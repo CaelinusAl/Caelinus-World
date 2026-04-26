@@ -106,6 +106,32 @@ export interface AtelierItemRow {
   updated_at: string;
 }
 
+/* /play studio — AI render cache + saved looks (migration 0005) */
+
+export interface PlayRenderRow {
+  id: string;
+  cache_key: string; // "<archetype>-<zodiac>-<scene>"
+  archetype: string;
+  zodiac: string;
+  scene: string;
+  url: string;
+  prompt: string | null;
+  seed: number | null;
+  provider: string | null;
+  created_at: string;
+}
+
+export interface UserPlayLookRow {
+  id: string;
+  user_id: string;
+  render_id: string;
+  archetype: string;
+  zodiac: string;
+  scene: string;
+  render_url: string;
+  created_at: string;
+}
+
 /** Compose a Supabase-typed Database root for `createClient<Database>()`.
  *
  * Shape mirrors Supabase's generated types pattern (`{ [_ in never]: never }`
@@ -147,6 +173,28 @@ export type Database = {
         Insert: Partial<AtelierItemRow> &
           Pick<AtelierItemRow, "atelier_id" | "slug" | "title_tr">;
         Update: Partial<AtelierItemRow>;
+        Relationships: [];
+      };
+      play_renders: {
+        Row: PlayRenderRow;
+        Insert: Partial<PlayRenderRow> &
+          Pick<PlayRenderRow, "cache_key" | "archetype" | "zodiac" | "scene" | "url">;
+        Update: Partial<PlayRenderRow>;
+        Relationships: [];
+      };
+      user_play_looks: {
+        Row: UserPlayLookRow;
+        Insert: Partial<UserPlayLookRow> &
+          Pick<
+            UserPlayLookRow,
+            | "user_id"
+            | "render_id"
+            | "archetype"
+            | "zodiac"
+            | "scene"
+            | "render_url"
+          >;
+        Update: Partial<UserPlayLookRow>;
         Relationships: [];
       };
     };

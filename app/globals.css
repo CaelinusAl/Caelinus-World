@@ -703,6 +703,13 @@ main {
 .cu-portal.violet .cu-portal-symbol { color: #d7c4ff; }
 .cu-portal.violet .cu-portal-ring { border-color: rgba(215,196,255,0.42); box-shadow: 0 0 28px rgba(215,196,255,0.12); }
 
+/* Atelier portal — the same hot-rose / magenta language as
+   /atelier itself. Distinct from .pink (which is sakura-cool) by
+   leaning warmer and slightly more violet. */
+.cu-portal.magenta .cu-portal-core,
+.cu-portal.magenta .cu-portal-symbol { color: #f29be0; }
+.cu-portal.magenta .cu-portal-ring { border-color: rgba(242,155,224,0.50); box-shadow: 0 0 30px rgba(242,155,224,0.18); }
+
 .cu-portal.cyan .cu-portal-core,
 .cu-portal.cyan .cu-portal-symbol { color: #c8ffff; }
 .cu-portal.cyan .cu-portal-ring { border-color: rgba(200,255,255,0.42); box-shadow: 0 0 28px rgba(200,255,255,0.12); }
@@ -15014,38 +15021,54 @@ body.atlas-host {
    ═════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --atelier-obsidian: #14110d;
-  --atelier-obsidian-2: #1c1812;
-  --atelier-parchment: #f4ecdf;
-  --atelier-parchment-soft: rgba(244, 236, 223, 0.85);
-  --atelier-parchment-dim: rgba(244, 236, 223, 0.55);
-  --atelier-parchment-faint: rgba(244, 236, 223, 0.18);
-  --atelier-copper: #c08457;
-  --atelier-copper-bright: #e0a572;
-  --atelier-gold: #d4b16a;
-  --atelier-rust: #a0552c;
-  --atelier-line: rgba(192, 132, 87, 0.35);
-  --atelier-line-soft: rgba(192, 132, 87, 0.18);
-  --atelier-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --atelier-glow: 0 0 32px rgba(224, 165, 114, 0.18);
+  /* Atelier — Nebula edition.
+     Deep midnight base, magenta core, soft rose highlights, faint
+     cyan accents. Renames are kept for backward-compat: every existing
+     "copper / parchment / obsidian" callsite resolves to the new
+     palette automatically. */
+  --atelier-obsidian:        #0a0816; /* midnight indigo, almost black */
+  --atelier-obsidian-2:      #14102a; /* slightly lifted nebula seam */
+  --atelier-parchment:       #f6ecff; /* near-white with a lavender cast */
+  --atelier-parchment-soft:  rgba(246, 236, 255, 0.85);
+  --atelier-parchment-dim:   rgba(246, 236, 255, 0.55);
+  --atelier-parchment-faint: rgba(246, 236, 255, 0.18);
+  --atelier-copper:          #c97cd6; /* magenta-violet (was copper) */
+  --atelier-copper-bright:   #f29be0; /* hot rose pink (was bright copper) */
+  --atelier-gold:            #ffb3e6; /* sakura highlight (was gold) */
+  --atelier-rust:            #5b2870; /* deep purple (was rust) */
+  --atelier-line:            rgba(201, 124, 214, 0.38);
+  --atelier-line-soft:       rgba(201, 124, 214, 0.20);
+  --atelier-shadow:          0 16px 48px rgba(0, 0, 0, 0.65);
+  --atelier-glow:            0 0 32px rgba(242, 155, 224, 0.22);
 }
 
 .atelier-shell {
   position: relative;
   min-height: 100dvh;
   background: var(--atelier-obsidian);
+  /* Nebula stack:
+     1) magenta bloom from the top — "the lamp"
+     2) violet pool at the bottom — "the well"
+     3) faint cyan blush off-center — the AI accent that the matrix
+        rain echoes per-stream
+     4) midnight gradient floor */
   background-image:
     radial-gradient(
       ellipse at 50% -10%,
-      rgba(224, 165, 114, 0.10) 0%,
+      rgba(242, 155, 224, 0.18) 0%,
       transparent 55%
     ),
     radial-gradient(
       ellipse at 50% 110%,
-      rgba(160, 85, 44, 0.08) 0%,
+      rgba(91, 40, 112, 0.30) 0%,
       transparent 60%
     ),
-    linear-gradient(180deg, #14110d 0%, #1c1812 50%, #14110d 100%);
+    radial-gradient(
+      ellipse at 18% 30%,
+      rgba(120, 200, 255, 0.08) 0%,
+      transparent 45%
+    ),
+    linear-gradient(180deg, #0a0816 0%, #14102a 50%, #0a0816 100%);
   color: var(--atelier-parchment);
   font-family: "Inter", system-ui, sans-serif;
   isolation: isolate;
@@ -15056,12 +15079,16 @@ body.atlas-host {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  /* Sits *underneath* the matrix rain so the rain is visible
+     full-bleed; the vignette only lifts a soft purple haze in the
+     corners. */
   z-index: 0;
   background:
     radial-gradient(
       ellipse at 50% 50%,
-      transparent 40%,
-      rgba(0, 0, 0, 0.55) 100%
+      transparent 35%,
+      rgba(10, 8, 22, 0.42) 70%,
+      rgba(10, 8, 22, 0.78) 100%
     );
 }
 
@@ -15078,8 +15105,8 @@ body.atlas-host {
   border-bottom: 1px solid var(--atelier-line-soft);
   background: linear-gradient(
     180deg,
-    rgba(20, 17, 13, 0.85) 0%,
-    rgba(20, 17, 13, 0.50) 100%
+    rgba(10, 8, 22, 0.85) 0%,
+    rgba(10, 8, 22, 0.50) 100%
   );
   backdrop-filter: blur(8px);
 }
@@ -15104,7 +15131,7 @@ body.atlas-host {
 .atelier-ribbon-mark {
   font-size: 22px;
   color: var(--atelier-copper);
-  text-shadow: 0 0 12px rgba(224, 165, 114, 0.5);
+  text-shadow: 0 0 12px rgba(242, 155, 224, 0.5);
 }
 
 .atelier-ribbon-name {
@@ -15137,7 +15164,7 @@ button.atelier-ribbon-btn {
 .atelier-ribbon-btn:hover {
   border-color: var(--atelier-copper);
   color: var(--atelier-copper-bright);
-  background: rgba(224, 165, 114, 0.06);
+  background: rgba(242, 155, 224, 0.06);
 }
 
 .atelier-ribbon-lang {
@@ -15161,7 +15188,7 @@ button.atelier-ribbon-btn {
 
 .atelier-ribbon-lang span.is-active {
   color: var(--atelier-copper-bright);
-  text-shadow: 0 0 6px rgba(224, 165, 114, 0.6);
+  text-shadow: 0 0 6px rgba(242, 155, 224, 0.6);
 }
 
 .atelier-ribbon-lang-divider {
@@ -15187,13 +15214,13 @@ button.atelier-ribbon-btn {
   background:
     radial-gradient(
       ellipse at 50% 0%,
-      rgba(224, 165, 114, 0.05) 0%,
+      rgba(242, 155, 224, 0.05) 0%,
       transparent 60%
     ),
     linear-gradient(
       180deg,
-      rgba(28, 24, 18, 0.85) 0%,
-      rgba(20, 17, 13, 0.85) 100%
+      rgba(20, 16, 42, 0.85) 0%,
+      rgba(10, 8, 22, 0.85) 100%
     );
   border: 1px solid var(--atelier-line-soft);
   border-radius: 4px;
@@ -15276,7 +15303,7 @@ button.atelier-ribbon-btn {
 .atelier-textarea,
 .atelier-select {
   appearance: none;
-  background: rgba(20, 17, 13, 0.55);
+  background: rgba(10, 8, 22, 0.55);
   border: 1px solid var(--atelier-line-soft);
   border-radius: 2px;
   padding: 11px 14px;
@@ -15295,8 +15322,8 @@ button.atelier-ribbon-btn {
 .atelier-select:focus {
   outline: none;
   border-color: var(--atelier-copper);
-  background: rgba(20, 17, 13, 0.85);
-  box-shadow: 0 0 0 3px rgba(192, 132, 87, 0.12);
+  background: rgba(10, 8, 22, 0.85);
+  box-shadow: 0 0 0 3px rgba(201, 124, 214, 0.12);
 }
 
 .atelier-textarea {
@@ -15342,23 +15369,27 @@ button.atelier-ribbon-btn {
 }
 
 .atelier-btn-primary {
+  /* Hot-rose → magenta gradient on midnight indigo text. The dark
+     text reads cleanly on the bright gradient and still feels part
+     of the nebula. */
   background: linear-gradient(
     180deg,
     var(--atelier-copper-bright) 0%,
     var(--atelier-copper) 100%
   );
-  color: #1a140d;
+  color: #0a0816;
   font-weight: 600;
-  box-shadow: 0 4px 16px rgba(224, 165, 114, 0.25);
+  box-shadow: 0 4px 16px rgba(242, 155, 224, 0.28);
 }
 
 .atelier-btn-primary:hover {
+  /* Lift to a sakura → hot-rose pop on hover. */
   background: linear-gradient(
     180deg,
-    #f0b885 0%,
+    var(--atelier-gold) 0%,
     var(--atelier-copper-bright) 100%
   );
-  box-shadow: 0 6px 22px rgba(224, 165, 114, 0.35);
+  box-shadow: 0 6px 22px rgba(255, 179, 230, 0.40);
   transform: translateY(-1px);
 }
 
@@ -15382,7 +15413,7 @@ button.atelier-ribbon-btn {
 .atelier-btn-ghost:hover {
   border-color: var(--atelier-copper);
   color: var(--atelier-copper-bright);
-  background: rgba(224, 165, 114, 0.06);
+  background: rgba(242, 155, 224, 0.06);
 }
 
 /* ─── Links ──────────────────────────────────────────────────────── */
@@ -15428,14 +15459,14 @@ button.atelier-ribbon-btn {
 }
 
 .atelier-alert.is-info {
-  background: rgba(192, 132, 87, 0.10);
+  background: rgba(201, 124, 214, 0.10);
   border-color: var(--atelier-line);
   color: var(--atelier-parchment-soft);
 }
 
 .atelier-alert.is-warn {
-  background: rgba(212, 177, 106, 0.10);
-  border-color: rgba(212, 177, 106, 0.40);
+  background: rgba(255, 179, 230, 0.10);
+  border-color: rgba(255, 179, 230, 0.40);
   color: var(--atelier-gold);
 }
 
@@ -15457,7 +15488,7 @@ button.atelier-ribbon-btn {
 .atelier-hero-glyph {
   font-size: 56px;
   color: var(--atelier-copper);
-  text-shadow: 0 0 28px rgba(224, 165, 114, 0.45);
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.45);
   margin-bottom: 16px;
 }
 
@@ -15504,8 +15535,8 @@ button.atelier-ribbon-btn {
   text-align: center;
   background: linear-gradient(
     180deg,
-    rgba(28, 24, 18, 0.65) 0%,
-    rgba(20, 17, 13, 0.65) 100%
+    rgba(20, 16, 42, 0.65) 0%,
+    rgba(10, 8, 22, 0.65) 100%
   );
   border: 1px solid var(--atelier-line-soft);
   border-radius: 4px;
@@ -15551,8 +15582,8 @@ button.atelier-ribbon-btn {
   padding: 28px 24px;
   background: linear-gradient(
     180deg,
-    rgba(28, 24, 18, 0.55) 0%,
-    rgba(20, 17, 13, 0.55) 100%
+    rgba(20, 16, 42, 0.55) 0%,
+    rgba(10, 8, 22, 0.55) 100%
   );
   border: 1px solid var(--atelier-line-soft);
   border-radius: 4px;
@@ -15563,8 +15594,8 @@ button.atelier-ribbon-btn {
   border-color: var(--atelier-line);
   background: linear-gradient(
     180deg,
-    rgba(28, 24, 18, 0.75) 0%,
-    rgba(20, 17, 13, 0.75) 100%
+    rgba(20, 16, 42, 0.75) 0%,
+    rgba(10, 8, 22, 0.75) 100%
   );
 }
 
@@ -15572,7 +15603,7 @@ button.atelier-ribbon-btn {
   font-size: 28px;
   color: var(--atelier-copper);
   margin-bottom: 12px;
-  text-shadow: 0 0 14px rgba(224, 165, 114, 0.35);
+  text-shadow: 0 0 14px rgba(242, 155, 224, 0.35);
 }
 
 .atelier-pillar-title {
@@ -15651,8 +15682,8 @@ button.atelier-ribbon-btn {
   padding: 24px 22px;
   background: linear-gradient(
     180deg,
-    rgba(28, 24, 18, 0.65) 0%,
-    rgba(20, 17, 13, 0.65) 100%
+    rgba(20, 16, 42, 0.65) 0%,
+    rgba(10, 8, 22, 0.65) 100%
   );
   border: 1px solid var(--atelier-line-soft);
   border-radius: 3px;
@@ -15702,8 +15733,8 @@ button.atelier-ribbon-btn {
 
 .status-pending {
   color: var(--atelier-gold);
-  border-color: rgba(212, 177, 106, 0.4);
-  background: rgba(212, 177, 106, 0.08);
+  border-color: rgba(255, 179, 230, 0.4);
+  background: rgba(255, 179, 230, 0.08);
 }
 
 .status-approved {
@@ -15725,8 +15756,8 @@ button.atelier-ribbon-btn {
   text-align: center;
   background: linear-gradient(
     180deg,
-    rgba(28, 24, 18, 0.65) 0%,
-    rgba(20, 17, 13, 0.65) 100%
+    rgba(20, 16, 42, 0.65) 0%,
+    rgba(10, 8, 22, 0.65) 100%
   );
   border: 1px solid var(--atelier-line-soft);
   border-radius: 4px;
@@ -15773,6 +15804,3685 @@ button.atelier-ribbon-btn {
   }
   .atelier-dash-card:hover,
   .atelier-btn-primary:hover {
+    transform: none !important;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   ATELIER · CINEMATIC LAYER
+   Behind-content matrix rain, hero aura, orbiting glyph, and a few
+   stagger reveals. Adds the "AI ⨯ IA" universe feel without touching
+   any of the existing atelier-* layout classes above.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* canvas (full-bleed bronze rain) ─────────────────────────────────── */
+
+.atelier-matrix {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  /* z-index 1: above the vignette (z=0) so the rain paints over the
+     soft purple haze, but below `.atelier-home` / `.atelier-dash`
+     (also z=1, but rendered later in the DOM, so they stack on top).
+     `atelier-shell` has `isolation: isolate`, so this canvas can't
+     leak above the global site nav. */
+  z-index: 1;
+  pointer-events: none;
+  /* Screen blend pulls magenta + rose out of the midnight base
+     without turning the whole page hazy. */
+  mix-blend-mode: screen;
+  will-change: contents;
+}
+
+/* hero scaffolding + reveal ───────────────────────────────────────── */
+
+.atelier-hero {
+  /* Allow the orbit ring + aura to escape the hero box. */
+  position: relative;
+}
+
+.atelier-hero-aura {
+  position: absolute;
+  left: 50%;
+  top: -60px;
+  width: clamp(420px, 80vw, 880px);
+  aspect-ratio: 1 / 1;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  /* Hot rose core → magenta mid → deep purple fade. */
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 200, 235, 0.26) 0%,
+      rgba(242, 155, 224, 0.16) 22%,
+      rgba(201, 124, 214, 0.08) 42%,
+      rgba(91, 40, 112, 0.04) 58%,
+      transparent 70%
+    );
+  filter: blur(2px);
+  animation: atelier-aura-pulse 6.5s ease-in-out infinite;
+}
+
+@keyframes atelier-aura-pulse {
+  0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1.00); }
+  50%      { opacity: 1.00; transform: translateX(-50%) scale(1.06); }
+}
+
+/* The compass mark gets a slow orbital ring — two concentric circles
+   rotating in opposite directions. CSS-only, no JS state. */
+.atelier-hero-glyph {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  /* Override the original margin-bottom won by the rule above. */
+}
+
+.atelier-hero-glyph::before,
+.atelier-hero-glyph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.atelier-hero-glyph::before {
+  border: 1px solid rgba(201, 124, 214, 0.40);
+  /* dashed makes it read as a star-chart ring, not a button border */
+  border-style: dashed;
+  animation: atelier-orbit-cw 22s linear infinite;
+}
+
+.atelier-hero-glyph::after {
+  inset: 14px;
+  border: 1px solid rgba(255, 200, 235, 0.22);
+  border-top-color: rgba(255, 200, 235, 0.90);
+  animation: atelier-orbit-ccw 11s linear infinite;
+}
+
+@keyframes atelier-orbit-cw  { to { transform: rotate(360deg); } }
+@keyframes atelier-orbit-ccw { to { transform: rotate(-360deg); } }
+
+/* Hero copy: stagger fade-in. Layered selectors keep the original
+   typography exactly the same — we only animate opacity + a small
+   translate. */
+.atelier-hero-title,
+.atelier-hero-lead,
+.atelier-hero-cta {
+  opacity: 0;
+  animation: atelier-rise 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.atelier-hero-title { animation-delay: 120ms; }
+.atelier-hero-lead  { animation-delay: 320ms; }
+.atelier-hero-cta   { animation-delay: 520ms; }
+
+@keyframes atelier-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* A subtle copper underline that draws itself in beneath the title. */
+.atelier-hero-underline {
+  display: block;
+  width: 0;
+  height: 1px;
+  margin: 4px auto 24px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(242, 155, 224, 0.90) 50%,
+    transparent 100%
+  );
+  animation: atelier-line-draw 1300ms cubic-bezier(0.2, 0.7, 0.2, 1) 700ms forwards;
+}
+
+@keyframes atelier-line-draw {
+  to { width: clamp(140px, 28vw, 280px); }
+}
+
+/* Pillar shimmer on hover ─────────────────────────────────────────── */
+
+.atelier-pillar {
+  position: relative;
+  overflow: hidden;
+}
+
+.atelier-pillar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 200, 235, 0.10) 48%,
+    rgba(242, 155, 224, 0.20) 50%,
+    rgba(255, 200, 235, 0.10) 52%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 900ms ease;
+}
+
+.atelier-pillar:hover::before {
+  transform: translateX(120%);
+}
+
+.atelier-pillar:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 24px 64px -32px rgba(242, 155, 224, 0.22),
+    0 1px 0 rgba(201, 124, 214, 0.22) inset;
+}
+
+.atelier-pillar-glyph {
+  transition: transform 250ms ease, text-shadow 250ms ease;
+}
+
+.atelier-pillar:hover .atelier-pillar-glyph {
+  transform: translateY(-1px) scale(1.04);
+  text-shadow: 0 0 22px rgba(255, 200, 235, 0.65);
+}
+
+/* Status / hero CTA polish ────────────────────────────────────────── */
+
+.atelier-status {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.atelier-status::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    140deg,
+    rgba(242, 155, 224, 0.20) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(120, 200, 255, 0.12) 100%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+/* The primary CTA gets a gentle copper shine that travels across on
+   hover — the same vocabulary as the pillar shimmer. */
+.atelier-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.atelier-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 220, 245, 0.40) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 700ms ease;
+}
+
+.atelier-btn-primary:hover::after {
+  transform: translateX(120%);
+}
+
+/* Dashboard / form pages — soft matrix backdrop ───────────────────── */
+
+/* When AtelierMatrix is rendered with intensity="soft" we fade it back
+   even further so dense form UI stays readable. */
+.atelier-matrix.is-soft {
+  mix-blend-mode: screen;
+  filter: blur(0.4px);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   ATELIER · Application & Edit forms — "ürün hali"
+   The bench's writing surface. Every input feels like a card pressed
+   into deep velvet: midnight indigo background, magenta focus halo,
+   sakura accents on prefix tags and active tabs. Same nebula language
+   as the landing hero, just dialled down so long copy stays legible.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ─── Wide application card ─────────────────────────────────────── */
+
+.atelier-auth-card-wide {
+  /* The application form has more fields than the login card, so it
+     gets a wider canvas without losing the bordered "tezgâh" feel. */
+  max-width: 720px;
+  padding: 44px 40px 36px;
+}
+
+@media (max-width: 560px) {
+  .atelier-auth-card-wide {
+    padding: 32px 22px 28px;
+  }
+}
+
+/* ─── Two-column form rows (kind+region, email+phone, …) ────────── */
+
+.atelier-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 560px) {
+  .atelier-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── URL-prefixed input (caelinus.world/atelier/<handle>) ──────── */
+
+.atelier-input-prefix {
+  display: flex;
+  align-items: stretch;
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: all 200ms ease;
+}
+
+.atelier-input-prefix:focus-within {
+  border-color: var(--atelier-copper);
+  background: rgba(10, 8, 22, 0.85);
+  box-shadow: 0 0 0 3px rgba(201, 124, 214, 0.14);
+}
+
+.atelier-input-prefix-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--atelier-parchment-dim);
+  border-right: 1px solid var(--atelier-line-soft);
+  background: linear-gradient(
+    180deg,
+    rgba(91, 40, 112, 0.28) 0%,
+    rgba(91, 40, 112, 0.14) 100%
+  );
+  user-select: none;
+  white-space: nowrap;
+}
+
+.atelier-input.atelier-input-bare {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding-left: 12px;
+  min-width: 0; /* let it shrink in flex */
+}
+
+.atelier-input.atelier-input-bare:focus {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* ─── Selects: custom magenta chevron + readable options ────────── */
+
+select.atelier-input {
+  /* Two crossed gradients form a tiny magenta chevron, no SVG file
+     needed. Sits on the right edge with consistent right-padding. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--atelier-copper-bright) 50%),
+    linear-gradient(135deg, var(--atelier-copper-bright) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 13px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+select.atelier-input:focus {
+  /* Keep the chevron from disappearing into the focus halo. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--atelier-gold) 50%),
+    linear-gradient(135deg, var(--atelier-gold) 50%, transparent 50%);
+}
+
+select.atelier-input option {
+  background: var(--atelier-obsidian-2);
+  color: var(--atelier-parchment);
+}
+
+/* ─── Field hint + error lines ──────────────────────────────────── */
+
+.atelier-field-hint {
+  font-size: 11px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment-faint);
+  margin: 2px 0 0;
+}
+
+.atelier-field-error {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #f4a8c8; /* warm rose, distinct from the magenta accent so it
+                     reads as warning, not decoration */
+  margin: 4px 0 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   ATELIER · Edit page — tezgâh düzenleme
+   Wider container than auth, head + status card on top, tabbed panel
+   below, sticky-feeling save bar at the bottom.
+   ═════════════════════════════════════════════════════════════════════ */
+
+.atelier-edit {
+  position: relative;
+  z-index: 1;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 36px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.atelier-edit-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 2px 0;
+}
+
+.atelier-edit-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment);
+  margin: 0;
+  text-shadow: 0 0 24px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-edit-handle {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--atelier-parchment-faint);
+  margin: 0;
+}
+
+/* ─── Status card ──────────────────────────────────────────────── */
+
+.atelier-edit-status {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.78) 0%,
+    rgba(10, 8, 22, 0.78) 100%
+  );
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 4px;
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.atelier-edit-status::before {
+  /* Vertical accent stripe, recoloured per status. */
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--atelier-line);
+}
+
+.atelier-edit-status.is-draft::before {
+  background: linear-gradient(
+    180deg,
+    rgba(201, 124, 214, 0.55) 0%,
+    rgba(201, 124, 214, 0.10) 100%
+  );
+}
+.atelier-edit-status.is-pending::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 179, 230, 0.85) 0%,
+    rgba(242, 155, 224, 0.20) 100%
+  );
+}
+.atelier-edit-status.is-approved::before {
+  background: linear-gradient(
+    180deg,
+    rgba(140, 220, 180, 0.85) 0%,
+    rgba(80, 160, 130, 0.20) 100%
+  );
+}
+.atelier-edit-status.is-rejected::before {
+  background: linear-gradient(
+    180deg,
+    rgba(244, 168, 200, 0.85) 0%,
+    rgba(180, 80, 100, 0.20) 100%
+  );
+}
+
+.atelier-edit-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.atelier-edit-status-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--atelier-parchment);
+  margin: 0;
+}
+
+.atelier-edit-status-hint {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--atelier-parchment-soft);
+  margin: 0;
+}
+
+.atelier-edit-status-note {
+  margin: 8px 0 0;
+  padding: 14px 16px;
+  background: rgba(91, 40, 112, 0.20);
+  border-left: 2px solid var(--atelier-copper-bright);
+  border-radius: 0 2px 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atelier-edit-status-note p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--atelier-parchment);
+  font-style: italic;
+}
+
+.atelier-edit-status-note-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-copper-bright);
+}
+
+/* ─── Tabs (Genel / Hikâye / İletişim / Görseller) ─────────────── */
+
+.atelier-edit-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--atelier-line-soft);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.atelier-edit-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.atelier-edit-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 12px 18px;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+  cursor: pointer;
+  position: relative;
+  transition: color 180ms ease;
+  white-space: nowrap;
+}
+
+.atelier-edit-tab:hover {
+  color: var(--atelier-parchment-soft);
+}
+
+.atelier-edit-tab.is-active {
+  color: var(--atelier-copper-bright);
+}
+
+.atelier-edit-tab.is-active::after {
+  /* Self-drawn rose-pink underline that locks the active tab in. */
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--atelier-copper-bright) 30%,
+    var(--atelier-gold) 50%,
+    var(--atelier-copper-bright) 70%,
+    transparent 100%
+  );
+  filter: drop-shadow(0 0 6px rgba(242, 155, 224, 0.55));
+}
+
+/* ─── Active panel (the form pane below the tabs) ──────────────── */
+
+.atelier-edit-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.70) 0%,
+    rgba(10, 8, 22, 0.70) 100%
+  );
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 4px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 560px) {
+  .atelier-edit-panel {
+    padding: 22px 18px;
+  }
+}
+
+.atelier-edit-h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--atelier-parchment);
+  margin: 0 0 2px;
+}
+
+.atelier-edit-intro {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--atelier-parchment-dim);
+  margin: 0 0 6px;
+  font-style: italic;
+}
+
+/* ─── Save bar at the bottom of the edit screen ───────────────── */
+
+.atelier-edit-savebar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0 0;
+}
+
+@media (max-width: 480px) {
+  .atelier-edit-savebar {
+    justify-content: stretch;
+  }
+  .atelier-edit-savebar .atelier-btn {
+    flex: 1;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   ATELIER · Image upload field
+   Drop-style preview (wide cover, square avatar) sitting on the same
+   indigo + magenta-line aesthetic as the rest of the form.
+   ═════════════════════════════════════════════════════════════════════ */
+
+.atelier-upload {
+  /* extends .atelier-field — keeps the label-on-top layout */
+}
+
+.atelier-upload-preview {
+  position: relative;
+  background: rgba(10, 8, 22, 0.55) center / cover no-repeat;
+  border: 1px dashed var(--atelier-line);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--atelier-copper);
+  overflow: hidden;
+  transition:
+    border-color 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.atelier-upload-preview::after {
+  /* Soft rose halo, only when the field has an image — like a frame. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(91, 40, 112, 0.45) 0%,
+    transparent 55%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.atelier-upload-preview.has-image::after {
+  opacity: 1;
+}
+
+.atelier-upload-preview.is-wide {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+}
+
+.atelier-upload-preview.is-square {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 220px;
+  border-radius: 50%;
+}
+
+.atelier-upload-preview.has-image {
+  border-style: solid;
+  border-color: var(--atelier-copper);
+  box-shadow: 0 8px 32px -16px rgba(242, 155, 224, 0.45);
+}
+
+.atelier-upload-preview:hover {
+  border-color: var(--atelier-copper-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px -18px rgba(242, 155, 224, 0.50);
+}
+
+.atelier-upload-empty {
+  font-size: 42px;
+  color: var(--atelier-copper);
+  opacity: 0.45;
+  text-shadow: 0 0 18px rgba(242, 155, 224, 0.35);
+}
+
+.atelier-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Visually hidden but still focusable file input — the button label
+   wraps it, so click + keyboard work without showing the OS chrome. */
+.atelier-upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Disabled state for label-as-button (used while uploads are in flight) */
+.atelier-btn.is-disabled,
+.atelier-btn-ghost.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   ATELIER · Public page — /atelier/<slug>
+   The visitor's view of an approved bench. Wide cover banner, avatar
+   that overlaps the cover bottom edge, name + meta + bio, optional
+   long-form story, contact links, and a small Caelinus verified stamp
+   at the foot. Owner preview banner sits above the hero on
+   non-approved pages.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ─── Preview banner (owner only, on non-approved pages) ──────── */
+
+.atelier-preview-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 12px 22px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  color: var(--atelier-parchment-soft);
+  background: linear-gradient(
+    90deg,
+    rgba(91, 40, 112, 0.45) 0%,
+    rgba(20, 16, 42, 0.65) 100%
+  );
+  border-bottom: 1px solid var(--atelier-line-soft);
+}
+
+.atelier-preview-banner-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--atelier-copper-bright);
+  box-shadow: 0 0 12px rgba(242, 155, 224, 0.65);
+  animation: atelier-preview-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes atelier-preview-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1.00; transform: scale(1.18); }
+}
+
+/* ─── Public main wrapper ─────────────────────────────────────── */
+
+.atelier-public {
+  position: relative;
+  z-index: 1;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+@media (max-width: 640px) {
+  .atelier-public {
+    padding: 16px 14px 64px;
+    gap: 40px;
+  }
+}
+
+/* ─── Hero ─────────────────────────────────────────────────────── */
+
+.atelier-public-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.atelier-public-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(242, 155, 224, 0.18) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 80% 90%,
+      rgba(91, 40, 112, 0.32) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #14102a 0%, #0a0816 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 6px;
+  border: 1px solid var(--atelier-line-soft);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--atelier-copper-bright);
+  box-shadow: var(--atelier-shadow);
+}
+
+@media (max-width: 640px) {
+  .atelier-public-cover {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.atelier-public-cover.has-image {
+  /* When a real image is set, the inline `style.backgroundImage` wins;
+     we just make sure the placeholder gradient layer doesn't bleed. */
+}
+
+.atelier-public-cover-empty {
+  font-size: 56px;
+  opacity: 0.28;
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.45);
+  letter-spacing: 0.1em;
+}
+
+.atelier-public-cover-fade {
+  position: absolute;
+  inset: 50% 0 0 0;
+  pointer-events: none;
+  /* Keeps the avatar/name readable against any photograph by darkening
+     the bottom half. */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(10, 8, 22, 0.45) 60%,
+    rgba(10, 8, 22, 0.85) 100%
+  );
+}
+
+/* ─── Identity row (avatar + name + meta + bio) ───────────────── */
+
+.atelier-public-identity {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: end;
+  /* Lift the row up so the avatar overlaps the cover's bottom edge. */
+  margin-top: -64px;
+  padding: 0 28px;
+  z-index: 2;
+}
+
+@media (max-width: 640px) {
+  .atelier-public-identity {
+    grid-template-columns: 1fr;
+    align-items: start;
+    margin-top: -56px;
+    padding: 0 16px;
+    gap: 16px;
+  }
+}
+
+.atelier-public-avatar {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: rgba(20, 16, 42, 0.85) center / cover no-repeat;
+  border: 2px solid var(--atelier-copper);
+  box-shadow:
+    0 12px 36px -10px rgba(242, 155, 224, 0.45),
+    0 0 0 6px rgba(10, 8, 22, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 44px;
+  color: var(--atelier-copper-bright);
+  letter-spacing: 0;
+  flex: 0 0 128px;
+}
+
+.atelier-public-avatar.has-image {
+  /* The radial / vignette comes from the image itself; remove the
+     mono-glyph by virtue of the `has-image` branch in the JSX. */
+}
+
+@media (max-width: 640px) {
+  .atelier-public-avatar {
+    width: 104px;
+    height: 104px;
+    font-size: 36px;
+    flex: 0 0 104px;
+  }
+}
+
+.atelier-public-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+
+.atelier-public-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-public-kind {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.20em;
+  color: var(--atelier-copper-bright);
+  background: rgba(91, 40, 112, 0.20);
+}
+
+.atelier-public-meta-divider {
+  opacity: 0.45;
+}
+
+.atelier-public-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  letter-spacing: 0.06em;
+}
+
+.atelier-public-place-plate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--atelier-parchment);
+  background: rgba(10, 8, 22, 0.85);
+  border: 1px solid var(--atelier-copper);
+  border-radius: 2px;
+  letter-spacing: 0;
+}
+
+.atelier-public-place-name {
+  color: var(--atelier-parchment);
+  letter-spacing: 0.04em;
+}
+
+.atelier-public-place-region {
+  color: var(--atelier-parchment-faint);
+}
+
+.atelier-public-name {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  color: var(--atelier-parchment);
+  margin: 0;
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.22);
+}
+
+.atelier-public-bio {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(15px, 2.2vw, 18px);
+  font-style: italic;
+  line-height: 1.65;
+  color: var(--atelier-parchment-soft);
+  margin: 8px 0 0;
+  max-width: 60ch;
+}
+
+.atelier-public-bio.is-empty {
+  color: var(--atelier-parchment-faint);
+  font-style: normal;
+  font-size: 13px;
+}
+
+/* ─── Sections (story, contact) ───────────────────────────────── */
+
+.atelier-public-section {
+  position: relative;
+  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 640px) {
+  .atelier-public-section {
+    padding: 0 14px;
+  }
+}
+
+.atelier-public-section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--atelier-parchment);
+  margin: 0;
+}
+
+.atelier-public-section-title::after {
+  /* A soft magenta tail line that visually anchors each section. */
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(242, 155, 224, 0.45) 0%,
+    transparent 100%
+  );
+}
+
+.atelier-public-section-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  color: var(--atelier-copper-bright);
+  text-shadow: 0 0 14px rgba(242, 155, 224, 0.55);
+  border: 1px solid var(--atelier-line);
+  border-radius: 50%;
+  background: rgba(20, 16, 42, 0.65);
+}
+
+/* ─── Prose (the long story) ─────────────────────────────────── */
+
+.atelier-public-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--atelier-parchment-soft);
+  max-width: 68ch;
+}
+
+.atelier-public-prose p {
+  margin: 0;
+}
+
+.atelier-public-prose p:first-child::first-letter {
+  /* Tiny editorial flourish — first letter of the first paragraph
+     gets a bit of weight, like an opening initial in a manuscript. */
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.4em;
+  font-weight: 500;
+  color: var(--atelier-copper-bright);
+  margin-right: 2px;
+}
+
+/* ─── Contact list ────────────────────────────────────────────── */
+
+.atelier-public-contact {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.atelier-public-contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.65) 0%,
+    rgba(10, 8, 22, 0.65) 100%
+  );
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 4px;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.atelier-public-contact-item:hover {
+  border-color: var(--atelier-copper);
+  transform: translateY(-1px);
+}
+
+.atelier-public-contact-label {
+  font-size: 10px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-public-contact-link {
+  font-size: 14px;
+  color: var(--atelier-copper-bright);
+  text-decoration: none;
+  word-break: break-word;
+  transition: color 150ms ease;
+}
+
+.atelier-public-contact-link:hover {
+  color: var(--atelier-gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Caelinus verified stamp (footer of approved pages) ──────── */
+
+.atelier-public-stamp {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+  background: rgba(20, 16, 42, 0.55);
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.atelier-public-stamp-mark {
+  color: var(--atelier-copper-bright);
+  text-shadow: 0 0 10px rgba(242, 155, 224, 0.55);
+}
+
+.atelier-public-stamp-text {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  letter-spacing: 0.18em;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · Atelier — Moderation panel (/atelier/admin)
+ * ────────────────────────────────────────────────────────────────
+ * Layout that keeps the nebula language but feels like a librarian's
+ * desk: dense cards, clear status colour codes, a side drawer for
+ * focused review. Approve = magenta primary, reject = rose danger,
+ * revert = ghost. Status counts pulse softly so the eye lands on
+ * the queue first.
+ */
+
+.atelier-admin {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1180px;
+  padding: 28px clamp(20px, 4vw, 36px) 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.atelier-admin-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atelier-admin-h1 {
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: clamp(28px, 4.4vw, 42px);
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin: 0;
+  color: var(--atelier-parchment);
+  text-shadow: 0 0 24px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-admin-sub {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-admin-loaderr {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 130, 160, 0.35);
+  background: rgba(91, 40, 112, 0.25);
+  color: #ffd0e2;
+  border-radius: 10px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Filters row ────────────────────────────────────────────── */
+
+.atelier-admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.atelier-admin-filter {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 16px;
+  background: rgba(20, 16, 42, 0.55);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment-soft);
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease,
+    color 180ms ease;
+}
+
+.atelier-admin-filter:hover {
+  border-color: var(--atelier-line);
+  background: rgba(20, 16, 42, 0.78);
+  color: var(--atelier-parchment);
+}
+
+.atelier-admin-filter.is-active {
+  border-color: rgba(242, 155, 224, 0.65);
+  background: rgba(91, 40, 112, 0.55);
+  color: var(--atelier-parchment);
+  box-shadow: 0 0 18px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-admin-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 0 6px;
+  height: 20px;
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  background: rgba(10, 8, 22, 0.6);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment-soft);
+}
+
+.atelier-admin-filter-count.is-pending {
+  color: #ffd0a8;
+  border-color: rgba(255, 188, 138, 0.45);
+  background: rgba(91, 40, 112, 0.35);
+}
+.atelier-admin-filter-count.is-approved {
+  color: #b6f0d2;
+  border-color: rgba(140, 220, 180, 0.45);
+  background: rgba(20, 60, 50, 0.55);
+}
+.atelier-admin-filter-count.is-rejected {
+  color: #ffc0d0;
+  border-color: rgba(255, 130, 170, 0.55);
+  background: rgba(110, 30, 60, 0.45);
+}
+.atelier-admin-filter-count.is-draft {
+  color: var(--atelier-parchment-dim);
+}
+.atelier-admin-filter-count.is-all {
+  color: var(--atelier-parchment-soft);
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+
+.atelier-admin-empty {
+  margin: 0;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--atelier-parchment-dim);
+  border: 1px dashed var(--atelier-line-soft);
+  border-radius: 14px;
+  background: rgba(20, 16, 42, 0.32);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* ── Grid + cards ──────────────────────────────────────────── */
+
+.atelier-admin-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.atelier-admin-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  background: rgba(20, 16, 42, 0.62);
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--atelier-parchment);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms ease, box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.atelier-admin-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242, 155, 224, 0.55);
+  background: rgba(20, 16, 42, 0.85);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(242, 155, 224, 0.14);
+}
+
+.atelier-admin-card:focus-visible {
+  outline: 2px solid var(--atelier-copper-bright);
+  outline-offset: 2px;
+}
+
+/* Status accent stripe along the top edge */
+.atelier-admin-card.status-pending  { border-top: 2px solid rgba(255, 188, 138, 0.85); }
+.atelier-admin-card.status-approved { border-top: 2px solid rgba(140, 220, 180, 0.75); }
+.atelier-admin-card.status-rejected { border-top: 2px solid rgba(255, 130, 170, 0.75); }
+.atelier-admin-card.status-draft    { border-top: 2px solid rgba(246, 236, 255, 0.25); }
+
+.atelier-admin-card-cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #1a1138 0%, #341a4d 60%, #5b2870 100%);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(246, 236, 255, 0.32);
+  font-size: 28px;
+}
+
+.atelier-admin-card-cover.has-image {
+  color: transparent;
+}
+
+.atelier-admin-card-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 8, 22, 0) 50%,
+    rgba(10, 8, 22, 0.65) 100%
+  );
+}
+
+.atelier-admin-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atelier-admin-card-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.atelier-admin-card-name {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment);
+  line-height: 1.25;
+}
+
+.atelier-admin-card-status {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.atelier-admin-card-status.status-pending   { color: #ffd0a8; }
+.atelier-admin-card-status.status-approved  { color: #b6f0d2; }
+.atelier-admin-card-status.status-rejected  { color: #ffc0d0; }
+.atelier-admin-card-status.status-draft     { color: var(--atelier-parchment-dim); }
+
+.atelier-admin-card-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--atelier-parchment-soft);
+  letter-spacing: 0.01em;
+}
+
+.atelier-admin-card-plate {
+  display: inline-block;
+  padding: 0 6px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 4px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  background: rgba(91, 40, 112, 0.55);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment);
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+}
+
+.atelier-admin-card-owner {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-admin-card-email {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--atelier-parchment-faint);
+  letter-spacing: 0;
+}
+
+.atelier-admin-card-time {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-faint);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+/* ── Toast ─────────────────────────────────────────────────── */
+
+.atelier-admin-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(20, 16, 42, 0.92);
+  border: 1px solid rgba(242, 155, 224, 0.45);
+  color: var(--atelier-parchment);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(242, 155, 224, 0.18);
+  backdrop-filter: blur(8px);
+  animation: atelier-toast-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes atelier-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── Review drawer ─────────────────────────────────────────── */
+
+.atelier-admin-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 3, 14, 0.62);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: flex-end;
+  animation: atelier-drawer-fade 180ms ease-out;
+}
+
+@keyframes atelier-drawer-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.atelier-admin-drawer {
+  position: relative;
+  width: min(560px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.96) 0%,
+    rgba(10, 8, 22, 0.98) 100%
+  );
+  border-left: 1px solid rgba(242, 155, 224, 0.35);
+  box-shadow: -28px 0 60px rgba(0, 0, 0, 0.6),
+    0 0 32px rgba(242, 155, 224, 0.08);
+  animation: atelier-drawer-slide 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes atelier-drawer-slide {
+  from { transform: translateX(28px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.atelier-admin-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--atelier-line-soft);
+}
+
+.atelier-admin-drawer-titlewrap {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atelier-admin-drawer-status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.atelier-admin-drawer-status.status-pending   { color: #ffd0a8; }
+.atelier-admin-drawer-status.status-approved  { color: #b6f0d2; }
+.atelier-admin-drawer-status.status-rejected  { color: #ffc0d0; }
+.atelier-admin-drawer-status.status-draft     { color: var(--atelier-parchment-dim); }
+
+.atelier-admin-drawer-title {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: clamp(22px, 3.2vw, 28px);
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--atelier-parchment);
+}
+
+.atelier-admin-drawer-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--atelier-parchment-soft);
+}
+
+.atelier-admin-drawer-region {
+  color: var(--atelier-parchment-dim);
+  font-size: 12px;
+}
+
+.atelier-admin-drawer-close {
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(10, 8, 22, 0.6);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment-soft);
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 160ms ease, color 160ms ease,
+    background-color 160ms ease;
+}
+.atelier-admin-drawer-close:hover {
+  border-color: var(--atelier-line);
+  color: var(--atelier-parchment);
+  background: rgba(91, 40, 112, 0.45);
+}
+
+.atelier-admin-drawer-cover {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid var(--atelier-line-soft);
+}
+
+.atelier-admin-drawer-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.atelier-admin-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.atelier-admin-drawer-section-rejected {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 130, 170, 0.45);
+  background: rgba(110, 30, 60, 0.25);
+  border-radius: 12px;
+}
+
+.atelier-admin-drawer-h3 {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--atelier-copper-bright);
+}
+
+.atelier-admin-drawer-line {
+  margin: 0;
+  font-size: 14px;
+  color: var(--atelier-parchment);
+}
+
+.atelier-admin-drawer-line-faint {
+  font-size: 12px;
+  color: var(--atelier-parchment-dim);
+  letter-spacing: 0.05em;
+}
+
+.atelier-admin-drawer-link {
+  color: var(--atelier-copper-bright);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(242, 155, 224, 0.35);
+  transition: border-color 160ms ease, color 160ms ease;
+}
+.atelier-admin-drawer-link:hover {
+  color: var(--atelier-gold);
+  border-color: rgba(255, 179, 230, 0.7);
+}
+
+.atelier-admin-drawer-prose {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--atelier-parchment-soft);
+  white-space: pre-wrap;
+}
+.atelier-admin-drawer-prose p {
+  margin: 0 0 10px;
+}
+.atelier-admin-drawer-prose p:last-child {
+  margin-bottom: 0;
+}
+
+.atelier-admin-drawer-empty {
+  font-style: italic;
+  color: var(--atelier-parchment-faint);
+}
+
+.atelier-admin-drawer-contact {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.atelier-admin-drawer-contact li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--atelier-parchment-soft);
+}
+.atelier-admin-drawer-contact li > span:first-child {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+  align-self: center;
+}
+
+.atelier-admin-drawer-rejected {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: 15px;
+  color: #ffe0ec;
+  border-left: 2px solid rgba(255, 130, 170, 0.65);
+  padding: 4px 0 4px 12px;
+}
+
+/* Reject form */
+.atelier-admin-drawer-rejectform {
+  padding: 14px 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atelier-admin-drawer-label {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-soft);
+}
+
+.atelier-admin-drawer-textarea {
+  resize: vertical;
+  min-height: 96px;
+  padding: 10px 12px;
+  background: rgba(10, 8, 22, 0.7);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment);
+  border-radius: 10px;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-size: 15px;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.atelier-admin-drawer-textarea:focus {
+  border-color: rgba(242, 155, 224, 0.7);
+  box-shadow: 0 0 0 3px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-admin-drawer-hint {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--atelier-parchment-dim);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+.atelier-admin-drawer-error {
+  margin: 0 24px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 130, 170, 0.55);
+  background: rgba(110, 30, 60, 0.4);
+  color: #ffd0e2;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.atelier-admin-drawer-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 24px 22px;
+  border-top: 1px solid var(--atelier-line-soft);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.atelier-admin-drawer-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 38px;
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--atelier-line);
+  background: rgba(20, 16, 42, 0.55);
+  color: var(--atelier-parchment-soft);
+  text-decoration: none;
+  transition: transform 140ms ease, border-color 140ms ease,
+    background-color 140ms ease, color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.atelier-admin-drawer-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--atelier-copper-bright);
+  color: var(--atelier-parchment);
+}
+
+.atelier-admin-drawer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.atelier-admin-drawer-btn.ghost {
+  margin-right: auto; /* push primary actions to the right */
+}
+
+.atelier-admin-drawer-btn.danger {
+  border-color: rgba(255, 130, 170, 0.55);
+  color: #ffd0e2;
+  background: rgba(110, 30, 60, 0.35);
+}
+.atelier-admin-drawer-btn.danger:hover:not(:disabled) {
+  border-color: rgba(255, 130, 170, 0.95);
+  background: rgba(140, 40, 80, 0.55);
+  color: #fff;
+}
+
+.atelier-admin-drawer-btn.primary {
+  background: linear-gradient(135deg, var(--atelier-copper) 0%,
+    var(--atelier-copper-bright) 100%);
+  border-color: rgba(255, 179, 230, 0.85);
+  color: #0a0816;
+  box-shadow: 0 12px 28px rgba(242, 155, 224, 0.25),
+    0 0 18px rgba(242, 155, 224, 0.18);
+}
+.atelier-admin-drawer-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--atelier-copper-bright) 0%,
+    var(--atelier-gold) 100%);
+  color: #0a0816;
+}
+
+/* Mobile: drawer becomes a sheet pinned to the bottom — easier reach. */
+@media (max-width: 540px) {
+  .atelier-admin-drawer-backdrop {
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .atelier-admin-drawer {
+    width: 100%;
+    height: min(92vh, 720px);
+    border-left: none;
+    border-top: 1px solid rgba(242, 155, 224, 0.35);
+    border-radius: 18px 18px 0 0;
+  }
+  .atelier-admin-drawer-actions .atelier-admin-drawer-btn.ghost {
+    margin-right: 0;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · /play — multi-step goddess studio
+ * ────────────────────────────────────────────────────────────────
+ * Same nebula palette + stage primitives as Atelier. The studio
+ * walks the user through archetype → avatar → scene → render. This
+ * block adds layout glue and the zodiac-ring picker, which has
+ * unique radial geometry that isn't worth pushing into a generic
+ * stage component.
+ */
+
+.play-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(118, 60, 168, 0.32) 0%, transparent 55%),
+    radial-gradient(circle at 78% 82%, rgba(40, 56, 138, 0.36) 0%, transparent 60%),
+    linear-gradient(180deg, #0a0816 0%, #060414 100%);
+  color: var(--atelier-parchment, #f6ecff);
+  font-family:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.play-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 36%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.play-ribbon {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px clamp(20px, 4vw, 40px);
+  border-bottom: 1px solid var(--atelier-line-soft, rgba(246, 236, 255, 0.06));
+  background: rgba(10, 8, 22, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.play-ribbon-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.play-ribbon-mark {
+  font-size: 16px;
+  color: var(--stage-tone-magenta);
+  text-shadow: 0 0 12px rgba(242, 155, 224, 0.5);
+}
+
+.play-ribbon-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.play-ribbon-btn,
+.play-ribbon-lang {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--atelier-line, rgba(246, 236, 255, 0.18));
+  color: inherit;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 200ms ease, color 200ms ease;
+}
+
+.play-ribbon-btn:hover,
+.play-ribbon-lang:hover {
+  border-color: color-mix(in oklab, var(--stage-tone-magenta) 70%, transparent);
+}
+
+.play-ribbon-lang { display: inline-flex; align-items: center; gap: 6px; }
+.play-ribbon-lang-divider { opacity: 0.5; }
+.play-ribbon-lang span.is-active { color: var(--stage-tone-magenta); }
+
+.play-main {
+  position: relative;
+  z-index: 3;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1280px;
+  padding: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 36px) 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.play-hero-portal-glyph {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 88px;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 80%, white);
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.55);
+  line-height: 1;
+}
+
+/* ── Stepper ─────────────────────────────────────────────────── */
+
+.play-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--atelier-line-soft, rgba(246, 236, 255, 0.06));
+  border-radius: 999px;
+  background: rgba(20, 16, 42, 0.55);
+  align-self: center;
+}
+
+.play-stepper-step {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  color: var(--atelier-parchment-dim, rgba(246, 236, 255, 0.55));
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.play-stepper-step:hover:not(.is-disabled) {
+  background: rgba(242, 155, 224, 0.08);
+  color: var(--atelier-parchment);
+}
+
+.play-stepper-step.is-here {
+  background: rgba(242, 155, 224, 0.16);
+  color: var(--atelier-parchment);
+}
+
+.play-stepper-step.is-reached:not(.is-here) {
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+}
+
+.play-stepper-step.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.play-stepper-num {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+}
+
+/* ── Step shell (shared head + foot for each picker) ─────────── */
+
+.play-step {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.play-step-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.play-step-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 70%, white);
+}
+
+.play-step-title {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", serif);
+  font-weight: 500;
+  font-size: clamp(28px, 5vw, 52px);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  color: var(--atelier-parchment);
+}
+
+.play-step-lead {
+  margin: 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--atelier-parchment-soft);
+}
+
+.play-step-foot {
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Archetype picker ────────────────────────────────────────── */
+
+.play-archetype-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 28px 22px;
+  margin-top: 8px;
+}
+
+.play-archetype-tile-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.play-archetype-tile-platform {
+  margin-top: -6px;
+}
+
+/* ── Avatar (zodiac) picker — radial ring around the portal ──── */
+
+.play-zodiac-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 540px;
+  padding: 32px 0;
+}
+
+.play-zodiac-ring {
+  --ring-radius: clamp(180px, 26vw, 280px);
+  position: relative;
+  width: calc(var(--ring-radius) * 2 + 100px);
+  height: calc(var(--ring-radius) * 2 + 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-zodiac-pip {
+  --angle: 0deg;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* place the pip on the ring at the requested angle */
+  transform: translate(-50%, -50%) rotate(var(--angle))
+    translate(var(--ring-radius)) rotate(calc(var(--angle) * -1));
+  appearance: none;
+  background: rgba(20, 16, 42, 0.7);
+  border: 1px solid var(--atelier-line, rgba(246, 236, 255, 0.18));
+  border-radius: 999px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  color: var(--atelier-parchment);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  min-width: 72px;
+  transition: border-color 200ms ease, transform 200ms ease,
+    box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.play-zodiac-pip-glyph {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.play-zodiac-pip-name {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.play-zodiac-pip:hover,
+.play-zodiac-pip.is-active {
+  background: rgba(20, 16, 42, 0.92);
+  box-shadow: 0 0 22px var(--pip-glow, rgba(242, 155, 224, 0.35));
+}
+
+.play-zodiac-pip--magenta { --pip-glow: rgba(242, 155, 224, 0.45); }
+.play-zodiac-pip--cosmic  { --pip-glow: rgba(155, 182, 255, 0.45); }
+.play-zodiac-pip--gold    { --pip-glow: rgba(255, 214, 168, 0.45); }
+.play-zodiac-pip--amber   { --pip-glow: rgba(255, 178, 136, 0.45); }
+.play-zodiac-pip--teal    { --pip-glow: rgba(136, 228, 210, 0.45); }
+
+.play-zodiac-pip:hover .play-zodiac-pip-name,
+.play-zodiac-pip.is-active .play-zodiac-pip-name {
+  color: var(--atelier-parchment);
+}
+
+.play-zodiac-pip.is-active {
+  border-color: color-mix(in oklab, var(--pip-glow, var(--stage-tone-magenta)) 80%, transparent);
+}
+
+.play-zodiac-core {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.play-zodiac-core-glyph {
+  font-size: 96px;
+  line-height: 1;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+  text-shadow: 0 0 32px rgba(242, 155, 224, 0.55);
+}
+
+.play-zodiac-core-label {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", serif);
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--atelier-parchment);
+}
+
+/* ── Scene picker ────────────────────────────────────────────── */
+
+.play-scene-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Render canvas ───────────────────────────────────────────── */
+
+.play-render {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-items: center;
+}
+
+.play-render-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.play-render-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: play-render-driftIn 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes play-render-driftIn {
+  from { opacity: 0; transform: scale(1.06); filter: blur(6px); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0); }
+}
+
+.play-render-shimmer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(242, 155, 224, 0.05) 0%,
+      rgba(242, 155, 224, 0.18) 50%,
+      rgba(242, 155, 224, 0.05) 100%
+    );
+  background-size: 220% 100%;
+  animation: play-render-shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes play-render-shimmer {
+  0%   { background-position: 220% 0; }
+  100% { background-position: -120% 0; }
+}
+
+.play-render-shimmer-glyph {
+  font-size: 96px;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.55);
+  animation: play-render-shimmer-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes play-render-shimmer-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1);    }
+  50%      { opacity: 1;   transform: scale(1.06); }
+}
+
+.play-render-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.play-render-error-glyph {
+  margin: 0;
+  font-size: 36px;
+  color: #ffc0d0;
+  line-height: 1;
+}
+
+.play-render-error-msg {
+  margin: 0;
+  font-size: 13px;
+  color: var(--atelier-parchment-soft);
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+.play-render-placeholder {
+  font-size: 96px;
+  color: rgba(246, 236, 255, 0.18);
+}
+
+.play-render-platform {
+  margin-top: -28px;
+}
+
+.play-render-hint {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.play-render-retry {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--atelier-line);
+  color: inherit;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 200ms ease;
+}
+
+.play-render-retry:hover {
+  border-color: color-mix(in oklab, var(--stage-tone-magenta) 70%, transparent);
+}
+
+/* ── Look actions ────────────────────────────────────────────── */
+
+.play-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.play-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.play-actions-toast {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+  text-align: center;
+}
+
+/* Accessibility for shimmer / drift / pulse */
+@media (prefers-reduced-motion: reduce) {
+  .play-render-shimmer,
+  .play-render-shimmer-glyph,
+  .play-render-image {
+    animation: none !important;
+  }
+  .play-render-shimmer { background: rgba(242, 155, 224, 0.1); }
+}
+
+/* ── /play/looks gallery + /play/look/[id] showcase ──────────── */
+
+.play-looks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.play-look-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.play-look-image-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 3 / 4;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--atelier-line-soft, rgba(246, 236, 255, 0.06));
+  background: rgba(20, 16, 42, 0.62);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 32px rgba(242, 155, 224, 0.18);
+}
+
+.play-look-image-wrap > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.play-look-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+  justify-content: center;
+}
+
+.play-look-meta b {
+  color: var(--atelier-parchment);
+  font-weight: 500;
+}
+
+.play-look-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · /atelier/[slug] — public showcase (stage layout)
+ * ────────────────────────────────────────────────────────────────
+ * Atelier public page wears the stage-system clothes: full-bleed
+ * hero cover with a NebulaPortal avatar floating over it, parchment
+ * scroll story, SceneTile contact rail, optional collection slot,
+ * and the SCORPIO-style approved stamp at the foot.
+ */
+
+.atelier-stage-hero {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(280px, 38vh) auto;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--atelier-line-soft);
+  background: rgba(20, 16, 42, 0.55);
+  isolation: isolate;
+}
+
+.atelier-stage-hero-cover {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--stage-tone-magenta-deep) 0%,
+    rgba(20, 16, 42, 1) 70%
+  );
+  background-size: cover;
+  background-position: center;
+}
+
+.atelier-stage-hero--cosmic .atelier-stage-hero-cover { background: linear-gradient(135deg, var(--stage-tone-cosmic-deep) 0%, rgba(20, 16, 42, 1) 70%); background-size: cover; background-position: center; }
+.atelier-stage-hero--gold   .atelier-stage-hero-cover { background: linear-gradient(135deg, var(--stage-tone-gold-deep) 0%, rgba(20, 16, 42, 1) 70%); background-size: cover; background-position: center; }
+.atelier-stage-hero--amber  .atelier-stage-hero-cover { background: linear-gradient(135deg, var(--stage-tone-amber-deep) 0%, rgba(20, 16, 42, 1) 70%); background-size: cover; background-position: center; }
+.atelier-stage-hero--teal   .atelier-stage-hero-cover { background: linear-gradient(135deg, var(--stage-tone-teal-deep) 0%, rgba(20, 16, 42, 1) 70%); background-size: cover; background-position: center; }
+
+.atelier-stage-hero-cover.has-image { background-size: cover; background-position: center; }
+
+.atelier-stage-hero-cover-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 8, 22, 0.05) 0%,
+    rgba(10, 8, 22, 0.55) 60%,
+    rgba(10, 8, 22, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+.atelier-stage-hero-foreground {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px 36px;
+  margin-top: -116px;
+  z-index: 2;
+}
+
+.atelier-stage-hero-foreground .stage-portal {
+  background: rgba(10, 8, 22, 0.88);
+  border-radius: 50%;
+}
+
+.atelier-stage-hero-portal-glyph {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 80px;
+  color: var(--atelier-copper-bright);
+  text-shadow: 0 0 28px rgba(242, 155, 224, 0.5);
+  line-height: 1;
+}
+
+.atelier-stage-hero-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  max-width: 720px;
+}
+
+.atelier-stage-hero-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-stage-hero-name {
+  margin: 4px 0 4px;
+  font-family: var(--atelier-serif, "Cormorant Garamond", serif);
+  font-weight: 500;
+  font-size: clamp(32px, 6vw, 56px);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  color: var(--atelier-parchment);
+  text-shadow: 0 0 32px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-stage-hero-place {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--atelier-parchment-soft);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.atelier-stage-hero-plate {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(10, 8, 22, 0.6);
+  border: 1px solid var(--atelier-line);
+  color: var(--atelier-parchment);
+}
+
+.atelier-stage-hero-region {
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-stage-hero-bio {
+  margin: 10px 0 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--atelier-parchment-soft);
+}
+
+.atelier-stage-hero-bio.is-empty {
+  font-style: italic;
+  color: var(--atelier-parchment-dim);
+}
+
+/* Parchment scroll for the story section */
+.atelier-public-scroll {
+  position: relative;
+  background: rgba(20, 16, 42, 0.45);
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 18px;
+  padding: clamp(22px, 3vw, 36px);
+  overflow: hidden;
+}
+
+.atelier-public-scroll::before,
+.atelier-public-scroll::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--stage-tone-magenta) 40%, transparent) 25%,
+    color-mix(in oklab, var(--stage-tone-magenta) 40%, transparent) 75%,
+    transparent 100%
+  );
+}
+
+.atelier-public-scroll::before { top: 8px; }
+.atelier-public-scroll::after  { bottom: 8px; }
+
+/* SceneTile contact grid */
+.atelier-stage-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.atelier-stage-contact-grid .stage-scene-tile-label {
+  letter-spacing: 0.12em;
+}
+
+/* Collection slot empty state */
+.atelier-stage-collection-empty {
+  border: 1px dashed var(--atelier-line-soft);
+  border-radius: 14px;
+  padding: clamp(24px, 4vw, 36px);
+  text-align: center;
+  color: var(--atelier-parchment-dim);
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: rgba(20, 16, 42, 0.32);
+}
+
+.atelier-stage-collection-empty p {
+  margin: 0;
+  max-width: 480px;
+}
+
+/* Approved stamp — wide rule lines flanking a ⌖ + label */
+.atelier-stage-stamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 4px 8px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+}
+
+.atelier-stage-stamp-rule {
+  flex: 1 1 80px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--stage-tone-magenta) 65%, transparent) 50%,
+    transparent 100%
+  );
+  max-width: 220px;
+}
+
+.atelier-stage-stamp-mark {
+  font-size: 18px;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 80%, white);
+  text-shadow: 0 0 18px rgba(242, 155, 224, 0.5);
+}
+
+.atelier-stage-stamp-text {
+  white-space: nowrap;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · /atelier/dashboard — bench list
+ * ────────────────────────────────────────────────────────────────
+ * Same stage primitives as the landing; this block adds dashboard
+ * spacing, the avatar portal letter fallback, and the bench grid.
+ */
+
+.atelier-dash {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1180px;
+  padding: 4px clamp(20px, 4vw, 36px) 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.atelier-dash-portal-glyph {
+  font-family: var(--atelier-serif, "Cormorant Garamond", serif);
+  font-size: 56px;
+  font-weight: 500;
+  color: var(--atelier-parchment);
+  text-shadow: 0 0 22px rgba(242, 155, 224, 0.45);
+  line-height: 1;
+}
+
+.atelier-dash-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.atelier-dash-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.atelier-dash-h2 {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", serif);
+  font-weight: 500;
+  font-size: clamp(20px, 2.6vw, 26px);
+  letter-spacing: 0.04em;
+  color: var(--atelier-parchment);
+}
+
+.atelier-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+.atelier-dash-empty-stage {
+  display: flex;
+  justify-content: center;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · /atelier landing — stage layout
+ * ────────────────────────────────────────────────────────────────
+ * Built on top of the shared stage components below. This block only
+ * adds page-specific layout: pillars grid, featured strip, status
+ * card, and the compass glyph that sits inside the hero portal.
+ */
+
+.atelier-home-portal-glyph {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 64px;
+  color: var(--atelier-copper-bright);
+  text-shadow:
+    0 0 24px rgba(242, 155, 224, 0.6),
+    0 0 48px rgba(242, 155, 224, 0.32);
+  line-height: 1;
+}
+
+.atelier-home {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1180px;
+  padding: 8px clamp(20px, 4vw, 36px) 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.atelier-home-email {
+  margin: 16px 0 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-home-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.atelier-home-section-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.atelier-home-section-title {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-weight: 500;
+  font-size: clamp(22px, 3.4vw, 30px);
+  letter-spacing: 0.04em;
+  color: var(--atelier-parchment);
+}
+
+.atelier-home-section-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--atelier-parchment-dim);
+  letter-spacing: 0.04em;
+  max-width: 540px;
+}
+
+.atelier-home-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px 24px;
+  margin-top: 8px;
+}
+
+.atelier-home-pillar-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.atelier-home-pillar-platform {
+  margin-top: -14px;
+}
+
+.atelier-home-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+}
+
+.atelier-home-featured-empty {
+  margin: 0;
+  text-align: center;
+  padding: 32px 18px;
+  color: var(--atelier-parchment-dim);
+  font-style: italic;
+  border: 1px dashed var(--atelier-line-soft);
+  border-radius: 14px;
+  background: rgba(20, 16, 42, 0.32);
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · Stage system (shared cinematic primitives)
+ * ────────────────────────────────────────────────────────────────
+ * Used by /atelier landing, /atelier/dashboard, /atelier/<slug> and
+ * /play. Components live under `app/_stage/` and consume only the
+ * `.stage-*` class namespace below — no per-page leaks.
+ *
+ * Tone tokens follow the nebula palette so the same component can
+ * sit on different sections without re-declaring colours.
+ */
+
+:root {
+  /* Stage scene tones — lighter accents that play nicely on top of the
+     existing nebula obsidian/parchment foundation. */
+  --stage-tone-magenta:        #f29be0;
+  --stage-tone-magenta-deep:   #5b2870;
+  --stage-tone-cosmic:         #9bb6ff;
+  --stage-tone-cosmic-deep:    #2a3a78;
+  --stage-tone-gold:           #ffd6a8;
+  --stage-tone-gold-deep:      #6e4a18;
+  --stage-tone-amber:          #ffb288;
+  --stage-tone-amber-deep:     #6b2c18;
+  --stage-tone-teal:           #88e4d2;
+  --stage-tone-teal-deep:      #154a48;
+}
+
+/* ── NebulaPortal ─────────────────────────────────────────────── */
+
+.stage-portal {
+  --stage-portal-size: 220px;
+  --stage-portal-tone: var(--stage-tone-magenta);
+  --stage-portal-tone-deep: var(--stage-tone-magenta-deep);
+
+  position: relative;
+  width: var(--stage-portal-size);
+  height: var(--stage-portal-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.stage-portal--magenta { --stage-portal-tone: var(--stage-tone-magenta); --stage-portal-tone-deep: var(--stage-tone-magenta-deep); }
+.stage-portal--cosmic  { --stage-portal-tone: var(--stage-tone-cosmic);  --stage-portal-tone-deep: var(--stage-tone-cosmic-deep); }
+.stage-portal--gold    { --stage-portal-tone: var(--stage-tone-gold);    --stage-portal-tone-deep: var(--stage-tone-gold-deep); }
+.stage-portal--amber   { --stage-portal-tone: var(--stage-tone-amber);   --stage-portal-tone-deep: var(--stage-tone-amber-deep); }
+.stage-portal--teal    { --stage-portal-tone: var(--stage-tone-teal);    --stage-portal-tone-deep: var(--stage-tone-teal-deep); }
+
+.stage-portal-aura-outer,
+.stage-portal-aura-inner,
+.stage-portal-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  left: 50%;
+  top: 50%;
+}
+
+/* outer ring — wide, low-opacity */
+.stage-portal-aura-outer {
+  width: calc(var(--stage-portal-size) * 1.65);
+  height: calc(var(--stage-portal-size) * 1.65);
+  transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in oklab, var(--stage-portal-tone) 18%, transparent);
+  box-shadow:
+    0 0 60px color-mix(in oklab, var(--stage-portal-tone) 22%, transparent),
+    0 0 140px color-mix(in oklab, var(--stage-portal-tone-deep) 28%, transparent);
+  z-index: 0;
+}
+
+/* inner aura — soft warm core */
+.stage-portal-aura-inner {
+  width: calc(var(--stage-portal-size) * 1.18);
+  height: calc(var(--stage-portal-size) * 1.18);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--stage-portal-tone) 28%, transparent) 0%,
+    color-mix(in oklab, var(--stage-portal-tone-deep) 18%, transparent) 50%,
+    transparent 78%
+  );
+  filter: blur(18px);
+  z-index: 1;
+}
+
+/* crisp halo at the subject border */
+.stage-portal-ring {
+  width: calc(var(--stage-portal-size) * 1.04);
+  height: calc(var(--stage-portal-size) * 1.04);
+  transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in oklab, var(--stage-portal-tone) 65%, transparent);
+  box-shadow: inset 0 0 24px color-mix(in oklab, var(--stage-portal-tone) 18%, transparent);
+  z-index: 2;
+}
+
+.stage-portal-slot {
+  position: relative;
+  z-index: 3;
+  width: var(--stage-portal-size);
+  height: var(--stage-portal-size);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 16, 42, 0.55);
+}
+
+.stage-portal-slot > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stage-portal--bare .stage-portal-slot {
+  background: transparent;
+}
+
+@keyframes stage-portal-pulse {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 0.85; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+.stage-portal--pulse .stage-portal-aura-inner {
+  animation: stage-portal-pulse 6s ease-in-out infinite;
+}
+
+.stage-portal--pulse .stage-portal-aura-outer {
+  animation: stage-portal-pulse 9s ease-in-out infinite reverse;
+}
+
+/* ── GlowPlatform ─────────────────────────────────────────────── */
+
+.stage-platform {
+  --stage-platform-width: 160px;
+  --stage-platform-tone: var(--stage-tone-magenta);
+  --stage-platform-tone-deep: var(--stage-tone-magenta-deep);
+  position: relative;
+  width: var(--stage-platform-width);
+  height: calc(var(--stage-platform-width) * 0.32);
+  pointer-events: none;
+}
+
+.stage-platform--magenta { --stage-platform-tone: var(--stage-tone-magenta); --stage-platform-tone-deep: var(--stage-tone-magenta-deep); }
+.stage-platform--cosmic  { --stage-platform-tone: var(--stage-tone-cosmic);  --stage-platform-tone-deep: var(--stage-tone-cosmic-deep); }
+.stage-platform--gold    { --stage-platform-tone: var(--stage-tone-gold);    --stage-platform-tone-deep: var(--stage-tone-gold-deep); }
+.stage-platform--amber   { --stage-platform-tone: var(--stage-tone-amber);   --stage-platform-tone-deep: var(--stage-tone-amber-deep); }
+.stage-platform--teal    { --stage-platform-tone: var(--stage-tone-teal);    --stage-platform-tone-deep: var(--stage-tone-teal-deep); }
+
+.stage-platform-halo {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklab, var(--stage-platform-tone) 42%, transparent) 0%,
+    color-mix(in oklab, var(--stage-platform-tone-deep) 18%, transparent) 55%,
+    transparent 80%
+  );
+  filter: blur(10px);
+}
+
+.stage-platform-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 70%;
+  transform: translate(-50%, -45%);
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--stage-platform-tone) 55%, transparent);
+  box-shadow: 0 0 20px color-mix(in oklab, var(--stage-platform-tone) 30%, transparent);
+}
+
+.stage-platform-glyph {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: color-mix(in oklab, var(--stage-platform-tone) 85%, white);
+  text-shadow: 0 0 10px color-mix(in oklab, var(--stage-platform-tone) 70%, transparent);
+}
+
+.stage-platform--soft .stage-platform-halo { opacity: 0.6; filter: blur(8px); }
+
+/* ── StageCard ────────────────────────────────────────────────── */
+
+.stage-card {
+  --stage-card-tone: var(--stage-tone-magenta);
+  --stage-card-tone-deep: var(--stage-tone-magenta-deep);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  background: rgba(20, 16, 42, 0.62);
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--atelier-parchment);
+  text-decoration: none;
+  appearance: none;
+  font-family: inherit;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms ease, box-shadow 220ms ease,
+    background-color 220ms ease;
+  isolation: isolate;
+}
+
+.stage-card--magenta { --stage-card-tone: var(--stage-tone-magenta); --stage-card-tone-deep: var(--stage-tone-magenta-deep); }
+.stage-card--cosmic  { --stage-card-tone: var(--stage-tone-cosmic);  --stage-card-tone-deep: var(--stage-tone-cosmic-deep); }
+.stage-card--gold    { --stage-card-tone: var(--stage-tone-gold);    --stage-card-tone-deep: var(--stage-tone-gold-deep); }
+.stage-card--amber   { --stage-card-tone: var(--stage-tone-amber);   --stage-card-tone-deep: var(--stage-tone-amber-deep); }
+.stage-card--teal    { --stage-card-tone: var(--stage-tone-teal);    --stage-card-tone-deep: var(--stage-tone-teal-deep); }
+
+a.stage-card,
+button.stage-card {
+  cursor: pointer;
+}
+
+div.stage-card {
+  cursor: default;
+}
+
+.stage-card:hover,
+.stage-card.is-active {
+  transform: translateY(-3px);
+  border-color: color-mix(in oklab, var(--stage-card-tone) 60%, transparent);
+  background: rgba(20, 16, 42, 0.85);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.55),
+    0 0 28px color-mix(in oklab, var(--stage-card-tone) 18%, transparent);
+}
+
+.stage-card:focus-visible {
+  outline: 2px solid var(--stage-card-tone);
+  outline-offset: 2px;
+}
+
+.stage-card.is-active {
+  border-color: color-mix(in oklab, var(--stage-card-tone) 80%, transparent);
+}
+
+/* status accent stripe at the top */
+.stage-card--status-pending  { border-top: 2px solid rgba(255, 188, 138, 0.85); }
+.stage-card--status-approved { border-top: 2px solid rgba(140, 220, 180, 0.75); }
+.stage-card--status-rejected { border-top: 2px solid rgba(255, 130, 170, 0.75); }
+.stage-card--status-draft    { border-top: 2px solid rgba(246, 236, 255, 0.25); }
+
+.stage-card-cover {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(
+    135deg,
+    var(--stage-card-tone-deep) 0%,
+    rgba(20, 16, 42, 1) 60%,
+    color-mix(in oklab, var(--stage-card-tone) 18%, rgba(10, 8, 22, 1)) 100%
+  );
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-card--pillar > .stage-card-cover { display: none; }
+.stage-card--tile > .stage-card-cover {
+  aspect-ratio: 1 / 1;
+}
+
+.stage-card-cover-placeholder {
+  font-size: 38px;
+  color: color-mix(in oklab, var(--stage-card-tone) 65%, white);
+  text-shadow: 0 0 24px color-mix(in oklab, var(--stage-card-tone) 60%, transparent);
+}
+
+.stage-card-cover-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 8, 22, 0) 50%,
+    rgba(10, 8, 22, 0.78) 100%
+  );
+  pointer-events: none;
+}
+
+.stage-card-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+
+.stage-card--pillar .stage-card-body {
+  padding: 24px 22px 28px;
+  gap: 12px;
+}
+
+.stage-card--tile .stage-card-body {
+  padding: 12px 14px 14px;
+  gap: 4px;
+}
+
+.stage-card-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid color-mix(in oklab, var(--stage-card-tone) 35%, transparent);
+  color: color-mix(in oklab, var(--stage-card-tone) 80%, white);
+  font-size: 20px;
+  margin-bottom: 6px;
+  box-shadow: 0 0 22px color-mix(in oklab, var(--stage-card-tone) 22%, transparent);
+}
+
+.stage-card--tile .stage-card-glyph {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.stage-card-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+}
+
+.stage-card-title {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: 0.01em;
+  line-height: 1.22;
+  color: var(--atelier-parchment);
+}
+
+.stage-card--pillar .stage-card-title { font-size: 24px; }
+.stage-card--tile .stage-card-title   { font-size: 14px; letter-spacing: 0.02em; }
+
+.stage-card-body-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--atelier-parchment-soft);
+}
+
+.stage-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 12.5px;
+  color: var(--atelier-parchment-dim);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  letter-spacing: 0.06em;
+}
+
+.stage-card-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  background: rgba(10, 8, 22, 0.85);
+  border: 1px solid currentColor;
+  backdrop-filter: blur(6px);
+}
+.stage-card-status.status-pending   { color: #ffd0a8; }
+.stage-card-status.status-approved  { color: #b6f0d2; }
+.stage-card-status.status-rejected  { color: #ffc0d0; }
+.stage-card-status.status-draft     { color: var(--atelier-parchment-dim); }
+.stage-card-status.status-neutral   { color: var(--atelier-parchment-soft); }
+
+.stage-card-platform {
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 32px;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklab, var(--stage-card-tone) 38%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ── SceneTile ────────────────────────────────────────────────── */
+
+.stage-scene-tile {
+  --stage-tile-tone: var(--stage-tone-magenta);
+  --stage-tile-tone-deep: var(--stage-tone-magenta-deep);
+
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--atelier-parchment);
+  font-family: inherit;
+  text-decoration: none;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.stage-scene-tile--magenta { --stage-tile-tone: var(--stage-tone-magenta); --stage-tile-tone-deep: var(--stage-tone-magenta-deep); }
+.stage-scene-tile--cosmic  { --stage-tile-tone: var(--stage-tone-cosmic);  --stage-tile-tone-deep: var(--stage-tone-cosmic-deep); }
+.stage-scene-tile--gold    { --stage-tile-tone: var(--stage-tone-gold);    --stage-tile-tone-deep: var(--stage-tone-gold-deep); }
+.stage-scene-tile--amber   { --stage-tile-tone: var(--stage-tone-amber);   --stage-tile-tone-deep: var(--stage-tone-amber-deep); }
+.stage-scene-tile--teal    { --stage-tile-tone: var(--stage-tone-teal);    --stage-tile-tone-deep: var(--stage-tone-teal-deep); }
+
+.stage-scene-tile:hover,
+.stage-scene-tile.is-active {
+  transform: translateY(-2px);
+}
+
+.stage-scene-tile-cover {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--atelier-line-soft);
+  background: linear-gradient(
+    135deg,
+    var(--stage-tile-tone-deep) 0%,
+    rgba(20, 16, 42, 1) 70%
+  );
+  background-size: cover;
+  background-position: center;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.stage-scene-tile--square .stage-scene-tile-cover { aspect-ratio: 1 / 1; }
+.stage-scene-tile--wide .stage-scene-tile-cover   { aspect-ratio: 16 / 9; }
+
+.stage-scene-tile:hover .stage-scene-tile-cover,
+.stage-scene-tile.is-active .stage-scene-tile-cover {
+  border-color: color-mix(in oklab, var(--stage-tile-tone) 70%, transparent);
+  box-shadow: 0 0 20px color-mix(in oklab, var(--stage-tile-tone) 28%, transparent);
+}
+
+.stage-scene-tile-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: color-mix(in oklab, var(--stage-tile-tone) 80%, white);
+  text-shadow: 0 0 16px color-mix(in oklab, var(--stage-tile-tone) 60%, transparent);
+}
+
+.stage-scene-tile-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 8, 22, 0) 50%,
+    rgba(10, 8, 22, 0.7) 100%
+  );
+  pointer-events: none;
+}
+
+.stage-scene-tile-label {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-soft);
+  text-align: center;
+  transition: color 200ms ease;
+}
+
+.stage-scene-tile:hover .stage-scene-tile-label,
+.stage-scene-tile.is-active .stage-scene-tile-label {
+  color: var(--atelier-parchment);
+}
+
+/* ── CinemaCTA ────────────────────────────────────────────────── */
+
+.stage-cta {
+  --stage-cta-tone: var(--stage-tone-magenta);
+  --stage-cta-tone-deep: var(--stage-tone-magenta-deep);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  cursor: pointer;
+  appearance: none;
+  text-decoration: none;
+  border: 1px solid color-mix(in oklab, var(--stage-cta-tone) 45%, transparent);
+  background: rgba(20, 16, 42, 0.55);
+  color: var(--atelier-parchment);
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 200ms ease, box-shadow 200ms ease,
+    background-color 200ms ease, color 200ms ease;
+  isolation: isolate;
+}
+
+.stage-cta--magenta { --stage-cta-tone: var(--stage-tone-magenta); --stage-cta-tone-deep: var(--stage-tone-magenta-deep); }
+.stage-cta--cosmic  { --stage-cta-tone: var(--stage-tone-cosmic);  --stage-cta-tone-deep: var(--stage-tone-cosmic-deep); }
+.stage-cta--gold    { --stage-cta-tone: var(--stage-tone-gold);    --stage-cta-tone-deep: var(--stage-tone-gold-deep); }
+.stage-cta--amber   { --stage-cta-tone: var(--stage-tone-amber);   --stage-cta-tone-deep: var(--stage-tone-amber-deep); }
+.stage-cta--teal    { --stage-cta-tone: var(--stage-tone-teal);    --stage-cta-tone-deep: var(--stage-tone-teal-deep); }
+
+.stage-cta:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--stage-cta-tone) 80%, transparent);
+  background: rgba(20, 16, 42, 0.85);
+  color: color-mix(in oklab, var(--stage-cta-tone) 75%, white);
+}
+
+.stage-cta-label { display: inline-block; }
+.stage-cta-glyph { font-size: 14px; opacity: 0.9; }
+
+.stage-cta-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklab, var(--stage-cta-tone) 32%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(14px);
+  z-index: -1;
+  opacity: 0.7;
+  transition: opacity 200ms ease;
+}
+
+.stage-cta:hover .stage-cta-glow { opacity: 1; }
+
+/* primary — magenta gradient fill, dark text */
+.stage-cta--primary {
+  background: linear-gradient(
+    135deg,
+    var(--stage-cta-tone) 0%,
+    color-mix(in oklab, var(--stage-cta-tone) 70%, white) 100%
+  );
+  color: #0a0816;
+  border-color: color-mix(in oklab, var(--stage-cta-tone) 90%, white);
+  box-shadow: 0 12px 28px color-mix(in oklab, var(--stage-cta-tone) 28%, transparent);
+}
+
+.stage-cta--primary:hover {
+  color: #0a0816;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--stage-cta-tone) 75%, white) 0%,
+    var(--atelier-gold) 100%
+  );
+}
+
+/* ghost — transparent fill, glass border */
+.stage-cta--ghost {
+  background: rgba(20, 16, 42, 0.35);
+  border-color: var(--atelier-line);
+  color: var(--atelier-parchment);
+}
+
+.stage-cta--ghost:hover {
+  border-color: color-mix(in oklab, var(--stage-cta-tone) 70%, transparent);
+}
+
+/* luminous — full pill with travelling sheen */
+.stage-cta--luminous {
+  padding: 16px 36px;
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--stage-cta-tone-deep) 70%, transparent) 0%,
+    color-mix(in oklab, var(--stage-cta-tone) 18%, transparent) 100%
+  );
+  border-color: color-mix(in oklab, var(--stage-cta-tone) 60%, transparent);
+  overflow: hidden;
+}
+
+.stage-cta--luminous::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    color-mix(in oklab, var(--stage-cta-tone) 30%, transparent) 50%,
+    transparent 100%
+  );
+  animation: stage-cta-sheen 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes stage-cta-sheen {
+  0%   { left: -50%; }
+  100% { left: 150%; }
+}
+
+.stage-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── StageHero ────────────────────────────────────────────────── */
+
+.stage-hero {
+  --stage-hero-tone: var(--stage-tone-magenta);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 22px;
+  padding: clamp(24px, 6vw, 64px) clamp(20px, 4vw, 36px) clamp(28px, 5vw, 56px);
+  z-index: 2;
+}
+
+.stage-hero--magenta { --stage-hero-tone: var(--stage-tone-magenta); }
+.stage-hero--cosmic  { --stage-hero-tone: var(--stage-tone-cosmic); }
+.stage-hero--gold    { --stage-hero-tone: var(--stage-tone-gold); }
+
+.stage-hero--split {
+  flex-direction: row;
+  text-align: left;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 36px;
+}
+
+.stage-hero--compact {
+  padding: 24px 20px;
+  gap: 12px;
+}
+
+.stage-hero-portal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.stage-hero--split .stage-hero-text {
+  align-items: flex-start;
+  flex: 1 1 360px;
+}
+
+.stage-hero-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--stage-hero-tone) 70%, white);
+  text-shadow: 0 0 20px color-mix(in oklab, var(--stage-hero-tone) 38%, transparent);
+}
+
+.stage-hero-title {
+  margin: 0;
+  font-family: var(--atelier-serif, "Cormorant Garamond", "EB Garamond", serif);
+  font-weight: 500;
+  font-size: clamp(32px, 6vw, 72px);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment);
+  text-shadow: 0 0 36px color-mix(in oklab, var(--stage-hero-tone) 18%, transparent);
+}
+
+.stage-hero--compact .stage-hero-title {
+  font-size: clamp(24px, 4vw, 36px);
+}
+
+.stage-hero-lead {
+  margin: 0;
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.6;
+  color: var(--atelier-parchment-soft);
+  max-width: 620px;
+}
+
+.stage-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.stage-hero--split .stage-hero-actions {
+  justify-content: flex-start;
+}
+
+.stage-hero-after {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Reduced motion — kill every cinematic animation, keep static glow. */
+@media (prefers-reduced-motion: reduce) {
+  .atelier-hero-aura,
+  .atelier-hero-glyph::before,
+  .atelier-hero-glyph::after,
+  .atelier-hero-title,
+  .atelier-hero-lead,
+  .atelier-hero-cta,
+  .atelier-hero-underline,
+  .atelier-pillar::before,
+  .atelier-btn-primary::after,
+  .atelier-preview-banner-dot,
+  .atelier-admin-toast,
+  .atelier-admin-drawer-backdrop,
+  .atelier-admin-drawer,
+  .stage-portal-aura-inner,
+  .stage-portal-aura-outer,
+  .stage-cta--luminous::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  .atelier-hero-title,
+  .atelier-hero-lead,
+  .atelier-hero-cta {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .atelier-hero-underline {
+    width: clamp(140px, 28vw, 280px) !important;
+  }
+  .atelier-matrix {
+    display: none !important;
+  }
+  .atelier-upload-preview,
+  .atelier-public-contact-item,
+  .atelier-admin-card,
+  .stage-card,
+  .stage-scene-tile,
+  .stage-cta {
+    transition: none !important;
+  }
+  .atelier-upload-preview:hover,
+  .atelier-public-contact-item:hover,
+  .atelier-admin-card:hover,
+  .stage-card:hover,
+  .stage-scene-tile:hover,
+  .stage-cta:hover {
     transform: none !important;
   }
 }

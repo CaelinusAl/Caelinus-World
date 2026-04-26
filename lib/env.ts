@@ -65,6 +65,22 @@ const ServerEnvSchema = z.object({
   ELEVEN_API_KEY: z.string().optional(),
   ELEVEN_VOICE_ID: z.string().optional(),
   ELEVEN_MODEL_ID: z.string().optional().default("eleven_multilingual_v2"),
+  /* /play AI image generation. Provider switch + secret. When the
+     provider is "stub" (or unset), the render route returns a styled
+     placeholder image instead of calling out — useful in dev. */
+  PLAY_AI_PROVIDER: z
+    .enum(["replicate", "openai", "stub"])
+    .optional()
+    .default("stub"),
+  PLAY_AI_API_KEY: z.string().optional(),
+  /* Replicate model slug used when PLAY_AI_PROVIDER=replicate. Defaults
+     to SDXL — overridable for experimentation. */
+  PLAY_AI_REPLICATE_MODEL: z
+    .string()
+    .optional()
+    .default(
+      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+    ),
 });
 
 /* ─── Friendly error formatting ────────────────────── */
@@ -117,6 +133,9 @@ function parseServerEnv() {
     ELEVEN_API_KEY: process.env.ELEVEN_API_KEY,
     ELEVEN_VOICE_ID: process.env.ELEVEN_VOICE_ID,
     ELEVEN_MODEL_ID: process.env.ELEVEN_MODEL_ID,
+    PLAY_AI_PROVIDER: process.env.PLAY_AI_PROVIDER,
+    PLAY_AI_API_KEY: process.env.PLAY_AI_API_KEY,
+    PLAY_AI_REPLICATE_MODEL: process.env.PLAY_AI_REPLICATE_MODEL,
   });
   if (!parsed.success) {
     throw new Error(
@@ -132,20 +151,54 @@ function parseServerEnv() {
 export const clientEnv = Object.freeze(parseClientEnv());
 
 /**
- * Cached, validated server env. Throws at import-time on the client.
- * Use this only in server-side modules.
+ * Cached, validated server env. Throws when ANY property is *read* on
+ * the client — but **not** at import time. We use a lazy Proxy so that
+ * client modules which only need `clientEnv` / `supabaseConfigured`
+ * don't accidentally trip the guard just by sharing this file.
+ *
+ * Server-side: the first property access parses + freezes the schema
+ * and caches it for the rest of the process.
+ *
+ * Client-side: the first property access throws loudly, so any real
+ * leak (someone actually reading `serverEnv.SECRET`) still fails fast.
  */
-export const serverEnv: z.infer<typeof ServerEnvSchema> = (() => {
+type ServerEnv = z.infer<typeof ServerEnvSchema>;
+
+let _serverEnvCache: ServerEnv | null = null;
+
+function readServerEnv(): ServerEnv {
   if (typeof window !== "undefined") {
     // Defensive: this should never run client-side. If a tree-shaking
-    // mistake leaks it, fail loudly rather than silently exposing secrets.
+    // mistake actually *reads* a server secret, fail loudly rather
+    // than silently exposing it.
     throw new Error(
       "[CAELINUS] serverEnv was imported into the browser. " +
         "Use clientEnv for public values, and keep secrets in server-only modules."
     );
   }
-  return Object.freeze(parseServerEnv());
-})();
+  if (!_serverEnvCache) {
+    _serverEnvCache = Object.freeze(parseServerEnv());
+  }
+  return _serverEnvCache;
+}
+
+export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
+  get(_target, prop, receiver) {
+    return Reflect.get(readServerEnv() as object, prop, receiver);
+  },
+  has(_target, prop) {
+    return Reflect.has(readServerEnv() as object, prop);
+  },
+  ownKeys() {
+    return Reflect.ownKeys(readServerEnv() as object);
+  },
+  getOwnPropertyDescriptor(_target, prop) {
+    return Reflect.getOwnPropertyDescriptor(
+      readServerEnv() as object,
+      prop
+    );
+  },
+});
 
 /* ─── Helpers ─────────────────────────────────────── */
 

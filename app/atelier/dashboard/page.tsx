@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import DashboardBody from "./DashboardBody";
+import { isCurrentUserAdmin } from "@/lib/atelier/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierRow, ProfileRow } from "@/lib/supabase/types";
 
@@ -14,6 +15,8 @@ type AtelierListRow = Pick<
   | "region"
   | "province"
   | "updated_at"
+  | "cover_image_url"
+  | "avatar_image_url"
 >;
 
 type ProfileSummary = Pick<
@@ -42,7 +45,9 @@ export default async function DashboardPage() {
 
   const ateliersResult = await supabase
     .from("ateliers")
-    .select("id, slug, name, kind, status, region, province, updated_at")
+    .select(
+      "id, slug, name, kind, status, region, province, updated_at, cover_image_url, avatar_image_url",
+    )
     .eq("owner_user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -54,12 +59,15 @@ export default async function DashboardPage() {
 
   const ateliers = (ateliersResult.data ?? []) as AtelierListRow[];
   const profile = profileResult.data as ProfileSummary | null;
+  const isAdmin = await isCurrentUserAdmin();
 
   return (
     <DashboardBody
       email={user.email ?? null}
       displayName={profile?.display_name ?? null}
+      avatarUrl={profile?.avatar_url ?? null}
       ateliers={ateliers}
+      isAdmin={isAdmin}
     />
   );
 }

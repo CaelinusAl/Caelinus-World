@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 
+import {
+  CinemaCTA,
+  GlowPlatform,
+  NebulaPortal,
+  StageCard,
+  StageHero,
+} from "@/app/_stage";
+import { KIND_LABELS } from "@/lib/atelier/validation";
+import type { AtelierKind, AtelierRow } from "@/lib/supabase/types";
 import { useLangStore } from "@/stores/lang-store";
+
+import AtelierMatrix from "./AtelierMatrix";
 
 type AtelierStatus =
   | "none"
@@ -12,14 +23,28 @@ type AtelierStatus =
   | "rejected"
   | null;
 
+/** A trimmed projection of `AtelierRow` for the featured strip. */
+export type FeaturedAtelier = Pick<
+  AtelierRow,
+  | "slug"
+  | "name"
+  | "kind"
+  | "region"
+  | "province"
+  | "cover_image_url"
+  | "avatar_image_url"
+>;
+
 interface Props {
   authed: boolean;
   email: string | null;
   atelierStatus: AtelierStatus;
+  featured?: FeaturedAtelier[];
 }
 
 const T = {
   brand: { tr: "Caelinus · Atelier", en: "Caelinus · Atelier" },
+  eyebrow: { tr: "Atelier", en: "Atelier" },
   hero: {
     title: {
       tr: "Üretenlerin Tezgâhı",
@@ -43,6 +68,7 @@ const T = {
           tr: "Her üretim bir hikâyeyle yayımlanır — bölgesi, frekansı, mood'u, üretim notu. Toprak Anlatıyor.",
           en: "Every piece ships with a story — its region, frequency, mood, maker's note. The soil tells.",
         },
+        tone: "magenta" as const,
       },
       {
         glyph: "✦",
@@ -51,6 +77,7 @@ const T = {
           tr: "Caelinus okumaları, kullanıcıyı senin atölyene rastgele değil — uygun ses dalgasında getirir.",
           en: "Caelinus readings bring people to your bench not at random, but at the right resonance.",
         },
+        tone: "cosmic" as const,
       },
       {
         glyph: "✿",
@@ -59,6 +86,7 @@ const T = {
           tr: "Üretiğini bağladığın bölge, Anadolu Atlas'ında nokta olarak yanar. Toprak unutmaz.",
           en: "The region you tie your craft to lights up as a node on the Anatolia Atlas. Soil remembers.",
         },
+        tone: "gold" as const,
       },
     ],
   },
@@ -104,12 +132,24 @@ const T = {
       cta: { tr: "Notları gör", en: "View notes" },
     },
   },
+  featured: {
+    title: { tr: "Açık tezgâhlar", en: "Open benches" },
+    sub: {
+      tr: "Caelinus kütüphanesinin onayladığı son atölyeler.",
+      en: "The most recent ateliers welcomed by the Caelinus librarians.",
+    },
+    empty: {
+      tr: "Henüz açık bir tezgâh yok — ilkini sen aç.",
+      en: "No open benches yet — open the first one yourself.",
+    },
+  },
 } as const;
 
 export default function AtelierHomeBody({
   authed,
   email,
   atelierStatus,
+  featured = [],
 }: Props) {
   const { lang, hydrated, toggle } = useLangStore();
   const L = hydrated ? lang : "tr";
@@ -119,8 +159,14 @@ export default function AtelierHomeBody({
       ? T.status[atelierStatus === "rejected" ? "rejected" : atelierStatus]
       : null;
 
+  const statusHref =
+    atelierStatus === "none" ? "/atelier/basvuru" : "/atelier/dashboard";
+
   return (
     <div className="atelier-shell">
+      {/* Cinematic atmosphere: nebula matrix rain behind everything,
+          then the existing radial vignette on top to anchor the eye. */}
+      <AtelierMatrix intensity="rich" />
       <div className="atelier-shell-vignette" aria-hidden="true" />
 
       <header className="atelier-ribbon">
@@ -155,63 +201,148 @@ export default function AtelierHomeBody({
       </header>
 
       <main className="atelier-home">
-        <section className="atelier-hero">
-          <div className="atelier-hero-glyph" aria-hidden="true">
-            ⌖
-          </div>
-          <h1 className="atelier-hero-title">{T.hero.title[L]}</h1>
-          <p className="atelier-hero-lead">{T.hero.lead[L]}</p>
-
-          <div className="atelier-hero-cta">
-            {authed ? (
-              <Link href="/atelier/dashboard" className="atelier-btn atelier-btn-primary">
+        <StageHero
+          tone="magenta"
+          eyebrow={T.eyebrow[L]}
+          title={T.hero.title[L]}
+          lead={T.hero.lead[L]}
+          portalSlot={
+            <NebulaPortal size={200} tone="magenta">
+              <span className="atelier-home-portal-glyph" aria-hidden="true">
+                ⌖
+              </span>
+            </NebulaPortal>
+          }
+          actions={
+            authed ? (
+              <CinemaCTA
+                href="/atelier/dashboard"
+                variant="primary"
+                tone="magenta"
+                trailingGlyph="→"
+              >
                 {T.ctaDashboard[L]}
-              </Link>
+              </CinemaCTA>
             ) : (
               <>
-                <Link href="/atelier/kayit" className="atelier-btn atelier-btn-primary">
+                <CinemaCTA
+                  href="/atelier/kayit"
+                  variant="primary"
+                  tone="magenta"
+                  trailingGlyph="→"
+                >
                   {T.ctaApply[L]}
-                </Link>
-                <Link href="/atelier/giris" className="atelier-btn atelier-btn-ghost">
+                </CinemaCTA>
+                <CinemaCTA href="/atelier/giris" variant="ghost" tone="magenta">
                   {T.ctaSignin[L]}
-                </Link>
+                </CinemaCTA>
               </>
-            )}
-          </div>
-
+            )
+          }
+        >
           {authed && email ? (
-            <p className="atelier-hero-email">{email}</p>
+            <p className="atelier-home-email">{email}</p>
           ) : null}
-        </section>
+        </StageHero>
 
         {statusBlock ? (
           <section className="atelier-status">
             <h2 className="atelier-status-title">{statusBlock.title[L]}</h2>
             <p className="atelier-status-body">{statusBlock.body[L]}</p>
-            <Link
-              href="/atelier/dashboard"
-              className="atelier-btn atelier-btn-ghost"
+            <CinemaCTA
+              href={statusHref}
+              variant="ghost"
+              tone="magenta"
+              trailingGlyph="→"
             >
-              {statusBlock.cta[L]} →
-            </Link>
+              {statusBlock.cta[L]}
+            </CinemaCTA>
           </section>
         ) : null}
 
-        <section className="atelier-pillars">
-          <h2 className="atelier-pillars-title">{T.pillars.title[L]}</h2>
-          <div className="atelier-pillars-grid">
-            {T.pillars.items.map((it) => (
-              <article key={it.glyph} className="atelier-pillar">
-                <div className="atelier-pillar-glyph" aria-hidden="true">
-                  {it.glyph}
-                </div>
-                <h3 className="atelier-pillar-title">{it.title[L]}</h3>
-                <p className="atelier-pillar-body">{it.body[L]}</p>
-              </article>
+        {/* Pillars — stage-card pillars with their own glow platforms. */}
+        <section className="atelier-home-section">
+          <header className="atelier-home-section-head">
+            <h2 className="atelier-home-section-title">
+              {T.pillars.title[L]}
+            </h2>
+          </header>
+          <div className="atelier-home-pillars-grid">
+            {T.pillars.items.map((item) => (
+              <div key={item.glyph} className="atelier-home-pillar-wrap">
+                <StageCard
+                  as="div"
+                  variant="pillar"
+                  tone={item.tone}
+                  glyph={item.glyph}
+                  title={item.title[L]}
+                  body={item.body[L]}
+                  withPlatform
+                />
+                <GlowPlatform
+                  width={180}
+                  tone={item.tone}
+                  intensity="soft"
+                  className="atelier-home-pillar-platform"
+                />
+              </div>
             ))}
           </div>
+        </section>
+
+        {/* Featured strip — recent approved ateliers. */}
+        <section className="atelier-home-section">
+          <header className="atelier-home-section-head">
+            <h2 className="atelier-home-section-title">
+              {T.featured.title[L]}
+            </h2>
+            <p className="atelier-home-section-sub">{T.featured.sub[L]}</p>
+          </header>
+
+          {featured.length > 0 ? (
+            <div className="atelier-home-featured-grid">
+              {featured.map((a) => (
+                <StageCard
+                  key={a.slug}
+                  as="link"
+                  href={`/atelier/${a.slug}`}
+                  variant="poster"
+                  tone={featuredTone(a.kind)}
+                  image={a.cover_image_url}
+                  eyebrow={KIND_LABELS[a.kind][L]}
+                  title={a.name}
+                  meta={
+                    a.province ? (
+                      <span>{a.province.toUpperCase()}</span>
+                    ) : null
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="atelier-home-featured-empty">
+              {T.featured.empty[L]}
+            </p>
+          )}
         </section>
       </main>
     </div>
   );
+}
+
+/** Map atelier kinds to a stage tone. Keeps the showcase visually
+ *  varied without us having to hand-pick a colour per atelier. */
+function featuredTone(
+  kind: AtelierKind,
+): "magenta" | "cosmic" | "gold" | "amber" | "teal" {
+  switch (kind) {
+    case "designer":   return "magenta";
+    case "artisan":    return "cosmic";
+    case "farmer":     return "teal";
+    case "chef":       return "amber";
+    case "herbalist":  return "gold";
+    case "cooperative":
+    case "other":
+    default:           return "magenta";
+  }
 }

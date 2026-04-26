@@ -2,33 +2,52 @@
 
 import Link from "next/link";
 
+import {
+  CinemaCTA,
+  NebulaPortal,
+  StageCard,
+  StageHero,
+} from "@/app/_stage";
+import { KIND_LABELS } from "@/lib/atelier/validation";
+import type { AtelierKind, AtelierStatus } from "@/lib/supabase/types";
 import { useLangStore } from "@/stores/lang-store";
+
+import AtelierMatrix from "../_components/AtelierMatrix";
 
 type AtelierRow = {
   id: string;
   slug: string;
   name: string;
-  kind: string;
-  status: string;
+  kind: AtelierKind;
+  status: AtelierStatus;
   region: string | null;
   province: string | null;
   updated_at: string;
+  cover_image_url: string | null;
+  avatar_image_url: string | null;
 };
 
 interface Props {
   email: string | null;
   displayName: string | null;
+  avatarUrl?: string | null;
   ateliers: AtelierRow[];
+  /** True when the visitor is on CAELINUS_ADMIN_EMAILS — surfaces the
+   *  moderation shortcut in the ribbon. */
+  isAdmin?: boolean;
 }
 
 const T = {
   brand: { tr: "Caelinus · Atelier", en: "Caelinus · Atelier" },
   signout: { tr: "Çıkış", en: "Sign out" },
+  moderate: { tr: "Moderasyon", en: "Moderation" },
+  greetEyebrow: { tr: "Tezgâh", en: "Bench" },
   greet: {
     tr: (name: string) => `Hoş geldin, ${name}`,
     en: (name: string) => `Welcome, ${name}`,
   },
   empty: {
+    eyebrow: { tr: "Yeni başlangıç", en: "Fresh start" },
     title: { tr: "Tezgâhın henüz boş", en: "Your bench is still empty" },
     body: {
       tr: "İlk atelier'ini açmak için kısa bir başvuru var: kim olduğunu, ne ürettiğini, hangi toprağa bağlı olduğunu anlat.",
@@ -48,7 +67,34 @@ const T = {
   } as Record<string, { tr: string; en: string }>,
 } as const;
 
-export default function DashboardBody({ email, displayName, ateliers }: Props) {
+function kindToTone(
+  kind: AtelierKind,
+): "magenta" | "cosmic" | "gold" | "amber" | "teal" {
+  switch (kind) {
+    case "designer":   return "magenta";
+    case "artisan":    return "cosmic";
+    case "farmer":     return "teal";
+    case "chef":       return "amber";
+    case "herbalist":  return "gold";
+    case "cooperative":
+    case "other":
+    default:           return "magenta";
+  }
+}
+
+function statusToCardStatus(
+  s: AtelierStatus,
+): "draft" | "pending" | "approved" | "rejected" {
+  return s;
+}
+
+export default function DashboardBody({
+  email,
+  displayName,
+  avatarUrl,
+  ateliers,
+  isAdmin = false,
+}: Props) {
   const { lang, hydrated, toggle } = useLangStore();
   const L = hydrated ? lang : "tr";
 
@@ -57,6 +103,7 @@ export default function DashboardBody({ email, displayName, ateliers }: Props) {
 
   return (
     <div className="atelier-shell">
+      <AtelierMatrix intensity="soft" />
       <div className="atelier-shell-vignette" aria-hidden="true" />
 
       <header className="atelier-ribbon">
@@ -66,6 +113,11 @@ export default function DashboardBody({ email, displayName, ateliers }: Props) {
         </Link>
 
         <div className="atelier-ribbon-actions">
+          {isAdmin ? (
+            <Link href="/atelier/admin" className="atelier-ribbon-btn">
+              {T.moderate[L]}
+            </Link>
+          ) : null}
           <form action="/auth/signout" method="post">
             <button className="atelier-ribbon-btn" type="submit">
               {T.signout[L]}
@@ -85,21 +137,42 @@ export default function DashboardBody({ email, displayName, ateliers }: Props) {
       </header>
 
       <main className="atelier-dash">
-        <section className="atelier-dash-greet">
-          <h1 className="atelier-dash-h1">{T.greet[L](name)}</h1>
-          {email ? <p className="atelier-dash-sub">{email}</p> : null}
-        </section>
+        <StageHero
+          layout="split"
+          tone="magenta"
+          eyebrow={T.greetEyebrow[L]}
+          title={T.greet[L](name)}
+          lead={email ?? undefined}
+          portalSlot={
+            <NebulaPortal size={140} tone="magenta">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt={name} />
+              ) : (
+                <span className="atelier-dash-portal-glyph" aria-hidden="true">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </NebulaPortal>
+          }
+          actions={
+            hasAteliers ? (
+              <CinemaCTA
+                href="/atelier/basvuru"
+                variant="ghost"
+                tone="magenta"
+                trailingGlyph="+"
+              >
+                {T.yours.cta[L]}
+              </CinemaCTA>
+            ) : null
+          }
+        />
 
         {hasAteliers ? (
           <section className="atelier-dash-section">
             <header className="atelier-dash-section-head">
               <h2 className="atelier-dash-h2">{T.yours.title[L]}</h2>
-              <Link
-                href="/atelier/basvuru"
-                className="atelier-btn atelier-btn-ghost"
-              >
-                + {T.yours.cta[L]}
-              </Link>
             </header>
 
             <div className="atelier-dash-grid">
@@ -107,37 +180,51 @@ export default function DashboardBody({ email, displayName, ateliers }: Props) {
                 const label =
                   T.statusLabel[a.status] ?? { tr: a.status, en: a.status };
                 return (
-                  <Link
+                  <StageCard
                     key={a.id}
+                    as="link"
                     href={`/atelier/${a.slug}/duzenle`}
-                    className={`atelier-dash-card is-${a.status}`}
-                  >
-                    <div className="atelier-dash-card-name">{a.name}</div>
-                    <div className="atelier-dash-card-meta">
-                      <span>{a.kind}</span>
-                      {a.region ? <span>· {a.region}</span> : null}
-                      {a.province ? <span>· {a.province}</span> : null}
-                    </div>
-                    <span
-                      className={`atelier-dash-card-status status-${a.status}`}
-                    >
-                      {label[L]}
-                    </span>
-                  </Link>
+                    variant="poster"
+                    tone={kindToTone(a.kind)}
+                    image={a.cover_image_url}
+                    eyebrow={KIND_LABELS[a.kind][L]}
+                    title={a.name}
+                    statusLabel={label[L]}
+                    status={statusToCardStatus(a.status)}
+                    meta={
+                      <>
+                        {a.region ? (
+                          <span>{a.region.toUpperCase()}</span>
+                        ) : null}
+                        {a.province ? (
+                          <span>{a.province.toUpperCase()}</span>
+                        ) : null}
+                      </>
+                    }
+                  />
                 );
               })}
             </div>
           </section>
         ) : (
-          <section className="atelier-dash-empty">
-            <h2 className="atelier-dash-h2">{T.empty.title[L]}</h2>
-            <p className="atelier-dash-empty-body">{T.empty.body[L]}</p>
-            <Link
-              href="/atelier/basvuru"
-              className="atelier-btn atelier-btn-primary"
-            >
-              {T.empty.cta[L]} →
-            </Link>
+          <section className="atelier-dash-empty-stage">
+            <StageHero
+              layout="vertical"
+              tone="magenta"
+              eyebrow={T.empty.eyebrow[L]}
+              title={T.empty.title[L]}
+              lead={T.empty.body[L]}
+              actions={
+                <CinemaCTA
+                  href="/atelier/basvuru"
+                  variant="primary"
+                  tone="magenta"
+                  trailingGlyph="→"
+                >
+                  {T.empty.cta[L]}
+                </CinemaCTA>
+              }
+            />
           </section>
         )}
       </main>

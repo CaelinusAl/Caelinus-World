@@ -1,31 +1,17 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function DesignersPage() {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at center, #24314d 0%, #070b16 55%, #04050a 100%)",
-        color: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Arial, sans-serif",
-        padding: "32px",
-      }}
-    >
-      <div style={{ textAlign: "center" }}>
-        <Link href="/" style={{ opacity: 0.75 }}>
-          ← UNIVERSE
-        </Link>
-        <h1 style={{ fontSize: "54px", letterSpacing: "8px", marginTop: "24px", marginBottom: 0 }}>
-          CAELINUS DESIGNERS
-        </h1>
-        <p style={{ marginTop: "16px", opacity: 0.82 }}>
-          Global conscious creators
-        </p>
-      </div>
-    </main>
-  );
+/**
+ * `/designers` is the legacy URL for what is now the Atelier.
+ *
+ * The portal in `/universe` used to point here and showed a single
+ * placeholder line. The real product — Caelinus · Atelier (üretici
+ * tezgâhı) — lives at `/atelier`, so we permanently forward both the
+ * portal click and any old bookmarks / outbound links to it.
+ *
+ * 308 (permanent) tells crawlers and clients to update their cached
+ * URLs; using `next/navigation`'s `redirect()` from a server component
+ * is the idiomatic way to issue this in the App Router.
+ */
+export default function DesignersPage(): never {
+  redirect("/atelier");
 }

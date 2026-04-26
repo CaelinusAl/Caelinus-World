@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 
 import { useLangStore } from "@/stores/lang-store";
 
+import AtelierMatrix from "./AtelierMatrix";
+
 type Copy = { tr: string; en: string };
 
 interface Props {
@@ -30,6 +32,10 @@ export default function AuthShell({ title, subtitle, footer, children }: Props) 
 
   return (
     <div className="atelier-shell">
+      {/* Same nebula language as the rest of /atelier/*, dialled down
+          so long forms (login, signup, password reset) stay easy on
+          the eyes. */}
+      <AtelierMatrix intensity="soft" />
       <div className="atelier-shell-vignette" aria-hidden="true" />
 
       <header className="atelier-ribbon">

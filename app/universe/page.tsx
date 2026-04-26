@@ -18,7 +18,10 @@ const portals = [
   { label: "Caelinus Shop", href: "/universe/shop", symbol: "◐", cls: "gold" },
   { label: "Caelinus Play", href: "/play", symbol: "∞", cls: "blue" },
   { label: "Archive / Art", href: "/archive", symbol: "△", cls: "pink" },
-  { label: "Designers", href: "/designers", symbol: "⬡", cls: "violet" },
+  // The "Atelier" portal — formerly "Designers". Same idea (conscious
+  // creators), but now wired to the live atelier system. Compass glyph
+  // ⌖ matches the Caelinus · Atelier ribbon mark.
+  { label: "Atelier", href: "/atelier", symbol: "⌖", cls: "magenta" },
   { label: "Cosmos", href: "/cosmos", symbol: "◌", cls: "cyan" },
   { label: "Manifesto", href: "/manifesto", symbol: "✧", cls: "violet" },
 ];
