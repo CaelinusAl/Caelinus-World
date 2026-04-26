@@ -1,5 +1,6 @@
 import AtelierHomeBody from "./_components/AtelierHomeBody";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { AtelierRow } from "@/lib/supabase/types";
 
 export const metadata = {
   title: "Caelinus · Atelier",
@@ -29,7 +30,7 @@ export default async function AtelierPage() {
     | null = null;
 
   if (user) {
-    const { data: atelier } = await supabase
+    const atelierResult = await supabase
       .from("ateliers")
       .select("status")
       .eq("owner_user_id", user.id)
@@ -37,6 +38,7 @@ export default async function AtelierPage() {
       .limit(1)
       .maybeSingle();
 
+    const atelier = atelierResult.data as Pick<AtelierRow, "status"> | null;
     atelierStatus = atelier?.status ?? "none";
   }
 

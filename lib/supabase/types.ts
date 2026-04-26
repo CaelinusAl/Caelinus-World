@@ -106,41 +106,58 @@ export interface AtelierItemRow {
   updated_at: string;
 }
 
-/** Compose a Supabase-typed Database root for `createClient<Database>()`. */
+/** Compose a Supabase-typed Database root for `createClient<Database>()`.
+ *
+ * Shape mirrors Supabase's generated types pattern (`{ [_ in never]: never }`
+ * for empty buckets) so `@supabase/supabase-js` infers row types correctly
+ * across `select(...)`, `.maybeSingle()`, `.returns<T>()` chains.
+ *
+ * `__InternalSupabase` is required by `@supabase/supabase-js` v2.104+
+ * for table-row inference; without it, every chained query collapses
+ * to `never` and properties like `display_name` become inaccessible.
+ */
 export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "12";
+  };
   public: {
     Tables: {
       profiles: {
         Row: ProfileRow;
         Insert: Partial<ProfileRow> & Pick<ProfileRow, "id">;
         Update: Partial<ProfileRow>;
+        Relationships: [];
       };
       ateliers: {
         Row: AtelierRow;
         Insert: Partial<AtelierRow> &
           Pick<AtelierRow, "owner_user_id" | "slug" | "name" | "kind">;
         Update: Partial<AtelierRow>;
+        Relationships: [];
       };
       atelier_collections: {
         Row: AtelierCollectionRow;
         Insert: Partial<AtelierCollectionRow> &
           Pick<AtelierCollectionRow, "atelier_id" | "slug" | "title_tr">;
         Update: Partial<AtelierCollectionRow>;
+        Relationships: [];
       };
       atelier_items: {
         Row: AtelierItemRow;
         Insert: Partial<AtelierItemRow> &
           Pick<AtelierItemRow, "atelier_id" | "slug" | "title_tr">;
         Update: Partial<AtelierItemRow>;
+        Relationships: [];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Views: { [_ in never]: never };
+    Functions: { [_ in never]: never };
     Enums: {
       atelier_kind: AtelierKind;
       atelier_status: AtelierStatus;
       collection_status: CollectionStatus;
       item_status: ItemStatus;
     };
+    CompositeTypes: { [_ in never]: never };
   };
 };

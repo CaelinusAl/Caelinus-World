@@ -207,8 +207,9 @@ export default function SignatureCard({ reading, lang }: Props) {
 
       {/* ── whisper ── */}
       <foreignObject x="100" y="930" width={W - 200} height="120">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <div
-          xmlns="http://www.w3.org/1999/xhtml"
+          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as any)}
           style={{
             width: "100%",
             color: "rgba(244, 236, 223, 0.92)",

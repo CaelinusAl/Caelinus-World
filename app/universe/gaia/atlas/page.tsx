@@ -159,6 +159,17 @@ const UI = {
 } as const;
 
 /**
+ * Shared shape for either-language UI copy.
+ *
+ * `UI` is `as const`, so `UI.tr` and `UI.en` end up as two structurally
+ * identical but nominally distinct literal types. `t = UI[lang]` widens
+ * to their union, but sub-components were typed as just `UI.tr`, which
+ * TypeScript rejects ("Two different types with this name"). This alias
+ * captures the union explicitly so panels accept either language.
+ */
+type AtlasCopy = (typeof UI)[keyof typeof UI];
+
+/**
  * Plants that already have ElevenLabs MP3 audio under
  * `/audio/plants/{id}.{lang}.mp3`. Anything else falls back to
  * the Web Speech API in <PlantVoice />.
@@ -463,7 +474,7 @@ function LangSwitch() {
 type PanelProps = {
   province: Province;
   lang: "tr" | "en";
-  t: (typeof UI)["tr"];
+  t: AtlasCopy;
   onClose: () => void;
 };
 
@@ -620,7 +631,7 @@ function ProvincePanel({ province, lang, t, onClose }: PanelProps) {
 type ChipProps = {
   plant: (typeof ALL_PLANTS)[number];
   lang: "tr" | "en";
-  t: (typeof UI)["tr"];
+  t: AtlasCopy;
   isSignature: boolean;
   hasStudioVoice: boolean;
 };

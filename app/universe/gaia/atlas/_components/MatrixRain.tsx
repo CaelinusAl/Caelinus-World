@@ -54,7 +54,10 @@ export default function MatrixRain({
     let drops: number[] = [];
     let speeds: number[] = [];
 
-    function resize() {
+    // Arrow-function form keeps TS's null-narrowing of `canvas`/`ctx`
+    // alive across the closure boundary; hoisted `function` declarations
+    // would re-widen them to `T | null`.
+    const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       cssWidth = window.innerWidth;
       cssHeight = window.innerHeight;
@@ -75,7 +78,7 @@ export default function MatrixRain({
       // start with full black so first frame doesn't flicker
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, cssWidth, cssHeight);
-    }
+    };
 
     resize();
     window.addEventListener("resize", resize);
@@ -83,17 +86,10 @@ export default function MatrixRain({
     let raf = 0;
     let running = true;
 
-    function onVisibility() {
-      running = document.visibilityState === "visible";
-      if (running) raf = requestAnimationFrame(draw);
-    }
-    document.addEventListener("visibilitychange", onVisibility);
+    const pickGlyph = (): string =>
+      GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
 
-    function pickGlyph(): string {
-      return GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
-    }
-
-    function draw() {
+    const draw = () => {
       if (!running) return;
 
       // soft fade — leaves a trail behind each glyph
@@ -129,7 +125,13 @@ export default function MatrixRain({
       }
 
       raf = requestAnimationFrame(draw);
-    }
+    };
+
+    const onVisibility = () => {
+      running = document.visibilityState === "visible";
+      if (running) raf = requestAnimationFrame(draw);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     raf = requestAnimationFrame(draw);
 

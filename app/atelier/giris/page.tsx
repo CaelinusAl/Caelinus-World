@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import AuthShell from "../_components/AuthShell";
 import { clientEnv, supabaseConfigured } from "@/lib/env";
@@ -56,7 +56,15 @@ function translateError(msg: string, lang: "tr" | "en"): string {
   return msg;
 }
 
-export default function GirisPage() {
+/**
+ * Inner form component.
+ *
+ * Reads `useSearchParams()`, which forces Next.js to bail out of static
+ * generation unless the consumer is wrapped in a Suspense boundary.
+ * Keeping it as a private inner component lets the default export stay
+ * pre-renderable while this body streams in.
+ */
+function GirisForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/atelier/dashboard";
@@ -201,5 +209,19 @@ export default function GirisPage() {
         </Link>
       </p>
     </AuthShell>
+  );
+}
+
+export default function GirisPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthShell title={T.title} subtitle={T.subtitle} footer={T.footer}>
+          <div className="atelier-form" aria-hidden="true" />
+        </AuthShell>
+      }
+    >
+      <GirisForm />
+    </Suspense>
   );
 }
