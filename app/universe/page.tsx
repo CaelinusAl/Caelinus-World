@@ -1,89 +1,107 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useMemo, type CSSProperties } from "react";
 
-type Star = {
+type Particle = {
   id: number;
   left: number;
   top: number;
   size: number;
   delay: number;
+  duration: number;
 };
 
-const portalItems = [
-  { title: "GAIA'S GARDEN", href: "/gaia", color: "#c79cff", symbol: "✿" },
-  { title: "CAELINUS SHOP", href: "/shop", color: "#d7a8ff", symbol: "☾" },
-  { title: "CAELINUS PLAY", href: "/play", color: "#b88cff", symbol: "∞" },
-  { title: "ARCHIVE / ART", href: "/archive", color: "#e4b7ff", symbol: "△" },
-  { title: "DESIGNERS", href: "/designers", color: "#caa2ff", symbol: "⬡" },
-  { title: "COSMOS", href: "/cosmos", color: "#b98dff", symbol: "◌" },
+const portals = [
+  { label: "Find Your Frequency", href: "/onboarding", symbol: "✦", cls: "gold" },
+  { label: "Gaia's Garden", href: "/universe/gaia", symbol: "✦", cls: "green" },
+  { label: "Caelinus Shop", href: "/universe/shop", symbol: "◐", cls: "gold" },
+  { label: "Caelinus Play", href: "/play", symbol: "∞", cls: "blue" },
+  { label: "Archive / Art", href: "/archive", symbol: "△", cls: "pink" },
+  { label: "Designers", href: "/designers", symbol: "⬡", cls: "violet" },
+  { label: "Cosmos", href: "/cosmos", symbol: "◌", cls: "cyan" },
+  { label: "Manifesto", href: "/manifesto", symbol: "✧", cls: "violet" },
 ];
 
 export default function UniversePage() {
-  const router = useRouter();
-
-  const stars = useMemo<Star[]>(
+  const particles = useMemo<Particle[]>(
     () =>
-      Array.from({ length: 40 }).map((_, i) => ({
+      Array.from({ length: 26 }).map((_, i) => ({
         id: i,
-        left: ((i * 37) % 96) + 2,
-        top: ((i * 61) % 92) + 2,
-        size: (i % 3) + 1,
-        delay: (i % 9) * 0.35,
+        left: ((i * 29) % 92) + 4,
+        top: ((i * 41) % 82) + 8,
+        size: (i % 3) + 10,
+        delay: (i % 7) * 0.7,
+        duration: 8 + (i % 5) * 2.2,
       })),
     []
   );
 
   return (
-    <main className="universe-scene">
-      <img
-        src="/universe/caelinus-universe.jpg"
-        alt="Caelinus Universe"
-        className="universe-bg"
-      />
+    <main className="cu-scene">
+      <div className="cu-bg" />
+      <div className="cu-overlay" />
+      <div className="cu-nebula cu-nebula-left" />
+      <div className="cu-nebula cu-nebula-right" />
+      <div className="cu-nebula cu-nebula-bottom" />
 
-      <div className="universe-overlay" />
-      <div className="universe-vignette" />
-      <div className="universe-edge-smoke" />
-
-      <div className="universe-stars">
-        {stars.map((star) => (
-          <span
-            key={star.id}
-            className="universe-star"
-            style={{
-              left: `${star.left}%`,
-              top: `${star.top}%`,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
+      <div className="cu-fairies">
+        {particles.map((p) => {
+          const style: CSSProperties = {
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          };
+          return <span key={p.id} className="cu-fairy-dot" style={style} />;
+        })}
       </div>
 
-      <section className="universe-ui">
-        <div className="universe-header">
-          <div className="universe-kicker">✦ CAELINUS UNIVERSE ✦</div>
-          <h1 className="universe-title">Choose Your Dimension</h1>
-          <p className="universe-subtitle">
+      <img
+        src="/universe/fairy.png"
+        alt=""
+        className="cu-fairy fairy-a"
+        draggable={false}
+      />
+      <img
+        src="/universe/fairy.png"
+        alt=""
+        className="cu-fairy fairy-b"
+        draggable={false}
+      />
+      <img
+        src="/universe/bird-light.png"
+        alt=""
+        className="cu-bird bird-a"
+        draggable={false}
+      />
+      <img
+        src="/universe/bird-light.png"
+        alt=""
+        className="cu-bird bird-b"
+        draggable={false}
+      />
+
+      <section className="cu-content">
+        <div className="cu-title-wrap">
+          <div className="cu-kicker">✦ CAELINUS UNIVERSE ✦</div>
+          <h1 className="cu-title">Choose Your Dimension</h1>
+          <p className="cu-subtitle">
             Enter the portal world you want to explore.
           </p>
         </div>
 
-        <div className="symbol-only-grid">
-          {portalItems.map((item) => (
-            <button
-              key={item.title}
-              className="symbol-portal"
-              style={{ ["--portal-color" as any]: item.color } as React.CSSProperties}
-              onClick={() => router.push(item.href)}
-            >
-              <span className="symbol-rings" />
-              <span className="symbol-core">{item.symbol}</span>
-              <span className="symbol-name">{item.title}</span>
-            </button>
+        <div className="cu-portal-grid">
+          {portals.map((item) => (
+            <Link key={item.label} href={item.href} className={`cu-portal ${item.cls}`}>
+              <div className="cu-portal-core" />
+              <div className="cu-portal-ring ring-one" />
+              <div className="cu-portal-ring ring-two" />
+              <div className="cu-portal-symbol">{item.symbol}</div>
+              <div className="cu-portal-label">{item.label}</div>
+            </Link>
           ))}
         </div>
       </section>

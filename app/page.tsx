@@ -21,7 +21,7 @@ export default function HomePage() {
 
   const stars = useMemo<Star[]>(
     () =>
-      Array.from({ length: 140 }).map((_, i) => {
+      Array.from({ length: 160 }).map((_, i) => {
         const left = ((i * 37) % 96) + 2;
         const top = ((i * 61) % 92) + 2;
 
@@ -33,7 +33,7 @@ export default function HomePage() {
           delay: (i % 9) * 0.28,
           duration: 2.6 + (i % 5) * 0.8,
           dx: 50 - left,
-          dy: 50 - top,
+          dy: 51 - top,
         };
       }),
     []
@@ -46,11 +46,11 @@ export default function HomePage() {
 
     setTimeout(() => {
       setFlash(true);
-    }, 900);
+    }, 1050);
 
     setTimeout(() => {
       router.push("/universe");
-    }, 1800);
+    }, 2050);
   };
 
   return (
@@ -68,11 +68,17 @@ export default function HomePage() {
             height: `${star.size}px`,
             animationDelay: `${star.delay}s`,
             animationDuration: `${star.duration}s`,
-            ["--pull-x" as string]: `${star.dx * 1.75}vw`,
-            ["--pull-y" as string]: `${star.dy * 1.75}vh`,
+            ["--pull-x" as string]: `${star.dx * 1.9}vw`,
+            ["--pull-y" as string]: `${star.dy * 1.9}vh`,
           };
 
-          return <span key={star.id} className={`star ${warp ? "star-warp" : ""}`} style={style} />;
+          return (
+            <span
+              key={star.id}
+              className={`star ${warp ? "star-warp" : ""}`}
+              style={style}
+            />
+          );
         })}
       </div>
 
@@ -105,7 +111,16 @@ export default function HomePage() {
         DISCOVER CAELINUS
       </button>
 
-      <div className={`blackhole ${warp ? "active" : ""}`} />
+      <div className={`vortex-field ${warp ? "active" : ""}`}>
+        <div className="vortex-core" />
+        <div className="vortex-spiral spiral-a" />
+        <div className="vortex-spiral spiral-b" />
+        <div className="vortex-ring vr-1" />
+        <div className="vortex-ring vr-2" />
+        <div className="vortex-ring vr-3" />
+        <div className="vortex-shock" />
+      </div>
+
       <div className={`screen-flash ${flash ? "active" : ""}`} />
     </main>
   );

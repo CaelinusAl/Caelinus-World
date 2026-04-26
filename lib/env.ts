@@ -1,0 +1,176 @@
+/**
+ * CAELINUS — Type-safe environment access.
+ *
+ * Two strict schemas:
+ *
+ *   • `serverEnv` — full set, only readable on the server. Throws at
+ *     module load if any required key is missing in production.
+ *
+ *   • `clientEnv` — public-only subset (NEXT_PUBLIC_*). Safe to access
+ *     from the browser; bundled at build time by Next.js.
+ *
+ * The validator is **lazy** for build-time safety: importing this
+ * module on the server during `next build` reads `process.env` once
+ * and freezes the result. If a required value is missing in
+ * `production`, the build fails — not the runtime.
+ *
+ * Usage:
+ *   import { serverEnv, clientEnv } from "@/lib/env";
+ *   const url = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
+ *
+ * NEVER `import { serverEnv } from "@/lib/env"` in a client component.
+ * If you do, Next.js will warn — but more importantly, the secret keys
+ * become reachable from the bundle. Use the SUPABASE_SERVICE_ROLE_KEY
+ * exclusively from server-only modules (route handlers, server actions,
+ * server components, lib/supabase/admin.ts).
+ */
+
+import { z } from "zod";
+
+const isProduction = process.env.NODE_ENV === "production";
+
+/* ─── Schemas ─────────────────────────────────────── */
+
+/**
+ * Public env vars — they are exposed to the browser. They MUST be
+ * prefixed with NEXT_PUBLIC_ to be inlined by Next.js.
+ */
+const ClientEnvSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z
+    .string()
+    .url("NEXT_PUBLIC_SUPABASE_URL must be a valid URL"),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z
+    .string()
+    .min(20, "NEXT_PUBLIC_SUPABASE_ANON_KEY looks too short to be a real key"),
+  /** Public site URL used to build absolute links (auth callbacks, OG, etc.). */
+  NEXT_PUBLIC_SITE_URL: z
+    .string()
+    .url("NEXT_PUBLIC_SITE_URL must be a valid URL")
+    .default("http://localhost:3000"),
+});
+
+/**
+ * Server-only env vars — secrets and config never sent to the browser.
+ * Reading any of these from a client component is a hard error.
+ */
+const ServerEnvSchema = z.object({
+  /* Service-role key (server only). Bypasses RLS — keep it secret. */
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .min(20, "SUPABASE_SERVICE_ROLE_KEY looks too short to be a real key")
+    .optional(),
+  /* Comma-separated list of admin emails (lower-cased on read). */
+  CAELINUS_ADMIN_EMAILS: z.string().optional().default(""),
+  /* ElevenLabs (build-time TTS). */
+  ELEVEN_API_KEY: z.string().optional(),
+  ELEVEN_VOICE_ID: z.string().optional(),
+  ELEVEN_MODEL_ID: z.string().optional().default("eleven_multilingual_v2"),
+});
+
+/* ─── Friendly error formatting ────────────────────── */
+
+function flatten(error: z.ZodError): string {
+  return error.issues
+    .map((i) => `  • ${i.path.join(".")}: ${i.message}`)
+    .join("\n");
+}
+
+/* ─── Parsers ─────────────────────────────────────── */
+
+function parseClientEnv() {
+  const parsed = ClientEnvSchema.safeParse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  });
+  if (!parsed.success) {
+    if (isProduction) {
+      // Hard-fail the build / serverless cold-start in production.
+      throw new Error(
+        `[CAELINUS] Invalid public environment:\n${flatten(parsed.error)}\n` +
+          `Set the variables in .env.local (dev) or your hosting dashboard (prod).`
+      );
+    }
+    // In dev, allow placeholder values so the app can still boot.
+    // The Supabase client modules will refuse to connect with a clear hint.
+    if (typeof console !== "undefined") {
+      console.warn(
+        `[CAELINUS] Missing public env (dev mode — running with placeholders):\n${flatten(
+          parsed.error
+        )}`
+      );
+    }
+    return {
+      NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key-not-real",
+      NEXT_PUBLIC_SITE_URL:
+        process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    };
+  }
+  return parsed.data;
+}
+
+function parseServerEnv() {
+  const parsed = ServerEnvSchema.safeParse({
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    CAELINUS_ADMIN_EMAILS: process.env.CAELINUS_ADMIN_EMAILS,
+    ELEVEN_API_KEY: process.env.ELEVEN_API_KEY,
+    ELEVEN_VOICE_ID: process.env.ELEVEN_VOICE_ID,
+    ELEVEN_MODEL_ID: process.env.ELEVEN_MODEL_ID,
+  });
+  if (!parsed.success) {
+    throw new Error(
+      `[CAELINUS] Invalid server environment:\n${flatten(parsed.error)}`
+    );
+  }
+  return parsed.data;
+}
+
+/* ─── Public API ───────────────────────────────────── */
+
+/** Cached, validated public env. Safe everywhere. */
+export const clientEnv = Object.freeze(parseClientEnv());
+
+/**
+ * Cached, validated server env. Throws at import-time on the client.
+ * Use this only in server-side modules.
+ */
+export const serverEnv: z.infer<typeof ServerEnvSchema> = (() => {
+  if (typeof window !== "undefined") {
+    // Defensive: this should never run client-side. If a tree-shaking
+    // mistake leaks it, fail loudly rather than silently exposing secrets.
+    throw new Error(
+      "[CAELINUS] serverEnv was imported into the browser. " +
+        "Use clientEnv for public values, and keep secrets in server-only modules."
+    );
+  }
+  return Object.freeze(parseServerEnv());
+})();
+
+/* ─── Helpers ─────────────────────────────────────── */
+
+/** Lower-cased, trimmed list of admin emails. */
+export function adminEmails(): string[] {
+  if (!serverEnv.CAELINUS_ADMIN_EMAILS) return [];
+  return serverEnv.CAELINUS_ADMIN_EMAILS
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/** True if the supplied email is a Caelinus admin. */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return adminEmails().includes(email.trim().toLowerCase());
+}
+
+/**
+ * Whether Supabase looks usable at runtime (not the placeholder URL).
+ * Useful for graceful "Yakında" UI when running locally without keys.
+ */
+export function supabaseConfigured(): boolean {
+  return (
+    clientEnv.NEXT_PUBLIC_SUPABASE_URL !== "https://placeholder.supabase.co" &&
+    clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "placeholder-anon-key-not-real"
+  );
+}

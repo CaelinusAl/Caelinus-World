@@ -1,3 +1,34 @@
+# dependencies
 node_modules
+
+# next.js
 .next
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# env
 .env
+.env.local
+.env.*.local
+
+# user uploads (KVKK / GDPR — never commit personal data)
+public/uploads/faces
+!public/uploads/faces/.gitkeep
+!public/uploads/faces/test-face.png
+
+# generated plant audio (regenerate with `npm run plants:audio`)
+public/audio/plants/*.mp3
+!public/audio/plants/.gitkeep
+public/audio/plants/_manifest.json
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor
+.vscode
+.idea
+.DS_Store
+Thumbs.db
