@@ -26,7 +26,9 @@ export default async function AccountPage() {
 
   const { data } = await supabase
     .from("profiles")
-    .select("id, email, display_name, avatar_url, locale, created_at, updated_at")
+    .select(
+      "id, email, display_name, avatar_url, locale, notify_orders, notify_marketing, marketing_consent_at, deleted_at, created_at, updated_at",
+    )
     .eq("id", user.id)
     .maybeSingle();
 
@@ -41,6 +43,10 @@ export default async function AccountPage() {
     display_name: null,
     avatar_url: null,
     locale: "tr",
+    notify_orders: true,
+    notify_marketing: false,
+    marketing_consent_at: null,
+    deleted_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

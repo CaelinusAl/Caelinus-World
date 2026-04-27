@@ -21342,3 +21342,213 @@ div.stage-card {
     display: none;
   }
 }
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · Account settings (/hesap) — F5
+ * ────────────────────────────────────────────────────────────────
+ * Avatar uploader, toggle switches, security panel, danger zone.
+ * Reuses `.atelier-edit-panel` / `.atelier-field` chrome from the
+ * atelier editor so layout stays consistent.
+ */
+
+/* ─── Avatar uploader ────────────────────────────────────────── */
+
+.account-avatar-uploader {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.account-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1px solid var(--atelier-line-soft, rgba(241, 236, 255, 0.18));
+  background: rgba(20, 16, 42, 0.55);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--atelier-parchment-dim, rgba(241, 236, 255, 0.6));
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 38px;
+}
+
+.account-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.account-avatar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Hide the native file input — the .account-avatar-actions button
+ * triggers it via a ref. Keeping it in the DOM (vs. visually
+ * hidden) lets keyboard users still tab to it. */
+.account-avatar-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Toggle switches ────────────────────────────────────────── */
+
+.account-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 0;
+  border-top: 1px solid var(--atelier-line-soft, rgba(241, 236, 255, 0.08));
+}
+
+.account-toggle-row:first-of-type {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.account-toggle-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-toggle-title {
+  display: block;
+  font-size: 14px;
+  color: var(--atelier-parchment, #f1ecff);
+  margin-bottom: 4px;
+}
+
+.account-toggle-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--atelier-parchment-dim, rgba(241, 236, 255, 0.6));
+}
+
+.account-toggle {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.account-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.account-toggle-track {
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(20, 16, 42, 0.7);
+  border: 1px solid var(--atelier-line-soft, rgba(241, 236, 255, 0.16));
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.account-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(241, 236, 255, 0.65);
+  transition: left 0.2s ease, background 0.2s ease;
+}
+
+.account-toggle input:checked + .account-toggle-track {
+  background: linear-gradient(135deg, #f29be0 0%, #c081ff 100%);
+  border-color: rgba(242, 155, 224, 0.55);
+}
+
+.account-toggle input:checked + .account-toggle-track .account-toggle-thumb {
+  left: 22px;
+  background: #fff;
+}
+
+.account-toggle input:focus-visible + .account-toggle-track {
+  outline: 2px solid rgba(242, 155, 224, 0.55);
+  outline-offset: 2px;
+}
+
+/* ─── Inline savebar (sub-panel actions) ─────────────────────── */
+
+.account-inline-savebar {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--atelier-line-soft, rgba(241, 236, 255, 0.08));
+}
+
+/* ─── Danger zone ────────────────────────────────────────────── */
+
+.account-danger-panel {
+  border-color: rgba(255, 95, 121, 0.32);
+  background: linear-gradient(
+    135deg,
+    rgba(60, 14, 28, 0.42) 0%,
+    rgba(20, 16, 42, 0.6) 100%
+  );
+}
+
+.account-danger-panel .atelier-edit-h2 {
+  color: #ffb1bf;
+}
+
+.account-danger-btn {
+  background: rgba(255, 95, 121, 0.16);
+  border: 1px solid rgba(255, 95, 121, 0.55);
+  color: #ffd4dc;
+}
+
+.account-danger-btn:hover:not(:disabled) {
+  background: rgba(255, 95, 121, 0.28);
+  border-color: rgba(255, 95, 121, 0.75);
+  color: #fff;
+}
+
+.account-danger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.account-danger-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 95, 121, 0.32);
+  background: rgba(20, 8, 18, 0.55);
+}
+
+@media (max-width: 720px) {
+  .account-toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .account-avatar-uploader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -34,6 +34,13 @@ export interface ProfileRow {
   display_name: string | null;
   avatar_url: string | null;
   locale: "tr" | "en" | null;
+  // F5 — notification preferences (KVKK: marketing defaults to false).
+  notify_orders: boolean;
+  notify_marketing: boolean;
+  marketing_consent_at: string | null;
+  // Tombstone for soft-deleted accounts. Hard delete via auth admin
+  // happens server-side; the row is kept briefly for audit/orders.
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
