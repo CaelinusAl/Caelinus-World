@@ -12,8 +12,16 @@
  *
  *   3. For first-time visitors with no manual override cookie, look at
  *      `x-vercel-ip-country` (Vercel edge geolocation) and redirect TR
- *      visitors to `caelinus.world` and everyone else to
- *      `en.caelinus.world`. Bots always see the canonical content for
+ *      visitors to `www.caelinus.com` and everyone else to
+ *      `en.caelinus.com`. The redirect only fires when both signals
+ *      are real:
+ *        • `x-vercel-ip-country` is present (we're at Vercel edge)
+ *        • current host matches an env-configured locale host (custom
+ *          domain is actually live)
+ *      Otherwise we leave the visitor on whatever host they chose —
+ *      keeps localhost dev and Vercel preview URLs bounce-free, and
+ *      avoids redirecting to a domain that doesn't resolve yet during
+ *      the DNS cutover. Bots always see the canonical content for
  *      whichever subdomain they hit so search engines can index both
  *      independently.
  *
@@ -83,21 +91,43 @@ export function middleware(request: NextRequest) {
   const userPreference: Locale | null =
     cookieLocale === "tr" || cookieLocale === "en" ? cookieLocale : null;
 
-  // Where the user *should* be, based on their preference or GeoIP.
+  // Two preconditions before we'll consider auto-redirecting:
+  //
+  //   1. We're actually behind Vercel edge (i.e. `x-vercel-ip-country`
+  //      is present). Without it we have no real GeoIP signal and
+  //      we'd be guessing — better to leave the visitor on the host
+  //      they explicitly chose. This also means localhost dev is
+  //      bounce-free: developers see whatever subdomain they typed.
+  //
+  //   2. The current host matches one of the env-configured locale
+  //      hosts (i.e. the custom domain is actually live). On a
+  //      Vercel preview URL or before DNS cuts over, we don't want
+  //      to bounce people to a domain that doesn't resolve yet.
+  //
+  // If either gate is closed we fall through to a no-op (header
+  // injection only). The manual cookie override is honoured even
+  // without GeoIP because that signal *is* explicit.
   const country = request.headers.get("x-vercel-ip-country");
-  const intendedLocale: Locale =
-    userPreference ?? localeFromCountry(country);
+  const envTR = process.env.NEXT_PUBLIC_SITE_HOST_TR?.toLowerCase();
+  const envEN = process.env.NEXT_PUBLIC_SITE_HOST_EN?.toLowerCase();
+  const cleanHost = host.split(":")[0].toLowerCase();
+  const onConfiguredHost =
+    !!envTR && !!envEN && (cleanHost === envTR || cleanHost === envEN);
 
-  // Already on the right subdomain? Inject header + continue.
-  if (intendedLocale === currentLocale) {
+  let intendedLocale: Locale | null = userPreference;
+  if (!intendedLocale && country && onConfiguredHost) {
+    intendedLocale = localeFromCountry(country);
+  }
+
+  if (!intendedLocale || intendedLocale === currentLocale) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCALE_HEADER, currentLocale);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Need to redirect to the alternate subdomain. Compute the target
-  // host; if we can't (preview URL etc.) just stay put and inject the
-  // header — better to render the wrong language than to 5xx.
+  // host; if we can't (preview URL, unknown host) just stay put and
+  // inject the header — better to render the wrong language than 5xx.
   const targetHost = alternateHost(host, intendedLocale);
   if (!targetHost) {
     const requestHeaders = new Headers(request.headers);
