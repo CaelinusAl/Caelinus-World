@@ -141,18 +141,100 @@ export default function GaiaPlantsPage() {
           </div>
         </div>
 
-        {/* ─── ANADOLU TOPRAK HAFIZASI MANİFESTOSU ─── */}
-        <section className="anatolia-hero" aria-labelledby="anatolia-heading">
+        {/* SENİN FREKANSIN — kişiselleştirme kartı */}
+        <PlantsPersonalCard />
+
+        {/* MOOD FILTERS */}
+        <div className="plants-filters" role="tablist" aria-label={UI_TEXT.filtersAria[lang]}>
+          {MOOD_ORDER.map((m) => {
+            const isAll = m === "all";
+            const label = isAll ? UI_TEXT.filterAll[lang] : MOOD_LABELS[m][lang];
+            const symbol = isAll ? "✦" : MOOD_LABELS[m].symbol;
+            return (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={filter === m}
+                className={`plants-filter ${filter === m ? "is-active" : ""}`}
+                onClick={() => setFilter(m)}
+              >
+                <span className="plants-filter-symbol" aria-hidden="true">{symbol}</span>
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <section className="plants-list-section">
+          <div className="plants-vertical-list">
+            {filtered.map((plant) => {
+              const isYours = plant.id === yourPlantId;
+              return (
+                <Link
+                  key={plant.id}
+                  href={`/universe/gaia/plants/${plant.id}`}
+                  className={`plants-row-card ${isYours ? "is-yours" : ""}`}
+                  aria-label={`${plant.name[lang]} — ${UI_TEXT.meetPlant[lang]}`}
+                >
+                  <div className="plants-row-image-wrap">
+                    <img
+                      src={plant.image}
+                      alt={plant.name[lang]}
+                      className="plants-row-image"
+                      draggable={false}
+                    />
+                  </div>
+
+                  <div className="plants-row-content">
+                    <div className="plants-row-top">
+                      <h3>{plant.name[lang]}</h3>
+                      <span className="plants-row-freq">{plant.frequency} Hz</span>
+                    </div>
+
+                    <div className="plants-row-region">
+                      {plant.scientific} · <em>{(REGION_LABEL[plant.region] ?? REGION_FALLBACK)[lang]}</em>
+                    </div>
+                    <p className="plants-row-poetic">{plant.poetic[lang]}</p>
+
+                    <div className="plants-row-moods">
+                      {plant.moods.map((mood) => {
+                        const lbl = MOOD_LABELS[mood];
+                        if (!lbl) return null;
+                        return (
+                          <span key={mood} className="plants-row-mood">
+                            {lbl.symbol} {lbl[lang]}
+                          </span>
+                        );
+                      })}
+                    </div>
+
+                    <span className="plants-row-cta" aria-hidden="true">
+                      {UI_TEXT.meetPlant[lang]} <span className="plants-row-cta-arrow">→</span>
+                    </span>
+                  </div>
+
+                  {isYours && (
+                    <span className="plants-row-flag">{UI_TEXT.yourPlant[lang]}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ─── ANADOLU TOPRAK HAFIZASI — sayfa sonu manifestosu ─── */}
+        <section className="anatolia-hero anatolia-hero--footer" aria-labelledby="anatolia-heading">
           <div className="anatolia-kicker">
             <span className="anatolia-kicker-dot">✦</span>
             <span>{UI_TEXT.kicker[lang]}</span>
             <span className="anatolia-kicker-dot">✦</span>
           </div>
 
-          <h1 id="anatolia-heading" className="anatolia-title">
+          <h2 id="anatolia-heading" className="anatolia-title">
             {UI_TEXT.titleA[lang]}<br />
             <em>{UI_TEXT.titleB[lang]}</em>
-          </h1>
+          </h2>
 
           <p className="anatolia-lede">{UI_TEXT.lede[lang]}</p>
 
@@ -239,92 +321,6 @@ export default function GaiaPlantsPage() {
               </span>
             ))}
           </blockquote>
-
-          <div className="anatolia-arrow" aria-hidden="true">
-            {UI_TEXT.arrow[lang]}
-          </div>
-        </section>
-
-        {/* SENİN FREKANSIN — kişiselleştirme kartı */}
-        <PlantsPersonalCard />
-
-        {/* MOOD FILTERS */}
-        <div className="plants-filters" role="tablist" aria-label={UI_TEXT.filtersAria[lang]}>
-          {MOOD_ORDER.map((m) => {
-            const isAll = m === "all";
-            const label = isAll ? UI_TEXT.filterAll[lang] : MOOD_LABELS[m][lang];
-            const symbol = isAll ? "✦" : MOOD_LABELS[m].symbol;
-            return (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={filter === m}
-                className={`plants-filter ${filter === m ? "is-active" : ""}`}
-                onClick={() => setFilter(m)}
-              >
-                <span className="plants-filter-symbol" aria-hidden="true">{symbol}</span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <section className="plants-list-section">
-          <div className="plants-vertical-list">
-            {filtered.map((plant) => {
-              const isYours = plant.id === yourPlantId;
-              return (
-                <Link
-                  key={plant.id}
-                  href={`/universe/gaia/plants/${plant.id}`}
-                  className={`plants-row-card ${isYours ? "is-yours" : ""}`}
-                  aria-label={`${plant.name[lang]} — ${UI_TEXT.meetPlant[lang]}`}
-                >
-                  <div className="plants-row-image-wrap">
-                    <img
-                      src={plant.image}
-                      alt={plant.name[lang]}
-                      className="plants-row-image"
-                      draggable={false}
-                    />
-                  </div>
-
-                  <div className="plants-row-content">
-                    <div className="plants-row-top">
-                      <h3>{plant.name[lang]}</h3>
-                      <span className="plants-row-freq">{plant.frequency} Hz</span>
-                    </div>
-
-                    <div className="plants-row-region">
-                      {plant.scientific} · <em>{(REGION_LABEL[plant.region] ?? REGION_FALLBACK)[lang]}</em>
-                    </div>
-                    <p className="plants-row-poetic">{plant.poetic[lang]}</p>
-
-                    <div className="plants-row-moods">
-                      {plant.moods.map((mood) => {
-                        const lbl = MOOD_LABELS[mood];
-                        if (!lbl) return null;
-                        return (
-                          <span key={mood} className="plants-row-mood">
-                            {lbl.symbol} {lbl[lang]}
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    <span className="plants-row-cta" aria-hidden="true">
-                      {UI_TEXT.meetPlant[lang]} <span className="plants-row-cta-arrow">→</span>
-                    </span>
-                  </div>
-
-                  {isYours && (
-                    <span className="plants-row-flag">{UI_TEXT.yourPlant[lang]}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
         </section>
 
         <div className="plants-bottom">

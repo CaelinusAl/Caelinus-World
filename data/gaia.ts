@@ -2456,7 +2456,7 @@ export const plants: GaiaPlant[] = [
     id: "diyarbakir-karpuzu",
     name: { tr: "Diyarbakır Karpuzu", en: "Diyarbakır Watermelon" },
     scientific: "Citrullus lanatus 'Diyarbakır'",
-    image: "/universe/plants/karpuz.png",
+    image: "/universe/plants/diyarbakir-karpuzu.png",
     frequency: 528,
     solfeggioMatch: 528,
     region: "guneydogu",
