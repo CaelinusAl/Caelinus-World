@@ -16,9 +16,8 @@ public/uploads/faces
 !public/uploads/faces/.gitkeep
 !public/uploads/faces/test-face.png
 
-# generated plant audio (regenerate with `npm run plants:audio`)
-public/audio/plants/*.mp3
-!public/audio/plants/.gitkeep
+# plant audio (committed to repo so production serves real ElevenLabs voices)
+# regenerate locally with `npm run plants:audio`
 public/audio/plants/_manifest.json
 
 # logs
