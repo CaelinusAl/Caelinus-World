@@ -45,14 +45,29 @@ type PlayState = {
   /** Persisted look id once SAVE returns successfully — lets SHARE
    *  send people to /play/look/<id> instead of just the raw render url. */
   savedLookId: string | null;
+  /** F2a — re-roll index. 1 = canonical render shared across the
+   *  gallery; 2..8 = fresh takes the user explicitly asked for. The
+   *  page passes this to /api/play/render and uses it when calling
+   *  lookCacheKey() for the save endpoint. */
+  variant: number;
+  /** F2b — optional one-line user brief. Empty string means "no
+   *  brief" (canonical/public render). Authenticated-only on the
+   *  server; the client may still hold a value (e.g. while signing
+   *  in), but render/save will 401 it for anonymous users. */
+  brief: string;
   setStep: (step: PlayStep) => void;
   setArchetype: (id: ArchetypeId) => void;
   setZodiac: (id: ZodiacId) => void;
   setScene: (id: SceneId) => void;
+  setBrief: (text: string) => void;
   beginRender: () => void;
   setRenderResult: (url: string, cached: boolean) => void;
   setRenderError: (message: string) => void;
   markSaved: (lookId: string | null) => void;
+  /** Bump the variant and reset the render canvas so the page can
+   *  immediately fire a fresh render call. Capped at 8 to mirror the
+   *  server-side cap in the request schema. */
+  nextVariant: () => void;
   remix: () => void;
   reset: () => void;
 };
@@ -65,7 +80,11 @@ const initialState = {
   render: { kind: "idle" } as RenderState,
   saved: false,
   savedLookId: null,
+  variant: 1,
+  brief: "",
 };
+
+const MAX_VARIANT = 8;
 
 export const usePlayStore = create<PlayState>((set) => ({
   ...initialState,
@@ -79,6 +98,8 @@ export const usePlayStore = create<PlayState>((set) => ({
       saved: false,
       savedLookId: null,
       render: { kind: "idle" },
+      variant: 1,
+      brief: "",
     }),
 
   setZodiac: (id) =>
@@ -88,10 +109,14 @@ export const usePlayStore = create<PlayState>((set) => ({
       saved: false,
       savedLookId: null,
       render: { kind: "idle" },
+      variant: 1,
+      brief: "",
     }),
 
   setScene: (id) =>
-    set({ scene: id, saved: false, savedLookId: null }),
+    set({ scene: id, saved: false, savedLookId: null, variant: 1 }),
+
+  setBrief: (text) => set({ brief: text }),
 
   beginRender: () =>
     set({
@@ -109,6 +134,16 @@ export const usePlayStore = create<PlayState>((set) => ({
 
   markSaved: (lookId) => set({ saved: true, savedLookId: lookId ?? null }),
 
+  nextVariant: () =>
+    set((state) => ({
+      variant: Math.min(MAX_VARIANT, state.variant + 1),
+      // Drop the old saved flag — the new variant is its own row in
+      // play_renders so it needs its own save flow.
+      saved: false,
+      savedLookId: null,
+      render: { kind: "idle" },
+    })),
+
   /** Take the user back to AvatarPick to try another zodiac while
    *  keeping the archetype + scene choices. */
   remix: () =>
@@ -117,6 +152,8 @@ export const usePlayStore = create<PlayState>((set) => ({
       render: { kind: "idle" },
       saved: false,
       savedLookId: null,
+      variant: 1,
+      brief: "",
     }),
 
   reset: () => set({ ...initialState }),

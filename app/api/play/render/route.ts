@@ -25,6 +25,8 @@ import {
   SCENES,
   ZODIACS,
 } from "@/data/play-assets";
+import { briefHash, BRIEF_MAX_LENGTH, sanitizeBrief } from "@/lib/play/brief";
+import { checkBrief, moderationMessage } from "@/lib/play/moderation";
 import { renderPlayImage } from "@/lib/play/provider";
 import {
   checkQuota,
@@ -32,6 +34,7 @@ import {
   recordRender,
 } from "@/lib/play/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PlayRenderRow } from "@/lib/supabase/types";
 import { buildPlayPrompt } from "@/prompts/play";
 
@@ -49,6 +52,25 @@ const RenderRequestSchema = z.object({
   archetype: z.enum(ARCHETYPE_IDS),
   zodiac: z.enum(ZODIAC_IDS),
   scene: z.enum(SCENE_IDS),
+  /**
+   * F2a — re-roll index. `1` (default) = canonical render shared
+   * across the gallery. Higher values create distinct cache rows
+   * keyed `<triple>-v<N>` so users can request a fresh take without
+   * polluting the canonical entry.
+   *
+   * Capped at 8 so a stray client can't farm cents with `?variant=999`.
+   */
+  variant: z.coerce.number().int().min(1).max(8).optional().default(1),
+  /**
+   * F2b — optional one-line user brief. Authenticated only; the route
+   * sanitises + moderates the value, hashes it into the cache key,
+   * and folds it into the AI prompt as a "personal brief" clause.
+   * Anonymous requests with a non-empty brief get a 401.
+   */
+  brief: z.string().max(BRIEF_MAX_LENGTH * 2).optional(),
+  /** UI language hint — only used to pick the rejection-message
+   *  language when moderation triggers. Defaults to EN. */
+  lang: z.enum(["tr", "en"]).optional().default("en"),
 });
 
 const STORAGE_BUCKET = "play-renders";
@@ -72,8 +94,39 @@ export async function POST(req: Request) {
     );
   }
 
-  const { archetype, zodiac, scene } = parsed.data;
-  const cacheKey = lookCacheKey(archetype, zodiac, scene);
+  const { archetype, zodiac, scene, variant, lang } = parsed.data;
+
+  // ── Brief: sanitise → auth → moderate ──────────────────────
+  // Anonymous users get the canonical (no-brief) render path. A brief
+  // that survives sanitisation but the user isn't signed in → 401 so
+  // the client can redirect to /atelier/giris with a `?next` param.
+  const cleanBrief = sanitizeBrief(parsed.data.brief);
+  if (cleanBrief) {
+    const userClient = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "auth_required", message: "Sign in to use a custom brief." },
+        { status: 401 },
+      );
+    }
+    const moderation = checkBrief(cleanBrief);
+    if (!moderation.ok) {
+      return NextResponse.json(
+        {
+          error: "moderation_blocked",
+          reason: moderation.reason,
+          message: moderationMessage(moderation.reason, lang),
+        },
+        { status: 400 },
+      );
+    }
+  }
+
+  const briefDigest = cleanBrief ? briefHash(cleanBrief) : "";
+  const cacheKey = lookCacheKey(archetype, zodiac, scene, variant, briefDigest);
 
   let supabase;
   try {
@@ -130,7 +183,13 @@ export async function POST(req: Request) {
   // 2) Build prompt + render fresh.
   let prompt;
   try {
-    prompt = buildPlayPrompt({ archetype, zodiac, scene });
+    prompt = buildPlayPrompt({
+      archetype,
+      zodiac,
+      scene,
+      variant,
+      brief: cleanBrief || undefined,
+    });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Prompt build failed" },

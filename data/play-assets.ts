@@ -201,12 +201,33 @@ export function findScene(id: SceneId | null | undefined) {
   return id ? SCENES.find((s) => s.id === id) ?? null : null;
 }
 
-/** Cache key — same triple → same render. The render route uses this
- *  to look up an existing image in Supabase Storage / `play_renders`. */
+/**
+ * Cache key — same triple (+ variant + brief) → same render. The render
+ * route uses this to look up an existing image in Supabase Storage /
+ * `play_renders`.
+ *
+ * Suffix order (omitted when default):
+ *   `<archetype>-<zodiac>-<scene>[-v<N>][-b<8charHex>]`
+ *
+ * • `variant === 1` and an empty `briefHash` produce the original
+ *   `<archetype>-<zodiac>-<scene>` key — back-compat with anything
+ *   cached before F2a / F2b.
+ * • Variants always render before the brief suffix so re-rolling a
+ *   custom brief stays grouped under the same brief hash.
+ * • `briefHash` is the 8-hex output of `lib/play/brief.ts`. Pass `""`
+ *   (or omit) when there's no user brief — that's the gallery-friendly
+ *   public render.
+ */
 export function lookCacheKey(
   archetype: ArchetypeId,
   zodiac: ZodiacId,
   scene: SceneId,
+  variant: number = 1,
+  briefHash: string = "",
 ): string {
-  return `${archetype}-${zodiac}-${scene}`;
+  let key = `${archetype}-${zodiac}-${scene}`;
+  const v = Math.max(1, Math.floor(variant));
+  if (v !== 1) key += `-v${v}`;
+  if (briefHash) key += `-b${briefHash}`;
+  return key;
 }

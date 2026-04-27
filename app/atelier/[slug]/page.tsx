@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import JsonLd from "@/components/seo/JsonLd";
 import { listOwnerItems, listPublicItems } from "@/lib/atelier/items";
+import { buildLocaleMetadata } from "@/lib/i18n/metadata";
+import { getLocale } from "@/lib/i18n/server";
+import { buildBrand, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { stripeReady } from "@/lib/stripe/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierRow } from "@/lib/supabase/types";
@@ -62,15 +66,21 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const atelier = await fetchAtelier(slug);
+  const [locale, atelier] = await Promise.all([getLocale(), fetchAtelier(slug)]);
   if (!atelier || atelier.status !== "approved") {
     return { title: "Atelier · Caelinus" };
   }
 
+  // Pick the bio in the visitor's locale; fall back to the other
+  // locale's text so we never ship an empty description.
+  const tr = locale === "tr";
+  const primaryBio = tr ? atelier.bio_tr : atelier.bio_en;
+  const secondaryBio = tr ? atelier.bio_en : atelier.bio_tr;
+  const fallback = tr
+    ? "Caelinus · Atelier — bilinçli üretici tezgâhı."
+    : "Caelinus · Atelier — a conscious maker's bench.";
   const description =
-    atelier.bio_tr?.trim() ||
-    atelier.bio_en?.trim() ||
-    "Caelinus · Atelier — bilinçli üretici tezgâhı.";
+    primaryBio?.trim() || secondaryBio?.trim() || fallback;
 
   return {
     title: `${atelier.name} · Caelinus Atelier`,
@@ -81,6 +91,7 @@ export async function generateMetadata({
       type: "profile",
       images: atelier.cover_image_url ? [atelier.cover_image_url] : [],
     },
+    ...buildLocaleMetadata(locale, `/atelier/${atelier.slug}`),
   };
 }
 
@@ -93,7 +104,7 @@ export default async function AtelierPublicPage({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const atelier = await fetchAtelier(slug);
+  const [locale, atelier] = await Promise.all([getLocale(), fetchAtelier(slug)]);
 
   if (!atelier) notFound();
 
@@ -130,13 +141,46 @@ export default async function AtelierPublicPage({
       ? (sp.checkout as Notice)
       : null;
 
+  // Only emit JSON-LD for approved benches — unapproved previews
+  // shouldn't leak structured data into search results.
+  const tr = locale === "tr";
+  const path = `/atelier/${atelier.slug}`;
+  const description =
+    (tr ? atelier.bio_tr : atelier.bio_en)?.trim() ||
+    (tr ? atelier.bio_en : atelier.bio_tr)?.trim() ||
+    (tr
+      ? "Caelinus · Atelier — bilinçli üretici tezgâhı."
+      : "Caelinus · Atelier — a conscious maker's bench.");
+  const jsonLd =
+    atelier.status === "approved"
+      ? [
+          buildBrand({
+            locale,
+            path,
+            name: atelier.name,
+            description: description.slice(0, 200),
+            logo: atelier.avatar_image_url,
+            image: atelier.cover_image_url,
+          }),
+          buildBreadcrumbList(locale, [
+            { name: "Caelinus", path: "/" },
+            { name: tr ? "Atelier" : "Atelier", path: "/atelier" },
+            { name: tr ? "Keşfet" : "Discover", path: "/atelier/kesfet" },
+            { name: atelier.name, path },
+          ]),
+        ]
+      : null;
+
   return (
-    <AtelierPublicBody
-      atelier={atelier}
-      isOwner={isOwner}
-      items={items}
-      checkoutEnabled={stripeReady()}
-      checkoutNotice={checkoutNotice}
-    />
+    <>
+      {jsonLd ? <JsonLd nodes={jsonLd} /> : null}
+      <AtelierPublicBody
+        atelier={atelier}
+        isOwner={isOwner}
+        items={items}
+        checkoutEnabled={stripeReady()}
+        checkoutNotice={checkoutNotice}
+      />
+    </>
   );
 }

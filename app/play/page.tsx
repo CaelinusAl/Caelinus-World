@@ -26,6 +26,8 @@ import {
   type SceneId,
   type ZodiacId,
 } from "@/data/play-assets";
+import { briefHash } from "@/lib/play/brief";
+import { useAuthStore } from "@/stores/auth-store";
 import { useLangStore } from "@/stores/lang-store";
 import { usePlayStore } from "@/stores/play-store";
 
@@ -38,7 +40,13 @@ import Stepper from "./_components/Stepper";
 
 type RenderResponse =
   | { url: string; cached: boolean }
-  | { error: string; message?: string; used?: number; limit?: number };
+  | {
+      error: string;
+      message?: string;
+      used?: number;
+      limit?: number;
+      reason?: string;
+    };
 
 export default function PlayPage() {
   const { lang, hydrated, hydrate, toggle } = useLangStore();
@@ -50,10 +58,16 @@ export default function PlayPage() {
     if (!hydrated) hydrate();
   }, [hydrated, hydrate]);
 
+  // Mirror the Supabase session into the auth store so the ScenePicker
+  // can show the brief textarea only to signed-in users. The store is
+  // global; init() is idempotent and self-cleans on unmount.
+  useEffect(() => useAuthStore.getState().init(), []);
+
   const step = usePlayStore((s) => s.step);
   const archetype = usePlayStore((s) => s.archetype);
   const zodiac = usePlayStore((s) => s.zodiac);
   const scene = usePlayStore((s) => s.scene);
+  const variant = usePlayStore((s) => s.variant);
   const render = usePlayStore((s) => s.render);
   const setStep = usePlayStore((s) => s.setStep);
   const setArchetype = usePlayStore((s) => s.setArchetype);
@@ -63,6 +77,7 @@ export default function PlayPage() {
   const setRenderResult = usePlayStore((s) => s.setRenderResult);
   const setRenderError = usePlayStore((s) => s.setRenderError);
   const markSaved = usePlayStore((s) => s.markSaved);
+  const nextVariant = usePlayStore((s) => s.nextVariant);
 
   const [toast, setToast] = useState<string | null>(null);
   const seededFromUrlRef = useRef(false);
@@ -109,16 +124,33 @@ export default function PlayPage() {
   const triggerRender = useCallback(async () => {
     if (!archetype || !zodiac || !scene) return;
     beginRender();
+    // Read variant + brief from the store at call time so a re-roll
+    // that just bumped the index doesn't race a stale closure.
+    const { variant: currentVariant, brief: currentBrief } =
+      usePlayStore.getState();
     try {
       const res = await fetch("/api/play/render", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ archetype, zodiac, scene }),
+        body: JSON.stringify({
+          archetype,
+          zodiac,
+          scene,
+          variant: currentVariant,
+          brief: currentBrief || undefined,
+          lang: L,
+        }),
       });
       if (!res.ok) {
         const j = (await res.json().catch(() => null)) as RenderResponse | null;
         let msg: string;
-        if (res.status === 429) {
+        if (res.status === 401) {
+          // Brief was supplied but no session — bounce to login. We
+          // preserve the current studio state so the user can come
+          // back and hit Generate again.
+          window.location.href = "/atelier/giris?next=/play";
+          return;
+        } else if (res.status === 429) {
           // Quota response carries a friendly TR message; fall back to a
           // generic English line if we ever localise on the server.
           msg =
@@ -164,12 +196,28 @@ export default function PlayPage() {
     }
   }, [archetype, zodiac, scene, beginRender, setRenderResult, setRenderError, L]);
 
+  // ── Re-roll (F2a) ─────────────────────────────────────────
+  // Bump the variant index in the store, then immediately re-render.
+  // Each variant maps to its own play_renders cache row + likes_count
+  // so the canonical (v1) gallery entry isn't disturbed.
+  const triggerReroll = useCallback(() => {
+    if (variant >= 8) return; // server caps at 8 anyway; mirror it client-side
+    nextVariant();
+    void triggerRender();
+  }, [variant, nextVariant, triggerRender]);
+
   const savedLookId = usePlayStore((s) => s.savedLookId);
 
   // ── Save look ─────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     if (render.kind !== "ready" || !archetype || !zodiac || !scene) return;
     try {
+      // Pull the brief fresh from the store so a save right after a
+      // re-roll uses the same brief that was rendered with. We hash
+      // it client-side using the same FNV-1a routine as the server so
+      // the cacheKey lines up — server still rehashes for verification.
+      const { brief: currentBrief } = usePlayStore.getState();
+      const briefDigest = currentBrief ? briefHash(currentBrief) : "";
       const res = await fetch("/api/play/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -178,7 +226,18 @@ export default function PlayPage() {
           zodiac,
           scene,
           renderUrl: render.url,
-          cacheKey: lookCacheKey(archetype, zodiac, scene),
+          variant,
+          brief: currentBrief || undefined,
+          // Match the variant + brief actually rendered — otherwise
+          // the save server-side cache_key check fails for v2+ rerolls
+          // or briefed renders.
+          cacheKey: lookCacheKey(
+            archetype,
+            zodiac,
+            scene,
+            variant,
+            briefDigest,
+          ),
         }),
       });
       if (res.status === 401) {
@@ -206,7 +265,7 @@ export default function PlayPage() {
     } catch {
       setToast(L === "tr" ? "Bağlantı sorunu." : "Connection issue.");
     }
-  }, [render, archetype, zodiac, scene, markSaved, L]);
+  }, [render, archetype, zodiac, scene, variant, markSaved, L]);
 
   // ── Share look ────────────────────────────────────────────
   // Prefer the public /play/look/<id> URL once the look has been
@@ -303,6 +362,8 @@ export default function PlayPage() {
                 lang={L}
                 onSave={handleSave}
                 onShare={handleShare}
+                onReroll={triggerReroll}
+                variant={variant}
                 toast={toast}
               />
             ) : null}

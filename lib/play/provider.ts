@@ -16,6 +16,11 @@
  *   • "stub" — local fallback. Generates a deterministic SVG placeholder
  *     so the dev server works without any AI credentials. Useful for
  *     UI-only iteration.
+ *
+ * F2c — When `PLAY_AI_FALLBACK_PROVIDER` is configured, the orchestrator
+ * retries once with the secondary provider on any primary failure.
+ * Replicate ↔ OpenAI auth tokens differ, so the fallback ships with its
+ * own API key (`PLAY_AI_FALLBACK_API_KEY`).
  */
 
 import "server-only";
@@ -34,33 +39,96 @@ export type RenderResult = {
   provider: ProviderName;
 };
 
-export async function renderPlayImage(input: {
+type RenderInput = {
   prompt: string;
   negativePrompt: string;
   seed: number;
   cacheKey: string;
-}): Promise<RenderResult> {
-  const provider = (serverEnv.PLAY_AI_PROVIDER ?? "stub") as ProviderName;
+};
 
-  // Without an API key we can't call out, regardless of provider choice.
-  if (provider !== "stub" && !serverEnv.PLAY_AI_API_KEY) {
+/**
+ * Top-level orchestrator. Picks the configured primary provider, and
+ * — when `PLAY_AI_FALLBACK_PROVIDER` is also set — retries once with
+ * the secondary on failure.
+ *
+ * Order of decisions:
+ *   1. If primary is `stub` (or no API key), short-circuit to stub.
+ *      The fallback config is ignored — there's nothing to fall back
+ *      from.
+ *   2. Try primary. If it succeeds, return.
+ *   3. If a fallback is configured AND its credentials are usable AND
+ *      it's not the same provider as primary (would just retry the
+ *      same upstream), call it. Stub fallback is allowed because it
+ *      never fails and keeps dev sessions visually intact.
+ *   4. Otherwise rethrow the primary error so the route surfaces it.
+ */
+export async function renderPlayImage(input: RenderInput): Promise<RenderResult> {
+  const primary = (serverEnv.PLAY_AI_PROVIDER ?? "stub") as ProviderName;
+  const primaryKey = serverEnv.PLAY_AI_API_KEY;
+  const fallback = serverEnv.PLAY_AI_FALLBACK_PROVIDER as
+    | ProviderName
+    | undefined;
+  const fallbackKey = serverEnv.PLAY_AI_FALLBACK_API_KEY;
+
+  // No real provider possible — stub straight away.
+  if (primary === "stub" || !primaryKey) {
     return renderStub(input);
   }
 
-  if (provider === "replicate") return renderReplicate(input);
-  if (provider === "openai") return renderOpenAI(input);
+  try {
+    return await callProvider(primary, primaryKey!, input);
+  } catch (primaryErr) {
+    // Decide whether the fallback can actually help.
+    const sameProvider = fallback === primary;
+    const fallbackUsable =
+      fallback === "stub" || (!!fallback && !!fallbackKey);
+    if (!fallback || sameProvider || !fallbackUsable) {
+      throw primaryErr;
+    }
+
+    console.warn(
+      `[play.provider] primary "${primary}" failed (${
+        primaryErr instanceof Error ? primaryErr.message : String(primaryErr)
+      }). Retrying with fallback "${fallback}"...`,
+    );
+
+    try {
+      return await callProvider(fallback, fallbackKey ?? "", input);
+    } catch (fallbackErr) {
+      // Surface the primary error — that's the one the user originally
+      // tried. Log the fallback chain so ops can see both arms blew up.
+      console.warn(
+        `[play.provider] fallback "${fallback}" also failed: ${
+          fallbackErr instanceof Error
+            ? fallbackErr.message
+            : String(fallbackErr)
+        }`,
+      );
+      throw primaryErr;
+    }
+  }
+}
+
+/**
+ * Single dispatch point. Each branch is responsible for its own auth
+ * and shape — keeping the shared orchestrator boring and testable.
+ */
+async function callProvider(
+  provider: ProviderName,
+  token: string,
+  input: RenderInput,
+): Promise<RenderResult> {
+  if (provider === "replicate") return renderReplicate(token, input);
+  if (provider === "openai") return renderOpenAI(token, input);
   return renderStub(input);
 }
 
-/* ── Replicate (default) ──────────────────────────────────────── */
+/* ── Replicate ───────────────────────────────────────────────── */
 
-async function renderReplicate(input: {
-  prompt: string;
-  negativePrompt: string;
-  seed: number;
-  cacheKey: string;
-}): Promise<RenderResult> {
-  const token = serverEnv.PLAY_AI_API_KEY!;
+async function renderReplicate(
+  token: string,
+  input: RenderInput,
+): Promise<RenderResult> {
   const model =
     serverEnv.PLAY_AI_REPLICATE_MODEL ??
     "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b";
@@ -161,17 +229,21 @@ async function renderReplicate(input: {
   return {
     bytes: buf,
     contentType,
-    extension: contentType.includes("webp") ? "webp" : contentType.includes("jpeg") ? "jpg" : "png",
+    extension: contentType.includes("webp")
+      ? "webp"
+      : contentType.includes("jpeg")
+        ? "jpg"
+        : "png",
     provider: "replicate",
   };
 }
 
 /* ── OpenAI gpt-image-1 ──────────────────────────────────────── */
 
-async function renderOpenAI(input: {
-  prompt: string;
-}): Promise<RenderResult> {
-  const token = serverEnv.PLAY_AI_API_KEY!;
+async function renderOpenAI(
+  token: string,
+  input: RenderInput,
+): Promise<RenderResult> {
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
@@ -203,10 +275,7 @@ async function renderOpenAI(input: {
  * dev environments without API keys still get *something* visual on
  * screen. This keeps the studio walkable end-to-end during demos.
  */
-async function renderStub(input: {
-  prompt: string;
-  cacheKey: string;
-}): Promise<RenderResult> {
+async function renderStub(input: RenderInput): Promise<RenderResult> {
   // Pick two HSL colours from the cache key so each triple produces a
   // distinct gradient. Same triple → same output (deterministic).
   const h = hash(input.cacheKey);

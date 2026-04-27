@@ -22,6 +22,10 @@ type Props = {
   renderUrl: string;
   createdAt: string;
   shareUrl: string;
+  /** Cache-row id behind this saved look — likes attach to play_renders. */
+  renderId: string;
+  initialLikes: number;
+  initialLiked: boolean;
 };
 
 const ARCHETYPE_BY_ID = new Map(ARCHETYPES.map((a) => [a.id as string, a]));
@@ -35,6 +39,9 @@ export default function LookView({
   renderUrl,
   createdAt,
   shareUrl,
+  renderId,
+  initialLikes,
+  initialLiked,
 }: Props) {
   const { lang, hydrated, hydrate, toggle } = useLangStore();
   const L = hydrated ? lang : "tr";
@@ -54,6 +61,45 @@ export default function LookView({
     const id = window.setTimeout(() => setToast(null), 2800);
     return () => window.clearTimeout(id);
   }, [toast]);
+
+  // Optimistic like state. Server is the source of truth; we reconcile
+  // with the response payload after each toggle.
+  const [liked, setLiked] = useState(initialLiked);
+  const [likeCount, setLikeCount] = useState(initialLikes);
+  const [likePending, setLikePending] = useState(false);
+
+  const onToggleLike = async () => {
+    if (likePending) return;
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setLikeCount((c) => Math.max(0, c + (wasLiked ? -1 : 1)));
+    setLikePending(true);
+    try {
+      const res = await fetch("/api/play/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ renderId }),
+      });
+      if (res.status === 401) {
+        // Roll back then bounce to login with a return path.
+        setLiked(wasLiked);
+        setLikeCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+        const next = window.location.pathname + window.location.search;
+        window.location.href = `/atelier/giris?next=${encodeURIComponent(next)}`;
+        return;
+      }
+      if (!res.ok) throw new Error("like failed");
+      const j = (await res.json()) as { liked: boolean; count: number };
+      setLiked(j.liked);
+      setLikeCount(j.count);
+    } catch {
+      setLiked(wasLiked);
+      setLikeCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+      setToast(L === "tr" ? "Beğeni gönderilemedi." : "Couldn't send like.");
+    } finally {
+      setLikePending(false);
+    }
+  };
 
   const onCopy = async () => {
     try {
@@ -138,6 +184,38 @@ export default function LookView({
             <span>·</span>
             <span>{formattedDate}</span>
           </p>
+
+          <div className="play-look-likebar">
+            <button
+              type="button"
+              className={"play-look-like" + (liked ? " is-liked" : "")}
+              onClick={onToggleLike}
+              aria-pressed={liked}
+              aria-label={
+                liked
+                  ? L === "tr"
+                    ? "Beğenmekten vazgeç"
+                    : "Unlike"
+                  : L === "tr"
+                    ? "Beğen"
+                    : "Like"
+              }
+            >
+              <span className="play-look-like-icon" aria-hidden="true">
+                {liked ? "♥" : "♡"}
+              </span>
+              <span className="play-look-like-count">{likeCount}</span>
+              <span className="play-look-like-label">
+                {likeCount === 1
+                  ? L === "tr"
+                    ? "beğeni"
+                    : "like"
+                  : L === "tr"
+                    ? "beğeni"
+                    : "likes"}
+              </span>
+            </button>
+          </div>
 
           <div className="play-look-actions">
             <CinemaCTA

@@ -18,6 +18,10 @@
  * scroll endlessly on mobile.
  */
 
+import type { Metadata } from "next";
+
+import { buildLocaleMetadata } from "@/lib/i18n/metadata";
+import { getLocale } from "@/lib/i18n/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierKind } from "@/lib/supabase/types";
 import { ATELIER_KINDS } from "@/lib/atelier/validation";
@@ -25,11 +29,17 @@ import { PROVINCE_REGIONS, PROVINCES } from "@/data/provinces";
 
 import KesfetBody, { type DiscoveryAtelier } from "./KesfetBody";
 
-export const metadata = {
-  title: "Atelier · Keşfet · Caelinus",
-  description:
-    "Caelinus Atelier dizini — açık tezgâhları zanaat türü, bölge ve isimle keşfedin.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const tr = locale === "tr";
+  return {
+    title: tr ? "Atelier · Keşfet · Caelinus" : "Atelier · Discover · Caelinus",
+    description: tr
+      ? "Caelinus Atelier dizini — açık tezgâhları zanaat türü, bölge ve isimle keşfedin."
+      : "The Caelinus Atelier directory — discover open benches by craft, region and name.",
+    ...buildLocaleMetadata(locale, "/atelier/kesfet"),
+  };
+}
 
 export const dynamic = "force-dynamic";
 

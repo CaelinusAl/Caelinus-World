@@ -10,7 +10,14 @@
  * The template targets stable-diffusion-xl-style models (Replicate's
  * SDXL endpoints are the default), but the structure is generic
  * enough to hand off to OpenAI gpt-image-1 with minimal shaping.
+ *
+ * F2d — Prompt engineering refresh:
+ *   • House style augmented with explicit quality + composition tags.
+ *   • Per-zodiac mood/palette enrichment (lighting + atmosphere).
+ *   • Negative prompt extended for SDXL-typical AI artefacts
+ *     (extra eyes, asymmetric face, jpeg compression, cropped frame).
  */
+
 import {
   findArchetype,
   findScene,
@@ -24,38 +31,133 @@ export type PromptInput = {
   archetype: ArchetypeId;
   zodiac: ZodiacId;
   scene: SceneId;
+  /** F2a — non-canonical variant index. Same triple, different seed.
+   *  Defaults to 1 (the canonical render). */
+  variant?: number;
+  /** F2b — sanitised user brief. When present, appended to the prompt
+   *  as a "personal brief: …" clause and folded into the seed so two
+   *  briefs on the same triple don't collide visually. The caller is
+   *  responsible for sanitisation + moderation; this module only
+   *  re-asserts the length cap as a defensive trim. */
+  brief?: string;
 };
 
 export type PromptOutput = {
   prompt: string;
   negativePrompt: string;
-  /** Deterministic seed derived from the triple — same triple maps to
-   *  the same seed so retries return visually similar outputs. */
+  /** Deterministic seed derived from the triple — same triple+variant
+   *  maps to the same seed so retries return visually similar outputs. */
   seed: number;
 };
 
-const STYLE_BASE =
-  // Caelinus house style — cinematic poster, warm-cool nebula light,
-  // editorial composition. Aiming for "moon-temple poster" vibe.
-  [
-    "cinematic poster portrait of a goddess archetype",
-    "centred composition, full body or three-quarter framing",
-    "soft warm rim light, magenta-and-cosmic nebula palette",
-    "subtle iridescent halo, delicate iridescent skin sheen",
-    "rich shadows, painterly brushwork, fashion-editorial styling",
-    "high detail face and hands, anatomically correct",
-    "ultra-sharp focus on subject, gentle bokeh background",
-    "art-direction: caelinus moon temple, cinematic, magazine cover",
-  ].join(", ");
+/**
+ * House style tokens. We lead with explicit quality boosters because
+ * SDXL responds strongly to "masterpiece / 8k / dslr"-class tags,
+ * then layer cinematic and editorial cues. Keep this string compact —
+ * the per-image prompt is appended afterwards and SDXL gets noisy past
+ * ~75 tokens of preamble.
+ */
+const STYLE_BASE = [
+  // Quality boosters first — SDXL conditioning loves these.
+  "(masterpiece:1.2)",
+  "(best quality:1.2)",
+  "ultra-detailed",
+  "8k uhd",
+  "sharp focus",
+  "professional fashion photography",
+  // Cinematic / poster styling — defines Caelinus' look.
+  "cinematic poster portrait of a goddess archetype",
+  "rule-of-thirds composition with generous headroom",
+  "magazine-cover framing, three-quarter to full body",
+  "soft warm rim light, magenta-and-cosmic nebula palette",
+  "subtle iridescent halo, delicate iridescent skin sheen",
+  "rich painterly shadows, fashion-editorial styling",
+  "high detail face and hands, anatomically correct features",
+  "shot on 85mm lens, f/1.8, shallow depth of field",
+  "soft volumetric haze, gentle bokeh background",
+  "art-direction: caelinus moon temple, magazine cover",
+].join(", ");
 
-const NEGATIVE_BASE =
-  [
-    "extra fingers", "extra limbs", "deformed", "disfigured",
-    "lowres", "blurry", "watermark", "text", "logo",
-    "bad anatomy", "long neck", "fused fingers", "double face",
-    "child", "infant", "underage",
-    "nsfw", "explicit", "nudity",
-  ].join(", ");
+/**
+ * Negative prompt — what we tell SDXL to *avoid*. Ordered by impact:
+ *   1. Anatomy failures (most common SDXL failure mode).
+ *   2. Composition failures (out-of-frame, cropped subjects).
+ *   3. Quality/encoding failures (jpeg artefacts, lowres).
+ *   4. Style failures (text/logo/watermark contamination).
+ *   5. Safety guardrails (nsfw + minor protection).
+ */
+const NEGATIVE_BASE = [
+  // Anatomy
+  "extra fingers", "missing fingers", "fused fingers",
+  "extra limbs", "missing limbs",
+  "extra arms", "extra legs", "extra hands",
+  "deformed", "disfigured", "mutilated", "mangled",
+  "bad anatomy", "long neck", "double face",
+  "asymmetric face", "asymmetric eyes",
+  "extra eyes", "deformed iris", "cross-eyed",
+  "ugly hands", "malformed hands",
+  // Composition
+  "out of frame", "cropped", "cut off",
+  "tiny subject", "off-centre subject",
+  // Quality / encoding
+  "lowres", "low quality", "worst quality",
+  "blurry", "out of focus",
+  "jpeg artifacts", "compression artifacts",
+  "noisy", "grainy",
+  // Style contamination
+  "watermark", "text", "letters", "signature", "logo",
+  "frame border", "passe-partout",
+  "cartoon", "3d render", "plastic skin",
+  // Safety
+  "child", "infant", "underage", "teenager",
+  "nsfw", "explicit", "nudity",
+].join(", ");
+
+/**
+ * Per-zodiac mood enrichment. The catalogue (`data/play-assets.ts`)
+ * keeps the visual identity terse (4–6 words). For the AI we layer on
+ * additional palette + atmosphere cues so the output reads as that
+ * zodiac at a glance. Adjusting these is the cheapest way to tune
+ * gallery quality — no DB or UI changes needed.
+ */
+const ZODIAC_MOOD: Record<ZodiacId, string> = {
+  aries:
+    "warm ember and crimson tones, glowing solar fire motifs, " +
+    "ash-warm dramatic side light, faint heat shimmer",
+  taurus:
+    "lush jade and bronze tones, soft earthen textures, " +
+    "honeyed harvest light, gentle wind through grass",
+  gemini:
+    "duality of warm and cool, mercurial silver-blue palette, " +
+    "split-light composition, mirror motif, dreamy double exposure",
+  cancer:
+    "lunar pearl and silver tones, soft tide reflections, " +
+    "moonlight rim, hushed cool ambient glow",
+  leo:
+    "regal sun-gold and amber tones, mane-like crown of light, " +
+    "warm golden-hour rim, theatrical spotlight",
+  virgo:
+    "ivory and harvest-gold tones, woven wheat motifs, " +
+    "soft dawn light, refined editorial restraint",
+  libra:
+    "rose-gold and twilight-pink tones, balanced symmetric composition, " +
+    "soft diffused light, romantic dusk atmosphere",
+  scorpio:
+    "deep magenta and obsidian tones, smoky velvet textures, " +
+    "low-key oracle lighting, mysterious shadowed gaze",
+  sagittarius:
+    "amber and bronze tones, traveller-at-sunset palette, " +
+    "warm long shadows, distant horizon glow",
+  capricorn:
+    "slate and graphite tones with cool stone-grey palette, " +
+    "mountain-dusk light, austere composed atmosphere",
+  aquarius:
+    "electric blue and silver tones, current-of-stars veil motif, " +
+    "polar dawn light, futuristic luminous accents",
+  pisces:
+    "seafoam and soft teal tones, dream-tide textures, " +
+    "underwater diffused light, gentle reflective shimmer",
+};
 
 /**
  * Stable hash → 32-bit non-negative integer. Used as the model seed.
@@ -70,10 +172,16 @@ function fnv1a(s: string): number {
   return h >>> 0;
 }
 
+/** Defensive cap mirroring lib/play/brief.ts so the prompt builder
+ *  can be called from tests without going through the API route. */
+const PROMPT_BRIEF_CAP = 200;
+
 export function buildPlayPrompt(input: PromptInput): PromptOutput {
   const archetype = findArchetype(input.archetype);
   const zodiac = findZodiac(input.zodiac);
   const scene = findScene(input.scene);
+  const variant = Math.max(1, Math.floor(input.variant ?? 1));
+  const brief = (input.brief ?? "").trim().slice(0, PROMPT_BRIEF_CAP);
 
   if (!archetype || !zodiac || !scene) {
     throw new Error(
@@ -82,15 +190,30 @@ export function buildPlayPrompt(input: PromptInput): PromptOutput {
     );
   }
 
+  const moodSuffix = ZODIAC_MOOD[zodiac.id] ?? "";
+
   const prompt = [
     STYLE_BASE,
     `figure: ${archetype.prompt}`,
     `archetype: ${zodiac.label.en} (${zodiac.id}) — ${zodiac.prompt}`,
+    moodSuffix ? `mood: ${moodSuffix}` : null,
     `scene: ${scene.prompt}`,
-    "shot on 85mm, shallow depth of field, soft volumetric haze",
-  ].join(". ");
+    // Brief lives last so SDXL sees the user's note as an over-ride
+    // applied on top of the canonical mood. The wrapping clause keeps
+    // it out of negative-prompt territory.
+    brief ? `personal brief: ${brief}` : null,
+  ]
+    .filter(Boolean)
+    .join(". ");
 
-  const seed = fnv1a(`${input.archetype}:${input.zodiac}:${input.scene}`);
+  // Seed embeds variant + brief so v1/v2/v3 and brief-vs-no-brief all
+  // produce visibly distinct outputs. v1 with no brief keeps the
+  // original deterministic seed (back-compat with renders cached
+  // before F2a / F2b).
+  const seedParts: string[] = [input.archetype, input.zodiac, input.scene];
+  if (variant !== 1) seedParts.push(`v${variant}`);
+  if (brief) seedParts.push(`b:${brief}`);
+  const seed = fnv1a(seedParts.join(":"));
 
   return {
     prompt,

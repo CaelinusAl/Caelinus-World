@@ -1,13 +1,24 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { buildLocaleMetadata } from "@/lib/i18n/metadata";
+import { getLocale } from "@/lib/i18n/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ProfileRow } from "@/lib/supabase/types";
 
 import AccountBody from "./AccountBody";
 
-export const metadata = {
-  title: "Hesap · Caelinus",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const tr = locale === "tr";
+  return {
+    title: tr ? "Hesap · Caelinus" : "Account · Caelinus",
+    // Account pages should never be indexed by search engines —
+    // private surfaces, no meaningful canonical content.
+    robots: { index: false, follow: false },
+    ...buildLocaleMetadata(locale, "/hesap"),
+  };
+}
 
 /**
  * Account settings — `/hesap`.

@@ -81,6 +81,17 @@ const ServerEnvSchema = z.object({
     .default(
       "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
     ),
+  /* Optional secondary provider for resiliency. When set, a primary
+     failure (network, timeout, non-success status) causes the render
+     route to retry once with the fallback before surfacing the error.
+     The two providers can be different families (replicate ↔ openai)
+     since their auth tokens are different — that's why the fallback
+     carries its own API key. Stub fallback is also valid; it never
+     fails and lets dev-mode keep the studio walkable. */
+  PLAY_AI_FALLBACK_PROVIDER: z
+    .enum(["replicate", "openai", "stub"])
+    .optional(),
+  PLAY_AI_FALLBACK_API_KEY: z.string().optional(),
   /* Cost guard: max fresh renders per IP per hour. Cache hits don't
      count, so 60/hour is plenty for normal play. */
   PLAY_AI_HOURLY_BUDGET: z.coerce.number().int().min(1).max(1000).default(60),
@@ -155,6 +166,8 @@ function parseServerEnv() {
     PLAY_AI_PROVIDER: process.env.PLAY_AI_PROVIDER,
     PLAY_AI_API_KEY: process.env.PLAY_AI_API_KEY,
     PLAY_AI_REPLICATE_MODEL: process.env.PLAY_AI_REPLICATE_MODEL,
+    PLAY_AI_FALLBACK_PROVIDER: process.env.PLAY_AI_FALLBACK_PROVIDER,
+    PLAY_AI_FALLBACK_API_KEY: process.env.PLAY_AI_FALLBACK_API_KEY,
     PLAY_AI_HOURLY_BUDGET: process.env.PLAY_AI_HOURLY_BUDGET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,

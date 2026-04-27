@@ -21,6 +21,7 @@ import {
   ZodiacId,
   lookCacheKey,
 } from "@/data/play-assets";
+import { briefHash, BRIEF_MAX_LENGTH, sanitizeBrief } from "@/lib/play/brief";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PlayRenderRow, UserPlayLookRow } from "@/lib/supabase/types";
@@ -38,6 +39,14 @@ const SaveSchema = z.object({
   scene: z.enum(SCENE_IDS),
   renderUrl: z.string().url(),
   cacheKey: z.string().min(3).max(80),
+  // F2a — when the user saves a re-roll (v2+), the cacheKey carries
+  // the suffix; we accept the variant explicitly so server can verify
+  // the suffix matches without parsing it back out.
+  variant: z.coerce.number().int().min(1).max(8).optional().default(1),
+  // F2b — the brief that produced the render, if any. We re-sanitise
+  // and re-hash here so the cacheKey verification stays the single
+  // source of truth (we don't trust a client-supplied brief hash).
+  brief: z.string().max(BRIEF_MAX_LENGTH * 2).optional(),
 });
 
 export async function POST(req: Request) {
@@ -56,11 +65,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const { archetype, zodiac, scene, renderUrl, cacheKey } = parsed.data;
+  const { archetype, zodiac, scene, renderUrl, cacheKey, variant } = parsed.data;
+  const cleanBrief = sanitizeBrief(parsed.data.brief);
+  const briefDigest = cleanBrief ? briefHash(cleanBrief) : "";
 
   // Re-derive the cache key server-side and double-check it matches
-  // — keeps clients honest about which triple they're saving.
-  if (lookCacheKey(archetype, zodiac, scene) !== cacheKey) {
+  // — keeps clients honest about which triple+variant+brief they're
+  // saving (we recompute briefHash from the brief string to avoid
+  // trusting a client-supplied hash).
+  if (lookCacheKey(archetype, zodiac, scene, variant, briefDigest) !== cacheKey) {
     return NextResponse.json(
       { error: "Cache key mismatch" },
       { status: 400 },

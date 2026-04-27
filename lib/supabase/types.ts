@@ -125,6 +125,8 @@ export interface PlayRenderRow {
   prompt: string | null;
   seed: number | null;
   provider: string | null;
+  // F4 — denormalised counter, kept in sync via DB trigger on play_likes.
+  likes_count: number;
   created_at: string;
 }
 
@@ -136,6 +138,14 @@ export interface UserPlayLookRow {
   zodiac: string;
   scene: string;
   render_url: string;
+  created_at: string;
+}
+
+/* Community signal (migration 0009) — one row per (user, render). */
+export interface PlayLikeRow {
+  id: string;
+  user_id: string;
+  render_id: string;
   created_at: string;
 }
 
@@ -265,6 +275,12 @@ export type Database = {
             | "render_url"
           >;
         Update: Partial<UserPlayLookRow>;
+        Relationships: [];
+      };
+      play_likes: {
+        Row: PlayLikeRow;
+        Insert: Partial<PlayLikeRow> & Pick<PlayLikeRow, "user_id" | "render_id">;
+        Update: Partial<PlayLikeRow>;
         Relationships: [];
       };
       atelier_orders: {

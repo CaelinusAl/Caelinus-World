@@ -18168,6 +18168,87 @@ select.atelier-input option {
   justify-content: center;
 }
 
+/* F2b — brief textarea on the scene step. Sits between the scene
+   tiles and the Generate button. Visible only to signed-in users;
+   anonymous visitors see a single-line sign-in hint instead. */
+.play-brief {
+  width: 100%;
+  max-width: 560px;
+  margin: 28px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.play-brief-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.play-brief-eyebrow {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.play-brief-counter {
+  font-feature-settings: "tnum";
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.play-brief-counter.is-warning {
+  color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+}
+
+.play-brief-input {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(20, 14, 32, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  resize: vertical;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.play-brief-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.play-brief-input:focus {
+  outline: none;
+  border-color: color-mix(in oklab, var(--stage-tone-magenta) 70%, white);
+  background: rgba(28, 18, 44, 0.7);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--stage-tone-magenta) 28%, transparent);
+}
+
+.play-brief-hint {
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.play-brief-signin {
+  margin: 0;
+  text-align: center;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
 /* ── Archetype picker ────────────────────────────────────────── */
 
 .play-archetype-grid {
@@ -18450,6 +18531,18 @@ select.atelier-input option {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--stage-tone-magenta) 75%, white);
+  text-align: center;
+}
+
+/* F2a — variant indicator beneath the action row. Reads like a quiet
+   metadata caption so the focus stays on the canvas above. */
+.play-actions-variant {
+  margin: 4px 0 0;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.6);
   text-align: center;
 }
 
@@ -20537,6 +20630,324 @@ div.stage-card {
 
 .play-gallery-foot-link:hover {
   color: #fff;
+}
+
+/* ─── /play/galeri — sort tabs (F4) ───────────────────────────── */
+
+.play-gallery-sort {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 2px 0;
+  flex-wrap: wrap;
+}
+
+.play-gallery-sort-label {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.play-gallery-sort-tabs {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 3px;
+  background: rgba(12, 8, 24, 0.6);
+}
+
+.play-gallery-sort-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: rgba(241, 236, 255, 0.7);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.play-gallery-sort-tab:hover {
+  color: #fff;
+}
+
+.play-gallery-sort-tab.is-active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.92) 0%,
+    rgba(167, 107, 255, 0.9) 100%
+  );
+  color: #0a0816;
+  font-weight: 600;
+}
+
+/* ─── /play/galeri — card with like button (F4) ───────────────── */
+
+.play-gallery-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    rgba(28, 18, 56, 0.55) 0%,
+    rgba(12, 8, 24, 0.85) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 220ms ease, border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.play-gallery-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 200, 255, 0.34);
+  box-shadow: 0 18px 40px -22px rgba(167, 107, 255, 0.55);
+}
+
+.play-gallery-card-link {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.play-gallery-card-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.play-gallery-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.play-gallery-card-eyebrow {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.65);
+  margin: 0;
+}
+
+.play-gallery-card-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+  color: #fff;
+}
+
+.play-gallery-card-meta {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  color: rgba(241, 236, 255, 0.55);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+/* Heart button — overlay on image, gentle scale on press */
+.play-gallery-like {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(10, 8, 22, 0.66);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.86);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 140ms ease, background 160ms ease,
+    border-color 160ms ease, color 160ms ease;
+  z-index: 2;
+}
+
+.play-gallery-like:hover {
+  border-color: rgba(255, 110, 199, 0.6);
+  color: #ffd6ee;
+}
+
+.play-gallery-like:active {
+  transform: scale(0.94);
+}
+
+.play-gallery-like-icon {
+  font-size: 14px;
+  line-height: 1;
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.play-gallery-like.is-liked {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.95) 0%,
+    rgba(255, 80, 160, 0.95) 100%
+  );
+  border-color: rgba(255, 200, 233, 0.78);
+  color: #0a0816;
+}
+
+.play-gallery-like.is-liked .play-gallery-like-icon {
+  animation: caelinus-heart-pop 360ms ease;
+  color: #fff;
+}
+
+@keyframes caelinus-heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-gallery-like.is-liked .play-gallery-like-icon {
+    animation: none;
+  }
+}
+
+/* ─── /play/galeri — pagination (F4) ──────────────────────────── */
+
+.play-gallery-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+}
+
+.play-gallery-page-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(241, 236, 255, 0.82);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.play-gallery-page-btn:hover {
+  border-color: rgba(255, 200, 255, 0.5);
+  color: #fff;
+}
+
+.play-gallery-page-btn.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.play-gallery-page-current {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.78);
+}
+
+/* ─── /play/look/[id] — like bar (F4) ─────────────────────────── */
+
+.play-look-likebar {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 6px;
+}
+
+.play-look-like {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(12, 8, 24, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(241, 236, 255, 0.86);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: transform 140ms ease, background 160ms ease,
+    border-color 160ms ease, color 160ms ease;
+}
+
+.play-look-like:hover {
+  border-color: rgba(255, 110, 199, 0.5);
+  color: #ffd6ee;
+}
+
+.play-look-like:active {
+  transform: scale(0.96);
+}
+
+.play-look-like-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.play-look-like-count {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.play-look-like-label {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.7);
+}
+
+.play-look-like.is-liked {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.95) 0%,
+    rgba(255, 80, 160, 0.95) 100%
+  );
+  border-color: rgba(255, 200, 233, 0.78);
+  color: #0a0816;
+}
+
+.play-look-like.is-liked .play-look-like-label {
+  color: rgba(10, 8, 22, 0.66);
+}
+
+.play-look-like.is-liked .play-look-like-icon {
+  animation: caelinus-heart-pop 360ms ease;
 }
 
 /* ─── /hesap — account settings ───────────────────────────────── */
