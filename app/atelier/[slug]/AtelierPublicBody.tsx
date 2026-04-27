@@ -3,10 +3,15 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { CinemaCTA, NebulaPortal, SceneTile } from "@/app/_stage";
+import { CinemaCTA, NebulaPortal, SceneTile, StageCard } from "@/app/_stage";
 import { PROVINCES, PROVINCE_REGIONS } from "@/data/provinces";
-import { KIND_LABELS } from "@/lib/atelier/validation";
+import {
+  ITEM_STATUS_LABELS,
+  KIND_LABELS,
+  formatItemPrice,
+} from "@/lib/atelier/validation";
 import type {
+  AtelierItemRow,
   AtelierKind,
   AtelierRow,
   AtelierStatus,
@@ -14,12 +19,30 @@ import type {
 import { useLangStore } from "@/stores/lang-store";
 
 import AtelierMatrix from "../_components/AtelierMatrix";
+import { startItemCheckout } from "./_actions/checkout";
 
 type Props = {
   atelier: AtelierRow;
   /** True when the visitor is the atelier's owner. Triggers preview banner +
    *  edit shortcut, regardless of status. */
   isOwner: boolean;
+  /** Items to render in the collection slot. Owners see everything; the
+   *  public sees only published + sold-out (RLS already enforces). */
+  items: AtelierItemRow[];
+  /** True when Stripe is configured server-side. When false we fall
+   *  back to "Inquire" CTAs so the BUY button never appears broken. */
+  checkoutEnabled?: boolean;
+  /** Banner surfaced after a checkout round-trip — see translations
+   *  for what each code means in user copy. */
+  checkoutNotice?:
+    | "iptal"
+    | "yapilandirma"
+    | "stripe"
+    | "yok"
+    | "fiyatsiz"
+    | "kapali"
+    | "hata"
+    | null;
 };
 
 const T = {
@@ -41,8 +64,42 @@ const T = {
       en: "No pieces have been published yet.",
     },
     placeholderOwner: {
-      tr: "Koleksiyonunu eklemek için tezgâhını düzenle. Ürün CRUD pek yakında.",
-      en: "Edit your bench to start a collection. Product CRUD is on the way.",
+      tr: "Henüz ürün eklemedin. Tezgâhını düzenleyip ilk parçanı koy.",
+      en: "No items yet. Edit your bench and add your first piece.",
+    },
+    addItem: { tr: "Yeni ürün", en: "Add item" },
+    edit: { tr: "Düzenle", en: "Edit" },
+    inquireOnly: { tr: "Fiyat için iletişim", en: "Inquire for price" },
+    buy: { tr: "Satın al", en: "Buy" },
+    soldOut: { tr: "Tükendi", en: "Sold out" },
+    inquire: { tr: "Fiyat için iletişim", en: "Inquire" },
+    cancelled: {
+      tr: "Ödeme yarıda kaldı. İstediğin zaman yeniden deneyebilirsin.",
+      en: "Checkout was cancelled. Try again whenever you're ready.",
+    },
+    notReady: {
+      tr: "Ödeme sistemi henüz hazır değil. Caelinus ekibi yapılandırmayı tamamlıyor.",
+      en: "Payments aren't live yet. The Caelinus team is finishing setup.",
+    },
+    stripeFailed: {
+      tr: "Stripe oturumu açılamadı. Birazdan tekrar dene.",
+      en: "Stripe session couldn't be started. Please try again shortly.",
+    },
+    notAvailable: {
+      tr: "Bu ürün şu anda satışta değil.",
+      en: "This piece is not currently for sale.",
+    },
+    noFixedPrice: {
+      tr: "Bu ürün için sabit fiyat yok. Üreticiyle iletişime geç.",
+      en: "No fixed price for this piece — please contact the maker.",
+    },
+    closed: {
+      tr: "Bu atölye şu anda alımı kabul edemiyor.",
+      en: "This atelier isn't accepting orders right now.",
+    },
+    genericError: {
+      tr: "Bir aksilik oldu. Lütfen yeniden dene.",
+      en: "Something went wrong. Please try again.",
     },
   },
   approvedStamp: {
@@ -122,7 +179,13 @@ function kindToTone(
   }
 }
 
-export default function AtelierPublicBody({ atelier, isOwner }: Props) {
+export default function AtelierPublicBody({
+  atelier,
+  isOwner,
+  items,
+  checkoutEnabled = false,
+  checkoutNotice = null,
+}: Props) {
   const { lang, hydrated, toggle } = useLangStore();
   const L = hydrated ? lang : "tr";
 
@@ -199,6 +262,27 @@ export default function AtelierPublicBody({ atelier, isOwner }: Props) {
                   ? "rejected"
                   : "draft"
             ][L]}
+          </span>
+        </div>
+      ) : null}
+
+      {checkoutNotice ? (
+        <div className="atelier-preview-banner is-cancel">
+          <span className="atelier-preview-banner-dot" aria-hidden="true" />
+          <span className="atelier-preview-banner-text">
+            {checkoutNotice === "iptal"
+              ? T.collection.cancelled[L]
+              : checkoutNotice === "yapilandirma"
+                ? T.collection.notReady[L]
+                : checkoutNotice === "stripe"
+                  ? T.collection.stripeFailed[L]
+                  : checkoutNotice === "yok"
+                    ? T.collection.notAvailable[L]
+                    : checkoutNotice === "fiyatsiz"
+                      ? T.collection.noFixedPrice[L]
+                      : checkoutNotice === "kapali"
+                        ? T.collection.closed[L]
+                        : T.collection.genericError[L]}
           </span>
         </div>
       ) : null}
@@ -337,31 +421,164 @@ export default function AtelierPublicBody({ atelier, isOwner }: Props) {
           </section>
         ) : null}
 
-        {/* ── Collection slot — empty for now, product CRUD pending ──── */}
+        {/* ── Collection — published items + owner add-shortcut ──────── */}
         <section className="atelier-public-section">
-          <h2 className="atelier-public-section-title">
-            <span className="atelier-public-section-glyph" aria-hidden="true">
-              ✿
-            </span>
-            {T.collection.title[L]}
-          </h2>
-          <div className="atelier-stage-collection-empty">
-            <p>
-              {isOwner
-                ? T.collection.placeholderOwner[L]
-                : T.collection.placeholder[L]}
-            </p>
+          <div className="atelier-public-section-head">
+            <h2 className="atelier-public-section-title">
+              <span className="atelier-public-section-glyph" aria-hidden="true">
+                ✿
+              </span>
+              {T.collection.title[L]}
+            </h2>
             {isOwner ? (
               <CinemaCTA
-                href={`/atelier/${atelier.slug}/duzenle`}
+                href={`/atelier/${atelier.slug}/duzenle/urun/yeni`}
                 variant="ghost"
                 tone={tone}
-                trailingGlyph="→"
+                trailingGlyph="+"
               >
-                {T.edit[L]}
+                {T.collection.addItem[L]}
               </CinemaCTA>
             ) : null}
           </div>
+
+          {items.length === 0 ? (
+            <div className="atelier-stage-collection-empty">
+              <p>
+                {isOwner
+                  ? T.collection.placeholderOwner[L]
+                  : T.collection.placeholder[L]}
+              </p>
+              {isOwner ? (
+                <CinemaCTA
+                  href={`/atelier/${atelier.slug}/duzenle/urun/yeni`}
+                  variant="primary"
+                  tone={tone}
+                  trailingGlyph="→"
+                >
+                  {T.collection.addItem[L]}
+                </CinemaCTA>
+              ) : null}
+            </div>
+          ) : (
+            <ul className="atelier-stage-collection-grid">
+              {items.map((item) => {
+                const cover = item.images?.[0] ?? null;
+                const title =
+                  L === "en" && item.title_en?.trim()
+                    ? item.title_en
+                    : item.title_tr;
+                const desc = pickLocalised(
+                  L === "tr" ? item.description_tr : item.description_en,
+                  L === "tr" ? item.description_en : item.description_tr,
+                );
+                const priceLabel = formatItemPrice(
+                  item.price_amount,
+                  item.currency,
+                  L,
+                );
+                const showStatusPill =
+                  isOwner && item.status !== "published";
+
+                const isSoldOut = item.status === "sold-out";
+                const hasFixedPrice = item.price_amount > 0;
+                const canBuy =
+                  !isOwner &&
+                  !isSoldOut &&
+                  item.status === "published" &&
+                  hasFixedPrice &&
+                  checkoutEnabled;
+
+                const meta = (
+                  <div className="atelier-stage-collection-meta">
+                    <span className="atelier-stage-collection-price">
+                      {priceLabel}
+                    </span>
+                    {isSoldOut ? (
+                      <span className="atelier-stage-collection-soldout">
+                        {T.collection.soldOut[L]}
+                      </span>
+                    ) : canBuy ? (
+                      <form
+                        action={startItemCheckout}
+                        className="atelier-stage-collection-buy-form"
+                      >
+                        <input
+                          type="hidden"
+                          name="itemId"
+                          value={item.id}
+                        />
+                        <input
+                          type="hidden"
+                          name="atelierSlug"
+                          value={atelier.slug}
+                        />
+                        <button
+                          type="submit"
+                          className="atelier-stage-collection-buy"
+                        >
+                          {T.collection.buy[L]} →
+                        </button>
+                      </form>
+                    ) : !isOwner && !hasFixedPrice && atelier.contact_email ? (
+                      <a
+                        href={`mailto:${atelier.contact_email}?subject=${encodeURIComponent(
+                          `${atelier.name} · ${title}`,
+                        )}`}
+                        className="atelier-stage-collection-inquire"
+                      >
+                        {T.collection.inquire[L]} →
+                      </a>
+                    ) : null}
+                  </div>
+                );
+                const statusLabel = showStatusPill
+                  ? ITEM_STATUS_LABELS[item.status][L]
+                  : undefined;
+                const cardStatus =
+                  item.status === "published"
+                    ? "approved"
+                    : item.status === "draft"
+                      ? "draft"
+                      : item.status === "archived"
+                        ? "rejected"
+                        : "neutral";
+
+                return (
+                  <li key={item.id} className="atelier-stage-collection-item">
+                    {isOwner ? (
+                      <StageCard
+                        as="link"
+                        href={`/atelier/${atelier.slug}/duzenle/urun/${item.id}`}
+                        variant="poster"
+                        tone={tone}
+                        image={cover}
+                        title={title}
+                        eyebrow={item.intent ?? undefined}
+                        body={desc ?? undefined}
+                        meta={meta}
+                        statusLabel={statusLabel}
+                        status={cardStatus}
+                      />
+                    ) : (
+                      <StageCard
+                        as="div"
+                        variant="poster"
+                        tone={tone}
+                        image={cover}
+                        title={title}
+                        eyebrow={item.intent ?? undefined}
+                        body={desc ?? undefined}
+                        meta={meta}
+                        statusLabel={statusLabel}
+                        status={cardStatus}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         {/* ── Caelinus stamp — only on approved pages ─────────────── */}

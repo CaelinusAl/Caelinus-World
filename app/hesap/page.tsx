@@ -1,0 +1,49 @@
+import { redirect } from "next/navigation";
+
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { ProfileRow } from "@/lib/supabase/types";
+
+import AccountBody from "./AccountBody";
+
+export const metadata = {
+  title: "Hesap · Caelinus",
+};
+
+/**
+ * Account settings — `/hesap`.
+ *
+ * Lets a signed-in user edit their public profile (display name, avatar,
+ * preferred language) and sign out. RLS on `profiles` already restricts
+ * writes to `auth.uid() = id`; we re-check ownership server-side so the
+ * route never ships an unauthenticated body.
+ */
+export default async function AccountPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/atelier/giris?next=/hesap");
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, email, display_name, avatar_url, locale, created_at, updated_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const profile = (data as ProfileRow | null) ?? null;
+
+  // The DB trigger creates a profile on first sign-in, but a stale
+  // session before the trigger ran could land us here without a row.
+  // Build a minimal placeholder so the form still renders.
+  const fallback: ProfileRow = {
+    id: user.id,
+    email: user.email ?? null,
+    display_name: null,
+    avatar_url: null,
+    locale: "tr",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  return <AccountBody profile={profile ?? fallback} />;
+}

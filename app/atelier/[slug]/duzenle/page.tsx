@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { listOwnerItems } from "@/lib/atelier/items";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierRow } from "@/lib/supabase/types";
 import EditAtelierBody from "./EditAtelierBody";
@@ -78,5 +79,7 @@ export default async function DuzenlePage({
     notFound();
   }
 
-  return <EditAtelierBody atelier={atelier} />;
+  const items = await listOwnerItems(atelier.id);
+
+  return <EditAtelierBody atelier={atelier} items={items} />;
 }

@@ -43,6 +43,9 @@ export default function LooksGallery({ looks }: { looks: SavedLook[] }) {
           <Link href="/play" className="play-ribbon-btn">
             {L === "tr" ? "Stüdyo" : "Studio"}
           </Link>
+          <Link href="/play/galeri" className="play-ribbon-btn">
+            {L === "tr" ? "Galeri" : "Gallery"}
+          </Link>
           <button
             type="button"
             className="play-ribbon-lang"

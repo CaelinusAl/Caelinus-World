@@ -8,13 +8,16 @@ import { PROVINCE_REGIONS } from "@/data/provinces";
 import { supabaseConfigured } from "@/lib/env";
 import {
   ATELIER_KINDS,
+  ITEM_STATUS_LABELS,
   KIND_LABELS,
   atelierEditSchema,
   emptyToNull,
+  formatItemPrice,
   provincesInRegion,
 } from "@/lib/atelier/validation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type {
+  AtelierItemRow,
   AtelierKind,
   AtelierRow,
   AtelierStatus,
@@ -24,10 +27,11 @@ import { useLangStore } from "@/stores/lang-store";
 import AtelierMatrix from "../../_components/AtelierMatrix";
 import ImageUploadField from "../../_components/ImageUploadField";
 
-type Tab = "general" | "story" | "contact" | "images";
+type Tab = "general" | "story" | "contact" | "images" | "items";
 
 type Props = {
   atelier: AtelierRow;
+  items: AtelierItemRow[];
 };
 
 const T = {
@@ -40,6 +44,7 @@ const T = {
     story:    { tr: "Hikâye",     en: "Story" },
     contact:  { tr: "İletişim",   en: "Contact" },
     images:   { tr: "Görseller",  en: "Images" },
+    items:    { tr: "Koleksiyon", en: "Collection" },
   },
 
   general: {
@@ -131,6 +136,22 @@ const T = {
     resubmit: { tr: "Yeniden gönder", en: "Resubmit" },
   },
 
+  items: {
+    title: { tr: "Koleksiyonun", en: "Your collection" },
+    intro: {
+      tr: "Atelier sayfanın ürün vitrini. Yayında olanlar ziyaretçiye görünür; taslak ve arşiv sadece sana.",
+      en: "The product showcase on your atelier page. Published items are visible to visitors; drafts and archives stay with you.",
+    },
+    add: { tr: "Yeni ürün", en: "Add item" },
+    empty: {
+      tr: "Henüz ürün eklemedin. İlk parçanı ekle ve sahnen canlansın.",
+      en: "No items yet. Add your first piece and let the stage breathe.",
+    },
+    edit: { tr: "Düzenle", en: "Edit" },
+    noImage: { tr: "Görselsiz", en: "No image" },
+    inquireOnly: { tr: "Fiyat için iletişim", en: "Inquire for price" },
+  },
+
   save: { tr: "Değişiklikleri kaydet", en: "Save changes" },
   saving: { tr: "Kaydediliyor…", en: "Saving…" },
   saved: { tr: "Kaydedildi.", en: "Saved." },
@@ -149,9 +170,10 @@ const TABS: { id: Tab; key: keyof typeof T.tabs }[] = [
   { id: "story", key: "story" },
   { id: "contact", key: "contact" },
   { id: "images", key: "images" },
+  { id: "items", key: "items" },
 ];
 
-export default function EditAtelierBody({ atelier }: Props) {
+export default function EditAtelierBody({ atelier, items }: Props) {
   const router = useRouter();
   const { lang, hydrated, toggle } = useLangStore();
   const L = hydrated ? lang : "tr";
@@ -670,6 +692,90 @@ export default function EditAtelierBody({ atelier }: Props) {
                 shape="square"
                 disabled={saving || submitting}
               />
+            </>
+          ) : null}
+
+          {tab === "items" ? (
+            <>
+              <div className="atelier-edit-items-head">
+                <div>
+                  <h2 className="atelier-edit-h2">{T.items.title[L]}</h2>
+                  <p className="atelier-edit-intro">{T.items.intro[L]}</p>
+                </div>
+                <Link
+                  href={`/atelier/${atelier.slug}/duzenle/urun/yeni`}
+                  className="atelier-btn atelier-btn-primary"
+                >
+                  + {T.items.add[L]}
+                </Link>
+              </div>
+
+              {items.length === 0 ? (
+                <p className="atelier-edit-items-empty">{T.items.empty[L]}</p>
+              ) : (
+                <ul className="atelier-edit-items-grid">
+                  {items.map((item) => {
+                    const cover = item.images?.[0] ?? null;
+                    const title =
+                      L === "en" && item.title_en?.trim()
+                        ? item.title_en
+                        : item.title_tr;
+                    const desc =
+                      L === "en" && item.description_en?.trim()
+                        ? item.description_en
+                        : item.description_tr;
+                    return (
+                      <li
+                        key={item.id}
+                        className={`atelier-edit-item-card status-${item.status}`}
+                      >
+                        <Link
+                          href={`/atelier/${atelier.slug}/duzenle/urun/${item.id}`}
+                          className="atelier-edit-item-link"
+                        >
+                          <div
+                            className="atelier-edit-item-cover"
+                            style={
+                              cover
+                                ? { backgroundImage: `url(${cover})` }
+                                : undefined
+                            }
+                          >
+                            {!cover ? (
+                              <span className="atelier-edit-item-cover-empty">
+                                {T.items.noImage[L]}
+                              </span>
+                            ) : null}
+                            <span
+                              className={`atelier-edit-item-status status-${item.status}`}
+                            >
+                              {ITEM_STATUS_LABELS[item.status][L]}
+                            </span>
+                          </div>
+                          <div className="atelier-edit-item-body">
+                            <h3 className="atelier-edit-item-title">{title}</h3>
+                            {desc ? (
+                              <p className="atelier-edit-item-desc">{desc}</p>
+                            ) : null}
+                            <div className="atelier-edit-item-meta">
+                              <span className="atelier-edit-item-price">
+                                {formatItemPrice(
+                                  item.price_amount,
+                                  item.currency,
+                                  L,
+                                )}
+                              </span>
+                              <span className="atelier-edit-item-edit">
+                                {T.items.edit[L]} →
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </>
           ) : null}
         </section>

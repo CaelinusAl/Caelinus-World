@@ -16449,6 +16449,244 @@ select.atelier-input option {
   }
 }
 
+/* ─── Items / collection tab ──────────────────────────────────── */
+
+.atelier-edit-items-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.atelier-edit-items-empty {
+  margin: 18px 0 4px;
+  padding: 28px 22px;
+  border: 1px dashed var(--atelier-line-soft);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--atelier-parchment-dim);
+  font-style: italic;
+}
+
+.atelier-edit-items-grid {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.atelier-edit-item-card {
+  position: relative;
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 6px;
+  background: linear-gradient(
+    180deg,
+    rgba(28, 22, 56, 0.72) 0%,
+    rgba(12, 10, 28, 0.72) 100%
+  );
+  overflow: hidden;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.atelier-edit-item-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242, 155, 224, 0.55);
+  box-shadow: 0 8px 26px rgba(242, 155, 224, 0.18);
+}
+
+.atelier-edit-item-card.status-draft { border-color: rgba(180, 180, 200, 0.32); }
+.atelier-edit-item-card.status-published { border-color: rgba(126, 226, 184, 0.42); }
+.atelier-edit-item-card.status-archived { border-color: rgba(120, 110, 150, 0.32); opacity: 0.78; }
+.atelier-edit-item-card.status-sold-out { border-color: rgba(242, 155, 224, 0.45); }
+
+.atelier-edit-item-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.atelier-edit-item-cover {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: rgba(10, 8, 22, 0.6) center/cover no-repeat;
+  border-bottom: 1px solid var(--atelier-line-soft);
+}
+
+.atelier-edit-item-cover-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--atelier-parchment-dim);
+  font-style: italic;
+}
+
+.atelier-edit-item-status {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(10, 8, 22, 0.78);
+  border: 1px solid var(--atelier-line-soft);
+  color: var(--atelier-parchment);
+  backdrop-filter: blur(6px);
+}
+
+.atelier-edit-item-status.status-published {
+  border-color: rgba(126, 226, 184, 0.6);
+  color: rgb(190, 240, 215);
+}
+.atelier-edit-item-status.status-draft {
+  border-color: rgba(220, 200, 240, 0.4);
+  color: rgba(220, 210, 240, 0.85);
+}
+.atelier-edit-item-status.status-archived {
+  border-color: rgba(160, 150, 180, 0.32);
+  color: rgba(180, 170, 200, 0.78);
+}
+.atelier-edit-item-status.status-sold-out {
+  border-color: rgba(242, 155, 224, 0.6);
+  color: rgb(248, 210, 240);
+}
+
+.atelier-edit-item-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.atelier-edit-item-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment);
+  margin: 0;
+}
+
+.atelier-edit-item-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--atelier-parchment-dim);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.atelier-edit-item-meta {
+  margin-top: auto;
+  padding-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--atelier-parchment-dim);
+}
+
+.atelier-edit-item-price {
+  color: var(--atelier-parchment);
+  font-weight: 500;
+}
+
+.atelier-edit-item-edit {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 155, 224, 0.75);
+}
+
+/* ─── Item form (yeni/düzenle ürün) ───────────────────────────── */
+
+.atelier-item-images-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+@media (min-width: 720px) {
+  .atelier-item-images-grid {
+    /* Cover spans full width on its own row, then 3 square slots in a row. */
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .atelier-item-images-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.atelier-status-field {
+  border: 1px solid var(--atelier-line-soft);
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: rgba(10, 8, 22, 0.45);
+}
+
+.atelier-status-field legend {
+  padding: 0 6px;
+}
+
+.atelier-status-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.atelier-status-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--atelier-line-soft);
+  background: rgba(20, 16, 42, 0.55);
+  color: var(--atelier-parchment-dim);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.atelier-status-radio input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.atelier-status-radio:hover {
+  border-color: rgba(242, 155, 224, 0.55);
+  color: var(--atelier-parchment);
+}
+
+.atelier-status-radio.is-active {
+  border-color: var(--atelier-copper-bright);
+  color: var(--atelier-parchment);
+  background: rgba(242, 155, 224, 0.18);
+  box-shadow: 0 0 18px rgba(242, 155, 224, 0.22);
+}
+
 /* ═════════════════════════════════════════════════════════════════════
    ATELIER · Image upload field
    Drop-style preview (wide cover, square avatar) sitting on the same
@@ -18487,6 +18725,280 @@ select.atelier-input option {
   max-width: 480px;
 }
 
+/* Section head with optional CTA on the right */
+.atelier-public-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.atelier-public-section-head .atelier-public-section-title {
+  margin: 0;
+}
+
+/* Collection grid + per-item meta */
+.atelier-stage-collection-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.atelier-stage-collection-item {
+  display: flex;
+}
+
+.atelier-stage-collection-item .stage-card {
+  flex: 1;
+}
+
+.atelier-stage-collection-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.atelier-stage-collection-price {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--stage-tone-magenta) 30%, white);
+}
+
+.atelier-stage-collection-soon {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--stage-tone-magenta) 35%, transparent);
+  color: color-mix(in oklab, var(--stage-tone-magenta) 55%, white);
+  background: rgba(10, 8, 22, 0.55);
+  cursor: not-allowed;
+}
+
+.atelier-stage-collection-soldout {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 155, 224, 0.6);
+  color: rgb(248, 210, 240);
+  background: rgba(242, 155, 224, 0.08);
+}
+
+.atelier-stage-collection-buy-form {
+  margin: 0;
+}
+
+.atelier-stage-collection-buy {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 200, 255, 0.55);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.95) 0%,
+    rgba(167, 107, 255, 0.92) 100%
+  );
+  color: #0a0816;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.atelier-stage-collection-buy:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(255, 130, 220, 0.28);
+}
+
+.atelier-stage-collection-buy:active {
+  transform: translateY(0);
+}
+
+.atelier-stage-collection-inquire {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 200, 255, 0.4);
+  color: rgba(255, 200, 255, 0.88);
+  background: rgba(10, 8, 22, 0.55);
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.atelier-stage-collection-inquire:hover {
+  color: #fff;
+  background: rgba(255, 200, 255, 0.08);
+}
+
+/* ─── Checkout success page ──────────────────────────────────── */
+
+.atelier-preview-banner.is-cancel {
+  border-color: rgba(255, 175, 130, 0.55);
+  color: rgba(255, 220, 200, 0.92);
+}
+
+.atelier-preview-banner.is-cancel .atelier-preview-banner-dot {
+  background: rgba(255, 180, 130, 0.92);
+}
+
+.checkout-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 22px;
+}
+
+.checkout-card {
+  max-width: 600px;
+  width: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 28, 82, 0.55) 0%,
+    rgba(12, 8, 28, 0.92) 100%
+  );
+  border: 1px solid rgba(255, 200, 255, 0.18);
+  border-radius: 6px;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: rgba(241, 236, 255, 0.92);
+}
+
+.checkout-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 30px;
+  line-height: 1.18;
+  font-weight: 500;
+  margin: 0;
+  color: #fff;
+}
+
+.checkout-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(241, 236, 255, 0.82);
+}
+
+.checkout-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 28px;
+  margin: 14px 0 0;
+}
+
+.checkout-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkout-meta dt {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.checkout-meta dd {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+  color: #fff;
+}
+
+.checkout-items {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-items li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(10, 8, 22, 0.55);
+}
+
+.checkout-items img {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.checkout-item-placeholder {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 200, 255, 0.18);
+  color: rgba(255, 200, 255, 0.66);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 28px;
+}
+
+.checkout-items b {
+  display: block;
+  color: #fff;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+}
+
+.checkout-items em {
+  font-style: normal;
+  color: rgba(255, 200, 255, 0.66);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.checkout-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+@media (max-width: 540px) {
+  .checkout-actions {
+    flex-direction: column;
+  }
+  .checkout-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Approved stamp — wide rule lines flanking a ⌖ + label */
 .atelier-stage-stamp {
   display: flex;
@@ -19487,3 +19999,954 @@ div.stage-card {
   }
 }
 
+/* ─── /play/galeri — community feed ───────────────────────────── */
+
+.play-gallery-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    180deg,
+    rgba(28, 18, 56, 0.45) 0%,
+    rgba(12, 8, 24, 0.65) 100%
+  );
+  border-radius: 6px;
+}
+
+.play-gallery-filter-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .play-gallery-filter-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+.play-gallery-filter-label {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.play-gallery-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.play-gallery-chip {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(241, 236, 255, 0.78);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.play-gallery-chip:hover {
+  border-color: rgba(255, 200, 255, 0.4);
+  color: #fff;
+}
+
+.play-gallery-chip.is-active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.95) 0%,
+    rgba(167, 107, 255, 0.92) 100%
+  );
+  border-color: rgba(255, 200, 255, 0.6);
+  color: #0a0816;
+}
+
+.play-gallery-clear {
+  align-self: flex-end;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: rgba(255, 200, 255, 0.7);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.play-gallery-clear:hover {
+  color: #fff;
+}
+
+.play-gallery-grid {
+  margin-top: 8px;
+}
+
+.play-gallery-empty {
+  text-align: center;
+  padding: 40px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: rgba(241, 236, 255, 0.86);
+}
+
+.play-gallery-empty h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0;
+  color: #fff;
+}
+
+.play-gallery-empty p {
+  margin: 0;
+  max-width: 480px;
+  line-height: 1.65;
+  color: rgba(241, 236, 255, 0.7);
+}
+
+.play-gallery-unavailable {
+  text-align: center;
+  color: rgba(255, 200, 255, 0.7);
+  font-style: italic;
+  margin: 18px 0;
+}
+
+.play-gallery-foot {
+  text-align: center;
+  margin: 30px 0 12px;
+}
+
+.play-gallery-foot-link {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.78);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 200, 255, 0.4);
+  padding-bottom: 2px;
+}
+
+.play-gallery-foot-link:hover {
+  color: #fff;
+}
+
+/* ─── /hesap — account settings ───────────────────────────────── */
+
+.account-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: 56px;
+}
+
+.account-portal-initial {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 86px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--atelier-parchment);
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  line-height: 1;
+}
+
+/* ───────────────────────────────────────────────────────────────
+ * Caelinus · /atelier/dashboard/siparisler & /hesap/siparislerim
+ * ────────────────────────────────────────────────────────────────
+ * Shared "order ledger" surface — used by both the maker dashboard
+ * (with editing controls) and the buyer history (read-only). Tones
+ * track lifecycle: pending → paid → shipped → delivered, plus
+ * cancelled/refunded.
+ */
+
+.orders-shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 36px 22px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.orders-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 4px 0;
+}
+
+.orders-hero-eyebrow {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+  margin: 0;
+}
+
+.orders-hero-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--atelier-parchment);
+  margin: 0;
+  text-shadow: 0 0 24px rgba(242, 155, 224, 0.18);
+}
+
+.orders-hero-lead {
+  font-size: 15px;
+  color: var(--atelier-parchment-faint);
+  max-width: 640px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.orders-hero-lead a {
+  color: rgba(255, 156, 227, 0.95);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 156, 227, 0.4);
+}
+
+/* ─── Filter chips ──────────────────────────────────────────── */
+
+.orders-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.orders-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 200, 255, 0.18);
+  background: rgba(10, 8, 22, 0.55);
+  color: rgba(241, 236, 255, 0.78);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.orders-filter-chip:hover {
+  color: #fff;
+  border-color: rgba(255, 200, 255, 0.45);
+}
+
+.orders-filter-chip.is-active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.18) 0%,
+    rgba(167, 107, 255, 0.18) 100%
+  );
+  border-color: rgba(255, 200, 255, 0.65);
+  color: #fff;
+}
+
+.orders-filter-count {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 200, 255, 0.86);
+  min-width: 22px;
+  text-align: center;
+}
+
+/* ─── Empty state ───────────────────────────────────────────── */
+
+.orders-empty {
+  border: 1px dashed rgba(255, 200, 255, 0.22);
+  border-radius: 6px;
+  padding: 56px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  color: rgba(241, 236, 255, 0.72);
+  font-size: 15px;
+  background: rgba(10, 8, 22, 0.4);
+}
+
+.orders-empty p {
+  margin: 0;
+}
+
+/* ─── Order list ────────────────────────────────────────────── */
+
+.orders-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.order-card {
+  display: grid;
+  grid-template-columns: 152px 1fr;
+  gap: 18px;
+  padding: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.78) 0%,
+    rgba(10, 8, 22, 0.92) 100%
+  );
+  border: 1px solid rgba(255, 200, 255, 0.16);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.order-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  transition: background 200ms ease;
+}
+
+.order-card.is-paid::before        { background: rgba(180, 220, 140, 0.85); }
+.order-card.is-shipped::before     { background: rgba(140, 200, 255, 0.85); }
+.order-card.is-delivered::before   { background: rgba(160, 240, 200, 0.95); }
+.order-card.is-cancelled::before   { background: rgba(255, 130, 130, 0.85); }
+.order-card.is-pending::before     { background: rgba(255, 200, 130, 0.7); }
+
+.order-card-cover {
+  width: 152px;
+  height: 152px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 200, 255, 0.14);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 200, 255, 0.5);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 48px;
+}
+
+.order-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.order-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.order-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(241, 236, 255, 0.7);
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.order-card-id {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 200, 255, 0.92);
+}
+
+.order-card-status-pill {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(10, 8, 22, 0.55);
+  color: rgba(241, 236, 255, 0.86);
+}
+
+.order-card-status-pill.is-paid {
+  border-color: rgba(180, 220, 140, 0.55);
+  color: rgba(220, 245, 200, 0.95);
+  background: rgba(180, 220, 140, 0.08);
+}
+.order-card-status-pill.is-shipped {
+  border-color: rgba(140, 200, 255, 0.55);
+  color: rgba(210, 235, 255, 0.95);
+  background: rgba(140, 200, 255, 0.08);
+}
+.order-card-status-pill.is-delivered {
+  border-color: rgba(160, 240, 200, 0.6);
+  color: rgba(220, 250, 230, 0.98);
+  background: rgba(160, 240, 200, 0.08);
+}
+.order-card-status-pill.is-cancelled {
+  border-color: rgba(255, 130, 130, 0.55);
+  color: rgba(255, 210, 210, 0.95);
+  background: rgba(255, 130, 130, 0.08);
+}
+.order-card-status-pill.is-pending {
+  border-color: rgba(255, 200, 130, 0.55);
+  color: rgba(255, 230, 200, 0.95);
+  background: rgba(255, 200, 130, 0.08);
+}
+
+.order-card-atelier {
+  color: rgba(255, 200, 255, 0.86);
+  text-decoration: none;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 15px;
+  border-bottom: 1px solid transparent;
+}
+
+.order-card-atelier:hover {
+  border-bottom-color: rgba(255, 200, 255, 0.5);
+}
+
+.order-card-date {
+  margin-left: auto;
+  color: rgba(241, 236, 255, 0.55);
+}
+
+/* ─── Item list inside the card ─────────────────────────────── */
+
+.order-card-titles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 16px;
+  color: var(--atelier-parchment);
+}
+
+.order-card-titles li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.order-card-titles em {
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.6);
+}
+
+/* ─── Money line ────────────────────────────────────────────── */
+
+.order-card-totals {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.order-card-totals strong {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-transform: none;
+}
+
+/* ─── Buyer details ─────────────────────────────────────────── */
+
+.order-card-buyer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 24px;
+  margin: 0;
+  padding: 12px 14px;
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid rgba(255, 200, 255, 0.1);
+  border-radius: 4px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+
+.order-card-buyer > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.order-card-buyer dt {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.6);
+}
+
+.order-card-buyer dd {
+  margin: 0;
+  color: var(--atelier-parchment);
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-card-buyer dd a {
+  color: rgba(255, 156, 227, 0.95);
+  text-decoration: none;
+}
+
+.order-card-buyer dd a:hover {
+  text-decoration: underline;
+}
+
+.order-card-buyer-quote {
+  font-style: italic;
+  color: rgba(241, 236, 255, 0.86);
+}
+
+/* ─── Tracking block ────────────────────────────────────────── */
+
+.order-card-tracking {
+  background: rgba(140, 200, 255, 0.06);
+  border: 1px solid rgba(140, 200, 255, 0.22);
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: rgba(241, 236, 255, 0.92);
+}
+
+.order-card-tracking p {
+  margin: 0 0 4px;
+}
+
+.order-card-tracking p:last-child {
+  margin-bottom: 0;
+}
+
+.order-card-tracking a {
+  color: rgba(180, 220, 255, 0.95);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(180, 220, 255, 0.4);
+}
+
+.order-card-maker-note {
+  font-style: italic;
+  color: rgba(241, 236, 255, 0.86);
+  border-left: 2px solid rgba(255, 156, 227, 0.4);
+  padding-left: 10px;
+}
+
+.order-card-notified {
+  color: rgba(160, 240, 200, 0.92);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Action area ───────────────────────────────────────────── */
+
+.order-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+
+.order-card-actions.is-final {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.order-action-form {
+  flex: 1 1 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid rgba(255, 200, 255, 0.16);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+
+.order-action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.order-action-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-action-input span {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 255, 0.66);
+}
+
+.order-action-input input,
+.order-action-input textarea {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 200, 255, 0.18);
+  color: var(--atelier-parchment);
+  padding: 8px 10px;
+  border-radius: 3px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.order-action-input input:focus,
+.order-action-input textarea:focus {
+  outline: none;
+  border-color: rgba(255, 200, 255, 0.55);
+  box-shadow: 0 0 0 2px rgba(255, 200, 255, 0.1);
+}
+
+.order-action-submit {
+  appearance: none;
+  border: 1px solid rgba(255, 200, 255, 0.55);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 110, 199, 0.95) 0%,
+    rgba(167, 107, 255, 0.92) 100%
+  );
+  color: #0a0816;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.order-action-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(255, 130, 220, 0.28);
+}
+
+.order-action-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-action-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-action-secondary-btn,
+.order-action-cancel-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 200, 255, 0.4);
+  background: rgba(10, 8, 22, 0.55);
+  color: rgba(255, 200, 255, 0.88);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.order-action-secondary-btn:hover,
+.order-action-cancel-btn:hover {
+  color: #fff;
+  background: rgba(255, 200, 255, 0.08);
+}
+
+.order-action-cancel-btn {
+  border-color: rgba(255, 130, 130, 0.45);
+  color: rgba(255, 200, 200, 0.92);
+}
+
+.order-action-cancel-btn:hover {
+  background: rgba(255, 130, 130, 0.1);
+  color: #fff;
+}
+
+.order-action-cancel-reason {
+  flex: 1 1 160px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 130, 130, 0.25);
+  color: var(--atelier-parchment);
+  padding: 7px 10px;
+  border-radius: 3px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+}
+
+.order-action-error {
+  flex: 1 0 100%;
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  background: rgba(255, 130, 130, 0.1);
+  border: 1px solid rgba(255, 130, 130, 0.4);
+  border-radius: 3px;
+  color: rgba(255, 220, 220, 0.95);
+  font-size: 13px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+/* ─── Status timeline ───────────────────────────────────────── */
+
+.order-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 2px;
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.order-timeline li {
+  position: relative;
+  flex: 1 1 0;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(241, 236, 255, 0.45);
+}
+
+.order-timeline li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.order-timeline li > span:first-child {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.order-timeline li.is-on > span:first-child {
+  color: rgba(160, 240, 200, 0.95);
+  text-shadow: 0 0 12px rgba(160, 240, 200, 0.4);
+}
+
+.order-timeline li.is-on {
+  color: rgba(241, 236, 255, 0.92);
+}
+
+.order-timeline li.is-shipped.is-on > span:first-child {
+  color: rgba(140, 200, 255, 0.95);
+  text-shadow: 0 0 12px rgba(140, 200, 255, 0.4);
+}
+
+.order-timeline li.is-cancelled > span:first-child {
+  color: rgba(255, 130, 130, 0.95);
+  text-shadow: 0 0 12px rgba(255, 130, 130, 0.4);
+}
+
+.order-timeline li.is-cancelled {
+  color: rgba(255, 200, 200, 0.86);
+}
+
+.order-timeline li > span:nth-child(2) {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.order-timeline li em {
+  font-style: normal;
+  font-size: 11px;
+  color: rgba(241, 236, 255, 0.55);
+}
+
+/* ─── Detail page extras ───────────────────────────────────── */
+
+.order-detail-card {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 42, 0.78) 0%,
+    rgba(10, 8, 22, 0.92) 100%
+  );
+  border: 1px solid rgba(255, 200, 255, 0.16);
+  border-radius: 6px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.order-detail-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.order-detail-card.is-paid::before        { background: rgba(180, 220, 140, 0.85); }
+.order-detail-card.is-shipped::before     { background: rgba(140, 200, 255, 0.85); }
+.order-detail-card.is-delivered::before   { background: rgba(160, 240, 200, 0.95); }
+.order-detail-card.is-cancelled::before   { background: rgba(255, 130, 130, 0.85); }
+.order-detail-card.is-pending::before     { background: rgba(255, 200, 130, 0.7); }
+
+.order-detail-status-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.order-detail-date {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(241, 236, 255, 0.55);
+}
+
+.order-detail-section-title {
+  margin: 8px 0 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--atelier-parchment);
+  letter-spacing: 0.01em;
+}
+
+.order-detail-money {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid rgba(255, 200, 255, 0.1);
+  border-radius: 4px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+}
+
+.order-detail-money > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.order-detail-money dt {
+  color: rgba(255, 200, 255, 0.66);
+  letter-spacing: 0.04em;
+}
+
+.order-detail-money dd {
+  margin: 0;
+  color: var(--atelier-parchment);
+}
+
+.order-detail-money-total {
+  border-top: 1px solid rgba(255, 200, 255, 0.16);
+  padding-top: 8px;
+  margin-top: 4px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+}
+
+.order-detail-money-total dt {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  align-self: center;
+}
+
+.order-detail-money-total dd {
+  font-weight: 500;
+  font-size: 22px;
+  color: #fff;
+}
+
+.order-detail-item-price {
+  margin-left: auto;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 17px;
+  color: rgba(255, 200, 255, 0.92);
+}
+
+@media (max-width: 720px) {
+  .order-card {
+    grid-template-columns: 1fr;
+  }
+  .order-card-cover {
+    width: 100%;
+    height: 200px;
+  }
+  .order-card-actions {
+    align-items: stretch;
+  }
+  .order-action-row {
+    grid-template-columns: 1fr;
+  }
+  .order-timeline {
+    flex-direction: column;
+  }
+  .order-timeline li + li::before {
+    display: none;
+  }
+}

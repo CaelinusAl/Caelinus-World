@@ -20,8 +20,17 @@
 import { revalidatePath } from "next/cache";
 
 import { AdminGateError, requireAdmin } from "@/lib/atelier/admin";
+import { getSiteUrl, sendEmail } from "@/lib/email/sender";
+import {
+  atelierApprovedEmail,
+  atelierRejectedEmail,
+} from "@/lib/email/templates/atelier-decision";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { AtelierRow, AtelierStatus } from "@/lib/supabase/types";
+import type {
+  AtelierRow,
+  AtelierStatus,
+  ProfileRow,
+} from "@/lib/supabase/types";
 
 export type ActionResult =
   | { ok: true; status: AtelierStatus }
@@ -54,6 +63,91 @@ async function fetchAtelierSlug(id: string): Promise<string | null> {
 function bumpCaches(slug: string | null) {
   revalidatePath("/atelier/admin");
   if (slug) revalidatePath(`/atelier/${slug}`);
+}
+
+/**
+ * Look up the maker's email + locale + display name + atelier name so we
+ * can send a personalised decision mail. We do this with the service-role
+ * client because RLS on `profiles` only exposes the row to its owner.
+ */
+async function fetchMakerContext(atelierId: string): Promise<{
+  email: string | null;
+  name: string;
+  locale: "tr" | "en";
+  slug: string;
+  atelierName: string;
+} | null> {
+  const supabase = createSupabaseAdminClient();
+  const { data: a } = await supabase
+    .from("ateliers")
+    .select("slug, name, owner_user_id")
+    .eq("id", atelierId)
+    .maybeSingle();
+  const atelier = a as Pick<AtelierRow, "slug" | "name" | "owner_user_id"> | null;
+  if (!atelier?.owner_user_id) return null;
+
+  const { data: p } = await supabase
+    .from("profiles")
+    .select("email, display_name, locale")
+    .eq("id", atelier.owner_user_id)
+    .maybeSingle();
+  const profile = p as Pick<
+    ProfileRow,
+    "email" | "display_name" | "locale"
+  > | null;
+
+  const fallbackName = profile?.email
+    ? profile.email.split("@")[0]!
+    : atelier.name;
+
+  return {
+    email: profile?.email ?? null,
+    name: profile?.display_name?.trim() || fallbackName,
+    locale: (profile?.locale === "en" ? "en" : "tr") as "tr" | "en",
+    slug: atelier.slug,
+    atelierName: atelier.name,
+  };
+}
+
+/** Best-effort: log on failure, never throw. Mail must not undo a decision. */
+async function dispatchDecisionEmail(
+  atelierId: string,
+  kind: "approved" | "rejected",
+  reason?: string,
+): Promise<void> {
+  try {
+    const ctx = await fetchMakerContext(atelierId);
+    if (!ctx?.email) return;
+    const siteUrl = getSiteUrl();
+    const tpl =
+      kind === "approved"
+        ? atelierApprovedEmail({
+            name: ctx.name,
+            slug: ctx.slug,
+            atelierName: ctx.atelierName,
+            locale: ctx.locale,
+            siteUrl,
+          })
+        : atelierRejectedEmail({
+            name: ctx.name,
+            slug: ctx.slug,
+            atelierName: ctx.atelierName,
+            reason: reason ?? "",
+            locale: ctx.locale,
+            siteUrl,
+          });
+    const result = await sendEmail({
+      to: ctx.email,
+      subject: tpl.subject,
+      html: tpl.html,
+      text: tpl.text,
+    });
+    if (!result.ok) {
+      console.warn("[atelier.admin] decision mail failed:", result.error);
+    }
+  } catch (err) {
+    console.warn("[atelier.admin] decision mail threw:", err);
+  }
 }
 
 /* ─── approveAtelier ────────────────────────────────────────── */
@@ -89,6 +183,7 @@ export async function approveAtelier(id: string): Promise<ActionResult> {
 
   const row = data as Pick<AtelierRow, "status" | "slug"> | null;
   bumpCaches(row?.slug ?? null);
+  await dispatchDecisionEmail(id, "approved");
   return { ok: true, status: row?.status ?? "approved" };
 }
 
@@ -139,6 +234,7 @@ export async function rejectAtelier(
 
   const row = data as Pick<AtelierRow, "status" | "slug"> | null;
   bumpCaches(row?.slug ?? null);
+  await dispatchDecisionEmail(id, "rejected", trimmed);
   return { ok: true, status: row?.status ?? "rejected" };
 }
 

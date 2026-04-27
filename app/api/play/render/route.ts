@@ -26,6 +26,11 @@ import {
   ZODIACS,
 } from "@/data/play-assets";
 import { renderPlayImage } from "@/lib/play/provider";
+import {
+  checkQuota,
+  clientKeyFromHeaders,
+  recordRender,
+} from "@/lib/play/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { PlayRenderRow } from "@/lib/supabase/types";
 import { buildPlayPrompt } from "@/prompts/play";
@@ -98,6 +103,28 @@ export async function POST(req: Request) {
   const cachedRow = cached.data as Pick<PlayRenderRow, "url"> | null;
   if (cachedRow?.url) {
     return NextResponse.json({ url: cachedRow.url, cached: true });
+  }
+
+  // Cache miss — every render from here on is a real provider call.
+  // Apply the per-IP hourly budget BEFORE we spend any cents.
+  const clientKey = clientKeyFromHeaders(req.headers);
+  const quota = checkQuota(clientKey);
+  if (!quota.ok) {
+    const retrySeconds = Math.ceil(quota.retryAfterMs / 1000);
+    return NextResponse.json(
+      {
+        error: "quota_exceeded",
+        message:
+          `Saatlik render limitine ulaştın (${quota.used}/${quota.limit}). ` +
+          `${Math.ceil(retrySeconds / 60)} dakika sonra tekrar dene.`,
+        used: quota.used,
+        limit: quota.limit,
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(retrySeconds) },
+      },
+    );
   }
 
   // 2) Build prompt + render fresh.
@@ -175,6 +202,12 @@ export async function POST(req: Request) {
 
   const insertedRow = insert.data as Pick<PlayRenderRow, "url"> | null;
   const finalUrl = insertedRow?.url ?? publicUrl;
+
+  // Only count successful, billed renders. Stub renders are free, so
+  // skip them — keeps the dev experience friction-free.
+  if (render.provider !== "stub") {
+    recordRender(clientKey);
+  }
 
   return NextResponse.json({ url: finalUrl, cached: false });
 }

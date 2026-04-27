@@ -41,6 +41,8 @@ const T = {
   brand: { tr: "Caelinus · Atelier", en: "Caelinus · Atelier" },
   signout: { tr: "Çıkış", en: "Sign out" },
   moderate: { tr: "Moderasyon", en: "Moderation" },
+  account: { tr: "Hesabım", en: "Account" },
+  orders: { tr: "Siparişler", en: "Orders" },
   greetEyebrow: { tr: "Tezgâh", en: "Bench" },
   greet: {
     tr: (name: string) => `Hoş geldin, ${name}`,
@@ -118,6 +120,17 @@ export default function DashboardBody({
               {T.moderate[L]}
             </Link>
           ) : null}
+          {hasAteliers ? (
+            <Link
+              href="/atelier/dashboard/siparisler"
+              className="atelier-ribbon-btn"
+            >
+              {T.orders[L]}
+            </Link>
+          ) : null}
+          <Link href="/hesap" className="atelier-ribbon-btn">
+            {T.account[L]}
+          </Link>
           <form action="/auth/signout" method="post">
             <button className="atelier-ribbon-btn" type="submit">
               {T.signout[L]}

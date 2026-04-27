@@ -17,6 +17,7 @@ import { PROVINCES, PROVINCE_REGIONS } from "@/data/provinces";
 import type {
   AtelierKind,
   AtelierStatus,
+  ItemStatus,
 } from "@/lib/supabase/types";
 
 /* ─── enums ─────────────────────────────────────────────────────── */
@@ -191,6 +192,106 @@ export const atelierEditSchema = z.object({
 
 export type AtelierEditInput = z.infer<typeof atelierEditSchema>;
 
+/* ─── item (atelier_items) ──────────────────────────────────────── */
+
+export const ITEM_STATUSES: readonly ItemStatus[] = [
+  "draft",
+  "published",
+  "archived",
+  "sold-out",
+] as const;
+
+export const ITEM_STATUS_LABELS: Record<
+  ItemStatus,
+  { tr: string; en: string }
+> = {
+  draft:       { tr: "Taslak",       en: "Draft" },
+  published:   { tr: "Yayında",      en: "Published" },
+  archived:    { tr: "Arşivde",      en: "Archived" },
+  "sold-out":  { tr: "Tükendi",      en: "Sold out" },
+};
+
+/** Currencies we'll accept on the form. ISO 4217. */
+export const ITEM_CURRENCIES = ["TRY", "EUR", "USD"] as const;
+export type ItemCurrency = (typeof ITEM_CURRENCIES)[number];
+
+/**
+ * Item create/edit payload from the owner side. Mirrors `atelier_items`
+ * column constraints (slug regex, price ≥ 0, frequency 100-2000) so the
+ * UI surfaces friendly errors before bouncing off Postgres.
+ *
+ * Every field except `slug` and `title_tr` is optional so we can submit
+ * partial updates without round-tripping the whole row.
+ */
+export const itemEditSchema = z.object({
+  slug: slugSchema,
+  title_tr: z
+    .string()
+    .trim()
+    .min(2, { message: "Ürün adı en az 2 karakter olmalı" })
+    .max(120, { message: "Ürün adı en fazla 120 karakter olabilir" }),
+  title_en: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .or(z.literal("")),
+  description_tr: z
+    .string()
+    .trim()
+    .max(800, { message: "En fazla 800 karakter" })
+    .optional()
+    .or(z.literal("")),
+  description_en: z
+    .string()
+    .trim()
+    .max(800, { message: "En fazla 800 karakter" })
+    .optional()
+    .or(z.literal("")),
+  story_tr: z
+    .string()
+    .trim()
+    .max(4000, { message: "En fazla 4000 karakter" })
+    .optional()
+    .or(z.literal("")),
+  story_en: z
+    .string()
+    .trim()
+    .max(4000, { message: "En fazla 4000 karakter" })
+    .optional()
+    .or(z.literal("")),
+  currency: z.enum(ITEM_CURRENCIES),
+  price_amount: z
+    .number()
+    .int({ message: "Fiyat tam sayı olmalı (kuruş cinsinden)" })
+    .min(0, { message: "Fiyat negatif olamaz" })
+    .max(1_000_000_00, { message: "Fiyat çok yüksek görünüyor" }),
+  frequency_hz: z
+    .number()
+    .int()
+    .min(100, { message: "Frekans 100 Hz'in altında olamaz" })
+    .max(2000, { message: "Frekans 2000 Hz'i aşamaz" })
+    .nullable()
+    .optional(),
+  moods: z.array(z.string().trim().min(1).max(40)).max(8).default([]),
+  intent: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .or(z.literal("")),
+  plant_ids: z.array(z.string().trim().min(1).max(60)).max(8).default([]),
+  images: z
+    .array(z.string().trim().url({ message: "Geçerli bir görsel URL'i" }))
+    .max(8, { message: "En fazla 8 görsel ekleyebilirsin" })
+    .default([]),
+  status: z.enum(ITEM_STATUSES as unknown as [ItemStatus, ...ItemStatus[]]),
+  position: z.number().int().min(0).default(0),
+  collection_id: z.string().uuid().nullable().optional(),
+});
+
+export type ItemEditInput = z.infer<typeof itemEditSchema>;
+
 /* ─── helpers ───────────────────────────────────────────────────── */
 
 /** Normalise an empty string to null — the DB cares about the difference. */
@@ -205,4 +306,57 @@ export function emptyToNull<T extends string | undefined>(
 /** Provinces that belong to a given region — for cascading dropdowns. */
 export function provincesInRegion(regionId: string) {
   return PROVINCES.filter((p) => p.regionId === regionId);
+}
+
+/**
+ * Convert the user's free-form price input ("1.249,90", "199.50", "0")
+ * into the integer minor unit that Postgres stores — kuruş for TRY,
+ * cents for EUR/USD. Returns null when the input cannot be parsed; the
+ * form treats null as "leave field empty" / inquire-only.
+ */
+export function parseMinorUnits(input: string): number | null {
+  if (input == null) return null;
+  const cleaned = input
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(/[₺€$]/g, "")
+    .replace(/\.(?=\d{3}\b)/g, "") // strip thousands separators
+    .replace(",", ".");
+  if (cleaned === "" || cleaned === "-") return null;
+  const value = Number(cleaned);
+  if (!Number.isFinite(value) || value < 0) return null;
+  return Math.round(value * 100);
+}
+
+/** Inverse of `parseMinorUnits`. */
+export function formatMinorUnits(
+  amount: number | null | undefined,
+  locale: "tr" | "en" = "tr",
+): string {
+  if (amount == null) return "";
+  const value = amount / 100;
+  return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+/** Money rendering with a currency code, used on showcase cards. */
+export function formatItemPrice(
+  amount: number | null | undefined,
+  currency: string,
+  locale: "tr" | "en" = "tr",
+): string {
+  if (amount == null || amount <= 0) {
+    return locale === "tr" ? "Fiyat için iletişime geç" : "Inquire for price";
+  }
+  try {
+    return new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount / 100);
+  } catch {
+    return `${(amount / 100).toFixed(0)} ${currency}`;
+  }
 }

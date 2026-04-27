@@ -14,10 +14,18 @@
  */
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CinemaCTA, NebulaPortal, StageHero } from "@/app/_stage";
-import { lookCacheKey } from "@/data/play-assets";
+import {
+  ARCHETYPES,
+  SCENES,
+  ZODIACS,
+  lookCacheKey,
+  type ArchetypeId,
+  type SceneId,
+  type ZodiacId,
+} from "@/data/play-assets";
 import { useLangStore } from "@/stores/lang-store";
 import { usePlayStore } from "@/stores/play-store";
 
@@ -30,7 +38,7 @@ import Stepper from "./_components/Stepper";
 
 type RenderResponse =
   | { url: string; cached: boolean }
-  | { error: string };
+  | { error: string; message?: string; used?: number; limit?: number };
 
 export default function PlayPage() {
   const { lang, hydrated, hydrate, toggle } = useLangStore();
@@ -48,12 +56,16 @@ export default function PlayPage() {
   const scene = usePlayStore((s) => s.scene);
   const render = usePlayStore((s) => s.render);
   const setStep = usePlayStore((s) => s.setStep);
+  const setArchetype = usePlayStore((s) => s.setArchetype);
+  const setZodiac = usePlayStore((s) => s.setZodiac);
+  const setScene = usePlayStore((s) => s.setScene);
   const beginRender = usePlayStore((s) => s.beginRender);
   const setRenderResult = usePlayStore((s) => s.setRenderResult);
   const setRenderError = usePlayStore((s) => s.setRenderError);
   const markSaved = usePlayStore((s) => s.markSaved);
 
   const [toast, setToast] = useState<string | null>(null);
+  const seededFromUrlRef = useRef(false);
 
   // Auto-dismiss toasts so the action row doesn't keep stale text.
   useEffect(() => {
@@ -61,6 +73,34 @@ export default function PlayPage() {
     const id = window.setTimeout(() => setToast(null), 3200);
     return () => window.clearTimeout(id);
   }, [toast]);
+
+  // Honour ?archetype=…&zodiac=…&scene=… so the gallery can deep-link
+  // someone straight into the result for that triple. We do this once
+  // per mount; the user can still navigate steps freely after.
+  useEffect(() => {
+    if (seededFromUrlRef.current) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const a = params.get("archetype");
+    const z = params.get("zodiac");
+    const s = params.get("scene");
+    const validA = ARCHETYPES.find((x) => x.id === a)?.id as
+      | ArchetypeId
+      | undefined;
+    const validZ = ZODIACS.find((x) => x.id === z)?.id as ZodiacId | undefined;
+    const validS = SCENES.find((x) => x.id === s)?.id as SceneId | undefined;
+    if (validA) setArchetype(validA);
+    if (validZ) setZodiac(validZ);
+    if (validS) setScene(validS);
+    if (validA && validZ && validS) {
+      // All three present → jump to scene step so the existing
+      // generate-on-pick handler can fire on the first interaction. We
+      // don't auto-render here because it would race the lang store's
+      // hydration and produce an English toast in a TR session.
+      setStep("scene");
+    }
+    seededFromUrlRef.current = true;
+  }, [setArchetype, setZodiac, setScene, setStep]);
 
   // ── Render trigger ────────────────────────────────────────
   // Called from ScenePicker (and Retry button on error). Posts the
@@ -77,18 +117,39 @@ export default function PlayPage() {
       });
       if (!res.ok) {
         const j = (await res.json().catch(() => null)) as RenderResponse | null;
-        const msg =
-          j && "error" in j
-            ? j.error
-            : L === "tr"
+        let msg: string;
+        if (res.status === 429) {
+          // Quota response carries a friendly TR message; fall back to a
+          // generic English line if we ever localise on the server.
+          msg =
+            (j && "message" in j && j.message) ||
+            (L === "tr"
+              ? "Saatlik render limitine ulaştın. Biraz sonra tekrar dene."
+              : "Hourly render limit reached. Try again later.");
+        } else if (res.status === 503) {
+          msg =
+            L === "tr"
+              ? "AI sağlayıcı şu an yanıt veremiyor. Bir saniye sonra tekrar dene."
+              : "The AI provider isn't responding right now. Try again in a moment.";
+        } else if (res.status === 502) {
+          msg =
+            L === "tr"
+              ? "Görünüm çizilirken bir şey ters gitti. Tekrar dene."
+              : "Something went wrong while painting your look. Try again.";
+        } else {
+          msg =
+            (j && "message" in j && j.message) ||
+            (j && "error" in j && j.error) ||
+            (L === "tr"
               ? "Görünüm oluşturulamadı."
-              : "Could not generate the look.";
+              : "Could not generate the look.");
+        }
         setRenderError(msg);
         return;
       }
       const j = (await res.json()) as RenderResponse;
       if ("error" in j) {
-        setRenderError(j.error);
+        setRenderError(("message" in j && j.message) || j.error);
       } else {
         setRenderResult(j.url, j.cached);
       }
@@ -174,6 +235,9 @@ export default function PlayPage() {
           <span className="play-ribbon-name">Caelinus · Play</span>
         </Link>
         <div className="play-ribbon-actions">
+          <Link href="/play/galeri" className="play-ribbon-btn">
+            {L === "tr" ? "Galeri" : "Gallery"}
+          </Link>
           <Link href="/play/looks" className="play-ribbon-btn">
             {L === "tr" ? "Görünümlerim" : "My looks"}
           </Link>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { listOwnerItems, listPublicItems } from "@/lib/atelier/items";
+import { stripeReady } from "@/lib/stripe/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierRow } from "@/lib/supabase/types";
 
@@ -84,10 +86,13 @@ export async function generateMetadata({
 
 export default async function AtelierPublicPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
   const atelier = await fetchAtelier(slug);
 
   if (!atelier) notFound();
@@ -104,5 +109,34 @@ export default async function AtelierPublicPage({
     notFound();
   }
 
-  return <AtelierPublicBody atelier={atelier} isOwner={isOwner} />;
+  // Owners get to preview every item (incl. drafts/archives) on their
+  // own page; visitors only see published + sold-out, courtesy of RLS.
+  const items = isOwner
+    ? await listOwnerItems(atelier.id)
+    : await listPublicItems(atelier.id);
+
+  const validNotices = [
+    "iptal",
+    "yapilandirma",
+    "stripe",
+    "yok",
+    "fiyatsiz",
+    "kapali",
+    "hata",
+  ] as const;
+  type Notice = (typeof validNotices)[number];
+  const checkoutNotice: Notice | null =
+    sp.checkout && validNotices.includes(sp.checkout as Notice)
+      ? (sp.checkout as Notice)
+      : null;
+
+  return (
+    <AtelierPublicBody
+      atelier={atelier}
+      isOwner={isOwner}
+      items={items}
+      checkoutEnabled={stripeReady()}
+      checkoutNotice={checkoutNotice}
+    />
+  );
 }

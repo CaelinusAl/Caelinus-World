@@ -81,6 +81,25 @@ const ServerEnvSchema = z.object({
     .default(
       "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
     ),
+  /* Cost guard: max fresh renders per IP per hour. Cache hits don't
+     count, so 60/hour is plenty for normal play. */
+  PLAY_AI_HOURLY_BUDGET: z.coerce.number().int().min(1).max(1000).default(60),
+  /* Transactional email (Resend). When `RESEND_API_KEY` is set we send
+     real notifications (atelier approval, password reset hand-offs).
+     Without it the sender falls back to console logging — useful in dev
+     and CI without leaking real mail. */
+  RESEND_API_KEY: z.string().optional(),
+  /* Mailbox we send FROM. Must be a verified Resend domain. Example:
+     "Caelinus <hello@mail.caelinus.world>". */
+  EMAIL_FROM: z.string().optional(),
+  /* Stripe (atelier e-commerce). Three keys:
+     - STRIPE_SECRET_KEY      sk_live_… / sk_test_… (server only)
+     - STRIPE_WEBHOOK_SECRET  whsec_… signing secret for /api/stripe/webhook
+     - STRIPE_CURRENCY_DEFAULT  ISO 4217 used as a fallback when the
+                                 listing didn't set its own. Default TRY. */
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_CURRENCY_DEFAULT: z.string().length(3).optional().default("TRY"),
 });
 
 /* ─── Friendly error formatting ────────────────────── */
@@ -136,6 +155,12 @@ function parseServerEnv() {
     PLAY_AI_PROVIDER: process.env.PLAY_AI_PROVIDER,
     PLAY_AI_API_KEY: process.env.PLAY_AI_API_KEY,
     PLAY_AI_REPLICATE_MODEL: process.env.PLAY_AI_REPLICATE_MODEL,
+    PLAY_AI_HOURLY_BUDGET: process.env.PLAY_AI_HOURLY_BUDGET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    STRIPE_CURRENCY_DEFAULT: process.env.STRIPE_CURRENCY_DEFAULT,
   });
   if (!parsed.success) {
     throw new Error(

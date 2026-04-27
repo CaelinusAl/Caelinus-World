@@ -132,6 +132,69 @@ export interface UserPlayLookRow {
   created_at: string;
 }
 
+/* Stripe-backed orders (migration 0006) */
+
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+
+export interface ShippingAddress {
+  line1: string | null;
+  line2: string | null;
+  city: string | null;
+  postal_code: string | null;
+  state: string | null;
+  country: string | null;
+}
+
+export interface AtelierOrderRow {
+  id: string;
+  buyer_user_id: string | null;
+  atelier_id: string;
+  status: OrderStatus;
+  currency: string;
+  subtotal_amount: number;
+  shipping_amount: number;
+  tax_amount: number;
+  total_amount: number;
+  buyer_email: string | null;
+  buyer_name: string | null;
+  shipping_address: ShippingAddress | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  buyer_notes: string | null;
+  /** Maker-side fulfilment trail (migration 0007). All nullable so
+   *  pre-shipment rows are valid without backfill. */
+  tracking_carrier: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
+  cancelled_at: string | null;
+  refunded_at: string | null;
+  maker_note: string | null;
+  buyer_notified_shipped_at: string | null;
+  created_at: string;
+  paid_at: string | null;
+  updated_at: string;
+}
+
+export interface AtelierOrderItemRow {
+  id: string;
+  order_id: string;
+  item_id: string;
+  title_snapshot: string;
+  currency_snapshot: string;
+  price_snapshot_amount: number;
+  image_snapshot_url: string | null;
+  quantity: number;
+  created_at: string;
+}
+
 /** Compose a Supabase-typed Database root for `createClient<Database>()`.
  *
  * Shape mirrors Supabase's generated types pattern (`{ [_ in never]: never }`
@@ -197,6 +260,33 @@ export type Database = {
         Update: Partial<UserPlayLookRow>;
         Relationships: [];
       };
+      atelier_orders: {
+        Row: AtelierOrderRow;
+        Insert: Partial<AtelierOrderRow> &
+          Pick<
+            AtelierOrderRow,
+            | "atelier_id"
+            | "currency"
+            | "subtotal_amount"
+            | "total_amount"
+          >;
+        Update: Partial<AtelierOrderRow>;
+        Relationships: [];
+      };
+      atelier_order_items: {
+        Row: AtelierOrderItemRow;
+        Insert: Partial<AtelierOrderItemRow> &
+          Pick<
+            AtelierOrderItemRow,
+            | "order_id"
+            | "item_id"
+            | "title_snapshot"
+            | "currency_snapshot"
+            | "price_snapshot_amount"
+          >;
+        Update: Partial<AtelierOrderItemRow>;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: { [_ in never]: never };
@@ -205,6 +295,7 @@ export type Database = {
       atelier_status: AtelierStatus;
       collection_status: CollectionStatus;
       item_status: ItemStatus;
+      order_status: OrderStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };
