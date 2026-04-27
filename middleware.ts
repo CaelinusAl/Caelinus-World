@@ -71,14 +71,14 @@ export function middleware(request: NextRequest) {
   const currentLocale = localeFromHost(host);
 
   // Bypass logic + header injection for static / API paths.
+  // Bots and static traffic always see the host-derived locale —
+  // cookies are a human-only signal.
   if (isStaticOrInternal(pathname)) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCALE_HEADER, currentLocale);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Bots see the canonical content for whichever subdomain they hit.
-  // No GeoIP, no cookie reading — just inject the header and move on.
   if (isBotUserAgent(request.headers.get("user-agent"))) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(LOCALE_HEADER, currentLocale);
@@ -90,6 +90,14 @@ export function middleware(request: NextRequest) {
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
   const userPreference: Locale | null =
     cookieLocale === "tr" || cookieLocale === "en" ? cookieLocale : null;
+
+  // Effective locale = cookie override ?? host-derived. This is what
+  // the server should *render*. In multi-host mode the cookie usually
+  // matches the host (because we redirect mismatches below), so this
+  // collapses to currentLocale. In single-host mode (Vercel preview
+  // URL, dev localhost without an en.* mirror) the cookie is the only
+  // way to switch language, so it must drive SSR.
+  const effectiveLocale: Locale = userPreference ?? currentLocale;
 
   // Two preconditions before we'll consider auto-redirecting:
   //
@@ -121,7 +129,7 @@ export function middleware(request: NextRequest) {
 
   if (!intendedLocale || intendedLocale === currentLocale) {
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set(LOCALE_HEADER, currentLocale);
+    requestHeaders.set(LOCALE_HEADER, effectiveLocale);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
@@ -131,7 +139,7 @@ export function middleware(request: NextRequest) {
   const targetHost = alternateHost(host, intendedLocale);
   if (!targetHost) {
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set(LOCALE_HEADER, currentLocale);
+    requestHeaders.set(LOCALE_HEADER, effectiveLocale);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
