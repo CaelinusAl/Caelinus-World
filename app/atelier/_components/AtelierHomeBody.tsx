@@ -142,6 +142,10 @@ const T = {
       tr: "Henüz açık bir tezgâh yok — ilkini sen aç.",
       en: "No open benches yet — open the first one yourself.",
     },
+    discoverAll: {
+      tr: "Tüm tezgâhları keşfet",
+      en: "Discover all benches",
+    },
   },
 } as const;
 
@@ -324,6 +328,20 @@ export default function AtelierHomeBody({
               {T.featured.empty[L]}
             </p>
           )}
+
+          {/* Pivot to the full directory — even when "featured" is empty
+              the keşfet page surfaces the empty-state with filters, so
+              the link is always meaningful. */}
+          <div className="atelier-home-featured-cta">
+            <CinemaCTA
+              href="/atelier/kesfet"
+              variant="ghost"
+              tone="magenta"
+              trailingGlyph="→"
+            >
+              {T.featured.discoverAll[L]}
+            </CinemaCTA>
+          </div>
         </section>
       </main>
     </div>
