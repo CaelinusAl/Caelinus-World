@@ -17,7 +17,7 @@
  *
  * Setting locale (toggle) means navigating to the alternate subdomain
  * and dropping a cookie so the GeoIP redirect in middleware doesn't
- * undo the user's choice. See `stores/lang-store.ts` and `middleware.ts`.
+ * undo the user's choice. See `stores/lang-store.ts` and `proxy.ts`.
  *
  * The `NEXT_PUBLIC_SITE_HOST_TR` / `NEXT_PUBLIC_SITE_HOST_EN` env vars
  * are only consulted in production. In dev we always use localhost so

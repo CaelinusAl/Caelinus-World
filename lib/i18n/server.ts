@@ -9,7 +9,7 @@
  *   const locale = await getLocale();    // → "tr" | "en"
  *   const host   = await getHost();      // → "caelinus.world" | …
  *
- * The `x-caelinus-locale` header is set by `middleware.ts` so we can
+ * The `x-caelinus-locale` header is set by `proxy.ts` so we can
  * cheaply read the locale once it's been resolved (and any GeoIP
  * redirects have already happened). When the header is missing
  * (preview deploy, edge cases) we fall back to host parsing.
