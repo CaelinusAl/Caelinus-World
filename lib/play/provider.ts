@@ -54,28 +54,75 @@ type RenderInput = {
    * paint the actual garment onto the goddess while preserving her
    * face, pose, lighting and background scene.
    *
-   *   • `avatarUrl`   — public URL of the bare (no-outfit) render that
-   *                     was already produced for this triple. Server
-   *                     fetches it as bytes for the multipart upload.
+   *   • `avatarUrl`     — public URL of the bare (no-outfit) render
+   *                       that was already produced for this triple.
+   *                       Server fetches it as bytes for the multipart
+   *                       upload.
    *
-   *   • `outfitImagePath` — path UNDER `public/` for the shop hero shot
-   *                     (e.g. "/play/shop/taurus-look.jpg"). Read off
-   *                     local disk so prod doesn't have to round-trip
-   *                     through its own CDN to itself.
+   *   • `garmentBytes`  — raw bytes of the shop product photo, fetched
+   *                       by the route handler over HTTP from the same
+   *                       deployment's CDN. We deliberately don't read
+   *                       `public/` from disk here — that triggers
+   *                       Next.js file tracing on the whole tree and
+   *                       balloons the serverless function bundle past
+   *                       Vercel's 300 MB limit.
    *
-   *   • `editPrompt`  — the surgical edit instruction built by
-   *                     `buildPlayEditPrompt` in `prompts/play.ts`.
-   *                     Different from `input.prompt` (text-to-image),
-   *                     which is too verbose for the edit endpoint.
+   *   • `garmentMime`   — content-type returned by the fetch (or
+   *                       guessed from the file extension when the
+   *                       CDN doesn't surface one).
+   *
+   *   • `editPrompt`    — the surgical edit instruction built by
+   *                       `buildPlayEditPrompt` in `prompts/play.ts`.
+   *                       Different from `input.prompt` (text-to-image),
+   *                       which is too verbose for the edit endpoint.
    *
    * Other providers (Replicate, stub) ignore this field and behave as
    * before — falls back to the text-to-image path with the regular
    * prompt + outfit fragment baked in.
+   *
+   * NOTE — best for accessories. We discovered the gpt-image-1 edit
+   * endpoint treats the second image as a *vibe reference* rather than
+   * a pixel source, so for actual garments (bikini / pareo) we now
+   * prefer the FASHN VTON path below. We still keep this branch alive
+   * because it works fine for jewelry / bag / heels (FASHN's model is
+   * garment-only) and as a fallback when `FAL_KEY` isn't configured.
    */
   editReferences?: {
     avatarUrl: string;
-    outfitImagePath: string;
+    garmentBytes: Uint8Array;
+    garmentMime: string;
     editPrompt: string;
+  };
+  /**
+   * Stylist Caelinus AI — pixel-perfect virtual try-on (FASHN v1.6).
+   *
+   * When set, the orchestrator hard-overrides the configured provider
+   * and routes through fal-ai/fashn/tryon/v1.6 — a commercial-grade
+   * VTON diffusion model trained specifically to *transfer the actual
+   * garment* from a flat-lay or on-model reference onto the subject.
+   * This is the path that actually answers "I want my real shop product
+   * on the avatar" instead of "I want an AI's interpretation of it".
+   *
+   *   • `avatarUrl`     — public URL of the bare avatar render. FASHN
+   *                       fetches it directly from our Supabase CDN.
+   *
+   *   • `garmentImageData` — base64 data URI of the shop product photo
+   *                       (`data:image/png;base64,…`). We don't pass a
+   *                       URL because in dev the host is localhost
+   *                       (FASHN can't reach it), and in prod we'd
+   *                       still need to round-trip through our own CDN.
+   *                       Data URI is the cleanest cross-environment
+   *                       option and keeps the secret garment image
+   *                       off any public CDN if we ever go that way.
+   *
+   *   • `category`      — FASHN body region: "tops", "bottoms",
+   *                       "one-pieces" or "auto". Picked per outfit at
+   *                       the route level.
+   */
+  vtonReferences?: {
+    avatarUrl: string;
+    garmentImageData: string;
+    category: "tops" | "bottoms" | "one-pieces" | "auto";
   };
 };
 
@@ -131,6 +178,62 @@ export async function renderPlayImage(input: RenderInput): Promise<RenderResult>
   const fallbackKey = fallback
     ? resolveProviderKey(fallback, serverEnv.PLAY_AI_FALLBACK_API_KEY)
     : undefined;
+
+  // FASHN VTON hard-override. Whenever the route asks for a virtual
+  // try-on AND the FAL key is configured, we go straight to FASHN —
+  // the configured `PLAY_AI_PROVIDER` is irrelevant for this path
+  // because gpt-image-1 / Replicate-SDXL aren't garment-transfer
+  // models. We still run the structured timing log + fallback to
+  // OpenAI image-edit when FASHN itself blows up so the demo never
+  // dead-ends.
+  if (input.vtonReferences) {
+    const falKey = serverEnv.FAL_KEY;
+    if (falKey) {
+      const startedAt = Date.now();
+      console.log(
+        `[play.provider] start provider=fashn cacheKey=${input.cacheKey} ts=${new Date(
+          startedAt,
+        ).toISOString()}`,
+      );
+      try {
+        const result = await renderFashnVTON(falKey, input);
+        console.log(
+          `[play.provider] done provider=${result.provider} cacheKey=${input.cacheKey} durationMs=${
+            Date.now() - startedAt
+          } bytes=${result.bytes.length} contentType=${result.contentType}`,
+        );
+        return result;
+      } catch (vtonErr) {
+        const msg =
+          vtonErr instanceof Error ? vtonErr.message : String(vtonErr);
+        console.error(
+          `[play.provider] fail provider=fashn cacheKey=${input.cacheKey} durationMs=${
+            Date.now() - startedAt
+          } msg=${msg}`,
+        );
+        // VTON failed — drop the vton overrides and try the OpenAI edit
+        // path instead (still better than text-to-image because at least
+        // it carries the avatar + garment as references).
+        if (input.editReferences && primaryKey && primary === "openai") {
+          console.warn(
+            `[play.provider] fallback start provider=openai-edit cacheKey=${input.cacheKey} reason=fashn_failed`,
+          );
+          // Fall through to the regular flow below with vtonReferences
+          // stripped so we don't loop.
+          input = { ...input, vtonReferences: undefined };
+        } else {
+          throw vtonErr;
+        }
+      }
+    } else {
+      // No FAL key — log once so the operator knows why the request
+      // silently dropped to the inferior path. Then fall through to
+      // the regular OpenAI-edit branch.
+      console.warn(
+        `[play.provider] vton requested but FAL_KEY unset — falling back to ${primary} edit path. cacheKey=${input.cacheKey}`,
+      );
+    }
+  }
 
   // No real provider possible — stub straight away.
   if (primary === "stub" || !primaryKey) {
@@ -412,40 +515,54 @@ async function renderOpenAIEdit(
   const avatarBuf = new Uint8Array(await avatarRes.arrayBuffer());
   const avatarType = avatarRes.headers.get("content-type") ?? "image/png";
 
-  // Outfit reference is a static asset under `public/` — read off the
-  // local filesystem so we don't make the server round-trip back through
-  // its own CDN to itself (slower + counts against the same budget).
-  // Lazy-imported to keep the cold path of the orchestrator small.
-  const { promises: fs } = await import("fs");
-  const path = await import("path");
-  const cleanPath = refs.outfitImagePath.replace(/^\/+/, "");
-  const absPath = path.join(process.cwd(), "public", cleanPath);
-  let outfitBuf: Buffer;
-  try {
-    outfitBuf = await fs.readFile(absPath);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `OpenAI edit: outfit reference missing on disk path=${absPath} err=${msg}`,
-    );
-  }
-  const outfitType = guessImageMime(refs.outfitImagePath);
+  // Garment bytes were fetched by the route handler over HTTP and
+  // handed in directly — we no longer read `public/` from disk here
+  // (that triggers Next.js file tracing across the whole tree and
+  // balloons the serverless function bundle past Vercel's 300 MB
+  // limit; see the comment on `RenderInput.editReferences` above).
+  const outfitBuf = refs.garmentBytes;
+  const outfitType = refs.garmentMime;
 
   const form = new FormData();
   form.append("model", "gpt-image-1");
   form.append("prompt", refs.editPrompt);
   form.append("size", "1024x1024");
   form.append("n", "1");
-  // gpt-image-1 accepts multiple images under the same `image` key —
-  // the first is treated as the subject, subsequent files as visual
-  // references the model can pull garment / accessory geometry from.
+  // Quality knobs. Both default LOW and we leave a *lot* of fidelity
+  // on the table by accepting the defaults — that's most of why
+  // earlier renders looked like AI re-imaginings of the garment
+  // rather than faithful transfers.
+  //
+  //   • `quality: high`         — pushes gpt-image-1 to spend more
+  //                               compute on detail; small fabric
+  //                               prints, hardware (rings, buckles,
+  //                               clasps) and embroidery survive
+  //                               the edit instead of being smoothed
+  //                               away. Cost ~3-4x vs default.
+  //
+  //   • `input_fidelity: high`  — tells the model to treat the input
+  //                               images as the visual ground truth.
+  //                               Without this, the multi-image edit
+  //                               endpoint behaves more like
+  //                               "img2img with hints" and drifts.
+  //                               This is the single most important
+  //                               parameter for "the actual product"
+  //                               vs. "an AI interpretation of the
+  //                               product" outcomes.
+  form.append("quality", "high");
+  form.append("input_fidelity", "high");
+  // gpt-image-1 multi-image edit takes `image[]` (PHP-style array
+  // syntax) — sending two `image=` fields trips a 400 "Duplicate
+  // parameter" guard. Order matters: the first entry is the subject
+  // the model rewrites, subsequent entries are visual references the
+  // model pulls garment / accessory geometry from.
   form.append(
-    "image",
+    "image[]",
     new Blob([avatarBuf as BlobPart], { type: avatarType }),
     "avatar.png",
   );
   form.append(
-    "image",
+    "image[]",
     new Blob([outfitBuf as BlobPart], { type: outfitType }),
     `outfit.${extFromMime(outfitType)}`,
   );
@@ -476,12 +593,114 @@ async function renderOpenAIEdit(
   };
 }
 
-function guessImageMime(filename: string): string {
-  const f = filename.toLowerCase();
-  if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
-  if (f.endsWith(".webp")) return "image/webp";
-  if (f.endsWith(".gif")) return "image/gif";
-  return "image/png";
+/* ── FASHN VTON via fal.ai ───────────────────────────────────── */
+
+/**
+ * Pixel-perfect virtual try-on through `fal-ai/fashn/tryon/v1.6`.
+ *
+ * FASHN v1.6 is currently the production-grade commercial VTON
+ * model. Unlike gpt-image-1 image-edit (which uses the second image
+ * as a mood reference), FASHN actually warps and transfers the real
+ * garment from the reference photo onto the subject — fabric prints,
+ * straps, hardware and stitching are preserved pixel by pixel.
+ *
+ * Endpoint: synchronous `https://fal.run/fal-ai/fashn/tryon/v1.6`
+ * Auth: `Authorization: Key <FAL_KEY>`
+ * Pricing: ~$0.075 per render (covered by demo budget).
+ * Latency: ~11s in `balanced` mode, ~25s in `quality`.
+ *
+ * Inputs we send:
+ *   • `model_image`         — public URL of the bare avatar (Supabase
+ *                             storage). FASHN fetches it directly.
+ *   • `garment_image`       — base64 data URI of the shop product.
+ *                             We don't send a localhost URL (FASHN
+ *                             can't reach it from dev) and we don't
+ *                             want to bounce through our own CDN, so
+ *                             data URI is the cleanest path.
+ *   • `category`            — body region (tops / bottoms / one-pieces
+ *                             / auto). Picked at the route level per
+ *                             outfit.
+ *   • `mode: "quality"`     — investor-demo facing, so we pay for the
+ *                             extra detail. Bump down to "balanced"
+ *                             if cost ever becomes a constraint.
+ *   • `garment_photo_type:  — our shop heroes are model-on shots, but
+ *      "auto"`                some products are flat-lay. "auto" lets
+ *                             FASHN pick the right pre-processor.
+ *   • `moderation_level:    — explicit content gets blocked, but
+ *      "permissive"`          swimwear is allowed (which we need for
+ *                             bikini outfits). "conservative" would
+ *                             reject every bikini.
+ */
+async function renderFashnVTON(
+  falKey: string,
+  input: RenderInput,
+): Promise<RenderResult> {
+  const refs = input.vtonReferences!;
+
+  const body = {
+    model_image: refs.avatarUrl,
+    garment_image: refs.garmentImageData,
+    category: refs.category,
+    mode: "quality" as const,
+    garment_photo_type: "auto" as const,
+    moderation_level: "permissive" as const,
+    num_samples: 1,
+    output_format: "png" as const,
+    seed: input.seed,
+  };
+
+  const res = await fetch("https://fal.run/fal-ai/fashn/tryon/v1.6", {
+    method: "POST",
+    headers: {
+      Authorization: `Key ${falKey}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`FASHN VTON failed: ${res.status} ${txt.slice(0, 240)}`);
+  }
+
+  const j = (await res.json()) as {
+    images?: { url?: string; content_type?: string }[];
+    error?: string;
+    detail?: unknown;
+  };
+
+  const first = j.images?.[0];
+  const imageUrl = first?.url;
+  if (!imageUrl) {
+    const summary = j.error ?? JSON.stringify(j.detail ?? j).slice(0, 240);
+    throw new Error(`FASHN VTON returned no image: ${summary}`);
+  }
+
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) {
+    throw new Error(
+      `FASHN VTON output fetch failed: ${imgRes.status} ${imageUrl}`,
+    );
+  }
+  const buf = new Uint8Array(await imgRes.arrayBuffer());
+  const contentType =
+    first?.content_type ?? imgRes.headers.get("content-type") ?? "image/png";
+  const extension = contentType.includes("jpeg")
+    ? "jpg"
+    : contentType.includes("webp")
+      ? "webp"
+      : "png";
+  return {
+    bytes: buf,
+    contentType,
+    extension,
+    // We tag VTON renders as `openai` for cache/telemetry compatibility
+    // — `provider` is currently a closed enum the cache row schema
+    // depends on. Bumping the schema is a separate concern; for now
+    // FASHN is logged via the structured `[play.provider]` lines.
+    provider: "openai",
+  };
 }
 
 function extFromMime(mime: string): string {

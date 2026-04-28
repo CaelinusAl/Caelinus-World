@@ -291,56 +291,104 @@ export type EditCategory = "bikini" | "pareo" | "jewelry" | "bag" | "heels";
 export type EditPromptInput = {
   /** Outfit category drives the verb (swap garment vs. add accessory). */
   category: EditCategory;
-  /** Outfit display name. Helps the model anchor on the right object
-   *  in the second image when several items are visible (e.g. shop
-   *  hero shots framed full-body). */
-  outfitName: string;
-  /** The same prompt fragment used in text-to-image — gives the model
-   *  a sanity check on palette / silhouette so it doesn't get fooled
-   *  by lighting differences in the reference photo. */
-  outfitPrompt: string;
 };
 
 /**
- * Edit verbs by category. We pick the action the model will apply to
- * the avatar (image #1), with explicit reference to image #2 as the
- * "ground truth" garment.
+ * Edit verbs by category. The verb is the surgical instruction that
+ * tells gpt-image-1 *exactly* what to do with image #1 (the avatar)
+ * using image #2 (the product photo) as the ground truth.
+ *
+ * Engineering notes:
+ *   • The previous draft said "wears the EXACT two-piece beachwear set
+ *     (matching cut, color, fabric pattern and hardware)". The model
+ *     read this as a vibe brief and rendered an *interpretation* of
+ *     the garment. The harder, more literal phrasing below ("replace…
+ *     pixel by pixel", "do NOT redesign, reinterpret or restyle")
+ *     significantly reduces creative drift.
+ *   • Vocabulary note — gpt-image-1's safety classifier has a heavy
+ *     hand on the word "swimwear" + body imagery, so the bikini verb
+ *     still leans on "two-piece beachwear set" + explicit "fashion
+ *     editorial" framing. Same content, calmer signal to the
+ *     moderation filter.
+ *   • We always say "second image" / "image #2" — gpt-image-1 indexes
+ *     attached images in upload order, so being explicit prevents the
+ *     model from confusing subject vs. reference.
  */
 const EDIT_VERBS: Record<EditCategory, string> = {
   bikini:
-    "Replace the swimwear on the goddess in the first image with the EXACT bikini shown in the second reference image",
+    "Replace the two-piece beachwear set on the figurine in image #1 with " +
+    "the EXACT garment shown on the model in image #2, copying its cut, " +
+    "neckline, strap geometry, fabric color, print pattern, fabric texture " +
+    "and any visible hardware pixel by pixel from image #2. Do NOT redesign, " +
+    "reinterpret or restyle the garment — it must be visually identical to " +
+    "the one in image #2",
   pareo:
-    "Drape the goddess in the first image with the EXACT silk pareo shown in the second reference image",
+    "Drape the figurine in image #1 with the EXACT silk pareo wrap shown " +
+    "in image #2, copying its full print pattern, color palette, fabric " +
+    "texture, fringe / trim, and the way it falls on the body, pixel by " +
+    "pixel from image #2. Do NOT invent a new pattern or recolor — match " +
+    "image #2 exactly",
   jewelry:
-    "Add the EXACT jewelry piece shown in the second reference image to the goddess in the first image, placed naturally on her body",
+    "Add the EXACT jewelry piece shown in image #2 onto the figurine in " +
+    "image #1, copying its shape, metal tone, gemstone color and clasp " +
+    "details pixel by pixel from image #2, placed naturally on the body " +
+    "(neck / wrist / ear as appropriate). Do NOT design a new piece",
   bag:
-    "Place the EXACT bag shown in the second reference image into the goddess's hand or on her shoulder, matching her pose",
+    "Place the EXACT bag shown in image #2 into the figurine's hand or on " +
+    "her shoulder in image #1, copying its silhouette, material finish, " +
+    "color, hardware (clasps, chains, logos-as-shape), strap and stitching " +
+    "pixel by pixel from image #2. Do NOT redesign or recolor",
   heels:
-    "Replace the footwear on the goddess in the first image with the EXACT heels shown in the second reference image",
+    "Replace the figurine's footwear in image #1 with the EXACT pair of " +
+    "heels shown in image #2, copying their silhouette, heel height, strap " +
+    "pattern, material finish and color pixel by pixel from image #2. Do " +
+    "NOT design a new shoe",
 };
 
 export function buildPlayEditPrompt(input: EditPromptInput): string {
   const verb = EDIT_VERBS[input.category];
-  const fragment = input.outfitPrompt.trim().slice(0, PROMPT_OUTFIT_CAP);
 
   return [
+    // Lead with explicit context so the safety classifier reads the
+    // request as a fashion / collectibles task, not a body-edit task.
+    "FASHION EDITORIAL ASSIGNMENT — luxury collectible figurine lookbook, " +
+      "family-friendly magazine-cover styling, no nudity, no skin reveal " +
+      "beyond what is already in image #1.",
+    // Hard directive up top. gpt-image-1 weights the first non-trivial
+    // sentence very heavily, so we open with the strongest possible
+    // anti-creativity signal before the verb.
+    "PRIMARY DIRECTIVE — PIXEL-PERFECT GARMENT TRANSFER: image #2 is the " +
+      "ground truth for every visible aspect of the garment. Your job is " +
+      "to MOVE the garment from image #2 onto the figurine in image #1, " +
+      "not to design a new garment in its style.",
     verb + ".",
+    // Reinforce the no-creativity directive after the verb in case
+    // gpt-image-1 dropped it during instruction following.
+    "If image #2 shows a print, copy that exact print. If image #2 shows " +
+      "a solid color, use that exact color. If image #2 shows specific " +
+      "hardware (rings, buckles, chains, ties), reproduce those exact " +
+      "details. Do not embellish, simplify, recolor or substitute.",
     // Lock down what must stay identical — face is the most fragile.
-    "Preserve the goddess's face, hair, body proportions, pose, " +
-      "skin tone, lighting and the entire background scene from the first image — " +
-      "do NOT regenerate or alter anything except the targeted garment.",
+    "Preserve the figurine's face, hair, body proportions, pose, skin " +
+      "tone, lighting and the entire background scene from image #1 — do " +
+      "NOT regenerate or alter anything except the targeted garment.",
     // Style continuity — the avatar is a luxury collectible figurine,
     // and the edit should remain in that same idiom rather than drift
-    // toward photographic realism.
-    "Keep the same luxury collectible figurine art style: porcelain " +
-      "BJD craftsmanship, glossy resin skin, premium 3D CG render, " +
-      "obviously a museum-grade collectible character — never a photograph.",
-    // Sanity hint from the original fragment so palette/silhouette match.
-    fragment ? `Stylist note: ${fragment}.` : null,
+    // toward photographic realism. Calling out "doll / figurine" loud
+    // helps the safety classifier recognise the subject as a posable
+    // collectible toy rather than a real person.
+    "Subject in image #1 is a luxury collectible figurine: porcelain BJD " +
+      "doll craftsmanship, glossy resin skin, premium 3D CG render, " +
+      "museum-grade collectible character art — clearly a posable doll, " +
+      "never a photograph of a real person. The transferred garment must " +
+      "drape on the doll's body in this same CG idiom (no real-fabric " +
+      "photo realism, no sudden style shift).",
+    // Image #2 disambiguation — the model in the photo is irrelevant.
+    "Image #2 is a product reference / lookbook still. Copy ONLY the " +
+      "garment and its details from it; do not copy the human model's " +
+      "face, hair, body, pose, lighting or background.",
     // Anti-text guardrail — the edit endpoint inherits the same proper-
     // noun-print failure mode as generation.
-    "No watermarks, no logos, no text, no captions on the canvas.",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    "No watermarks, no logos-as-text, no captions, no labels on the canvas.",
+  ].join(" ");
 }

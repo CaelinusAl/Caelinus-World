@@ -250,7 +250,19 @@ export async function POST(req: Request) {
   //   3. Build the surgical edit prompt and pass both reference URLs
   //      to renderPlayImage().
   let editReferences:
-    | { avatarUrl: string; outfitImagePath: string; editPrompt: string }
+    | {
+        avatarUrl: string;
+        garmentBytes: Uint8Array;
+        garmentMime: string;
+        editPrompt: string;
+      }
+    | undefined;
+  let vtonReferences:
+    | {
+        avatarUrl: string;
+        garmentImageData: string;
+        category: "tops" | "bottoms" | "one-pieces" | "auto";
+      }
     | undefined;
   if (outfit) {
     const bareCacheKey = lookCacheKey(
@@ -358,15 +370,76 @@ export async function POST(req: Request) {
     }
 
     if (bareAvatarUrl) {
-      editReferences = {
-        avatarUrl: bareAvatarUrl,
-        outfitImagePath: outfit.imageUrl,
-        editPrompt: buildPlayEditPrompt({
-          category: outfit.category as EditCategory,
-          outfitName: outfit.name,
-          outfitPrompt: outfit.prompt,
-        }),
-      };
+      // Fetch the shop hero shot over HTTP so the garment bytes are
+      // available to both the FASHN VTON path (needs base64) and the
+      // OpenAI image-edit path (needs raw bytes for multipart).
+      //
+      // Why HTTP instead of `fs.readFile(public/...)`:
+      //   • Touching `process.cwd()` in a route handler triggers
+      //     Next.js file tracing on the entire `public/` tree and
+      //     copies it into the serverless function bundle. Our
+      //     `public/` weighs ~900 MB (atelier dashboard imagery),
+      //     which blew past Vercel's 300 MB function-size limit.
+      //   • The `public/play/shop/*` files are already served by the
+      //     same deployment as static assets, so HTTP fetch is the
+      //     correct round-trip.
+      //   • Works identically in dev (localhost:3000) and prod
+      //     (vercel.app / custom domain) — origin comes from the
+      //     incoming request URL.
+      let garmentBytes: Uint8Array | null = null;
+      let garmentMime = mimeFromExtension(outfit.imageUrl);
+      try {
+        const origin = new URL(req.url).origin;
+        const garmentUrl = new URL(outfit.imageUrl, origin).href;
+        const garmentRes = await fetch(garmentUrl);
+        if (!garmentRes.ok) {
+          throw new Error(
+            `garment fetch ${garmentRes.status} ${garmentUrl}`,
+          );
+        }
+        garmentBytes = new Uint8Array(await garmentRes.arrayBuffer());
+        garmentMime =
+          garmentRes.headers.get("content-type") ?? garmentMime;
+      } catch (err) {
+        // Without the garment we can't run either edit path — log and
+        // skip both. The outer flow then falls back to vanilla
+        // text-to-image with the outfit fragment in the prompt, which
+        // at least produces *something* visual instead of a dead end.
+        console.warn(
+          `[play.render] garment fetch failed → using prompt-only path. ` +
+            `outfit=${outfit.id} err=${
+              err instanceof Error ? err.message : String(err)
+            }`,
+        );
+      }
+
+      if (garmentBytes) {
+        // Always build the OpenAI edit references — they're the
+        // accessory path AND the fallback if FASHN VTON fails.
+        editReferences = {
+          avatarUrl: bareAvatarUrl,
+          garmentBytes,
+          garmentMime,
+          editPrompt: buildPlayEditPrompt({
+            category: outfit.category as EditCategory,
+          }),
+        };
+
+        // FASHN VTON is the preferred path for true garments. Builds
+        // a data URI so FASHN can't be tripped up by localhost URLs
+        // in dev and so we don't have to host the garment on a public
+        // CDN in prod — FASHN reads the data URI inline.
+        if (outfit.vtonCategory) {
+          const garmentDataUri = `data:${garmentMime};base64,${Buffer.from(
+            garmentBytes,
+          ).toString("base64")}`;
+          vtonReferences = {
+            avatarUrl: bareAvatarUrl,
+            garmentImageData: garmentDataUri,
+            category: outfit.vtonCategory,
+          };
+        }
+      }
     }
   }
 
@@ -378,6 +451,7 @@ export async function POST(req: Request) {
       seed: prompt.seed,
       cacheKey,
       editReferences,
+      vtonReferences,
     });
   } catch (err) {
     // Surface the upstream message in the server log so we can
@@ -443,4 +517,17 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ url: finalUrl, cached: false });
+}
+
+/** Cheap extension → MIME mapper for the data-URI we hand to FASHN.
+ *  Keep in sync with `lib/play/provider.ts → guessImageMime`. We
+ *  duplicate the tiny helper instead of cross-importing because the
+ *  provider module is `server-only` and lugging an `import` over for
+ *  six lines feels heavier than the duplication. */
+function mimeFromExtension(p: string): string {
+  const f = p.toLowerCase();
+  if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
+  if (f.endsWith(".webp")) return "image/webp";
+  if (f.endsWith(".gif")) return "image/gif";
+  return "image/png";
 }

@@ -26,6 +26,29 @@ import type { ZodiacId } from "@/data/play-assets";
 
 export type PlayOutfitCategory = "bikini" | "pareo" | "jewelry" | "bag" | "heels";
 
+/**
+ * FASHN VTON body-region category. Tells the FASHN model which slot
+ * of the silhouette the garment occupies, which it uses to choose
+ * the right segmentation mask + try-on path.
+ *
+ *   • "tops"        — shirts / bras / bikini tops only
+ *   • "bottoms"     — shorts / skirts / bikini bottoms only
+ *   • "one-pieces"  — dresses, jumpsuits, bodysuits, *bikini sets
+ *                     treated as a single garment*, pareos worn as a
+ *                     wrap dress
+ *   • "auto"        — let FASHN inspect the garment photo and pick
+ *
+ * `null` means the outfit isn't a transferable garment (jewelry, bags,
+ * heels) — those still go through the OpenAI image-edit path because
+ * FASHN is garment-only and won't render an accessory.
+ */
+export type PlayOutfitVtonCategory =
+  | "tops"
+  | "bottoms"
+  | "one-pieces"
+  | "auto"
+  | null;
+
 export type PlayOutfit = {
   /** Mirrors the product id from `data/products.ts` so cache keys
    *  + buy links stay aligned with the shop catalogue. */
@@ -48,6 +71,10 @@ export type PlayOutfit = {
    *  the AI's own interpretation of the prompt fragment. Mirrors the
    *  `image` column from `data/products.ts`. */
   imageUrl: string;
+  /** FASHN body region. Set for garments (bikini, pareo) so the route
+   *  can prefer FASHN VTON for pixel-perfect transfer. `null` for
+   *  accessories — those stay on the OpenAI image-edit path. */
+  vtonCategory: PlayOutfitVtonCategory;
   /** Click target for the "Hemen Al" CTA. Routes into the live shop
    *  with the product highlighted. */
   buyHref: string;
@@ -103,18 +130,53 @@ const SHOP_PRODUCTS = products as ReadonlyArray<{
   image: string;
 }>;
 
+/**
+ * Map a shop category to a FASHN VTON body region. Keep this map in
+ * sync with the FASHN endpoint's `category` enum.
+ *
+ *   • bikini → "one-pieces" — bikini sets are two separate garments
+ *     in real life, but FASHN's VTON model handles them best as a
+ *     single one-piece transfer (treating top + bottom as a coherent
+ *     outfit). "tops" alone leaves the figurine pant-less; "bottoms"
+ *     alone leaves her in a default top. "one-pieces" gives us the
+ *     full coordinated set in one render.
+ *   • pareo  → "one-pieces" — silk wrap effectively functions as a
+ *     wrap dress for the model.
+ *   • jewelry / bag / heels → null — FASHN doesn't model accessories,
+ *     so we leave them on the OpenAI image-edit fallback path.
+ */
+function vtonCategoryFor(
+  shopCategory: PlayOutfitCategory,
+): PlayOutfitVtonCategory {
+  switch (shopCategory) {
+    case "bikini":
+      return "one-pieces";
+    case "pareo":
+      return "one-pieces";
+    case "jewelry":
+    case "bag":
+    case "heels":
+    default:
+      return null;
+  }
+}
+
 export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
   .filter((p) => Boolean(OUTFIT_PROMPTS[p.id]))
-  .map((p) => ({
-    id: p.id,
-    name: p.name,
-    category: p.category as PlayOutfitCategory,
-    price: p.price,
-    zodiac: p.zodiac,
-    prompt: OUTFIT_PROMPTS[p.id]!,
-    imageUrl: p.image,
-    buyHref: `/universe/shop?product=${p.id}`,
-  }));
+  .map((p) => {
+    const category = p.category as PlayOutfitCategory;
+    return {
+      id: p.id,
+      name: p.name,
+      category,
+      price: p.price,
+      zodiac: p.zodiac,
+      prompt: OUTFIT_PROMPTS[p.id]!,
+      imageUrl: p.image,
+      vtonCategory: vtonCategoryFor(category),
+      buyHref: `/universe/shop?product=${p.id}`,
+    };
+  });
 
 export function findOutfit(id: string | null | undefined): PlayOutfit | null {
   if (!id) return null;

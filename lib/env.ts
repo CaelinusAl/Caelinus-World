@@ -95,6 +95,18 @@ const ServerEnvSchema = z.object({
   /* Cost guard: max fresh renders per IP per hour. Cache hits don't
      count, so 60/hour is plenty for normal play. */
   PLAY_AI_HOURLY_BUDGET: z.coerce.number().int().min(1).max(1000).default(60),
+  /* Stylist Caelinus AI — pixel-perfect virtual try-on.
+     When `FAL_KEY` is set, render route routes outfit categories that
+     map to garments (bikini, pareo) through `fal-ai/fashn/tryon/v1.6`
+     instead of the generic OpenAI image-edit endpoint. FASHN v1.6 is
+     the production-grade commercial VTON model — it actually *paints
+     the real shop garment* onto the goddess, where gpt-image-1 only
+     paints its own interpretation of the prompt fragment.
+     Get a key at https://fal.ai/dashboard/keys (commercial-friendly
+     pricing — ~$0.075/run as of 2026-04). Accessory outfits (jewelry,
+     bag, heels) still use OpenAI image-edit because FASHN's model is
+     garment-only. */
+  FAL_KEY: z.string().optional(),
   /* Transactional email (Resend). When `RESEND_API_KEY` is set we send
      real notifications (atelier approval, password reset hand-offs).
      Without it the sender falls back to console logging — useful in dev
@@ -169,6 +181,7 @@ function parseServerEnv() {
     PLAY_AI_FALLBACK_PROVIDER: process.env.PLAY_AI_FALLBACK_PROVIDER,
     PLAY_AI_FALLBACK_API_KEY: process.env.PLAY_AI_FALLBACK_API_KEY,
     PLAY_AI_HOURLY_BUDGET: process.env.PLAY_AI_HOURLY_BUDGET,
+    FAL_KEY: process.env.FAL_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,

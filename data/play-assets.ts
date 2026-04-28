@@ -250,7 +250,32 @@ export function findScene(id: SceneId | null | undefined) {
  * • `outfit` is the product id from `data/play-outfits.ts` (e.g. `b10`,
  *   `pr1`). It's already short + safe for object keys, so we don't
  *   hash it.
+ *
+ * Pipeline version suffix
+ * -----------------------
+ * The outfit suffix is `-oe<N><id>` where N is the *edit pipeline*
+ * version. Bumping the version is how we invalidate every previously
+ * cached "interpretive" render in one move:
+ *
+ *   • e1 — first cut. Plain text-to-image with the outfit fragment
+ *          baked into the prompt; the model painted whatever it
+ *          imagined the garment looked like.
+ *   • e2 — OpenAI gpt-image-1 image-edit endpoint with the real shop
+ *          product photo as a reference image, plus `quality: high`
+ *          + `input_fidelity: high`. Better, but still mediated by
+ *          gpt-image-1's "vibe interpretation" of the second image.
+ *   • e3 — current. FASHN VTON v1.6 (fal-ai/fashn/tryon/v1.6) for
+ *          true garment categories (bikini → "one-pieces", pareo →
+ *          "one-pieces"), with the OpenAI image-edit path retained
+ *          as the accessory route (jewelry, bag, heels) and a
+ *          fallback when FAL_KEY isn't configured.
+ *
+ * Bump this number whenever the prompt builder, edit endpoint or
+ * fidelity knobs change in a way that would let a fresh render look
+ * substantially better than the cached one.
  */
+const OUTFIT_PIPELINE_VERSION = 3;
+
 export function lookCacheKey(
   archetype: ArchetypeId,
   zodiac: ZodiacId,
@@ -263,6 +288,6 @@ export function lookCacheKey(
   const v = Math.max(1, Math.floor(variant));
   if (v !== 1) key += `-v${v}`;
   if (briefHash) key += `-b${briefHash}`;
-  if (outfit) key += `-o${outfit}`;
+  if (outfit) key += `-oe${OUTFIT_PIPELINE_VERSION}${outfit}`;
   return key;
 }
