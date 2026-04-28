@@ -109,14 +109,32 @@ export default function PlayDashboard({
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/play/avatar-previews", { cache: "force-cache" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.statusText)))
-      .then((j: { ok: boolean; previews?: PreviewMap }) => {
-        if (cancelled) return;
-        if (j.ok && j.previews) setPreviews(j.previews);
+    // `no-store` for the dev loop so a stale 304 from the Next dev
+    // server never strands us with an empty matrix. Vercel's edge
+    // cache (24h s-maxage on the route) still works in production.
+    fetch("/api/play/avatar-previews", { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} ${r.statusText}`);
+        return r.json();
       })
-      .catch(() => {
-        // Silent fail: fallback rendering already covers the empty case.
+      .then((j: { ok: boolean; previews?: PreviewMap; count?: number }) => {
+        if (cancelled) return;
+        if (j.ok && j.previews) {
+          setPreviews(j.previews);
+          if (typeof window !== "undefined") {
+            console.log(
+              `[play] avatar matrix loaded — ${j.count ?? Object.keys(j.previews).length} previews`,
+            );
+          }
+        } else {
+          console.warn("[play] avatar-previews replied without previews", j);
+        }
+      })
+      .catch((err) => {
+        // Surface the failure in dev so an empty matrix doesn't go
+        // unnoticed. Production fallback (CSS silhouette) still kicks
+        // in regardless.
+        console.error("[play] avatar matrix fetch failed:", err);
       });
     return () => {
       cancelled = true;

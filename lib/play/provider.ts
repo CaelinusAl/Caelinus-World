@@ -104,9 +104,33 @@ export async function renderPlayImage(input: RenderInput): Promise<RenderResult>
     return renderStub(input);
   }
 
+  // Structured timing log so Vercel Logs can be grep'd by cacheKey or
+  // outcome. We log start, then either done (with provider + duration)
+  // or fail (with the upstream error). Fallback retries log their own
+  // start/done so the chain is fully visible.
+  const startedAt = Date.now();
+  console.log(
+    `[play.provider] start provider=${primary} cacheKey=${input.cacheKey} ts=${new Date(
+      startedAt,
+    ).toISOString()}`,
+  );
+
   try {
-    return await callProvider(primary, primaryKey!, input);
+    const result = await callProvider(primary, primaryKey!, input);
+    console.log(
+      `[play.provider] done provider=${result.provider} cacheKey=${input.cacheKey} durationMs=${
+        Date.now() - startedAt
+      } bytes=${result.bytes.length} contentType=${result.contentType}`,
+    );
+    return result;
   } catch (primaryErr) {
+    const primaryDuration = Date.now() - startedAt;
+    const primaryMsg =
+      primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+    console.error(
+      `[play.provider] fail provider=${primary} cacheKey=${input.cacheKey} durationMs=${primaryDuration} msg=${primaryMsg}`,
+    );
+
     // Decide whether the fallback can actually help.
     const sameProvider = fallback === primary;
     const fallbackUsable =
@@ -115,19 +139,32 @@ export async function renderPlayImage(input: RenderInput): Promise<RenderResult>
       throw primaryErr;
     }
 
+    const fallbackStart = Date.now();
     console.warn(
-      `[play.provider] primary "${primary}" failed (${
-        primaryErr instanceof Error ? primaryErr.message : String(primaryErr)
-      }). Retrying with fallback "${fallback}"...`,
+      `[play.provider] fallback start provider=${fallback} cacheKey=${input.cacheKey} ts=${new Date(
+        fallbackStart,
+      ).toISOString()} reason=primary_failed`,
     );
 
     try {
-      return await callProvider(fallback, fallbackKey ?? "", input);
+      const fallbackResult = await callProvider(
+        fallback,
+        fallbackKey ?? "",
+        input,
+      );
+      console.log(
+        `[play.provider] fallback done provider=${fallbackResult.provider} cacheKey=${input.cacheKey} durationMs=${
+          Date.now() - fallbackStart
+        } bytes=${fallbackResult.bytes.length}`,
+      );
+      return fallbackResult;
     } catch (fallbackErr) {
       // Surface the primary error — that's the one the user originally
       // tried. Log the fallback chain so ops can see both arms blew up.
-      console.warn(
-        `[play.provider] fallback "${fallback}" also failed: ${
+      console.error(
+        `[play.provider] fallback fail provider=${fallback} cacheKey=${input.cacheKey} durationMs=${
+          Date.now() - fallbackStart
+        } msg=${
           fallbackErr instanceof Error
             ? fallbackErr.message
             : String(fallbackErr)

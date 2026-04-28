@@ -11,7 +11,17 @@
  * The canvas itself is responsive: a big portal (~min(560px, 70vw))
  * over a glow platform. Aria-live is "polite" so screen readers
  * announce the result without interrupting.
+ *
+ * Loading copy is staged by elapsed time so a slow render never feels
+ * like a frozen screen:
+ *   • 0–30s  — "usually 10–25 seconds"
+ *   • 30–60s — "scene is dense, hang on"
+ *   • 60s+   — "Replicate is queued, a few more seconds"
+ * The page-level fetch aborts at 75s so the user still gets a retry
+ * button; this hint just keeps them oriented in the meantime.
  */
+
+import { useEffect, useState } from "react";
 
 import { GlowPlatform, NebulaPortal } from "@/app/_stage";
 import {
@@ -33,6 +43,36 @@ export default function RenderCanvas({ lang, onRetry }: Props) {
   const scene = findScene(usePlayStore((s) => s.scene));
 
   const tone = zodiac?.tone ?? archetype?.tone ?? "magenta";
+
+  // Track elapsed seconds while a render is in flight. The interval is
+  // armed only during the loading state and torn down on transition,
+  // so finished/error/idle states never tick.
+  const [elapsedSec, setElapsedSec] = useState(0);
+  useEffect(() => {
+    if (render.kind !== "loading") {
+      setElapsedSec(0);
+      return;
+    }
+    const startedAt = Date.now();
+    setElapsedSec(0);
+    const id = window.setInterval(() => {
+      setElapsedSec(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [render.kind]);
+
+  const loadingHint =
+    elapsedSec < 30
+      ? lang === "tr"
+        ? "Caelinus tanrıçanı çiziyor… genelde 10–25 saniye."
+        : "Caelinus is painting your goddess… usually 10–25 seconds."
+      : elapsedSec < 60
+        ? lang === "tr"
+          ? "Sahne yoğun çıktı, biraz daha sürebilir…"
+          : "The scene is dense — hang on a moment…"
+        : lang === "tr"
+          ? "Replicate sırada bekliyor — birkaç saniye daha sabret."
+          : "Replicate is queued — a few more seconds.";
 
   return (
     <div className="play-render">
@@ -93,10 +133,11 @@ export default function RenderCanvas({ lang, onRetry }: Props) {
       </div>
 
       {render.kind === "loading" ? (
-        <p className="play-render-hint">
-          {lang === "tr"
-            ? "Caelinus tanrıçanı çiziyor… genelde 10–25 saniye."
-            : "Caelinus is painting your goddess… usually 10–25 seconds."}
+        <p className="play-render-hint" aria-live="polite">
+          {loadingHint}
+          {elapsedSec >= 5 ? (
+            <span className="play-render-hint-elapsed"> · {elapsedSec}s</span>
+          ) : null}
         </p>
       ) : null}
 

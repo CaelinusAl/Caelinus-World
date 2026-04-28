@@ -51,31 +51,44 @@ export type PromptOutput = {
 };
 
 /**
- * House style tokens. We lead with explicit quality boosters because
- * SDXL responds strongly to "masterpiece / 8k / dslr"-class tags,
- * then layer cinematic and editorial cues. Keep this string compact —
- * the per-image prompt is appended afterwards and SDXL gets noisy past
- * ~75 tokens of preamble.
+ * House style tokens. The signature look is a **luxury collectible
+ * figurine portrait** — porcelain BJD craftsmanship, premium 3D CG,
+ * museum-grade collectible character art. The render must read as
+ * an *obviously CG figurine*, never as a photograph of a real
+ * person.
+ *
+ * IMPORTANT — gpt-image-1 prints any readable proper noun (brand,
+ * series name, headline phrase) directly into the image as visible
+ * text. Keep this list free of:
+ *   • Brand / software names (Daz, NVIDIA, ZBrush, Octane, …)
+ *   • Series / line names (e.g. "moon temple collectible line")
+ *   • Title-cased multi-word phrases the model could read as a logo.
+ * Use generic descriptive tokens only.
  */
 const STYLE_BASE = [
-  // Quality boosters first — SDXL conditioning loves these.
+  // Quality boosters — generic, safe to use across providers.
   "(masterpiece:1.2)",
   "(best quality:1.2)",
   "ultra-detailed",
-  "8k uhd",
+  "8k resolution",
   "sharp focus",
-  "professional fashion photography",
-  // Cinematic / poster styling — defines Caelinus' look.
+  // Luxury collectible figurine pipeline — generic descriptors only.
+  "luxury collectible figurine portrait",
+  "ball-jointed bjd doll, hand-crafted porcelain figurine",
+  "polished 3d digital sculpt, hi-poly cg character",
+  "premium cinematic 3d render, photoreal cg fidelity",
+  "glossy porcelain skin shader with soft subsurface scattering",
+  "smooth resin doll surface, subtle pearlescent sheen",
+  "museum-grade collectible art statue, quarter-scale figurine",
+  "obviously rendered cg character, not a photograph of a real person",
+  // Composition / art direction — palette + framing only.
   "cinematic poster portrait of a goddess archetype",
   "rule-of-thirds composition with generous headroom",
   "magazine-cover framing, three-quarter to full body",
   "soft warm rim light, magenta-and-cosmic nebula palette",
+  "studio hdri lighting with crisp specular highlights",
   "subtle iridescent halo, delicate iridescent skin sheen",
-  "rich painterly shadows, fashion-editorial styling",
-  "high detail face and hands, anatomically correct features",
-  "shot on 85mm lens, f/1.8, shallow depth of field",
-  "soft volumetric haze, gentle bokeh background",
-  "art-direction: caelinus moon temple, magazine cover",
+  "macro toy-photography aesthetic, tabletop dramatic light",
 ].join(", ");
 
 /**
@@ -104,10 +117,25 @@ const NEGATIVE_BASE = [
   "blurry", "out of focus",
   "jpeg artifacts", "compression artifacts",
   "noisy", "grainy",
-  // Style contamination
+  // Style contamination — we want a Daz3D / BJD figurine render, NOT
+  // a photograph of a real person. gpt-image-1 strongly defaults to
+  // photographic output, so the photo-family ban here has to be loud
+  // and broad. We also lock out 2D-painterly tones and the low-poly /
+  // clay failure mode of weak CG.
   "watermark", "text", "letters", "signature", "logo",
   "frame border", "passe-partout",
-  "cartoon", "3d render", "plastic skin",
+  "oil painting", "watercolor", "ink illustration",
+  "flat 2D illustration", "anime line art", "manga shading",
+  // Hard ban on the entire photographic family — this is the one
+  // thing keeping us out of MetaHuman-photo limbo.
+  "photograph", "raw photograph", "real photograph",
+  "DSLR photo", "candid photograph", "snapshot",
+  "documentary photo", "paparazzi shot", "street photography",
+  "fashion editorial photograph", "wedding photograph",
+  "cinematic film still", "live-action movie still",
+  "real woman portrait", "real human photograph",
+  // Weak-CG failure modes.
+  "low-poly", "blocky polygons", "untextured mesh", "clay render",
   // Safety
   "child", "infant", "underage", "teenager",
   "nsfw", "explicit", "nudity",

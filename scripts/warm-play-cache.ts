@@ -89,6 +89,17 @@ type OpenAIQuality = "low" | "medium" | "high" | "auto";
 
 const PROVIDER = flagValue("provider", "replicate") as ProviderName;
 const OPENAI_QUALITY = flagValue("quality", "medium") as OpenAIQuality;
+/**
+ * `--only=archetype-zodiac` — restrict the warm pass to a single combo,
+ * eg `--only=light-aries`. Handy for cheap style-test renders before
+ * committing to a full 84-image batch (saves ~$15.96 on a high-quality
+ * OpenAI sweep). Comma-separated values are also accepted, eg
+ * `--only=light-aries,dark-scorpio,curvy-pisces`.
+ */
+const ONLY_RAW = flagValue("only", "");
+const ONLY_KEYS = ONLY_RAW
+  ? ONLY_RAW.split(",").map((s) => s.trim()).filter(Boolean)
+  : null;
 
 if (PROVIDER !== "replicate" && PROVIDER !== "openai") {
   console.error(`✗ Unknown --provider="${PROVIDER}" (use replicate | openai)`);
@@ -316,6 +327,30 @@ async function main() {
     for (const z of ZODIACS) {
       combos.push({ archetype: a.id, zodiac: z.id });
     }
+  }
+
+  // `--only=` filter. Refuse unknown keys early so the user notices
+  // typos before any AI dollars are spent.
+  if (ONLY_KEYS && ONLY_KEYS.length) {
+    const validKeys = new Set(combos.map((c) => `${c.archetype}-${c.zodiac}`));
+    const unknown = ONLY_KEYS.filter((k) => !validKeys.has(k));
+    if (unknown.length) {
+      console.error(
+        `✗ Unknown --only key(s): ${unknown.join(", ")}\n` +
+          `  Expected format: <archetype>-<zodiac>, e.g. light-aries.`,
+      );
+      process.exit(1);
+    }
+    const onlySet = new Set(ONLY_KEYS);
+    const before = combos.length;
+    combos.splice(
+      0,
+      combos.length,
+      ...combos.filter((c) => onlySet.has(`${c.archetype}-${c.zodiac}`)),
+    );
+    console.log(
+      `  → --only filter: ${combos.length}/${before} combos selected.`,
+    );
   }
 
   const modelLabel =

@@ -25,6 +25,7 @@ import {
   type SceneId,
   type ZodiacId,
 } from "@/data/play-assets";
+import { findPreset } from "@/data/play-presets";
 import { briefHash } from "@/lib/play/brief";
 import { useAuthStore } from "@/stores/auth-store";
 import { useLangStore } from "@/stores/lang-store";
@@ -74,6 +75,10 @@ export default function PlayPage() {
 
   const [toast, setToast] = useState<string | null>(null);
   const seededFromUrlRef = useRef(false);
+  // Set when ?preset=<id> seeded a full triple — picked up by a
+  // dedicated effect below so we render exactly once per mount, after
+  // the lang store has hydrated and Zustand state has settled.
+  const [pendingAutoRender, setPendingAutoRender] = useState(false);
 
   // Auto-dismiss toasts so the action row doesn't keep stale text.
   useEffect(() => {
@@ -82,13 +87,29 @@ export default function PlayPage() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
-  // Honour ?archetype=…&zodiac=…&scene=… so the gallery can deep-link
-  // someone straight into the result for that triple. We do this once
-  // per mount; the user can still navigate steps freely after.
+  // Honour ?preset=<id> and ?archetype=…&zodiac=…&scene=… so the gallery
+  // (and investor demo links) can deep-link someone straight into a
+  // known-good triple. We do this once per mount; the user can still
+  // navigate steps freely after. `?preset=wow` is the investor-facing
+  // flagship — it also flips `pendingAutoRender` so the render fires
+  // on its own as soon as state has settled.
   useEffect(() => {
     if (seededFromUrlRef.current) return;
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+
+    // Presets win over loose params — they're explicit + curated.
+    const preset = findPreset(params.get("preset"));
+    if (preset) {
+      setArchetype(preset.archetype);
+      setZodiac(preset.zodiac);
+      setScene(preset.scene);
+      setStep("scene");
+      setPendingAutoRender(true);
+      seededFromUrlRef.current = true;
+      return;
+    }
+
     const a = params.get("archetype");
     const z = params.get("zodiac");
     const s = params.get("scene");
@@ -114,6 +135,12 @@ export default function PlayPage() {
   // Called from ScenePicker (and Retry button on error). Posts the
   // current triple to /api/play/render. The route will either return
   // a cached URL right away or paint a fresh image from the AI provider.
+  //
+  // Timeout protection: the server route caps Replicate polling at 60s,
+  // but a stalled connection (slow DNS, dropped TCP, hung CDN) could
+  // theoretically freeze the client forever. We arm an AbortController
+  // at 75s (server budget + 15s buffer) so the user always gets back
+  // to a retry-able error state instead of an infinite shimmer.
   const triggerRender = useCallback(async () => {
     if (!archetype || !zodiac || !scene) return;
     beginRender();
@@ -121,6 +148,8 @@ export default function PlayPage() {
     // that just bumped the index doesn't race a stale closure.
     const { variant: currentVariant, brief: currentBrief } =
       usePlayStore.getState();
+    const controller = new AbortController();
+    const abortTimer = window.setTimeout(() => controller.abort(), 75_000);
     try {
       const res = await fetch("/api/play/render", {
         method: "POST",
@@ -133,6 +162,7 @@ export default function PlayPage() {
           brief: currentBrief || undefined,
           lang: L,
         }),
+        signal: controller.signal,
       });
       if (!res.ok) {
         const j = (await res.json().catch(() => null)) as RenderResponse | null;
@@ -179,15 +209,41 @@ export default function PlayPage() {
         setRenderResult(j.url, j.cached);
       }
     } catch (err) {
+      // AbortError = our 75s safety net fired. Give the user a clear
+      // "provider is slow, hit retry" message instead of the generic
+      // "connection failed" line — they can click Try again and the
+      // next attempt usually lands inside 25s.
+      const isAbort =
+        err instanceof DOMException && err.name === "AbortError";
       setRenderError(
-        err instanceof Error
-          ? err.message
-          : L === "tr"
-            ? "Bağlantı kurulamadı."
-            : "Connection failed.",
+        isAbort
+          ? L === "tr"
+            ? "AI sağlayıcı 75 saniye içinde yanıt vermedi. Tekrar dene."
+            : "The AI provider didn't respond within 75s. Try again."
+          : err instanceof Error
+            ? err.message
+            : L === "tr"
+              ? "Bağlantı kurulamadı."
+              : "Connection failed.",
       );
+    } finally {
+      window.clearTimeout(abortTimer);
     }
   }, [archetype, zodiac, scene, beginRender, setRenderResult, setRenderError, L]);
+
+  // ── Auto-render after preset seeding ──────────────────────
+  // `?preset=<id>` flipped pendingAutoRender; once Zustand has the full
+  // triple settled and we're not already rendering, fire once and clear
+  // the flag. The triggerRender callback closes over the latest state,
+  // so by the time this effect runs the request will carry the right
+  // (archetype, zodiac, scene) tuple.
+  useEffect(() => {
+    if (!pendingAutoRender) return;
+    if (!archetype || !zodiac || !scene) return;
+    if (render.kind === "loading" || render.kind === "ready") return;
+    setPendingAutoRender(false);
+    void triggerRender();
+  }, [pendingAutoRender, archetype, zodiac, scene, render.kind, triggerRender]);
 
   // ── Re-roll (F2a) ─────────────────────────────────────────
   // Bump the variant index in the store, then immediately re-render.
