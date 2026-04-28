@@ -12,14 +12,15 @@
  *   • SAVE LOOK    — POST to /api/play/save (auth-gated; caller
  *                    handles the redirect-to-signin),
  *   • SHARE LOOK   — copy the public look URL to clipboard,
- *   • BUY THIS LOOK — disabled "yakında" tooltip until the e-commerce
- *                     phase (5e) lands.
- *
- * The action buttons are intentionally heavy on the same .stage-cta
- * styling so they sit alongside the picker buttons without clashing.
+ *   • BUY THIS LOOK — when the Stylist Caelinus AI overlay is active,
+ *                     deep-link into /universe/shop for the selected
+ *                     product. Without an outfit, links to the
+ *                     zodiac-filtered shop view as an "explore the
+ *                     drop" affordance.
  */
 
 import { CinemaCTA } from "@/app/_stage";
+import { findOutfit } from "@/data/play-outfits";
 import { usePlayStore } from "@/stores/play-store";
 
 const MAX_VARIANT = 8;
@@ -51,8 +52,33 @@ export default function LookActions({
   const remix = usePlayStore((s) => s.remix);
   const saved = usePlayStore((s) => s.saved);
   const renderState = usePlayStore((s) => s.render);
+  const zodiacId = usePlayStore((s) => s.zodiac);
+  const outfitId = usePlayStore((s) => s.outfit);
   const isReady = renderState.kind === "ready";
   const canReroll = variant < MAX_VARIANT;
+
+  const selectedOutfit = outfitId ? findOutfit(outfitId) : null;
+  const buyHref = selectedOutfit
+    ? selectedOutfit.buyHref
+    : zodiacId
+      ? `/universe/shop?zodiac=${zodiacId}`
+      : "/universe/shop";
+
+  const buyLabel = selectedOutfit
+    ? lang === "tr"
+      ? `${selectedOutfit.name} · ${selectedOutfit.price}`
+      : `${selectedOutfit.name} · ${selectedOutfit.price}`
+    : lang === "tr"
+      ? "Bu görünümü al"
+      : "Buy this look";
+
+  const buyTitle = selectedOutfit
+    ? lang === "tr"
+      ? `Mağazada satın al — ${selectedOutfit.name}`
+      : `Open in shop — ${selectedOutfit.name}`
+    : lang === "tr"
+      ? "Burcuna ait koleksiyonu keşfet"
+      : "Explore the matching collection";
 
   const rerollLabel =
     variant >= MAX_VARIANT
@@ -123,13 +149,17 @@ export default function LookActions({
         </CinemaCTA>
 
         <CinemaCTA
+          href={buyHref}
           variant="ghost"
           tone="gold"
           trailingGlyph="⌖"
-          disabled
-          title={lang === "tr" ? "Yakında" : "Coming soon"}
+          aria-label={buyTitle}
+          title={buyTitle}
+          aria-disabled={!isReady ? true : undefined}
+          tabIndex={!isReady ? -1 : undefined}
+          className={!isReady ? "is-disabled" : ""}
         >
-          {lang === "tr" ? "Bu görünümü al" : "Buy this look"}
+          {buyLabel}
         </CinemaCTA>
       </div>
 

@@ -144,10 +144,14 @@ export default function PlayPage() {
   const triggerRender = useCallback(async () => {
     if (!archetype || !zodiac || !scene) return;
     beginRender();
-    // Read variant + brief from the store at call time so a re-roll
-    // that just bumped the index doesn't race a stale closure.
-    const { variant: currentVariant, brief: currentBrief } =
-      usePlayStore.getState();
+    // Read variant + brief + outfit from the store at call time so a
+    // re-roll that just bumped the index, or an outfit pick that just
+    // landed, doesn't race a stale closure.
+    const {
+      variant: currentVariant,
+      brief: currentBrief,
+      outfit: currentOutfit,
+    } = usePlayStore.getState();
     const controller = new AbortController();
     const abortTimer = window.setTimeout(() => controller.abort(), 75_000);
     try {
@@ -160,6 +164,7 @@ export default function PlayPage() {
           scene,
           variant: currentVariant,
           brief: currentBrief || undefined,
+          outfit: currentOutfit || undefined,
           lang: L,
         }),
         signal: controller.signal,
@@ -255,17 +260,37 @@ export default function PlayPage() {
     void triggerRender();
   }, [variant, nextVariant, triggerRender]);
 
+  // ── Outfit try-on (F2c) ───────────────────────────────────
+  // Stylist Caelinus AI: set the outfit overlay on the store, then
+  // immediately fire a fresh render. Cache key carries `-o<id>` so
+  // each outfit-on look is its own row — re-selecting an outfit hits
+  // the cache instantly the second time around.
+  const setOutfit = usePlayStore((s) => s.setOutfit);
+  const triggerOutfitTryOn = useCallback(
+    (outfitId: string | null) => {
+      setOutfit(outfitId);
+      // Defer the render so Zustand has the new outfit settled when
+      // triggerRender reads from getState(). One microtask is enough.
+      void Promise.resolve().then(() => {
+        if (archetype && zodiac && scene) void triggerRender();
+      });
+    },
+    [setOutfit, archetype, zodiac, scene, triggerRender],
+  );
+
   const savedLookId = usePlayStore((s) => s.savedLookId);
 
   // ── Save look ─────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     if (render.kind !== "ready" || !archetype || !zodiac || !scene) return;
     try {
-      // Pull the brief fresh from the store so a save right after a
-      // re-roll uses the same brief that was rendered with. We hash
-      // it client-side using the same FNV-1a routine as the server so
-      // the cacheKey lines up — server still rehashes for verification.
-      const { brief: currentBrief } = usePlayStore.getState();
+      // Pull the brief + outfit fresh from the store so a save right
+      // after a re-roll or stylist outfit pick uses the same overlay
+      // that was rendered with. We hash the brief client-side using
+      // the same FNV-1a routine as the server so the cacheKey lines
+      // up — server still rehashes for verification.
+      const { brief: currentBrief, outfit: currentOutfit } =
+        usePlayStore.getState();
       const briefDigest = currentBrief ? briefHash(currentBrief) : "";
       const res = await fetch("/api/play/save", {
         method: "POST",
@@ -277,15 +302,17 @@ export default function PlayPage() {
           renderUrl: render.url,
           variant,
           brief: currentBrief || undefined,
-          // Match the variant + brief actually rendered — otherwise
-          // the save server-side cache_key check fails for v2+ rerolls
-          // or briefed renders.
+          outfit: currentOutfit || undefined,
+          // Match the variant + brief + outfit actually rendered —
+          // otherwise the save server-side cache_key check fails for
+          // v2+ rerolls, briefed renders or stylist outfit overlays.
           cacheKey: lookCacheKey(
             archetype,
             zodiac,
             scene,
             variant,
             briefDigest,
+            currentOutfit ?? "",
           ),
         }),
       });
@@ -370,6 +397,7 @@ export default function PlayPage() {
           onSave={handleSave}
           onShare={handleShare}
           onReroll={triggerReroll}
+          onSelectOutfit={triggerOutfitTryOn}
           toast={toast}
         />
       </main>

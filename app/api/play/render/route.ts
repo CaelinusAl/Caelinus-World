@@ -25,6 +25,7 @@ import {
   SCENES,
   ZODIACS,
 } from "@/data/play-assets";
+import { findOutfit, PLAY_OUTFITS } from "@/data/play-outfits";
 import { briefHash, BRIEF_MAX_LENGTH, sanitizeBrief } from "@/lib/play/brief";
 import { checkBrief, moderationMessage } from "@/lib/play/moderation";
 import { renderPlayImage } from "@/lib/play/provider";
@@ -47,6 +48,12 @@ export const maxDuration = 60;
 const ARCHETYPE_IDS = ARCHETYPES.map((a) => a.id) as [ArchetypeId, ...ArchetypeId[]];
 const ZODIAC_IDS = ZODIACS.map((z) => z.id) as [ZodiacId, ...ZodiacId[]];
 const SCENE_IDS = SCENES.map((s) => s.id) as [SceneId, ...SceneId[]];
+// Outfit ids are taken straight from the play-outfits catalogue. Empty
+// list would crash zod's enum, so fall back to a single sentinel that
+// no live product can ever match.
+const OUTFIT_IDS = (PLAY_OUTFITS.length > 0
+  ? (PLAY_OUTFITS.map((o) => o.id) as [string, ...string[]])
+  : ["__no_outfit__"]) as [string, ...string[]];
 
 const RenderRequestSchema = z.object({
   archetype: z.enum(ARCHETYPE_IDS),
@@ -68,6 +75,18 @@ const RenderRequestSchema = z.object({
    * Anonymous requests with a non-empty brief get a 401.
    */
   brief: z.string().max(BRIEF_MAX_LENGTH * 2).optional(),
+  /**
+   * F2c — Stylist Caelinus AI outfit overlay. Optional product id
+   * from the live shop catalogue (e.g. `b10` = Capricorn Stone Siren
+   * bikini). When present, the prompt builder folds the outfit
+   * fragment into the figure clause and the cache key gets an
+   * `-o<id>` suffix so the outfit-on look is its own row alongside
+   * the canonical no-outfit entry.
+   *
+   * Anonymous-allowed: outfits are curated copy with no user input,
+   * so there's nothing to moderate (unlike the free-form `brief`).
+   */
+  outfit: z.enum(OUTFIT_IDS).optional(),
   /** UI language hint — only used to pick the rejection-message
    *  language when moderation triggers. Defaults to EN. */
   lang: z.enum(["tr", "en"]).optional().default("en"),
@@ -95,6 +114,11 @@ export async function POST(req: Request) {
   }
 
   const { archetype, zodiac, scene, variant, lang } = parsed.data;
+  // Resolve the outfit (if any) up front — `findOutfit` returns null
+  // when the id slips through but isn't in the live catalogue, which
+  // we treat as "no outfit" instead of erroring (defensive against
+  // catalogue updates that prune entries).
+  const outfit = findOutfit(parsed.data.outfit);
 
   // ── Brief: sanitise → auth → moderate ──────────────────────
   // Anonymous users get the canonical (no-brief) render path. A brief
@@ -126,7 +150,14 @@ export async function POST(req: Request) {
   }
 
   const briefDigest = cleanBrief ? briefHash(cleanBrief) : "";
-  const cacheKey = lookCacheKey(archetype, zodiac, scene, variant, briefDigest);
+  const cacheKey = lookCacheKey(
+    archetype,
+    zodiac,
+    scene,
+    variant,
+    briefDigest,
+    outfit?.id ?? "",
+  );
 
   let supabase;
   try {
@@ -191,6 +222,7 @@ export async function POST(req: Request) {
       scene,
       variant,
       brief: cleanBrief || undefined,
+      outfit: outfit ? { id: outfit.id, prompt: outfit.prompt } : null,
     });
   } catch (err) {
     return NextResponse.json(

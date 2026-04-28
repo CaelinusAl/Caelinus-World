@@ -18995,6 +18995,293 @@ select.atelier-input option {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Stylist Caelinus AI — outfit try-on rail (F2c)
+
+   Sits beneath the AI scene preview once a render is ready. Carries
+   four curated product tiles (bikini, pareo, jewelry, accessory)
+   matched to the current zodiac. Tapping a tile fires a fresh render
+   with the outfit fragment appended; the canvas paints the same
+   goddess wearing the selection, "Hemen Al" CTA routes to checkout.
+   ───────────────────────────────────────────────────────────── */
+
+.play-stylist-panel {
+  margin-top: 20px;
+  padding: 18px 20px 16px;
+  border-radius: 18px;
+  background: linear-gradient(
+    160deg,
+    rgba(10, 6, 22, 0.78) 0%,
+    rgba(28, 8, 52, 0.62) 100%
+  );
+  border: 1px solid rgba(246, 236, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(246, 236, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.play-stylist-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+}
+
+.play-stylist-kicker {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(
+    in oklab,
+    var(--stage-tone-magenta, #d96be0) 70%,
+    rgba(246, 236, 255, 0.72)
+  );
+}
+
+.play-stylist-lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: rgba(246, 236, 255, 0.86);
+  letter-spacing: 0.01em;
+}
+
+.play-stylist-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .play-stylist-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.play-stylist-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 18, 70, 0.55) 0%,
+    rgba(14, 8, 32, 0.78) 100%
+  );
+  border: 1px solid rgba(246, 236, 255, 0.08);
+  color: rgba(246, 236, 255, 0.92);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+.play-stylist-tile:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in oklab,
+    var(--stage-tone-magenta, #d96be0) 38%,
+    rgba(246, 236, 255, 0.14)
+  );
+  box-shadow:
+    0 10px 26px rgba(217, 107, 224, 0.18),
+    inset 0 1px 0 rgba(246, 236, 255, 0.06);
+}
+
+.play-stylist-tile.is-active {
+  border-color: color-mix(
+    in oklab,
+    var(--stage-tone-magenta, #d96be0) 65%,
+    rgba(246, 236, 255, 0.2)
+  );
+  box-shadow:
+    0 0 0 1px color-mix(
+      in oklab,
+      var(--stage-tone-magenta, #d96be0) 50%,
+      transparent
+    ),
+    0 12px 32px rgba(217, 107, 224, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(74, 28, 122, 0.65) 0%,
+    rgba(22, 10, 46, 0.85) 100%
+  );
+}
+
+.play-stylist-tile.is-pending,
+.play-stylist-tile:disabled {
+  cursor: progress;
+  filter: saturate(0.7);
+  opacity: 0.7;
+}
+
+.play-stylist-tile-badge {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(
+    in oklab,
+    var(--stage-tone-magenta, #d96be0) 60%,
+    rgba(246, 236, 255, 0.65)
+  );
+}
+
+.play-stylist-tile-name {
+  font-size: 13px;
+  line-height: 1.3;
+  color: rgba(246, 236, 255, 0.96);
+  font-weight: 500;
+}
+
+.play-stylist-tile-price {
+  margin-top: auto;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(246, 236, 255, 0.72);
+}
+
+.play-stylist-tile-active {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(
+    in oklab,
+    var(--stage-tone-magenta, #d96be0) 78%,
+    rgba(246, 236, 255, 0.05)
+  );
+  color: rgba(10, 6, 22, 0.95);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.play-stylist-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.play-stylist-hint {
+  margin: 0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(246, 236, 255, 0.55);
+  text-align: center;
+}
+
+.play-stylist-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-stylist-buy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: linear-gradient(
+    96deg,
+    color-mix(in oklab, var(--stage-tone-magenta, #d96be0) 92%, #ffffff 0%) 0%,
+    color-mix(in oklab, var(--stage-tone-magenta, #d96be0) 76%, #1a0822 0%) 100%
+  );
+  color: rgba(8, 4, 18, 0.96);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(246, 236, 255, 0.16);
+  box-shadow:
+    0 8px 24px rgba(217, 107, 224, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+.play-stylist-buy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 30px rgba(217, 107, 224, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  filter: brightness(1.04);
+}
+
+.play-stylist-clear-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid rgba(246, 236, 255, 0.16);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(246, 236, 255, 0.72);
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    color 220ms ease,
+    background 220ms ease;
+}
+
+.play-stylist-clear-btn:hover:not(:disabled) {
+  border-color: rgba(246, 236, 255, 0.32);
+  color: rgba(246, 236, 255, 0.92);
+  background: rgba(246, 236, 255, 0.04);
+}
+
+.play-stylist-clear-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.play-stylist-collection-link {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(246, 236, 255, 0.6);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(246, 236, 255, 0.18);
+  padding-bottom: 2px;
+  transition: color 220ms ease, border-color 220ms ease;
+}
+
+.play-stylist-collection-link:hover {
+  color: rgba(246, 236, 255, 0.92);
+  border-color: rgba(246, 236, 255, 0.42);
+}
+
+/* ─────────────────────────────────────────────────────────────
    Avatar matrix thumbnails (warmed previews)
 
    When the dashboard has fetched the avatar matrix from

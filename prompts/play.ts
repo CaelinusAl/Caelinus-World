@@ -40,6 +40,13 @@ export type PromptInput = {
    *  responsible for sanitisation + moderation; this module only
    *  re-asserts the length cap as a defensive trim. */
   brief?: string;
+  /** F2c — Stylist Caelinus AI outfit overlay. When present, the
+   *  fragment is appended as a "wearing: …" clause so the figure is
+   *  rendered with the selected garment / accessory. Caller resolves
+   *  the product id → fragment via `findOutfit()` from
+   *  `data/play-outfits.ts`; this module only consumes the resolved
+   *  string + id (id feeds the seed for cache uniqueness). */
+  outfit?: { id: string; prompt: string } | null;
 };
 
 export type PromptOutput = {
@@ -204,12 +211,22 @@ function fnv1a(s: string): number {
  *  can be called from tests without going through the API route. */
 const PROMPT_BRIEF_CAP = 200;
 
+/** Defensive cap for outfit fragments — Stylist Caelinus AI is the
+ *  only producer today (curated copy in `data/play-outfits.ts`), but
+ *  trimming here keeps a future "free-form outfit" extension from
+ *  ever blowing the prompt budget. */
+const PROMPT_OUTFIT_CAP = 240;
+
 export function buildPlayPrompt(input: PromptInput): PromptOutput {
   const archetype = findArchetype(input.archetype);
   const zodiac = findZodiac(input.zodiac);
   const scene = findScene(input.scene);
   const variant = Math.max(1, Math.floor(input.variant ?? 1));
   const brief = (input.brief ?? "").trim().slice(0, PROMPT_BRIEF_CAP);
+  const outfitFragment = (input.outfit?.prompt ?? "")
+    .trim()
+    .slice(0, PROMPT_OUTFIT_CAP);
+  const outfitId = (input.outfit?.id ?? "").trim();
 
   if (!archetype || !zodiac || !scene) {
     throw new Error(
@@ -225,6 +242,11 @@ export function buildPlayPrompt(input: PromptInput): PromptOutput {
     `figure: ${archetype.prompt}`,
     `archetype: ${zodiac.label.en} (${zodiac.id}) — ${zodiac.prompt}`,
     moodSuffix ? `mood: ${moodSuffix}` : null,
+    // Outfit lands BEFORE the scene clause so the figure description
+    // and the garment description are still adjacent — gpt-image-1
+    // tends to bind clothing tightly to whichever clause is closest
+    // to the figure description in the prompt.
+    outfitFragment ? `outfit: ${outfitFragment}` : null,
     `scene: ${scene.prompt}`,
     // Brief lives last so SDXL sees the user's note as an over-ride
     // applied on top of the canonical mood. The wrapping clause keeps
@@ -234,13 +256,14 @@ export function buildPlayPrompt(input: PromptInput): PromptOutput {
     .filter(Boolean)
     .join(". ");
 
-  // Seed embeds variant + brief so v1/v2/v3 and brief-vs-no-brief all
-  // produce visibly distinct outputs. v1 with no brief keeps the
-  // original deterministic seed (back-compat with renders cached
-  // before F2a / F2b).
+  // Seed embeds variant + brief + outfit so v1/v2/v3, brief-vs-no-brief
+  // and outfit-vs-no-outfit all produce visibly distinct outputs.
+  // v1 with no brief and no outfit keeps the original deterministic
+  // seed (back-compat with renders cached before F2a / F2b / F2c).
   const seedParts: string[] = [input.archetype, input.zodiac, input.scene];
   if (variant !== 1) seedParts.push(`v${variant}`);
   if (brief) seedParts.push(`b:${brief}`);
+  if (outfitId) seedParts.push(`o:${outfitId}`);
   const seed = fnv1a(seedParts.join(":"));
 
   return {

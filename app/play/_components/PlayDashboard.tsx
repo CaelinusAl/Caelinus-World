@@ -33,6 +33,7 @@ import { usePlayStore } from "@/stores/play-store";
 
 import LookActions from "./LookActions";
 import RenderCanvas from "./RenderCanvas";
+import StylistPanel from "./StylistPanel";
 
 /**
  * Signature zodiac per archetype — used to pick the thumbnail shown on
@@ -66,6 +67,9 @@ type Props = {
   onSave: () => void;
   onShare: () => void;
   onReroll: () => void;
+  /** Stylist Caelinus AI — outfit try-on. `null` clears the overlay
+   *  and returns the canvas to the canonical no-outfit render. */
+  onSelectOutfit: (outfitId: string | null) => void;
   toast: string | null;
 };
 
@@ -76,6 +80,7 @@ export default function PlayDashboard({
   onSave,
   onShare,
   onReroll,
+  onSelectOutfit,
   toast,
 }: Props) {
   const archetypeId = usePlayStore((s) => s.archetype);
@@ -83,6 +88,7 @@ export default function PlayDashboard({
   const sceneId = usePlayStore((s) => s.scene);
   const variant = usePlayStore((s) => s.variant);
   const render = usePlayStore((s) => s.render);
+  const outfitId = usePlayStore((s) => s.outfit);
 
   const setArchetype = usePlayStore((s) => s.setArchetype);
   const setZodiac = usePlayStore((s) => s.setZodiac);
@@ -430,6 +436,18 @@ export default function PlayDashboard({
               <p className="play-dash-ai-need">{T.needPicks}</p>
             ) : null}
           </div>
+
+          {/* Stylist Caelinus AI — outfit try-on rail. Surfaces only
+              after a render lands so the user has a goddess to dress. */}
+          {hasResult || isRendering ? (
+            <StylistPanel
+              lang={lang}
+              zodiacId={zodiacId}
+              selectedOutfitId={outfitId}
+              rendering={isRendering}
+              onSelectOutfit={onSelectOutfit}
+            />
+          ) : null}
         </section>
       </div>
     </div>

@@ -228,21 +228,28 @@ export function findScene(id: SceneId | null | undefined) {
 }
 
 /**
- * Cache key — same triple (+ variant + brief) → same render. The render
- * route uses this to look up an existing image in Supabase Storage /
- * `play_renders`.
+ * Cache key — same triple (+ variant + brief + outfit) → same render.
+ * The render route uses this to look up an existing image in Supabase
+ * Storage / `play_renders`.
  *
  * Suffix order (omitted when default):
- *   `<archetype>-<zodiac>-<scene>[-v<N>][-b<8charHex>]`
+ *   `<archetype>-<zodiac>-<scene>[-v<N>][-b<8charHex>][-o<outfitId>]`
  *
- * • `variant === 1` and an empty `briefHash` produce the original
- *   `<archetype>-<zodiac>-<scene>` key — back-compat with anything
- *   cached before F2a / F2b.
+ * • `variant === 1`, empty `briefHash` and empty `outfit` produce the
+ *   original `<archetype>-<zodiac>-<scene>` key — back-compat with
+ *   anything cached before F2a / F2b / F2c.
  * • Variants always render before the brief suffix so re-rolling a
  *   custom brief stays grouped under the same brief hash.
+ * • Outfit (F2c) always sits last so the canonical (no-outfit) render
+ *   acts as the parent and outfit-overlay variants nest under it.
+ *   This keeps the gallery row stable while the stylist panel can
+ *   freely add/remove outfits without polluting the canonical entry.
  * • `briefHash` is the 8-hex output of `lib/play/brief.ts`. Pass `""`
  *   (or omit) when there's no user brief — that's the gallery-friendly
  *   public render.
+ * • `outfit` is the product id from `data/play-outfits.ts` (e.g. `b10`,
+ *   `pr1`). It's already short + safe for object keys, so we don't
+ *   hash it.
  */
 export function lookCacheKey(
   archetype: ArchetypeId,
@@ -250,10 +257,12 @@ export function lookCacheKey(
   scene: SceneId,
   variant: number = 1,
   briefHash: string = "",
+  outfit: string = "",
 ): string {
   let key = `${archetype}-${zodiac}-${scene}`;
   const v = Math.max(1, Math.floor(variant));
   if (v !== 1) key += `-v${v}`;
   if (briefHash) key += `-b${briefHash}`;
+  if (outfit) key += `-o${outfit}`;
   return key;
 }

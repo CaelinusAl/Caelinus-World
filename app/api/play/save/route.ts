@@ -21,6 +21,7 @@ import {
   ZodiacId,
   lookCacheKey,
 } from "@/data/play-assets";
+import { PLAY_OUTFITS } from "@/data/play-outfits";
 import { briefHash, BRIEF_MAX_LENGTH, sanitizeBrief } from "@/lib/play/brief";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -32,13 +33,19 @@ export const dynamic = "force-dynamic";
 const ARCHETYPE_IDS = ARCHETYPES.map((a) => a.id) as [ArchetypeId, ...ArchetypeId[]];
 const ZODIAC_IDS = ZODIACS.map((z) => z.id) as [ZodiacId, ...ZodiacId[]];
 const SCENE_IDS = SCENES.map((s) => s.id) as [SceneId, ...SceneId[]];
+// Mirror the render route's outfit enum so save-then-render paths
+// validate consistently. Sentinel guards against an empty catalogue
+// (impossible in practice — we ship 27 products).
+const OUTFIT_IDS = (PLAY_OUTFITS.length > 0
+  ? (PLAY_OUTFITS.map((o) => o.id) as [string, ...string[]])
+  : ["__no_outfit__"]) as [string, ...string[]];
 
 const SaveSchema = z.object({
   archetype: z.enum(ARCHETYPE_IDS),
   zodiac: z.enum(ZODIAC_IDS),
   scene: z.enum(SCENE_IDS),
   renderUrl: z.string().url(),
-  cacheKey: z.string().min(3).max(80),
+  cacheKey: z.string().min(3).max(96),
   // F2a — when the user saves a re-roll (v2+), the cacheKey carries
   // the suffix; we accept the variant explicitly so server can verify
   // the suffix matches without parsing it back out.
@@ -47,6 +54,11 @@ const SaveSchema = z.object({
   // and re-hash here so the cacheKey verification stays the single
   // source of truth (we don't trust a client-supplied brief hash).
   brief: z.string().max(BRIEF_MAX_LENGTH * 2).optional(),
+  // F2c — Stylist Caelinus AI outfit overlay. Optional product id
+  // from the live shop catalogue (b1, pr2, j3, …). Folded into the
+  // cache key verification so a saved outfit-on look points at the
+  // correct play_renders row.
+  outfit: z.enum(OUTFIT_IDS).optional(),
 });
 
 export async function POST(req: Request) {
@@ -65,15 +77,20 @@ export async function POST(req: Request) {
     );
   }
 
-  const { archetype, zodiac, scene, renderUrl, cacheKey, variant } = parsed.data;
+  const { archetype, zodiac, scene, renderUrl, cacheKey, variant, outfit } =
+    parsed.data;
   const cleanBrief = sanitizeBrief(parsed.data.brief);
   const briefDigest = cleanBrief ? briefHash(cleanBrief) : "";
 
   // Re-derive the cache key server-side and double-check it matches
-  // — keeps clients honest about which triple+variant+brief they're
-  // saving (we recompute briefHash from the brief string to avoid
-  // trusting a client-supplied hash).
-  if (lookCacheKey(archetype, zodiac, scene, variant, briefDigest) !== cacheKey) {
+  // — keeps clients honest about which triple+variant+brief+outfit
+  // they're saving (we recompute briefHash from the brief string to
+  // avoid trusting a client-supplied hash; the outfit id is enum-
+  // validated above so trusting it is safe).
+  if (
+    lookCacheKey(archetype, zodiac, scene, variant, briefDigest, outfit ?? "") !==
+    cacheKey
+  ) {
     return NextResponse.json(
       { error: "Cache key mismatch" },
       { status: 400 },

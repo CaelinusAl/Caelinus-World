@@ -55,11 +55,21 @@ type PlayState = {
    *  server; the client may still hold a value (e.g. while signing
    *  in), but render/save will 401 it for anonymous users. */
   brief: string;
+  /** F2c — Stylist Caelinus AI overlay. The product id (from
+   *  `data/play-outfits.ts`) currently being painted onto the figure.
+   *  `null` means "canonical no-outfit render". Clearing it returns
+   *  the canvas to the canonical look without burning a fresh render
+   *  (the cached canonical row is reused). */
+  outfit: string | null;
   setStep: (step: PlayStep) => void;
   setArchetype: (id: ArchetypeId) => void;
   setZodiac: (id: ZodiacId) => void;
   setScene: (id: SceneId) => void;
   setBrief: (text: string) => void;
+  /** Set the stylist outfit overlay. Resets the render canvas to
+   *  `idle` so the page can immediately fire a fresh request — same
+   *  pattern as `nextVariant`. Pass `null` to clear the overlay. */
+  setOutfit: (id: string | null) => void;
   beginRender: () => void;
   setRenderResult: (url: string, cached: boolean) => void;
   setRenderError: (message: string) => void;
@@ -82,6 +92,7 @@ const initialState = {
   savedLookId: null,
   variant: 1,
   brief: "",
+  outfit: null as string | null,
 };
 
 const MAX_VARIANT = 8;
@@ -100,6 +111,7 @@ export const usePlayStore = create<PlayState>((set) => ({
       render: { kind: "idle" },
       variant: 1,
       brief: "",
+      outfit: null,
     }),
 
   setZodiac: (id) =>
@@ -111,12 +123,26 @@ export const usePlayStore = create<PlayState>((set) => ({
       render: { kind: "idle" },
       variant: 1,
       brief: "",
+      outfit: null,
     }),
 
   setScene: (id) =>
-    set({ scene: id, saved: false, savedLookId: null, variant: 1 }),
+    set({ scene: id, saved: false, savedLookId: null, variant: 1, outfit: null }),
 
   setBrief: (text) => set({ brief: text }),
+
+  setOutfit: (id) =>
+    set({
+      outfit: id,
+      // Same pattern as nextVariant: kicking the canvas back to idle
+      // tells the page to fire a fresh render with the new outfit
+      // appended. The cache key carries `-o<id>` so this becomes its
+      // own row in play_renders, leaving the canonical no-outfit
+      // entry untouched.
+      render: { kind: "idle" },
+      saved: false,
+      savedLookId: null,
+    }),
 
   beginRender: () =>
     set({
@@ -154,6 +180,7 @@ export const usePlayStore = create<PlayState>((set) => ({
       savedLookId: null,
       variant: 1,
       brief: "",
+      outfit: null,
     }),
 
   reset: () => set({ ...initialState }),
