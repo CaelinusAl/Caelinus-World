@@ -42,6 +42,12 @@ export type PlayOutfit = {
    *  but never include brand/series proper nouns (gpt-image-1 will
    *  print readable proper nouns into the canvas as visible text). */
   prompt: string;
+  /** Public path to the real shop photo. Used as a *visual reference*
+   *  when the OpenAI image-edit pipeline is engaged: the goddess gets
+   *  the actual garment from this image painted onto her, instead of
+   *  the AI's own interpretation of the prompt fragment. Mirrors the
+   *  `image` column from `data/products.ts`. */
+  imageUrl: string;
   /** Click target for the "Hemen Al" CTA. Routes into the live shop
    *  with the product highlighted. */
   buyHref: string;
@@ -94,6 +100,7 @@ const SHOP_PRODUCTS = products as ReadonlyArray<{
   category: string;
   price: string;
   zodiac?: ZodiacId;
+  image: string;
 }>;
 
 export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
@@ -105,6 +112,7 @@ export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
     price: p.price,
     zodiac: p.zodiac,
     prompt: OUTFIT_PROMPTS[p.id]!,
+    imageUrl: p.image,
     buyHref: `/universe/shop?product=${p.id}`,
   }));
 

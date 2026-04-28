@@ -272,3 +272,75 @@ export function buildPlayPrompt(input: PromptInput): PromptOutput {
     seed,
   };
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Image-edit prompt builder — Stylist Caelinus AI try-on.
+
+   When the route hands two reference images to gpt-image-1
+   (`/v1/images/edits` with `image[]: [avatar, garment]`), the
+   prompt has to be short, surgical, and category-aware. Heavy
+   STYLE_BASE babble confuses the edit endpoint — gpt-image-1
+   prefers a tight directive: "swap X using Y, keep Z".
+
+   Returns null when there's nothing to edit (no outfit) — caller
+   falls back to the regular text-to-image path.
+   ───────────────────────────────────────────────────────────── */
+
+export type EditCategory = "bikini" | "pareo" | "jewelry" | "bag" | "heels";
+
+export type EditPromptInput = {
+  /** Outfit category drives the verb (swap garment vs. add accessory). */
+  category: EditCategory;
+  /** Outfit display name. Helps the model anchor on the right object
+   *  in the second image when several items are visible (e.g. shop
+   *  hero shots framed full-body). */
+  outfitName: string;
+  /** The same prompt fragment used in text-to-image — gives the model
+   *  a sanity check on palette / silhouette so it doesn't get fooled
+   *  by lighting differences in the reference photo. */
+  outfitPrompt: string;
+};
+
+/**
+ * Edit verbs by category. We pick the action the model will apply to
+ * the avatar (image #1), with explicit reference to image #2 as the
+ * "ground truth" garment.
+ */
+const EDIT_VERBS: Record<EditCategory, string> = {
+  bikini:
+    "Replace the swimwear on the goddess in the first image with the EXACT bikini shown in the second reference image",
+  pareo:
+    "Drape the goddess in the first image with the EXACT silk pareo shown in the second reference image",
+  jewelry:
+    "Add the EXACT jewelry piece shown in the second reference image to the goddess in the first image, placed naturally on her body",
+  bag:
+    "Place the EXACT bag shown in the second reference image into the goddess's hand or on her shoulder, matching her pose",
+  heels:
+    "Replace the footwear on the goddess in the first image with the EXACT heels shown in the second reference image",
+};
+
+export function buildPlayEditPrompt(input: EditPromptInput): string {
+  const verb = EDIT_VERBS[input.category];
+  const fragment = input.outfitPrompt.trim().slice(0, PROMPT_OUTFIT_CAP);
+
+  return [
+    verb + ".",
+    // Lock down what must stay identical — face is the most fragile.
+    "Preserve the goddess's face, hair, body proportions, pose, " +
+      "skin tone, lighting and the entire background scene from the first image — " +
+      "do NOT regenerate or alter anything except the targeted garment.",
+    // Style continuity — the avatar is a luxury collectible figurine,
+    // and the edit should remain in that same idiom rather than drift
+    // toward photographic realism.
+    "Keep the same luxury collectible figurine art style: porcelain " +
+      "BJD craftsmanship, glossy resin skin, premium 3D CG render, " +
+      "obviously a museum-grade collectible character — never a photograph.",
+    // Sanity hint from the original fragment so palette/silhouette match.
+    fragment ? `Stylist note: ${fragment}.` : null,
+    // Anti-text guardrail — the edit endpoint inherits the same proper-
+    // noun-print failure mode as generation.
+    "No watermarks, no logos, no text, no captions on the canvas.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}

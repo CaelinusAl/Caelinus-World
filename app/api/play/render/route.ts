@@ -37,7 +37,11 @@ import {
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PlayRenderRow } from "@/lib/supabase/types";
-import { buildPlayPrompt } from "@/prompts/play";
+import {
+  buildPlayEditPrompt,
+  buildPlayPrompt,
+  type EditCategory,
+} from "@/prompts/play";
 
 export const runtime = "nodejs";
 // Replicate's polling can stretch close to 60s — opt out of static
@@ -231,6 +235,141 @@ export async function POST(req: Request) {
     );
   }
 
+  // 2b) Stylist Caelinus AI virtual try-on.
+  //
+  // When the request carries an outfit, we want gpt-image-1 to paint
+  // the *real* shop garment onto the goddess — not its own
+  // interpretation of a prompt fragment. To do that the OpenAI
+  // image-edit endpoint needs a "bare" avatar render to edit.
+  //
+  // Strategy:
+  //   1. Look up the bare cache row (same triple, no outfit).
+  //   2. If missing, render the bare avatar fresh with text-to-image,
+  //      upload it, persist its cache row — then edit-mode can build
+  //      on top of that asset.
+  //   3. Build the surgical edit prompt and pass both reference URLs
+  //      to renderPlayImage().
+  let editReferences:
+    | { avatarUrl: string; outfitImagePath: string; editPrompt: string }
+    | undefined;
+  if (outfit) {
+    const bareCacheKey = lookCacheKey(
+      archetype,
+      zodiac,
+      scene,
+      variant,
+      briefDigest,
+      "",
+    );
+
+    let bareAvatarUrl: string | null = null;
+    const bareCached = await supabase
+      .from("play_renders")
+      .select("url, provider")
+      .eq("cache_key", bareCacheKey)
+      .maybeSingle();
+    const bareCachedRow = bareCached.data as
+      | Pick<PlayRenderRow, "url" | "provider">
+      | null;
+    if (bareCachedRow?.url && bareCachedRow.provider !== "stub") {
+      bareAvatarUrl = bareCachedRow.url;
+    } else {
+      // Need to produce the bare avatar before we can edit it.
+      let barePromptOutput;
+      try {
+        barePromptOutput = buildPlayPrompt({
+          archetype,
+          zodiac,
+          scene,
+          variant,
+          brief: cleanBrief || undefined,
+          outfit: null,
+        });
+      } catch (err) {
+        return NextResponse.json(
+          {
+            error:
+              err instanceof Error
+                ? `bare prompt build failed: ${err.message}`
+                : "Bare prompt build failed",
+          },
+          { status: 400 },
+        );
+      }
+
+      let bareRender;
+      try {
+        bareRender = await renderPlayImage({
+          prompt: barePromptOutput.prompt,
+          negativePrompt: barePromptOutput.negativePrompt,
+          seed: barePromptOutput.seed,
+          cacheKey: bareCacheKey,
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(
+          `[play.render] ${cacheKey} bare prerender failed → ${msg}`,
+        );
+        return NextResponse.json(
+          { error: msg || "AI bare prerender failed" },
+          { status: 502 },
+        );
+      }
+
+      const bareObjectPath = `${bareCacheKey}.${bareRender.extension}`;
+      const bareUpload = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(bareObjectPath, bareRender.bytes, {
+          contentType: bareRender.contentType,
+          upsert: true,
+        });
+      if (bareUpload.error) {
+        return NextResponse.json(
+          {
+            error: `Storage upload failed (bare): ${bareUpload.error.message}`,
+          },
+          { status: 502 },
+        );
+      }
+      const { data: barePub } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(bareObjectPath);
+      bareAvatarUrl = barePub.publicUrl;
+
+      await supabase.from("play_renders").upsert(
+        {
+          cache_key: bareCacheKey,
+          archetype,
+          zodiac,
+          scene,
+          url: bareAvatarUrl,
+          prompt: barePromptOutput.prompt,
+          seed: barePromptOutput.seed,
+          provider: bareRender.provider,
+        } as never,
+        { onConflict: "cache_key" },
+      );
+
+      // The bare render itself was a real provider call when it wasn't
+      // cached — count it against the hourly quota too.
+      if (bareRender.provider !== "stub") {
+        recordRender(clientKey);
+      }
+    }
+
+    if (bareAvatarUrl) {
+      editReferences = {
+        avatarUrl: bareAvatarUrl,
+        outfitImagePath: outfit.imageUrl,
+        editPrompt: buildPlayEditPrompt({
+          category: outfit.category as EditCategory,
+          outfitName: outfit.name,
+          outfitPrompt: outfit.prompt,
+        }),
+      };
+    }
+  }
+
   let render;
   try {
     render = await renderPlayImage({
@@ -238,6 +377,7 @@ export async function POST(req: Request) {
       negativePrompt: prompt.negativePrompt,
       seed: prompt.seed,
       cacheKey,
+      editReferences,
     });
   } catch (err) {
     // Surface the upstream message in the server log so we can

@@ -44,6 +44,39 @@ type RenderInput = {
   negativePrompt: string;
   seed: number;
   cacheKey: string;
+  /**
+   * Stylist Caelinus AI — image-edit / virtual try-on mode.
+   *
+   * When set, the OpenAI provider switches from `/v1/images/generations`
+   * (text-to-image) to `/v1/images/edits` (multi-image edit). The model
+   * receives the canonical avatar image as the first reference and the
+   * real shop product photo as the second reference, and is asked to
+   * paint the actual garment onto the goddess while preserving her
+   * face, pose, lighting and background scene.
+   *
+   *   • `avatarUrl`   — public URL of the bare (no-outfit) render that
+   *                     was already produced for this triple. Server
+   *                     fetches it as bytes for the multipart upload.
+   *
+   *   • `outfitImagePath` — path UNDER `public/` for the shop hero shot
+   *                     (e.g. "/play/shop/taurus-look.jpg"). Read off
+   *                     local disk so prod doesn't have to round-trip
+   *                     through its own CDN to itself.
+   *
+   *   • `editPrompt`  — the surgical edit instruction built by
+   *                     `buildPlayEditPrompt` in `prompts/play.ts`.
+   *                     Different from `input.prompt` (text-to-image),
+   *                     which is too verbose for the edit endpoint.
+   *
+   * Other providers (Replicate, stub) ignore this field and behave as
+   * before — falls back to the text-to-image path with the regular
+   * prompt + outfit fragment baked in.
+   */
+  editReferences?: {
+    avatarUrl: string;
+    outfitImagePath: string;
+    editPrompt: string;
+  };
 };
 
 /**
@@ -310,6 +343,21 @@ async function renderOpenAI(
   token: string,
   input: RenderInput,
 ): Promise<RenderResult> {
+  // Two pathways:
+  //   • editReferences set → multi-image image-edit endpoint (Stylist
+  //     Caelinus AI virtual try-on — the AI paints the actual shop
+  //     garment onto the existing avatar render).
+  //   • otherwise → vanilla text-to-image generation.
+  if (input.editReferences) {
+    return renderOpenAIEdit(token, input);
+  }
+  return renderOpenAIGenerate(token, input);
+}
+
+async function renderOpenAIGenerate(
+  token: string,
+  input: RenderInput,
+): Promise<RenderResult> {
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
@@ -332,6 +380,115 @@ async function renderOpenAI(
   if (!b64) throw new Error("OpenAI returned no image data");
   const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   return { bytes, contentType: "image/png", extension: "png", provider: "openai" };
+}
+
+/**
+ * Stylist Caelinus AI virtual try-on. Posts both reference images
+ * (avatar + shop product hero shot) to gpt-image-1's image-edit
+ * endpoint as a single multipart form. The model treats the first
+ * image as the subject and the second as the source garment, and
+ * paints the goddess wearing it.
+ *
+ * Why two paths and not just always use edit:
+ *   • Generations costs ~$0.04/image; edits are ~$0.15. Reserving the
+ *     edit endpoint for "the user actively asked to dress the goddess"
+ *     keeps the per-session bill under control.
+ *   • The edit endpoint requires us to already have a bare avatar
+ *     render online — the route handler arranges that ahead of time.
+ */
+async function renderOpenAIEdit(
+  token: string,
+  input: RenderInput,
+): Promise<RenderResult> {
+  const refs = input.editReferences!;
+
+  // Avatar lives in Supabase Storage — fetch over the network.
+  const avatarRes = await fetch(refs.avatarUrl);
+  if (!avatarRes.ok) {
+    throw new Error(
+      `OpenAI edit: avatar fetch failed ${avatarRes.status} ${refs.avatarUrl}`,
+    );
+  }
+  const avatarBuf = new Uint8Array(await avatarRes.arrayBuffer());
+  const avatarType = avatarRes.headers.get("content-type") ?? "image/png";
+
+  // Outfit reference is a static asset under `public/` — read off the
+  // local filesystem so we don't make the server round-trip back through
+  // its own CDN to itself (slower + counts against the same budget).
+  // Lazy-imported to keep the cold path of the orchestrator small.
+  const { promises: fs } = await import("fs");
+  const path = await import("path");
+  const cleanPath = refs.outfitImagePath.replace(/^\/+/, "");
+  const absPath = path.join(process.cwd(), "public", cleanPath);
+  let outfitBuf: Buffer;
+  try {
+    outfitBuf = await fs.readFile(absPath);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `OpenAI edit: outfit reference missing on disk path=${absPath} err=${msg}`,
+    );
+  }
+  const outfitType = guessImageMime(refs.outfitImagePath);
+
+  const form = new FormData();
+  form.append("model", "gpt-image-1");
+  form.append("prompt", refs.editPrompt);
+  form.append("size", "1024x1024");
+  form.append("n", "1");
+  // gpt-image-1 accepts multiple images under the same `image` key —
+  // the first is treated as the subject, subsequent files as visual
+  // references the model can pull garment / accessory geometry from.
+  form.append(
+    "image",
+    new Blob([avatarBuf as BlobPart], { type: avatarType }),
+    "avatar.png",
+  );
+  form.append(
+    "image",
+    new Blob([outfitBuf as BlobPart], { type: outfitType }),
+    `outfit.${extFromMime(outfitType)}`,
+  );
+
+  const res = await fetch("https://api.openai.com/v1/images/edits", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      // No Content-Type — let fetch set the multipart boundary.
+    },
+    body: form,
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(
+      `OpenAI image-edit failed: ${res.status} ${txt.slice(0, 240)}`,
+    );
+  }
+  const j = (await res.json()) as { data?: { b64_json?: string }[] };
+  const b64 = j.data?.[0]?.b64_json;
+  if (!b64) throw new Error("OpenAI image-edit returned no image data");
+  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  return {
+    bytes,
+    contentType: "image/png",
+    extension: "png",
+    provider: "openai",
+  };
+}
+
+function guessImageMime(filename: string): string {
+  const f = filename.toLowerCase();
+  if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
+  if (f.endsWith(".webp")) return "image/webp";
+  if (f.endsWith(".gif")) return "image/gif";
+  return "image/png";
+}
+
+function extFromMime(mime: string): string {
+  if (mime.includes("jpeg")) return "jpg";
+  if (mime.includes("webp")) return "webp";
+  if (mime.includes("gif")) return "gif";
+  return "png";
 }
 
 /* ── Stub (no API key) ───────────────────────────────────────── */
