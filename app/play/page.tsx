@@ -16,7 +16,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { CinemaCTA, NebulaPortal, StageHero } from "@/app/_stage";
 import {
   ARCHETYPES,
   SCENES,
@@ -31,12 +30,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useLangStore } from "@/stores/lang-store";
 import { usePlayStore } from "@/stores/play-store";
 
-import ArchetypePicker from "./_components/ArchetypePicker";
-import AvatarPicker from "./_components/AvatarPicker";
-import LookActions from "./_components/LookActions";
-import RenderCanvas from "./_components/RenderCanvas";
-import ScenePicker from "./_components/ScenePicker";
-import Stepper from "./_components/Stepper";
+import PlayDashboard from "./_components/PlayDashboard";
 
 type RenderResponse =
   | { url: string; cached: boolean }
@@ -63,7 +57,6 @@ export default function PlayPage() {
   // global; init() is idempotent and self-cleans on unmount.
   useEffect(() => useAuthStore.getState().init(), []);
 
-  const step = usePlayStore((s) => s.step);
   const archetype = usePlayStore((s) => s.archetype);
   const zodiac = usePlayStore((s) => s.zodiac);
   const scene = usePlayStore((s) => s.scene);
@@ -314,61 +307,15 @@ export default function PlayPage() {
       </header>
 
       <main className="play-main">
-        {step !== "hero" ? <Stepper lang={L} /> : null}
-
-        {step === "hero" ? (
-          <StageHero
-            tone="magenta"
-            eyebrow={L === "tr" ? "Caelinus · Play" : "Caelinus · Play"}
-            title={
-              L === "tr" ? "Tanrıça Sahnesine Gir" : "Enter the Goddess Stage"
-            }
-            lead={
-              L === "tr"
-                ? "Üç adımda kendi tanrıçanı seç: figür, burç, sahne. Caelinus, AI ile sana özel bir poster çizer."
-                : "Pick your goddess in three moves: figure, sign, scene. Caelinus paints you a one-off poster with AI."
-            }
-            portalSlot={
-              <NebulaPortal size={240} tone="magenta" pulse>
-                <span className="play-hero-portal-glyph" aria-hidden="true">
-                  ✦
-                </span>
-              </NebulaPortal>
-            }
-            actions={
-              <CinemaCTA
-                variant="luminous"
-                tone="magenta"
-                trailingGlyph="→"
-                onClick={() => setStep("archetype")}
-              >
-                {L === "tr" ? "Sahneye gir" : "Enter the playground"}
-              </CinemaCTA>
-            }
-          />
-        ) : null}
-
-        {step === "archetype" ? <ArchetypePicker lang={L} /> : null}
-        {step === "zodiac" ? <AvatarPicker lang={L} /> : null}
-        {step === "scene" ? (
-          <ScenePicker lang={L} onGenerate={triggerRender} />
-        ) : null}
-
-        {(step === "render" || step === "result") ? (
-          <>
-            <RenderCanvas lang={L} onRetry={triggerRender} />
-            {step === "result" && render.kind === "ready" ? (
-              <LookActions
-                lang={L}
-                onSave={handleSave}
-                onShare={handleShare}
-                onReroll={triggerReroll}
-                variant={variant}
-                toast={toast}
-              />
-            ) : null}
-          </>
-        ) : null}
+        <PlayDashboard
+          lang={L}
+          onGenerate={triggerRender}
+          onRetry={triggerRender}
+          onSave={handleSave}
+          onShare={handleShare}
+          onReroll={triggerReroll}
+          toast={toast}
+        />
       </main>
     </div>
   );

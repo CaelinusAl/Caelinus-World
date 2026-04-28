@@ -146,15 +146,17 @@ export async function POST(req: Request) {
     );
   }
 
-  // 1) Cache hit?
+  // 1) Cache hit? Stub-cached rows are treated as misses so a real
+  //    provider call replaces the placeholder SVG with actual artwork
+  //    (the upsert at the end of this handler updates the same row).
   const cached = await supabase
     .from("play_renders")
-    .select("url")
+    .select("url, provider")
     .eq("cache_key", cacheKey)
     .maybeSingle();
 
-  const cachedRow = cached.data as Pick<PlayRenderRow, "url"> | null;
-  if (cachedRow?.url) {
+  const cachedRow = cached.data as Pick<PlayRenderRow, "url" | "provider"> | null;
+  if (cachedRow?.url && cachedRow.provider !== "stub") {
     return NextResponse.json({ url: cachedRow.url, cached: true });
   }
 
@@ -206,13 +208,13 @@ export async function POST(req: Request) {
       cacheKey,
     });
   } catch (err) {
+    // Surface the upstream message in the server log so we can
+    // distinguish billing/rate-limit/safety/prompt failures at a glance.
+    // The original message is also returned to the client (502 body).
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[play.render] ${cacheKey} failed → ${msg}`);
     return NextResponse.json(
-      {
-        error:
-          err instanceof Error
-            ? err.message
-            : "AI render failed unexpectedly",
-      },
+      { error: msg || "AI render failed unexpectedly" },
       { status: 502 },
     );
   }

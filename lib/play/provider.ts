@@ -62,13 +62,42 @@ type RenderInput = {
  *      never fails and keeps dev sessions visually intact.
  *   4. Otherwise rethrow the primary error so the route surfaces it.
  */
+/**
+ * Resolves the API key for a given provider. We allow two sources so a
+ * single Vercel/local env can keep the auth tokens for both upstreams
+ * cleanly separated:
+ *
+ *   • `PLAY_AI_API_KEY`   — generic slot. Whatever the *primary* provider
+ *                            expects. For prod this is usually the only
+ *                            key set.
+ *   • `OPENAI_API_KEY`    — provider-specific override for OpenAI. Lets a
+ *                            local dev keep `PLAY_AI_API_KEY=r8_…` for
+ *                            Replicate while still having `OPENAI_API_KEY`
+ *                            sit in the same `.env.local`.
+ *
+ * Replicate has no equivalent override today (no widely-shared token name),
+ * so it always reads from `PLAY_AI_API_KEY` (and `PLAY_AI_FALLBACK_API_KEY`
+ * when used as a fallback).
+ */
+function resolveProviderKey(
+  provider: ProviderName,
+  primarySlot: string | undefined,
+): string | undefined {
+  if (provider === "openai") {
+    return process.env.OPENAI_API_KEY ?? primarySlot;
+  }
+  return primarySlot;
+}
+
 export async function renderPlayImage(input: RenderInput): Promise<RenderResult> {
   const primary = (serverEnv.PLAY_AI_PROVIDER ?? "stub") as ProviderName;
-  const primaryKey = serverEnv.PLAY_AI_API_KEY;
+  const primaryKey = resolveProviderKey(primary, serverEnv.PLAY_AI_API_KEY);
   const fallback = serverEnv.PLAY_AI_FALLBACK_PROVIDER as
     | ProviderName
     | undefined;
-  const fallbackKey = serverEnv.PLAY_AI_FALLBACK_API_KEY;
+  const fallbackKey = fallback
+    ? resolveProviderKey(fallback, serverEnv.PLAY_AI_FALLBACK_API_KEY)
+    : undefined;
 
   // No real provider possible — stub straight away.
   if (primary === "stub" || !primaryKey) {

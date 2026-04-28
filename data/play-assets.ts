@@ -148,7 +148,7 @@ export const ZODIACS: readonly Zodiac[] = [
 // "Where to?" — 4 cinematic backgrounds. The Beach/Coffee/Night/
 // Resort split mirrors the mockup's bottom rail.
 
-export type SceneId = "beach" | "coffee" | "night" | "resort";
+export type SceneId = "beach" | "coffee" | "night" | "resort" | "preview";
 
 export type Scene = {
   id: SceneId;
@@ -187,7 +187,33 @@ export const SCENES: readonly Scene[] = [
     tone: "teal",
     prompt: "infinity-pool resort terrace, twilight palms, calm reflective water",
   },
+  // ── Preview ────────────────────────────────────────────────
+  // Internal-only scene used to warm the avatar matrix (one render per
+  // archetype × zodiac, no environment). Filtered out of the picker via
+  // `PUBLIC_SCENES`. Backend validation (render route) keeps it valid so
+  // the warm script can pass scene="preview" and reuse the cache key
+  // pipeline unchanged.
+  {
+    id: "preview",
+    label: { tr: "Önizleme", en: "Preview" },
+    glyph: "○",
+    tone: "cosmic",
+    prompt:
+      "neutral deep-space studio backdrop, isolated portrait composition, " +
+      "no environment props, clean fashion-magazine framing, " +
+      "subtle cosmic gradient behind the figure, dramatic soft rim light",
+  },
 ];
+
+/**
+ * UI-facing scene list. The `preview` entry is omitted because it's a
+ * thumbnail-only render context — users shouldn't see "Preview" in the
+ * NEREYE? row. Components rendering the scene picker MUST import this
+ * (not `SCENES`) to keep the tile count at 4.
+ */
+export const PUBLIC_SCENES: readonly Scene[] = SCENES.filter(
+  (s) => s.id !== "preview",
+);
 
 // ── Lookup helpers ────────────────────────────────────────────
 
