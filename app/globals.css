@@ -18979,11 +18979,21 @@ select.atelier-input option {
 }
 
 .play-dash-ai-stage .stage-portal {
-  --stage-portal-size: clamp(320px, 44vw, 620px) !important;
+  --stage-portal-size: clamp(380px, 62vw, 820px) !important;
 }
 
 .play-dash-ai-stage .play-render-platform {
-  --stage-platform-width: clamp(320px, 44vw, 620px) !important;
+  --stage-platform-width: clamp(380px, 62vw, 820px) !important;
+}
+
+/* Play studio'da portal slot'u içindeki avatar/shop görseli tam
+   sığsın diye object-fit: cover (genel stage default'u) yerine
+   contain kullanıyoruz. Aksi takdirde 2:3 portrait shop fotoğrafları
+   yuvarlağın üstünden taşıp yüzü kırpıyor. */
+.play-dash-ai-stage .stage-portal-slot > img,
+.play-dash-ai-stage .stage-portal-slot > .play-render-image {
+  object-fit: contain !important;
+  object-position: 50% 50%;
 }
 
 .play-dash-ai-foot {
@@ -19886,8 +19896,8 @@ select.atelier-input option {
 .play-render-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: 50% 50%;
+  object-fit: contain !important;
+  object-position: 50% 35%;
   animation: play-render-driftIn 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -23445,5 +23455,218 @@ div.stage-card {
   .account-avatar-uploader {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ── Selfie uploader (Faz 2.1) ─────────────────────────────────
+ * /play studio'da kullanıcı kendi yüzü ile bikiniyi denesin diye:
+ *   • drop-zone hissi veren büyük yuvarlak köşeli kutu
+ *   • selfie yüklüyse mini avatar preview, yoksa sembol (⌖)
+ *   • aktif durumda kenar magenta accent ile vurgulanır
+ *   • drag-over geçici altın halo
+ *   • yumuşak privacy notu altta hep görünür kalır
+ * Aynı palet StylistPanel ile uyumlu — gradient indigo/magenta zemin,
+ * mat cam görünüm. Mobil'de tek kolon olarak akar.
+ */
+
+.play-selfie {
+  margin-top: 14px;
+  padding: 16px 18px 14px;
+  border-radius: 18px;
+  background: linear-gradient(
+    160deg,
+    rgba(10, 6, 22, 0.78) 0%,
+    rgba(28, 8, 52, 0.62) 100%
+  );
+  border: 1px solid rgba(246, 236, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(246, 236, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.play-selfie.has-selfie {
+  border-color: rgba(246, 154, 255, 0.42);
+  box-shadow:
+    0 10px 38px rgba(70, 26, 110, 0.46),
+    inset 0 1px 0 rgba(246, 236, 255, 0.06);
+}
+
+.play-selfie.is-drag {
+  border-color: rgba(255, 217, 138, 0.6);
+  box-shadow:
+    0 10px 32px rgba(192, 152, 70, 0.32),
+    inset 0 0 0 1px rgba(255, 217, 138, 0.45);
+}
+
+.play-selfie-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.play-selfie-title {
+  margin: 0;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: rgba(246, 236, 255, 0.96);
+}
+
+.play-selfie-active {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: rgba(246, 154, 255, 0.95);
+  text-transform: uppercase;
+}
+
+.play-selfie-sub {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(246, 236, 255, 0.62);
+}
+
+.play-selfie-drop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(8, 4, 18, 0.55);
+  border: 1px dashed rgba(246, 236, 255, 0.18);
+  transition: border-color 220ms ease, background 220ms ease;
+}
+
+.play-selfie.is-drag .play-selfie-drop {
+  border-color: rgba(255, 217, 138, 0.6);
+  background: rgba(48, 30, 6, 0.42);
+}
+
+.play-selfie-glyph {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgba(246, 154, 255, 0.32) 0%,
+    rgba(50, 24, 94, 0.6) 60%,
+    rgba(8, 4, 18, 0.85) 100%
+  );
+  color: rgba(246, 236, 255, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(246, 236, 255, 0.12);
+}
+
+.play-selfie-preview {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px rgba(246, 154, 255, 0.55), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.play-selfie-actions {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.play-selfie-btn {
+  appearance: none;
+  border: 1px solid rgba(246, 154, 255, 0.55);
+  background: linear-gradient(
+    180deg,
+    rgba(246, 154, 255, 0.18) 0%,
+    rgba(120, 40, 180, 0.22) 100%
+  );
+  color: rgba(246, 236, 255, 0.96);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease,
+    background 220ms ease;
+}
+
+.play-selfie-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(120, 40, 180, 0.32);
+}
+
+.play-selfie-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.play-selfie-btn--ghost {
+  background: transparent;
+  border-color: rgba(246, 236, 255, 0.18);
+  color: rgba(246, 236, 255, 0.68);
+}
+
+.play-selfie-btn--ghost:hover:not(:disabled) {
+  border-color: rgba(255, 154, 154, 0.5);
+  color: rgba(255, 196, 196, 0.92);
+  box-shadow: 0 4px 14px rgba(140, 30, 30, 0.24);
+}
+
+.play-selfie-hint {
+  font-size: 11.5px;
+  color: rgba(246, 236, 255, 0.45);
+  font-style: italic;
+}
+
+.play-selfie-input {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.play-selfie-privacy {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(246, 236, 255, 0.42);
+  letter-spacing: 0.2px;
+}
+
+.play-selfie-error {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 154, 154, 0.92);
+  letter-spacing: 0.2px;
+}
+
+@media (max-width: 720px) {
+  .play-selfie-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .play-selfie-drop {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .play-selfie-actions {
+    justify-content: center;
   }
 }

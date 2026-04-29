@@ -283,11 +283,31 @@ export function lookCacheKey(
   variant: number = 1,
   briefHash: string = "",
   outfit: string = "",
+  /**
+   * Faz 2.1 — kullanıcı selfie'si. Suffix `-fb<hash>` (face-banana,
+   * Gemini nano-banana modelini yansıtır) formatında cache key'e
+   * eklenir; aynı selfie + aynı outfit kombinasyonu cache hit olur,
+   * sınırsız remix'te yalnızca benzersiz her çift bir kez gerçek
+   * render harcar.
+   *
+   * Tarihsel notlar (suffix evrimi):
+   *   • `-s<hash>`  → FASHN VTON dönemi (kullanıcının kendi
+   *                   vücuduna garment boyamak — istediğimiz
+   *                   davranış değildi).
+   *   • `-fs<hash>` → easel-ai/advanced-face-swap (deprecated;
+   *                   500 Internal Server Error dönüyor).
+   *   • `-fb<hash>` → fal-ai/nano-banana/edit (Gemini 2.5 Flash
+   *                   Image, multi-reference image edit). Aktif.
+   * Suffix değişikliği eski başarısız satırları otomatik invalidate
+   * ediyor.
+   */
+  selfieHash: string = "",
 ): string {
   let key = `${archetype}-${zodiac}-${scene}`;
   const v = Math.max(1, Math.floor(variant));
   if (v !== 1) key += `-v${v}`;
   if (briefHash) key += `-b${briefHash}`;
   if (outfit) key += `-oe${OUTFIT_PIPELINE_VERSION}${outfit}`;
+  if (selfieHash) key += `-fb${selfieHash}`;
   return key;
 }

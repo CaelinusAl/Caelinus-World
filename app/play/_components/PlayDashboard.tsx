@@ -33,6 +33,7 @@ import { usePlayStore } from "@/stores/play-store";
 
 import LookActions from "./LookActions";
 import RenderCanvas from "./RenderCanvas";
+import SelfieUploader from "./SelfieUploader";
 import StylistPanel from "./StylistPanel";
 
 /**
@@ -433,6 +434,15 @@ export default function PlayDashboard({
               rendering={isRendering}
               onSelectOutfit={onSelectOutfit}
             />
+          ) : null}
+
+          {/* Faz 2.1 — kendi yüzünle dene. Stylist'in altında çıkar
+              ki kullanıcı önce burcunu görsün, sonra "ben de tanrıça
+              olabilir miyim?" sorusunu sorma anına özgü konumlansın.
+              Selfie yüklenince selfieHash effect'i mevcut outfit'i
+              FASHN VTON üzerinden yeniden render eder. */}
+          {hasResult || isRendering ? (
+            <SelfieUploader lang={lang} />
           ) : null}
         </section>
       </div>

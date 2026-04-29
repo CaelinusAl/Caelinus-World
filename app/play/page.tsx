@@ -143,15 +143,24 @@ export default function PlayPage() {
   // at 75s (server budget + 15s buffer) so the user always gets back
   // to a retry-able error state instead of an infinite shimmer.
   const triggerRender = useCallback(async () => {
-    if (!archetype || !zodiac || !scene) return;
+    // Faz 2.1 — face-swap pipeline target_image olarak burç bazlı
+    // signature shop görselini kullanıyor; archetype/scene render'a
+    // etki etmez ama cache_key bütünlüğü için server-side schema'da
+    // hâlâ zorunlu. Kullanıcı bu alanları UI'da seçmemiş olabilir
+    // (Phase-1'de cosmetic), o yüzden burada güvenli default uyguluyoruz.
+    if (!zodiac) return;
+    const archetypeForRender: ArchetypeId = archetype ?? "dark";
+    const sceneForRender: SceneId = scene ?? "night";
     beginRender();
-    // Read variant + brief + outfit from the store at call time so a
-    // re-roll that just bumped the index, or an outfit pick that just
-    // landed, doesn't race a stale closure.
+    // Read variant + brief + outfit + selfie from the store at call
+    // time so a re-roll, an outfit pick, or a selfie upload that just
+    // landed doesn't race a stale closure.
     const {
       variant: currentVariant,
       brief: currentBrief,
       outfit: currentOutfit,
+      selfieDataUri: currentSelfie,
+      selfieHash: currentSelfieHash,
     } = usePlayStore.getState();
     const controller = new AbortController();
     const abortTimer = window.setTimeout(() => controller.abort(), 75_000);
@@ -160,12 +169,17 @@ export default function PlayPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          archetype,
+          archetype: archetypeForRender,
           zodiac,
-          scene,
+          scene: sceneForRender,
           variant: currentVariant,
           brief: currentBrief || undefined,
           outfit: currentOutfit || undefined,
+          // Faz 2.1 — selfie payload. Server selfie + outfit + previewImage
+          // üçlüsü ile face-swap yoluna gider; aksi takdirde alanları
+          // görmezden gelir ve eski static-frame yoluna düşer.
+          selfieDataUri: currentSelfie || undefined,
+          selfieHash: currentSelfieHash || undefined,
           lang: L,
         }),
         signal: controller.signal,
@@ -237,59 +251,93 @@ export default function PlayPage() {
     }
   }, [archetype, zodiac, scene, beginRender, setRenderResult, setRenderError, L]);
 
-  // ── Phase-1 auto-preview on zodiac select ────────────────
-  // The AI bare-avatar pipeline is paused for cost-control. Picking a
-  // zodiac now drops the user straight into that sign's designer-
-  // curated shop frame (signature bikini at /play/shop/{zodiac}-look.jpg).
-  // Zero AI calls, zero FASHN credit, zero loading shimmer — just an
-  // instant <img src> swap that doubles as the canonical "this is your
-  // look" view.
+  // ── Outfit application — iki yollu mod seçici ───────────────
+  // Caelinus Play iki render moduyla çalışır:
   //
-  // We also seed `outfit` with the signature bikini id so the stylist
-  // panel reflects the active tile and the "Bu görünümü al" CTA links
-  // straight to the matching shop product.
+  //   1. STATIC MOD (Phase-1, varsayılan):
+  //      Outfit'in `previewImage`'ı doğrudan canvas'a basılır. AI yok,
+  //      FASHN yok, Supabase yok — saf <img src> swap. Maliyet $0.
   //
-  // `pendingAutoRender` is honoured here too: a `?preset=<id>` deep
-  // link still lands the user on a ready-to-share frame, just without
-  // burning an AI render to do it.
+  //   2. SELFIE MOD (Faz 2.1):
+  //      Kullanıcı selfie yüklemişse outfit seçimi `/api/play/render`
+  //      üzerinden FASHN VTON'a gider; sonuç kullanıcının kendi yüzü
+  //      ve bedeniyle bikiniyi giymiş hâlidir. selfieHash cache_key'e
+  //      dahil olduğu için aynı selfie + outfit ikinci kez ücret
+  //      yazmaz.
+  //
+  // Hangi modun tetikleneceği store'daki `selfieDataUri`'ye bakılarak
+  // tek noktada karar verilir; zodiac auto-pick, outfit-tile click ve
+  // selfie upload effect'leri bu helper'dan geçer.
   const setOutfit = usePlayStore((s) => s.setOutfit);
-  useEffect(() => {
-    if (!zodiac) return;
-    const bikini = findSignatureBikini(zodiac);
-    if (!bikini?.previewImage) return;
-    setOutfit(bikini.id);
-    setRenderResult(bikini.previewImage, false);
-    if (pendingAutoRender) setPendingAutoRender(false);
-  }, [zodiac, setOutfit, setRenderResult, pendingAutoRender]);
 
-  // ── Outfit try-on (F2c) ───────────────────────────────────
-  // Phase-1 cost-control: every renderable outfit ships with a
-  // `previewImage` (currently the 12 zodiac bikinis at
-  // /play/shop/{zodiac}-look.jpg) — clicking a tile is a *pure
-  // <img src> swap*. No AI call, no FASHN credit, no Supabase write.
-  //
-  // Clearing the outfit (`outfitId === null`) snaps the canvas back to
-  // the active zodiac's signature bikini frame — same designer photo
-  // the zodiac-pick effect lands on. The AI bare-avatar fallback that
-  // used to live here is intentionally gone; every visible state on
-  // /play now comes from a static shop image.
-  const triggerOutfitTryOn = useCallback(
+  const applyOutfit = useCallback(
     (outfitId: string | null) => {
       const outfit = outfitId ? findOutfit(outfitId) : null;
-      const target = outfit?.previewImage
-        ? outfit
-        : findSignatureBikini(zodiac);
-      setOutfit(target?.id ?? null);
+      const target = outfit ?? findSignatureBikini(zodiac);
+      const targetId = target?.id ?? null;
+
+      setOutfit(targetId);
+
+      const { selfieDataUri: currentSelfie } = usePlayStore.getState();
+      // Selfie + zodiac + outfit ile face-swap yoluna gideriz; archetype
+      // ve scene kullanıcı seçmediyse triggerRender'da default'lanır.
+      const aiPath = !!(currentSelfie && targetId && zodiac);
+
+      if (aiPath) {
+        // Selfie modu — AI render fire & forget. triggerRender
+        // beginRender() çağırır, canvas shimmer'a düşer, sonuç
+        // gelince setRenderResult ile aktarılır.
+        void Promise.resolve().then(() => {
+          void triggerRender();
+        });
+        return;
+      }
+
+      // Static mod — anında <img src> swap.
       if (target?.previewImage) {
         const url = target.previewImage;
-        // One microtask defer so Zustand `outfit` has settled before
-        // any downstream effect re-reads it from `setRenderResult`.
         void Promise.resolve().then(() => {
           setRenderResult(url, false);
         });
       }
     },
-    [setOutfit, setRenderResult, zodiac],
+    [setOutfit, setRenderResult, archetype, zodiac, scene, triggerRender],
+  );
+
+  // ── Auto-preview on zodiac select ────────────────────────
+  // Zodiac değiştiğinde signature bikini'ye düşeriz; applyOutfit
+  // seçili moda göre static swap veya AI render tetikler.
+  useEffect(() => {
+    if (!zodiac) return;
+    const bikini = findSignatureBikini(zodiac);
+    if (!bikini) return;
+    applyOutfit(bikini.id);
+    if (pendingAutoRender) setPendingAutoRender(false);
+    // applyOutfit zodiac dependency'sine bağlı — sadece zodiac değişimi
+    // yeniden çalıştırsın, bağımsız re-fire'lardan kaçınmak için.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zodiac]);
+
+  // ── Selfie change → mevcut outfit'i yeniden uygula ────────
+  // Selfie yüklendiğinde veya kaldırıldığında, ekrandaki canvas
+  // doğru moda göre yenilenmeli (static ↔ AI). Selfie hash'inde olan
+  // bir değişiklik aynı outfit için yeni bir cache_key demek.
+  const selfieHash = usePlayStore((s) => s.selfieHash);
+  useEffect(() => {
+    const { outfit: currentOutfit } = usePlayStore.getState();
+    if (!currentOutfit) return;
+    applyOutfit(currentOutfit);
+    // applyOutfit'i deps'e koymak istersek sürekli zincir oluşur —
+    // yalnızca selfieHash değişimi tetiklesin.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selfieHash]);
+
+  // Outfit tile click handler — applyOutfit'in dış arayüzü.
+  const triggerOutfitTryOn = useCallback(
+    (outfitId: string | null) => {
+      applyOutfit(outfitId);
+    },
+    [applyOutfit],
   );
 
   const savedLookId = usePlayStore((s) => s.savedLookId);

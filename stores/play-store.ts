@@ -61,6 +61,19 @@ type PlayState = {
    *  the canvas to the canonical look without burning a fresh render
    *  (the cached canonical row is reused). */
   outfit: string | null;
+  /**
+   * Faz 2.1 — kullanıcı selfie'si. Set olduğunda outfit seçimi FASHN
+   * VTON pipeline'ına gider ve `model_image` olarak bu data URI
+   * geçer; sonuçta kullanıcı kendi yüzü/bedeniyle bikiniyi giymiş
+   * görünür. `null` = klasik static shop frame swap (Faz 1) modu.
+   *
+   * `selfieDataUri` 1024px'e resize edilmiş base64 PNG, sunucuya
+   * inflight gönderilir, hiçbir yerde kalıcı saklanmaz. `selfieHash`
+   * ise data URI'nin sha256 prefix'i — cache_key'e dahil edilir, aynı
+   * selfie + outfit ikinci kez render edilmez (zero-cost replay).
+   */
+  selfieDataUri: string | null;
+  selfieHash: string | null;
   setStep: (step: PlayStep) => void;
   setArchetype: (id: ArchetypeId) => void;
   setZodiac: (id: ZodiacId) => void;
@@ -70,6 +83,16 @@ type PlayState = {
    *  `idle` so the page can immediately fire a fresh request — same
    *  pattern as `nextVariant`. Pass `null` to clear the overlay. */
   setOutfit: (id: string | null) => void;
+  /** Set the user's selfie payload. Both fields go together — the
+   *  data URI is what FASHN consumes, the hash is what the cache key
+   *  keys off. Resets the render canvas to `idle` so the next outfit
+   *  pick fires a fresh AI render against the new face. */
+  setSelfie: (dataUri: string, hash: string) => void;
+  /** Drop the selfie and snap the studio back to Phase-1 static-frame
+   *  mode. The current canvas is left as-is so the user can compare
+   *  the two visual modes; the next outfit click picks up the static
+   *  preview path. */
+  clearSelfie: () => void;
   beginRender: () => void;
   setRenderResult: (url: string, cached: boolean) => void;
   setRenderError: (message: string) => void;
@@ -93,6 +116,8 @@ const initialState = {
   variant: 1,
   brief: "",
   outfit: null as string | null,
+  selfieDataUri: null as string | null,
+  selfieHash: null as string | null,
 };
 
 const MAX_VARIANT = 8;
@@ -140,6 +165,25 @@ export const usePlayStore = create<PlayState>((set) => ({
       // own row in play_renders, leaving the canonical no-outfit
       // entry untouched.
       render: { kind: "idle" },
+      saved: false,
+      savedLookId: null,
+    }),
+
+  setSelfie: (dataUri, hash) =>
+    set({
+      selfieDataUri: dataUri,
+      selfieHash: hash,
+      // Force the next outfit pick to render fresh against the new
+      // face. Clearing the canvas state here keeps the current image
+      // visible until the new render lands (no brief flash to idle).
+      saved: false,
+      savedLookId: null,
+    }),
+
+  clearSelfie: () =>
+    set({
+      selfieDataUri: null,
+      selfieHash: null,
       saved: false,
       savedLookId: null,
     }),

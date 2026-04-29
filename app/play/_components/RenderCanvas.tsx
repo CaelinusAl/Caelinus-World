@@ -99,7 +99,7 @@ export default function RenderCanvas({ lang, onRetry }: Props) {
         aria-live="polite"
         aria-busy={render.kind === "loading"}
       >
-        <NebulaPortal size={620} tone={tone} pulse>
+        <NebulaPortal size={760} tone={tone} pulse>
           {render.kind === "ready" ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -125,7 +125,7 @@ export default function RenderCanvas({ lang, onRetry }: Props) {
           )}
         </NebulaPortal>
         <GlowPlatform
-          width={620}
+          width={760}
           tone={tone}
           intensity="rich"
           className="play-render-platform"

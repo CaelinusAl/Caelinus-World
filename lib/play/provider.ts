@@ -124,6 +124,36 @@ type RenderInput = {
     garmentImageData: string;
     category: "tops" | "bottoms" | "one-pieces" | "auto";
   };
+  /**
+   * Faz 2.1 v3 — Caelinus face-swap akışı.
+   *
+   * `fal-ai/nano-banana/edit` (Gemini 2.5 Flash Image) üzerinden
+   * kullanıcının yüzünü Caelinus modelinin bikinili shop görseline
+   * yerleştirir. Vücut, poz, kıyafet, sahne hep `targetImage`'tan
+   * gelir; sadece yüz değişir. Bu, "kullanıcının kendi vücuduna
+   * kıyafet boya" (FASHN VTON) yerine "kullanıcının yüzü Caelinus
+   * modelinin bedenine" diyen doğru üründür.
+   *
+   * Tarihçe: v2'de `easel-ai/advanced-face-swap` denedik ama o
+   * endpoint resmi olarak deprecate edildi (500 dönüyor). v3'te
+   * Google'ın aktif multi-reference image-edit modeline geçtik.
+   *
+   *   • `sourceImage` — kullanıcı selfie'si (data URI veya URL).
+   *                    fal.ai data URI kabul ediyor; client tarafı
+   *                    tarayıcıda 1024px JPEG @ q=0.85 üretiyor,
+   *                    ~250-450 KB.
+   *   • `targetImage` — Caelinus shop görselinin URL'i
+   *                    (`/play/shop/{zodiac}-look.jpg` deployment
+   *                    origin'i ile birleşik tam URL) **veya**
+   *                    önceden hazırlanmış data URI. Provider
+   *                    server-side fetch ile her durumda data URI'a
+   *                    normalize ediyor — dev'deki localhost
+   *                    URL'leri fal sunucusundan görünmez.
+   */
+  faceSwapReferences?: {
+    sourceImage: string;
+    targetImage: string;
+  };
 };
 
 /**
@@ -178,6 +208,45 @@ export async function renderPlayImage(input: RenderInput): Promise<RenderResult>
   const fallbackKey = fallback
     ? resolveProviderKey(fallback, serverEnv.PLAY_AI_FALLBACK_API_KEY)
     : undefined;
+
+  // Face-swap hard-override. Caelinus shop görseli üzerine kullanıcının
+  // yüzünü yerleştirmek için `easel-ai/advanced-face-swap`'a gideriz.
+  // Bu yol bare avatar render gerektirmez; target image olarak
+  // pre-rendered shop hero shot kullanılır, dolayısıyla FASHN VTON
+  // veya gpt-image-1 hiç çağrılmaz. fal_key gerekli; yoksa stub'a
+  // düşeriz çünkü face-swap için fallback yok.
+  if (input.faceSwapReferences) {
+    const falKey = serverEnv.FAL_KEY;
+    if (falKey) {
+      const startedAt = Date.now();
+      console.log(
+        `[play.provider] start provider=face-swap cacheKey=${input.cacheKey} ts=${new Date(
+          startedAt,
+        ).toISOString()}`,
+      );
+      try {
+        const result = await renderFaceSwap(falKey, input);
+        console.log(
+          `[play.provider] done provider=face-swap cacheKey=${input.cacheKey} durationMs=${
+            Date.now() - startedAt
+          } bytes=${result.bytes.length} contentType=${result.contentType}`,
+        );
+        return result;
+      } catch (fsErr) {
+        const msg =
+          fsErr instanceof Error ? fsErr.message : String(fsErr);
+        console.error(
+          `[play.provider] fail provider=face-swap cacheKey=${input.cacheKey} durationMs=${
+            Date.now() - startedAt
+          } msg=${msg}`,
+        );
+        throw fsErr;
+      }
+    }
+    console.warn(
+      `[play.provider] face-swap requested but FAL_KEY unset — falling through to ${primary}. cacheKey=${input.cacheKey}`,
+    );
+  }
 
   // FASHN VTON hard-override. Whenever the route asks for a virtual
   // try-on AND the FAL key is configured, we go straight to FASHN —
@@ -708,6 +777,157 @@ function extFromMime(mime: string): string {
   if (mime.includes("webp")) return "webp";
   if (mime.includes("gif")) return "gif";
   return "png";
+}
+
+/* ── Face swap via fal.ai (nano-banana / Gemini 2.5 Flash Image) ─ */
+
+/**
+ * Caelinus face-swap — Faz 2.1 v3.
+ *
+ * Senaryo: kullanıcı selfie yükler ve bir burç seçer. Burcun signature
+ * shop görseli (`/play/shop/{zodiac}-look.jpg`) zaten tasarımcıların
+ * çektiği yüksek kaliteli model + bikini fotoğrafı. Kullanıcının yüzü
+ * o modelin yüzüne yerleştirilir; vücut, poz, kıyafet, ışık, sahne
+ * tamamen hedef görselden gelir.
+ *
+ * Niye nano-banana/edit (Gemini 2.5 Flash Image)?
+ *   v2'de `easel-ai/advanced-face-swap` denedik, ama o endpoint
+ *   resmi olarak deprecate edildi (fal model gallery'sinde "This
+ *   model is no longer supported" + 500 Internal Server Error).
+ *   nano-banana/edit aktif, multi-reference image alıyor, ticari
+ *   lisans uyumlu, data URI destekliyor ve face/body swap dahil
+ *   yüksek kaliteli prompt-based image edit yapıyor.
+ *
+ * Bu yaklaşım üç şey kazandırır:
+ *   1. Bare avatar render etmek gerekmez — maliyet yarıdan aşağı.
+ *   2. FASHN VTON'un "kullanıcının kendi vücuduna kıyafet boya"
+ *      yanlışlığından kaçar — çünkü vücut zaten profesyonel.
+ *   3. Static shop görselleri üretim kalitesinde, AI rendering
+ *      yorumu yok; sadece yüz değişir.
+ *
+ * API: `https://fal.run/fal-ai/nano-banana/edit`
+ * Auth: `Authorization: Key <FAL_KEY>` (FASHN ile aynı key).
+ * Latency: ~5-10 saniye.
+ * Pricing: ~$0.04 per edit.
+ *
+ * Parametre seçimleri:
+ *   • `prompt`           — face-swap için açık talimatlar; kıyafet,
+ *                          vücut ve sahne korunmalı, sadece yüz
+ *                          değişmeli. Birinci görsel = kullanıcı
+ *                          (kaynak yüz), ikinci görsel = Caelinus
+ *                          modeli (hedef vücut + kıyafet).
+ *   • `image_urls`       — [selfie data URI, target data URI].
+ *                          Target'ı da data URI yapıyoruz çünkü
+ *                          dev'de localhost URL fal sunucusundan
+ *                          erişilemez; prod'da da public CDN'i
+ *                          ekstra bir hop atlayarak gönderiyor
+ *                          oluruz, fark etmiyor.
+ *   • `aspect_ratio`     — "auto"; target görseli ne ise onu sürdür.
+ *   • `output_format`    — "png", lossless.
+ *   • `safety_tolerance` — "5" — moderate. Bikini içerikleri için
+ *                          "1-3" çok katı; "6" tamamen serbest. "5"
+ *                          swimwear'a izin verir, açık explicit
+ *                          içerik üretmez.
+ *   • `num_images: 1`    — tek çıktı yeterli; reroll yok.
+ */
+async function renderFaceSwap(
+  falKey: string,
+  input: RenderInput,
+): Promise<RenderResult> {
+  const refs = input.faceSwapReferences!;
+
+  // Hedef görseli (Caelinus shop fotoğrafı) data URI'a çevir. Dev'de
+  // localhost URL'leri dış servisten erişilemez; data URI tüm
+  // ortamlarda eşit çalışır.
+  let targetDataUri = refs.targetImage;
+  if (!targetDataUri.startsWith("data:")) {
+    const targetRes = await fetch(refs.targetImage);
+    if (!targetRes.ok) {
+      throw new Error(
+        `Face-swap target fetch failed: ${targetRes.status} ${refs.targetImage}`,
+      );
+    }
+    const targetBuf = new Uint8Array(await targetRes.arrayBuffer());
+    const targetMime =
+      targetRes.headers.get("content-type") ?? "image/jpeg";
+    const b64 = Buffer.from(targetBuf).toString("base64");
+    targetDataUri = `data:${targetMime};base64,${b64}`;
+  }
+
+  // Prompt — Gemini'nin face-swap için en doğru cevabı vermesi için
+  // explicit, deterministic talimatlar. Birinci görselin yalnızca
+  // yüz kaynağı olduğu, diğer her şeyin (kıyafet, poz, sahne) ikinci
+  // görselden geleceği vurgulanır.
+  const facePrompt =
+    "Take the face from the first reference image and place it onto the woman in the second reference image. Keep everything else from the second image unchanged: the bikini outfit, body pose, hair style, hair color, lighting, background, scene, color grading, and overall composition must remain identical to the second image. Only the facial features (eyes, nose, mouth, face shape) should be transferred from the first image. The result must be a photorealistic, magazine-quality fashion photograph. Do not alter the swimwear, do not modify the background, do not change the body proportions.";
+
+  const body = {
+    prompt: facePrompt,
+    image_urls: [refs.sourceImage, targetDataUri],
+    num_images: 1,
+    aspect_ratio: "auto" as const,
+    output_format: "png" as const,
+    safety_tolerance: "5" as const,
+  };
+
+  const res = await fetch(
+    "https://fal.run/fal-ai/nano-banana/edit",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Key ${falKey}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(
+      `Face-swap failed: ${res.status} ${txt.slice(0, 240)}`,
+    );
+  }
+
+  const j = (await res.json()) as {
+    images?: { url?: string; content_type?: string }[];
+    description?: string;
+    error?: string;
+    detail?: unknown;
+  };
+
+  const first = j.images?.[0];
+  const imageUrl = first?.url;
+  if (!imageUrl) {
+    const summary = j.error ?? JSON.stringify(j.detail ?? j).slice(0, 240);
+    throw new Error(`Face-swap returned no image: ${summary}`);
+  }
+
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) {
+    throw new Error(
+      `Face-swap output fetch failed: ${imgRes.status} ${imageUrl}`,
+    );
+  }
+  const buf = new Uint8Array(await imgRes.arrayBuffer());
+  const contentType =
+    first?.content_type ?? imgRes.headers.get("content-type") ?? "image/png";
+  const extension = contentType.includes("jpeg")
+    ? "jpg"
+    : contentType.includes("webp")
+      ? "webp"
+      : "png";
+  return {
+    bytes: buf,
+    contentType,
+    extension,
+    // Provider enum sınırlı (replicate / openai / stub); fal.ai
+    // face-swap'i `openai` etiketleyerek mevcut play_renders şemasına
+    // uyuyoruz. Detaylı telemetri yapısal `[play.provider]`
+    // log satırlarında zaten var.
+    provider: "openai",
+  };
 }
 
 /* ── Stub (no API key) ───────────────────────────────────────── */

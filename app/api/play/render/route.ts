@@ -91,6 +91,36 @@ const RenderRequestSchema = z.object({
    * so there's nothing to moderate (unlike the free-form `brief`).
    */
   outfit: z.enum(OUTFIT_IDS).optional(),
+  /**
+   * Faz 2.1 — kullanıcı selfie'si. Set edildiğinde:
+   *   • bare avatar pre-render adımı atlanır,
+   *   • FASHN VTON `model_image` parametresine doğrudan bu data URI
+   *     geçer (FASHN URL veya base64 data URI kabul eder),
+   *   • cache_key'e `-s<hash>` suffix eklenir, böylece aynı selfie +
+   *     aynı outfit ikinci kez render edilmez.
+   *
+   * Sadece outfit ile birlikte anlamlı: outfit yoksa selfie alanları
+   * görmezden gelinir (selfie tek başına AI render tetiklemez).
+   *
+   * Boyut limiti: ~3 MB data URI ≈ 2.2 MB raw. Client tarafı
+   * SelfieUploader bunu 1024px JPEG @ q=0.85 ile garanti altına alır
+   * (~250-450 KB). 4 MB üstüne çıkanı reddediyoruz, JSON body uzar
+   * sonra Vercel/Next 4.5 MB request limit'ine yanaşır.
+   */
+  selfieDataUri: z
+    .string()
+    .max(4 * 1024 * 1024, "Selfie too large")
+    .regex(/^data:image\/(jpeg|png|webp);base64,/, "Invalid selfie data URI")
+    .optional(),
+  /** Selfie data URI'nin sha256-prefix hash'i (16 hex). Client
+   *  hesaplar; sunucu sadece cache_key'e dahil eder, integrity
+   *  doğrulaması yapmaz (cache hit kötüye kullanılırsa kullanıcı yine
+   *  kendi yüklediği selfie ile render olur, başkası bu hash'i tahmin
+   *  edemez). */
+  selfieHash: z
+    .string()
+    .regex(/^[0-9a-f]{8,32}$/i, "Invalid selfie hash")
+    .optional(),
   /** UI language hint — only used to pick the rejection-message
    *  language when moderation triggers. Defaults to EN. */
   lang: z.enum(["tr", "en"]).optional().default("en"),
@@ -123,6 +153,20 @@ export async function POST(req: Request) {
   // we treat as "no outfit" instead of erroring (defensive against
   // catalogue updates that prune entries).
   const outfit = findOutfit(parsed.data.outfit);
+
+  // Faz 2.1 — selfie payload. Selfie'nin anlamlı olabilmesi için outfit
+  // şart (FASHN model_image + garment_image ikilisi gerekiyor); selfie
+  // tek başına gelirse görmezden geliyoruz, eski text-to-image yoluna
+  // düşmemek için. selfieDataUri ile selfieHash birlikte gelmeli;
+  // birinin eksikliği "selfie modu yok" kabul edilir.
+  const selfieDataUri =
+    outfit && parsed.data.selfieDataUri && parsed.data.selfieHash
+      ? parsed.data.selfieDataUri
+      : null;
+  const selfieHash =
+    outfit && parsed.data.selfieDataUri && parsed.data.selfieHash
+      ? parsed.data.selfieHash
+      : "";
 
   // ── Brief: sanitise → auth → moderate ──────────────────────
   // Anonymous users get the canonical (no-brief) render path. A brief
@@ -161,6 +205,7 @@ export async function POST(req: Request) {
     variant,
     briefDigest,
     outfit?.id ?? "",
+    selfieHash,
   );
 
   let supabase;
@@ -264,7 +309,30 @@ export async function POST(req: Request) {
         category: "tops" | "bottoms" | "one-pieces" | "auto";
       }
     | undefined;
-  if (outfit) {
+  let faceSwapReferences:
+    | {
+        sourceImage: string;
+        targetImage: string;
+      }
+    | undefined;
+
+  // ── Selfie + outfit → face-swap (Caelinus shop hero shot üzerine
+  //    kullanıcı yüzü) ──────────────────────────────────────────
+  // Selfie yüklenmiş AND outfit'in kullanılabilir bir `previewImage`'ı
+  // varsa face-swap yolu zorla devreye girer; bare avatar render,
+  // FASHN VTON ve OpenAI image-edit yolları tamamen atlanır.
+  // previewImage Caelinus modelinin bikinili hâli olduğu için sadece
+  // yüzü değiştirip $0.04 maliyetinde son ürünü çıkarmak yeterli.
+  if (selfieDataUri && outfit?.previewImage) {
+    const origin = new URL(req.url).origin;
+    const targetImageUrl = new URL(outfit.previewImage, origin).href;
+    faceSwapReferences = {
+      sourceImage: selfieDataUri,
+      targetImage: targetImageUrl,
+    };
+  }
+
+  if (outfit && !faceSwapReferences) {
     const bareCacheKey = lookCacheKey(
       archetype,
       zodiac,
@@ -275,97 +343,112 @@ export async function POST(req: Request) {
     );
 
     let bareAvatarUrl: string | null = null;
-    const bareCached = await supabase
-      .from("play_renders")
-      .select("url, provider")
-      .eq("cache_key", bareCacheKey)
-      .maybeSingle();
-    const bareCachedRow = bareCached.data as
-      | Pick<PlayRenderRow, "url" | "provider">
-      | null;
-    if (bareCachedRow?.url && bareCachedRow.provider !== "stub") {
-      bareAvatarUrl = bareCachedRow.url;
+
+    // Faz 2.1 — selfie modu: bare avatar pre-render adımını tamamen
+    // atla ve FASHN'a `model_image` olarak kullanıcının selfie data
+    // URI'sini geçir. Bu yol:
+    //   • bare AI render maliyetini sıfırlar (FASHN tek render yeter),
+    //   • kullanıcının kendi yüzü/bedeni ile garmenti birleştirir,
+    //   • selfieHash cache_key'de olduğu için aynı selfie+outfit
+    //     ikinci kez ücret yazmaz.
+    // editReferences (OpenAI image-edit) bu yolda inşa edilmez —
+    // FASHN garment-only model olduğu için zaten editReferences'ı
+    // selfie ile besleyemezdik (face preservation farklı problem).
+    if (selfieDataUri) {
+      bareAvatarUrl = selfieDataUri;
     } else {
-      // Need to produce the bare avatar before we can edit it.
-      let barePromptOutput;
-      try {
-        barePromptOutput = buildPlayPrompt({
-          archetype,
-          zodiac,
-          scene,
-          variant,
-          brief: cleanBrief || undefined,
-          outfit: null,
-        });
-      } catch (err) {
-        return NextResponse.json(
+      const bareCached = await supabase
+        .from("play_renders")
+        .select("url, provider")
+        .eq("cache_key", bareCacheKey)
+        .maybeSingle();
+      const bareCachedRow = bareCached.data as
+        | Pick<PlayRenderRow, "url" | "provider">
+        | null;
+      if (bareCachedRow?.url && bareCachedRow.provider !== "stub") {
+        bareAvatarUrl = bareCachedRow.url;
+      } else {
+        // Need to produce the bare avatar before we can edit it.
+        let barePromptOutput;
+        try {
+          barePromptOutput = buildPlayPrompt({
+            archetype,
+            zodiac,
+            scene,
+            variant,
+            brief: cleanBrief || undefined,
+            outfit: null,
+          });
+        } catch (err) {
+          return NextResponse.json(
+            {
+              error:
+                err instanceof Error
+                  ? `bare prompt build failed: ${err.message}`
+                  : "Bare prompt build failed",
+            },
+            { status: 400 },
+          );
+        }
+
+        let bareRender;
+        try {
+          bareRender = await renderPlayImage({
+            prompt: barePromptOutput.prompt,
+            negativePrompt: barePromptOutput.negativePrompt,
+            seed: barePromptOutput.seed,
+            cacheKey: bareCacheKey,
+          });
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error(
+            `[play.render] ${cacheKey} bare prerender failed → ${msg}`,
+          );
+          return NextResponse.json(
+            { error: msg || "AI bare prerender failed" },
+            { status: 502 },
+          );
+        }
+
+        const bareObjectPath = `${bareCacheKey}.${bareRender.extension}`;
+        const bareUpload = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(bareObjectPath, bareRender.bytes, {
+            contentType: bareRender.contentType,
+            upsert: true,
+          });
+        if (bareUpload.error) {
+          return NextResponse.json(
+            {
+              error: `Storage upload failed (bare): ${bareUpload.error.message}`,
+            },
+            { status: 502 },
+          );
+        }
+        const { data: barePub } = supabase.storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(bareObjectPath);
+        bareAvatarUrl = barePub.publicUrl;
+
+        await supabase.from("play_renders").upsert(
           {
-            error:
-              err instanceof Error
-                ? `bare prompt build failed: ${err.message}`
-                : "Bare prompt build failed",
-          },
-          { status: 400 },
+            cache_key: bareCacheKey,
+            archetype,
+            zodiac,
+            scene,
+            url: bareAvatarUrl,
+            prompt: barePromptOutput.prompt,
+            seed: barePromptOutput.seed,
+            provider: bareRender.provider,
+          } as never,
+          { onConflict: "cache_key" },
         );
-      }
 
-      let bareRender;
-      try {
-        bareRender = await renderPlayImage({
-          prompt: barePromptOutput.prompt,
-          negativePrompt: barePromptOutput.negativePrompt,
-          seed: barePromptOutput.seed,
-          cacheKey: bareCacheKey,
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(
-          `[play.render] ${cacheKey} bare prerender failed → ${msg}`,
-        );
-        return NextResponse.json(
-          { error: msg || "AI bare prerender failed" },
-          { status: 502 },
-        );
-      }
-
-      const bareObjectPath = `${bareCacheKey}.${bareRender.extension}`;
-      const bareUpload = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(bareObjectPath, bareRender.bytes, {
-          contentType: bareRender.contentType,
-          upsert: true,
-        });
-      if (bareUpload.error) {
-        return NextResponse.json(
-          {
-            error: `Storage upload failed (bare): ${bareUpload.error.message}`,
-          },
-          { status: 502 },
-        );
-      }
-      const { data: barePub } = supabase.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(bareObjectPath);
-      bareAvatarUrl = barePub.publicUrl;
-
-      await supabase.from("play_renders").upsert(
-        {
-          cache_key: bareCacheKey,
-          archetype,
-          zodiac,
-          scene,
-          url: bareAvatarUrl,
-          prompt: barePromptOutput.prompt,
-          seed: barePromptOutput.seed,
-          provider: bareRender.provider,
-        } as never,
-        { onConflict: "cache_key" },
-      );
-
-      // The bare render itself was a real provider call when it wasn't
-      // cached — count it against the hourly quota too.
-      if (bareRender.provider !== "stub") {
-        recordRender(clientKey);
+        // The bare render itself was a real provider call when it
+        // wasn't cached — count it against the hourly quota too.
+        if (bareRender.provider !== "stub") {
+          recordRender(clientKey);
+        }
       }
     }
 
@@ -452,6 +535,7 @@ export async function POST(req: Request) {
       cacheKey,
       editReferences,
       vtonReferences,
+      faceSwapReferences,
     });
   } catch (err) {
     // Surface the upstream message in the server log so we can
