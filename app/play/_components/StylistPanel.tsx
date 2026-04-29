@@ -89,6 +89,7 @@ export default function StylistPanel({
     clear: lang === "tr" ? "Çıplak Görünüm" : "Bare Look",
     buyNow: lang === "tr" ? "Hemen Al" : "Buy Now",
     seeAll: lang === "tr" ? "Tüm Koleksiyon" : "Full Collection",
+    comingSoon: lang === "tr" ? "Çok Yakında" : "Coming Soon",
   };
 
   // Empty catalogue is impossible in practice (we ship 27 products),
@@ -118,6 +119,15 @@ export default function StylistPanel({
       >
         {tiles.map((outfit) => {
           const active = selectedOutfitId === outfit.id;
+          // Phase-1 scope guard: pareos + accessories appear in the
+          // rail (so the catalogue tells the full Caelinus story) but
+          // their tiles are non-interactive — clicking does nothing
+          // and a "Çok Yakında" badge surfaces over them. Only
+          // bikinis are wired to the live FASHN VTON pipeline today.
+          const locked = outfit.comingSoon;
+          const ariaLabel = locked
+            ? `${outfit.name} — ${T.comingSoon}`
+            : `${outfit.name} — ${outfit.price}`;
           return (
             <button
               key={outfit.id}
@@ -125,22 +135,32 @@ export default function StylistPanel({
               className={
                 "play-stylist-tile" +
                 (active ? " is-active" : "") +
-                (rendering ? " is-pending" : "")
+                (rendering ? " is-pending" : "") +
+                (locked ? " is-locked" : "")
               }
-              onClick={() => onSelectOutfit(active ? null : outfit.id)}
-              disabled={rendering}
-              aria-pressed={active}
-              aria-label={`${outfit.name} — ${outfit.price}`}
+              onClick={
+                locked
+                  ? undefined
+                  : () => onSelectOutfit(active ? null : outfit.id)
+              }
+              disabled={rendering || locked}
+              aria-pressed={locked ? undefined : active}
+              aria-disabled={locked ? true : undefined}
+              aria-label={ariaLabel}
+              title={locked ? T.comingSoon : undefined}
             >
               <span className="play-stylist-tile-badge">
                 {categoryLabel[outfit.category] ?? outfit.category}
               </span>
               <span className="play-stylist-tile-name">{outfit.name}</span>
               <span className="play-stylist-tile-price">{outfit.price}</span>
-              {active ? (
+              {active && !locked ? (
                 <span className="play-stylist-tile-active" aria-hidden="true">
                   ✦
                 </span>
+              ) : null}
+              {locked ? (
+                <span className="play-stylist-tile-soon">{T.comingSoon}</span>
               ) : null}
             </button>
           );

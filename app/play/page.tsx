@@ -25,6 +25,7 @@ import {
   type SceneId,
   type ZodiacId,
 } from "@/data/play-assets";
+import { findOutfit, findSignatureBikini } from "@/data/play-outfits";
 import { findPreset } from "@/data/play-presets";
 import { briefHash } from "@/lib/play/brief";
 import { useAuthStore } from "@/stores/auth-store";
@@ -236,46 +237,59 @@ export default function PlayPage() {
     }
   }, [archetype, zodiac, scene, beginRender, setRenderResult, setRenderError, L]);
 
-  // ── Auto-render after preset seeding ──────────────────────
-  // `?preset=<id>` flipped pendingAutoRender; once Zustand has the full
-  // triple settled and we're not already rendering, fire once and clear
-  // the flag. The triggerRender callback closes over the latest state,
-  // so by the time this effect runs the request will carry the right
-  // (archetype, zodiac, scene) tuple.
+  // ── Phase-1 auto-preview on zodiac select ────────────────
+  // The AI bare-avatar pipeline is paused for cost-control. Picking a
+  // zodiac now drops the user straight into that sign's designer-
+  // curated shop frame (signature bikini at /play/shop/{zodiac}-look.jpg).
+  // Zero AI calls, zero FASHN credit, zero loading shimmer — just an
+  // instant <img src> swap that doubles as the canonical "this is your
+  // look" view.
+  //
+  // We also seed `outfit` with the signature bikini id so the stylist
+  // panel reflects the active tile and the "Bu görünümü al" CTA links
+  // straight to the matching shop product.
+  //
+  // `pendingAutoRender` is honoured here too: a `?preset=<id>` deep
+  // link still lands the user on a ready-to-share frame, just without
+  // burning an AI render to do it.
+  const setOutfit = usePlayStore((s) => s.setOutfit);
   useEffect(() => {
-    if (!pendingAutoRender) return;
-    if (!archetype || !zodiac || !scene) return;
-    if (render.kind === "loading" || render.kind === "ready") return;
-    setPendingAutoRender(false);
-    void triggerRender();
-  }, [pendingAutoRender, archetype, zodiac, scene, render.kind, triggerRender]);
-
-  // ── Re-roll (F2a) ─────────────────────────────────────────
-  // Bump the variant index in the store, then immediately re-render.
-  // Each variant maps to its own play_renders cache row + likes_count
-  // so the canonical (v1) gallery entry isn't disturbed.
-  const triggerReroll = useCallback(() => {
-    if (variant >= 8) return; // server caps at 8 anyway; mirror it client-side
-    nextVariant();
-    void triggerRender();
-  }, [variant, nextVariant, triggerRender]);
+    if (!zodiac) return;
+    const bikini = findSignatureBikini(zodiac);
+    if (!bikini?.previewImage) return;
+    setOutfit(bikini.id);
+    setRenderResult(bikini.previewImage, false);
+    if (pendingAutoRender) setPendingAutoRender(false);
+  }, [zodiac, setOutfit, setRenderResult, pendingAutoRender]);
 
   // ── Outfit try-on (F2c) ───────────────────────────────────
-  // Stylist Caelinus AI: set the outfit overlay on the store, then
-  // immediately fire a fresh render. Cache key carries `-o<id>` so
-  // each outfit-on look is its own row — re-selecting an outfit hits
-  // the cache instantly the second time around.
-  const setOutfit = usePlayStore((s) => s.setOutfit);
+  // Phase-1 cost-control: every renderable outfit ships with a
+  // `previewImage` (currently the 12 zodiac bikinis at
+  // /play/shop/{zodiac}-look.jpg) — clicking a tile is a *pure
+  // <img src> swap*. No AI call, no FASHN credit, no Supabase write.
+  //
+  // Clearing the outfit (`outfitId === null`) snaps the canvas back to
+  // the active zodiac's signature bikini frame — same designer photo
+  // the zodiac-pick effect lands on. The AI bare-avatar fallback that
+  // used to live here is intentionally gone; every visible state on
+  // /play now comes from a static shop image.
   const triggerOutfitTryOn = useCallback(
     (outfitId: string | null) => {
-      setOutfit(outfitId);
-      // Defer the render so Zustand has the new outfit settled when
-      // triggerRender reads from getState(). One microtask is enough.
-      void Promise.resolve().then(() => {
-        if (archetype && zodiac && scene) void triggerRender();
-      });
+      const outfit = outfitId ? findOutfit(outfitId) : null;
+      const target = outfit?.previewImage
+        ? outfit
+        : findSignatureBikini(zodiac);
+      setOutfit(target?.id ?? null);
+      if (target?.previewImage) {
+        const url = target.previewImage;
+        // One microtask defer so Zustand `outfit` has settled before
+        // any downstream effect re-reads it from `setRenderResult`.
+        void Promise.resolve().then(() => {
+          setRenderResult(url, false);
+        });
+      }
     },
-    [setOutfit, archetype, zodiac, scene, triggerRender],
+    [setOutfit, setRenderResult, zodiac],
   );
 
   const savedLookId = usePlayStore((s) => s.savedLookId);
@@ -392,11 +406,9 @@ export default function PlayPage() {
       <main className="play-main">
         <PlayDashboard
           lang={L}
-          onGenerate={triggerRender}
           onRetry={triggerRender}
           onSave={handleSave}
           onShare={handleShare}
-          onReroll={triggerReroll}
           onSelectOutfit={triggerOutfitTryOn}
           toast={toast}
         />

@@ -18978,6 +18978,14 @@ select.atelier-input option {
   margin: 0 auto;
 }
 
+.play-dash-ai-stage .stage-portal {
+  --stage-portal-size: clamp(320px, 44vw, 620px) !important;
+}
+
+.play-dash-ai-stage .play-render-platform {
+  --stage-platform-width: clamp(320px, 44vw, 620px) !important;
+}
+
 .play-dash-ai-foot {
   display: flex;
   flex-direction: column;
@@ -19170,6 +19178,35 @@ select.atelier-input option {
   color: rgba(10, 6, 22, 0.95);
   font-size: 10px;
   font-weight: 700;
+}
+
+/* Phase-1 lock state — pareos + accessories live in the rail but
+   aren't wired to FASHN yet. Tile fades down, badge sits in the
+   bottom-right corner so the catalogue still reads as "real" copy. */
+.play-stylist-tile.is-locked {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+.play-stylist-tile.is-locked:hover {
+  transform: none;
+  border-color: rgba(246, 236, 255, 0.12);
+  box-shadow: none;
+}
+.play-stylist-tile-soon {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(10, 6, 22, 0.78);
+  border: 1px solid rgba(246, 236, 255, 0.18);
+  color: rgba(246, 236, 255, 0.78);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 .play-stylist-foot {
@@ -19849,7 +19886,8 @@ select.atelier-input option {
 .play-render-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: 50% 50%;
   animation: play-render-driftIn 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 

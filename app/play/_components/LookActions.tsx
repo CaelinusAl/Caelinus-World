@@ -4,11 +4,6 @@
  * LookActions — the row under the rendered look:
  *
  *   • REMIX        — return to AvatarPicker, keep archetype + scene,
- *   • RE-ROLL      — request another take of the same triple (F2a).
- *                    Each re-roll bumps the variant index in the store
- *                    and produces a new play_renders cache row, so the
- *                    canonical (v1) gallery entry isn't disturbed and
- *                    the new variant can be saved/liked independently.
  *   • SAVE LOOK    — POST to /api/play/save (auth-gated; caller
  *                    handles the redirect-to-signin),
  *   • SHARE LOOK   — copy the public look URL to clipboard,
@@ -17,13 +12,17 @@
  *                     product. Without an outfit, links to the
  *                     zodiac-filtered shop view as an "explore the
  *                     drop" affordance.
+ *
+ * Phase-1: the live AI render path is paused, so the previous "RE-ROLL"
+ * action (which spent an OpenAI/FASHN credit per click) is gone. Every
+ * canvas state on /play now comes from a static designer-curated shop
+ * frame, so there's nothing to "re-roll" — the only way to swap the
+ * look is to pick a different zodiac or outfit tile.
  */
 
 import { CinemaCTA } from "@/app/_stage";
 import { findOutfit } from "@/data/play-outfits";
 import { usePlayStore } from "@/stores/play-store";
-
-const MAX_VARIANT = 8;
 
 type Props = {
   lang: "tr" | "en";
@@ -31,11 +30,10 @@ type Props = {
    *  through /atelier/giris with a "next" param. */
   onSave: () => void;
   onShare: () => void;
-  /** F2a — request a fresh variant for the current triple. Caller
-   *  bumps the variant index in the store and triggers the render. */
-  onReroll: () => void;
-  /** Current variant index (1 = canonical). Drives the re-roll label
-   *  and disabled state when the cap is reached. */
+  /** Current variant index (1 = canonical). Surfaces a small "v2/v3…"
+   *  hint under the actions row whenever the user has cycled past the
+   *  canonical render — kept for forward-compat even though Phase-1
+   *  doesn't write new variants. */
   variant: number;
   /** Toast message currently in flight, if any. */
   toast: string | null;
@@ -45,7 +43,6 @@ export default function LookActions({
   lang,
   onSave,
   onShare,
-  onReroll,
   variant,
   toast,
 }: Props) {
@@ -55,7 +52,6 @@ export default function LookActions({
   const zodiacId = usePlayStore((s) => s.zodiac);
   const outfitId = usePlayStore((s) => s.outfit);
   const isReady = renderState.kind === "ready";
-  const canReroll = variant < MAX_VARIANT;
 
   const selectedOutfit = outfitId ? findOutfit(outfitId) : null;
   const buyHref = selectedOutfit
@@ -80,19 +76,6 @@ export default function LookActions({
       ? "Burcuna ait koleksiyonu keşfet"
       : "Explore the matching collection";
 
-  const rerollLabel =
-    variant >= MAX_VARIANT
-      ? lang === "tr"
-        ? "Limit doldu"
-        : "Limit reached"
-      : variant === 1
-        ? lang === "tr"
-          ? "Yeni bir tane çiz"
-          : "Paint another"
-        : lang === "tr"
-          ? `Tekrar dene · v${variant + 1}`
-          : `Try again · v${variant + 1}`;
-
   return (
     <div className="play-actions">
       <div className="play-actions-row">
@@ -103,23 +86,6 @@ export default function LookActions({
           onClick={remix}
         >
           {lang === "tr" ? "Yeniden karıştır" : "Remix"}
-        </CinemaCTA>
-
-        <CinemaCTA
-          variant="ghost"
-          tone="cosmic"
-          trailingGlyph="✦"
-          onClick={onReroll}
-          disabled={!isReady || !canReroll}
-          title={
-            !canReroll
-              ? lang === "tr"
-                ? "Aynı kombinasyon için maksimum varyant sayısına ulaştın"
-                : "You've reached the variant limit for this combo"
-              : undefined
-          }
-        >
-          {rerollLabel}
         </CinemaCTA>
 
         <CinemaCTA

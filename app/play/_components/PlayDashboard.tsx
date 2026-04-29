@@ -62,24 +62,23 @@ type Lang = "tr" | "en";
 
 type Props = {
   lang: Lang;
-  onGenerate: () => void;
+  /** Phase-1 — error fallback only. The canvas swap is driven by the
+   *  zodiac picker and never goes through the AI render route, so the
+   *  retry button on RenderCanvas is the last surviving consumer. */
   onRetry: () => void;
   onSave: () => void;
   onShare: () => void;
-  onReroll: () => void;
   /** Stylist Caelinus AI — outfit try-on. `null` clears the overlay
-   *  and returns the canvas to the canonical no-outfit render. */
+   *  and snaps the canvas back to the active zodiac's signature look. */
   onSelectOutfit: (outfitId: string | null) => void;
   toast: string | null;
 };
 
 export default function PlayDashboard({
   lang,
-  onGenerate,
   onRetry,
   onSave,
   onShare,
-  onReroll,
   onSelectOutfit,
   toast,
 }: Props) {
@@ -171,14 +170,14 @@ export default function PlayDashboard({
     aiKickerSuffix: lang === "tr" ? "AI SAHNE" : "AI SCENE",
     aiPlaceholder:
       lang === "tr"
-        ? "Üç seçimi tamamla ve sahneyi oluştur"
-        : "Pick all three then generate the scene",
+        ? "Bir burç seç ve tanrıçanı yükle"
+        : "Pick a zodiac to load your goddess",
 
     generate: lang === "tr" ? "GÖRÜNÜMÜ OLUŞTUR" : "GENERATE LOOK",
     needPicks:
       lang === "tr"
-        ? "Önce arketip, burç ve sahne seç"
-        : "Pick an archetype, sign and scene first",
+        ? "Bir burcuna tıkla — tanrıça anında gelir"
+        : "Tap a zodiac sign — your goddess loads instantly",
   };
 
   // Build "SCORPIO ARCHETYPE AI SCENE" style title; fallback when missing
@@ -405,36 +404,23 @@ export default function PlayDashboard({
             )}
           </div>
 
-          {/* Generate / Actions footer */}
+          {/* Actions footer — Phase-1: no AI Generate CTA. The zodiac
+              tap auto-swaps the canvas to that sign's signature shop
+              frame, so the user lands on LookActions immediately. While
+              we wait for the first zodiac pick, a quiet helper line
+              points the way. */}
           <div className="play-dash-ai-foot">
-            {!hasResult ? (
-              <CinemaCTA
-                variant="luminous"
-                tone={zodiac?.tone ?? "magenta"}
-                trailingGlyph={isRendering ? "◌" : "✦"}
-                onClick={onGenerate}
-                disabled={!allSelected || isRendering}
-              >
-                {isRendering
-                  ? lang === "tr"
-                    ? "Çiziliyor..."
-                    : "Painting..."
-                  : T.generate}
-              </CinemaCTA>
-            ) : (
+            {hasResult ? (
               <LookActions
                 lang={lang}
                 onSave={onSave}
                 onShare={onShare}
-                onReroll={onReroll}
                 variant={variant}
                 toast={toast}
               />
-            )}
-
-            {!allSelected && !hasResult ? (
+            ) : (
               <p className="play-dash-ai-need">{T.needPicks}</p>
-            ) : null}
+            )}
           </div>
 
           {/* Stylist Caelinus AI — outfit try-on rail. Surfaces only

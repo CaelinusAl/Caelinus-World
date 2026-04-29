@@ -16,6 +16,8 @@
     "play:warm:openai:low": "tsx scripts/warm-play-cache.ts --provider=openai --quality=low",
     "play:warm:openai:high": "tsx scripts/warm-play-cache.ts --provider=openai --quality=high",
     "play:warm:openai:dry": "tsx scripts/warm-play-cache.ts --provider=openai --dry-run",
+    "play:warm:bikinis": "tsx scripts/warm-play-bikinis.ts",
+    "play:warm:bikinis:dry": "tsx scripts/warm-play-bikinis.ts --dry-run",
     "play:previews:check": "node -e \"fetch('http://localhost:3000/api/play/avatar-previews').then(r=>r.json()).then(j=>console.log('previews count:',j.count))\"",
     "play:purge:stubs": "tsx scripts/purge-stub-renders.ts",
     "play:purge:stubs:apply": "tsx scripts/purge-stub-renders.ts --apply"

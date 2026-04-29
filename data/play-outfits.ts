@@ -71,10 +71,39 @@ export type PlayOutfit = {
    *  the AI's own interpretation of the prompt fragment. Mirrors the
    *  `image` column from `data/products.ts`. */
   imageUrl: string;
-  /** FASHN body region. Set for garments (bikini, pareo) so the route
-   *  can prefer FASHN VTON for pixel-perfect transfer. `null` for
-   *  accessories — those stay on the OpenAI image-edit path. */
+  /** FASHN body region. Set for garments routed through the live VTON
+   *  pipeline; `null` means the outfit is either an accessory or it
+   *  hasn't been pre-warmed yet (see `comingSoon`). */
   vtonCategory: PlayOutfitVtonCategory;
+  /** Phase-1 scope flag. When `true`, the stylist panel paints a
+   *  "Çok yakında" badge over the tile and disables the click-to-
+   *  render action — the catalogue stays visible to the user (and
+   *  the investor) but we don't spend FASHN credit until the warm-up
+   *  pipeline catches up. Bikinis are launch-ready; pareos +
+   *  accessories ride on this flag for now. */
+  comingSoon: boolean;
+  /**
+   * Phase-1 cost-control: pre-rendered shop hero shot for the bikini
+   * worn on a real model. When set, clicking the tile *swaps the
+   * canvas image directly to this URL* instead of firing the live
+   * render pipeline (no AI call, no FASHN credit, no Supabase round-
+   * trip — just an instant <img src> swap).
+   *
+   * Why we ship pre-rendered shop photos for the gallery:
+   *   • The shop already commissioned 12 designer-quality lookbook
+   *     images at /public/play/shop/{zodiac}-look.jpg — they're more
+   *     polished than anything the AI produces today.
+   *   • $0 marginal cost per click. Investor demo, viral-share-worthy
+   *     gallery and "kiyafet değiştir oyunu" use cases all fit here.
+   *   • Bare avatar still goes through gpt-image-1 so the user gets
+   *     their *own* curated CG figurine when no outfit is on; only
+   *     the outfit-on view jumps to the pre-rendered shop frame.
+   *
+   * `null` means there's no pre-made image — the panel still works
+   * if `comingSoon` is `true` (tile is locked) or, in the future,
+   * we wire the outfit through the live FASHN VTON path.
+   */
+  previewImage: string | null;
   /** Click target for the "Hemen Al" CTA. Routes into the live shop
    *  with the product highlighted. */
   buyHref: string;
@@ -131,19 +160,19 @@ const SHOP_PRODUCTS = products as ReadonlyArray<{
 }>;
 
 /**
- * Map a shop category to a FASHN VTON body region. Keep this map in
- * sync with the FASHN endpoint's `category` enum.
+ * Map a shop category to a FASHN VTON body region.
  *
- *   • bikini → "one-pieces" — bikini sets are two separate garments
- *     in real life, but FASHN's VTON model handles them best as a
- *     single one-piece transfer (treating top + bottom as a coherent
- *     outfit). "tops" alone leaves the figurine pant-less; "bottoms"
- *     alone leaves her in a default top. "one-pieces" gives us the
- *     full coordinated set in one render.
- *   • pareo  → "one-pieces" — silk wrap effectively functions as a
- *     wrap dress for the model.
- *   • jewelry / bag / heels → null — FASHN doesn't model accessories,
- *     so we leave them on the OpenAI image-edit fallback path.
+ * Phase-1 scope decision (2026-04-29): only bikinis go through FASHN.
+ * Pareos, jewelry, bags and heels stay UI-visible but render-disabled
+ * so we can showcase the catalogue without spending FASHN credit on
+ * them yet. Their `vtonCategory` is therefore `null` and the stylist
+ * panel paints a "Çok yakında" badge over them (see `comingSoon`).
+ *
+ *   • bikini → "one-pieces" — FASHN handles a two-piece bikini best
+ *     when treated as a single one-piece transfer (top + bottom in
+ *     one shot). "tops"/"bottoms" alone leaves the figurine half-
+ *     dressed.
+ *   • everything else → null
  */
 function vtonCategoryFor(
   shopCategory: PlayOutfitCategory,
@@ -152,7 +181,6 @@ function vtonCategoryFor(
     case "bikini":
       return "one-pieces";
     case "pareo":
-      return "one-pieces";
     case "jewelry":
     case "bag":
     case "heels":
@@ -161,10 +189,64 @@ function vtonCategoryFor(
   }
 }
 
+/**
+ * Resolve the *FASHN reference image* for a bikini. The shop hero
+ * shots under `/play/shop/*-look.jpg` are model-on photos at low
+ * resolution (~125–235 KB), which are too noisy for FASHN — the
+ * model picks up on the photo's lighting + pose and blends them in.
+ *
+ * Under `/public/play/bikinis/{zodiac}.png` we keep *isolated*
+ * 2 MB+ flat-lay-style renders of each bikini — perfect FASHN
+ * references because there's no human model competing with the
+ * goddess in image #1. We swap the model-on shop image for the
+ * isolated bikini whenever a zodiac mapping exists; otherwise fall
+ * back to the shop hero so nothing breaks.
+ *
+ * NOTE — this only matters when the live FASHN pipeline is engaged
+ * (premium tier / future). In Phase-1 we ship pre-rendered shop
+ * frames via `previewImage` and bypass FASHN entirely, so this
+ * helper is currently dormant but kept ready.
+ */
+function bikiniReferenceImage(
+  productImage: string,
+  zodiac: ZodiacId | undefined,
+): string {
+  if (!zodiac) return productImage;
+  return `/play/bikinis/${zodiac}.png`;
+}
+
+/**
+ * Phase-1 outfit preview image — the lookbook frame the canvas swaps
+ * to instantly when the user clicks a tile. Today, only bikinis have
+ * pre-made shop hero shots that survive a full-frame swap (real model
+ * wearing the suit at studio quality), so we light those up. Pareos
+ * and accessories return `null` and the tile stays locked until the
+ * live FASHN pipeline ships for them.
+ */
+function bikiniPreviewImage(
+  zodiac: ZodiacId | undefined,
+): string | null {
+  if (!zodiac) return null;
+  return `/play/shop/${zodiac}-look.jpg`;
+}
+
+/** Shop categories that should still appear in the stylist panel
+ *  but are *not yet* wired to a live render path. The UI gates them
+ *  with a "Çok yakında" badge; clicking is a no-op. Bumping a
+ *  category off this set is the trigger for the next FASHN warm-up
+ *  pass. */
+const COMING_SOON_CATEGORIES: ReadonlySet<PlayOutfitCategory> = new Set([
+  "pareo",
+  "jewelry",
+  "bag",
+  "heels",
+]);
+
 export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
   .filter((p) => Boolean(OUTFIT_PROMPTS[p.id]))
   .map((p) => {
     const category = p.category as PlayOutfitCategory;
+    const isBikini = category === "bikini";
     return {
       id: p.id,
       name: p.name,
@@ -172,8 +254,10 @@ export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
       price: p.price,
       zodiac: p.zodiac,
       prompt: OUTFIT_PROMPTS[p.id]!,
-      imageUrl: p.image,
+      imageUrl: isBikini ? bikiniReferenceImage(p.image, p.zodiac) : p.image,
       vtonCategory: vtonCategoryFor(category),
+      comingSoon: COMING_SOON_CATEGORIES.has(category),
+      previewImage: isBikini ? bikiniPreviewImage(p.zodiac) : null,
       buyHref: `/universe/shop?product=${p.id}`,
     };
   });
@@ -181,6 +265,25 @@ export const PLAY_OUTFITS: readonly PlayOutfit[] = SHOP_PRODUCTS
 export function findOutfit(id: string | null | undefined): PlayOutfit | null {
   if (!id) return null;
   return PLAY_OUTFITS.find((o) => o.id === id) ?? null;
+}
+
+/**
+ * Resolve the signature bikini outfit for a zodiac sign. Used by the
+ * Phase-1 auto-preview flow on `/play`: as soon as the user taps a
+ * zodiac glyph, we drop her into the matching designer-curated shop
+ * frame from `/public/play/shop/` — no archetype, no scene, no AI
+ * round-trip required. Each zodiac has exactly one signature bikini,
+ * but we still defensively return `null` if the catalogue ever drifts.
+ */
+export function findSignatureBikini(
+  zodiac: ZodiacId | null | undefined,
+): PlayOutfit | null {
+  if (!zodiac) return null;
+  return (
+    PLAY_OUTFITS.find(
+      (o) => o.zodiac === zodiac && o.category === "bikini",
+    ) ?? null
+  );
 }
 
 /**
