@@ -49,8 +49,8 @@ const T = {
     en: "Drag the model to rotate 360°. Naz Yardımcı's debut collection will take the stage on this mannequin.",
   },
   hint: {
-    tr: "Sürükle · oto-dönüş",
-    en: "Drag · auto-rotate",
+    tr: "Sürükle · yakınlaştır · oto-dönüş",
+    en: "Drag · zoom · auto-rotate",
   },
   soonTitle: {
     tr: "İlk koleksiyon hazırlanıyor",

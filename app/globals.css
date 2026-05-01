@@ -20772,9 +20772,28 @@ select.atelier-input option {
 }
 
 .atelier-home-featured-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  /* Flex + capped child width: tek bir kart bile varsa kart 320px
+     sınırını aşmasın. Önceki auto-fit/1fr kombinasyonu tek kart
+     geldiğinde tüm satırı kaplayıp cover PNG'lerini yatay yamuk
+     uzatıyordu. */
+  display: flex;
+  flex-wrap: wrap;
   gap: 22px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.atelier-home-featured-grid > .stage-card {
+  flex: 0 1 280px;
+  max-width: 320px;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .atelier-home-featured-grid > .stage-card {
+    flex: 1 1 220px;
+    max-width: 280px;
+  }
 }
 
 .atelier-home-featured-empty {

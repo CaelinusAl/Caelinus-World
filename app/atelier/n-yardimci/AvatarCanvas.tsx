@@ -78,7 +78,7 @@ function GltfMesh({ url }: { url: string }) {
     applyShadows(scene);
   }, [scene]);
 
-  useFitToView(scene, { targetSize: 2.4, yOffset: -0.05 });
+  useFitToView(scene, { targetSize: 1.9, yOffset: 0.0 });
   useIntroAndFloat(ref);
 
   return (
@@ -97,7 +97,7 @@ function FbxMesh({ url }: { url: string }) {
     applyShadows(scene);
   }, [scene]);
 
-  useFitToView(scene, { targetSize: 2.4, yOffset: -0.05 });
+  useFitToView(scene, { targetSize: 1.9, yOffset: 0.0 });
   useIntroAndFloat(ref);
 
   return (
@@ -116,7 +116,7 @@ export default function AvatarCanvas({
 }) {
   return (
     <Canvas
-      camera={{ position: [0, 1.4, 3.4], fov: 32 }}
+      camera={{ position: [0, 1.1, 4.6], fov: 36 }}
       dpr={[1, 1.6]}
       shadows
       gl={{
@@ -195,9 +195,12 @@ export default function AvatarCanvas({
         autoRotate
         autoRotateSpeed={1.4}
         enablePan={false}
-        enableZoom={false}
-        minPolarAngle={Math.PI / 3}
-        maxPolarAngle={Math.PI / 1.9}
+        enableZoom
+        zoomSpeed={0.6}
+        minDistance={2.8}
+        maxDistance={7.5}
+        minPolarAngle={Math.PI / 3.2}
+        maxPolarAngle={Math.PI / 1.85}
         target={[0, 0.05, 0]}
         makeDefault
       />
