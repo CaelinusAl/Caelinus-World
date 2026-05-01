@@ -62,9 +62,11 @@ function hosts(): HostPair {
     const port = process.env.PORT ?? "3000";
     return { tr: `localhost:${port}`, en: `en.localhost:${port}` };
   }
-  const tr = (process.env.NEXT_PUBLIC_SITE_HOST_TR ?? "www.caelinus.com").toLowerCase();
-  // Fallback EN host: strip a leading `www.` so the default is
-  // `en.caelinus.com` rather than `en.www.caelinus.com`.
+  // Production fallback hizalandı: caelinus.ai apex (TR) ve en.caelinus.ai
+  // (EN). Vercel env'de `NEXT_PUBLIC_SITE_HOST_TR=caelinus.ai` ayarlanmadığı
+  // sürece bu default kullanılır — yatırımcı paylaşımları, OG image'ler ve
+  // sitemap URL'leri caelinus.ai üzerinden gider.
+  const tr = (process.env.NEXT_PUBLIC_SITE_HOST_TR ?? "caelinus.ai").toLowerCase();
   const trRoot = tr.startsWith("www.") ? tr.slice(4) : tr;
   const en = (process.env.NEXT_PUBLIC_SITE_HOST_EN ?? `en.${trRoot}`).toLowerCase();
   return { tr, en };

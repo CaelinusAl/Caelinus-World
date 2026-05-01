@@ -48,12 +48,22 @@ export type AtelierMatrixProps = {
   opacity?: number;
   /** Glyph cell size in CSS pixels. Default 18. */
   fontSize?: number;
+  /**
+   * Colour theme of the rain.
+   *   • "magenta" — default Caelinus Atelier nebula (magenta/violet,
+   *     cyan accent stream).
+   *   • "frost"   — mavi/beyaz su şelalesi: ice-blue gövde, beyaz
+   *     başlar, derin koyu mavi kuyruklar. Launch designer landing
+   *     gibi "akış / berraklık" hissi gereken sayfalar için.
+   */
+  tone?: "magenta" | "frost";
 };
 
 export default function AtelierMatrix({
   intensity = "rich",
   opacity,
   fontSize = 18,
+  tone = "magenta",
 }: AtelierMatrixProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -68,13 +78,43 @@ export default function AtelierMatrix({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Per-tone palettes. We resolve up-front (closure-stable) so the
+    // hot path (draw loop) just indexes into the right colour without
+    // re-evaluating the tone on every glyph.
+    const palette =
+      tone === "frost"
+        ? {
+            // Backdrop — derin gece-mavisi (gece okyanusu).
+            backdrop: "#04101e",
+            trail: "rgba(4, 16, 30, 0.085)",
+            // Mainstream: ice-blue body + bright white head — su şelalesi.
+            mainTail: "rgba(20, 70, 130, 0.42)",
+            mainBody: "rgba(120, 200, 245, 0.72)",
+            mainHead: "rgba(245, 255, 255, 0.98)",
+            // Accent: pure white shimmer — köpük damlası.
+            accentTail: "rgba(120, 200, 245, 0.30)",
+            accentBody: "rgba(220, 240, 255, 0.65)",
+            accentHead: "rgba(255, 255, 255, 1.0)",
+          }
+        : {
+            // Magenta default (Caelinus nebula).
+            backdrop: "#0a0816",
+            trail: "rgba(10, 8, 22, 0.085)",
+            mainTail: "rgba(91, 40, 112, 0.42)",
+            mainBody: "rgba(201, 124, 214, 0.70)",
+            mainHead: "rgba(255, 200, 235, 0.96)",
+            accentTail: "rgba(80, 160, 220, 0.30)",
+            accentBody: "rgba(140, 210, 255, 0.55)",
+            accentHead: "rgba(220, 245, 255, 0.92)",
+          };
+
     if (
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
-      // Static fallback — paint atelier midnight indigo and bail. The
-      // aura and other static atmospheric layers do the rest.
-      ctx.fillStyle = "#0a0816";
+      // Static fallback — paint backdrop and bail. The aura and other
+      // static atmospheric layers do the rest.
+      ctx.fillStyle = palette.backdrop;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       return;
     }
@@ -117,7 +157,7 @@ export default function AtelierMatrix({
         .fill(false)
         .map(() => Math.random() < 0.06);
 
-      ctx.fillStyle = "#0a0816";
+      ctx.fillStyle = palette.backdrop;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
     };
 
@@ -135,10 +175,9 @@ export default function AtelierMatrix({
     const draw = () => {
       if (!running) return;
 
-      // Soft fade towards atelier midnight indigo leaves a magenta
-      // trail. The alpha controls how long the trail is visible —
-      // lower = longer / more dreamy.
-      ctx.fillStyle = "rgba(10, 8, 22, 0.085)";
+      // Soft fade leaves a colour-trail. The alpha controls how long
+      // the trail is visible — lower = longer / more dreamy.
+      ctx.fillStyle = palette.trail;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
 
       ctx.font = `${fontSize}px ui-monospace, "JetBrains Mono", "Iosevka", monospace`;
@@ -151,29 +190,29 @@ export default function AtelierMatrix({
         const isAccent = accents[i];
 
         if (isAccent) {
-          // cyan accent stream — the "AI" thread peeking through
+          // accent stream — frost'ta pure white köpük, magenta'da cyan.
           if (drops[i] > 1) {
-            ctx.fillStyle = "rgba(80, 160, 220, 0.30)";
+            ctx.fillStyle = palette.accentTail;
             ctx.fillText(glyph, x, y - fontSize);
           }
           if (drops[i] > 0.5) {
-            ctx.fillStyle = "rgba(140, 210, 255, 0.55)";
+            ctx.fillStyle = palette.accentBody;
             ctx.fillText(glyph, x, y - 0.6 * fontSize);
           }
-          ctx.fillStyle = "rgba(220, 245, 255, 0.92)";
+          ctx.fillStyle = palette.accentHead;
           ctx.fillText(glyph, x, y);
         } else {
-          // magenta / rose stream — the "IA" thread (intelligenza
-          // artigiana / handcraft intelligence)
+          // main stream — frost'ta ice-blue + beyaz baş, magenta'da
+          // pembe-eflatun.
           if (drops[i] > 1) {
-            ctx.fillStyle = "rgba(91, 40, 112, 0.42)";
+            ctx.fillStyle = palette.mainTail;
             ctx.fillText(glyph, x, y - fontSize);
           }
           if (drops[i] > 0.5) {
-            ctx.fillStyle = "rgba(201, 124, 214, 0.70)";
+            ctx.fillStyle = palette.mainBody;
             ctx.fillText(glyph, x, y - 0.6 * fontSize);
           }
-          ctx.fillStyle = "rgba(255, 200, 235, 0.96)";
+          ctx.fillStyle = palette.mainHead;
           ctx.fillText(glyph, x, y);
         }
 
@@ -204,7 +243,7 @@ export default function AtelierMatrix({
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [fontSize, intensity]);
+  }, [fontSize, intensity, tone]);
 
   return (
     <canvas

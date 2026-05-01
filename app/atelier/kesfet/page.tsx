@@ -26,6 +26,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AtelierKind } from "@/lib/supabase/types";
 import { ATELIER_KINDS } from "@/lib/atelier/validation";
 import { PROVINCE_REGIONS, PROVINCES } from "@/data/provinces";
+import {
+  asDiscoveryAtelier,
+  isLaunchSlug,
+  LAUNCH_ATELIERS,
+} from "@/data/atelier-launch";
 
 import KesfetBody, { type DiscoveryAtelier } from "./KesfetBody";
 
@@ -115,9 +120,40 @@ export default async function KesfetPage({
     query = query.ilike("name", `%${safe}%`);
   }
 
-  const { data, count } = await query;
-  const ateliers = (data ?? []) as DiscoveryAtelier[];
-  const total = count ?? ateliers.length;
+  // DB hatasına dayanıklı (atelier tablosu bazı ortamlarda henüz yok).
+  // 404 / network hatasında sessizce boş listeye düşeriz; sayfa launch
+  // designer'lar üzerinden hâlâ anlamlı içerik gösterir.
+  let dbAteliers: DiscoveryAtelier[] = [];
+  let dbTotal = 0;
+  try {
+    const { data, count } = await query;
+    dbAteliers = (data ?? []) as DiscoveryAtelier[];
+    dbTotal = count ?? dbAteliers.length;
+  } catch {
+    dbAteliers = [];
+    dbTotal = 0;
+  }
+
+  // Launch designer'lar (statik) ilk sayfada en üstte. Filtre uyumlu
+  // olanlar gösterilir; aktif kind/region/province filter'ları da
+  // launch satırlarına aynı kuralla uygulanır.
+  const launchOnFirstPage =
+    page === 1
+      ? LAUNCH_ATELIERS.filter((a) => {
+          if (kind && a.kind !== kind) return false;
+          if (region && a.region !== region) return false;
+          if (province && a.province !== province) return false;
+          if (q && !a.name.toLowerCase().includes(q.toLowerCase()))
+            return false;
+          return true;
+        }).map(asDiscoveryAtelier)
+      : [];
+
+  const ateliers: DiscoveryAtelier[] = [
+    ...launchOnFirstPage,
+    ...dbAteliers.filter((a) => !isLaunchSlug(a.slug)),
+  ];
+  const total = dbTotal + launchOnFirstPage.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
