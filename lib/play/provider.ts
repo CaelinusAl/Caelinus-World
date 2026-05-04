@@ -25,6 +25,13 @@
 
 import "server-only";
 
+import type { Zodiac } from "@/data/play-assets";
+import type { AvatarCanvas } from "@/lib/avatar/canvases";
+import {
+  REPLICATE_FACESWAP_DEADLINE_MS,
+  REPLICATE_FACESWAP_POLL_MS,
+  REPLICATE_FACESWAP_VERSION,
+} from "@/lib/play/replicate-faceswap";
 import { serverEnv } from "@/lib/env";
 
 export type ProviderName = "replicate" | "openai" | "stub";
@@ -125,34 +132,50 @@ type RenderInput = {
     category: "tops" | "bottoms" | "one-pieces" | "auto";
   };
   /**
-   * Faz 2.1 v3 — Caelinus face-swap akışı.
+   * Caelinus Avatar Studio — PhotoMaker identity-preserving generation.
    *
-   * `fal-ai/nano-banana/edit` (Gemini 2.5 Flash Image) üzerinden
-   * kullanıcının yüzünü Caelinus modelinin bikinili shop görseline
-   * yerleştirir. Vücut, poz, kıyafet, sahne hep `targetImage`'tan
-   * gelir; sadece yüz değişir. Bu, "kullanıcının kendi vücuduna
-   * kıyafet boya" (FASHN VTON) yerine "kullanıcının yüzü Caelinus
-   * modelinin bedenine" diyen doğru üründür.
+   * Faz 4 (yeni). Önceki face-swap (`fal-ai/nano-banana/edit` üzerinden
+   * Gemini 2.5 Flash Image) dört prompt iterasyonuna ve boyut
+   * paritesine rağmen başarısız oldu — model, hedef görseli
+   * "tamamlanmış AI eseri" olarak algılayıp pixel-perfect kopya
+   * döndürdü, gerçek bir face transfer hiç gerçekleşmedi. Doğru
+   * teknoloji `fal-ai/photomaker` (PhotoMaker v1): tek selfie
+   * referansı + serbest text prompt → identity-preserving generation.
+   * "Yüzü hedefe yapıştır" değil, "bu yüzü sıfırdan Caelinus
+   * dünyasına doğur".
    *
-   * Tarihçe: v2'de `easel-ai/advanced-face-swap` denedik ama o
-   * endpoint resmi olarak deprecate edildi (500 dönüyor). v3'te
-   * Google'ın aktif multi-reference image-edit modeline geçtik.
+   *   • `selfieDataUri` — kullanıcı selfie'si data URI olarak.
+   *                       Client tarafı 1024px JPEG @ q=0.85 üretir
+   *                       (~250-450 KB). Provider tek dosyalık ZIP'e
+   *                       sarıp `image_archive_url`'e fal data URI
+   *                       olarak gönderir.
    *
-   *   • `sourceImage` — kullanıcı selfie'si (data URI veya URL).
-   *                    fal.ai data URI kabul ediyor; client tarafı
-   *                    tarayıcıda 1024px JPEG @ q=0.85 üretiyor,
-   *                    ~250-450 KB.
-   *   • `targetImage` — Caelinus shop görselinin URL'i
-   *                    (`/play/shop/{zodiac}-look.jpg` deployment
-   *                    origin'i ile birleşik tam URL) **veya**
-   *                    önceden hazırlanmış data URI. Provider
-   *                    server-side fetch ile her durumda data URI'a
-   *                    normalize ediyor — dev'deki localhost
-   *                    URL'leri fal sunucusundan görünmez.
+   *   • `zodiac`        — kullanıcının seçtiği burç. PhotoMaker
+   *                       prompt builder'ı buradan aurayı çıkarır
+   *                       (Aries → ember-red palette, Pisces →
+   *                       seafoam veil, vs.).
+   *
+   *   • `canvas`        — kullanıcının seçtiği base canvas
+   *                       (silk/bodysuit/veil) ya da null. Set ise
+   *                       `garmentNote` prompt'a girer (yeni AI
+   *                       portresi o garment'ı giyer). Canvas null ise
+   *                       Caelinus default outfit prompt'a düşer.
+   *
+   *   • `canvasImageDataUri` — opsiyonel base64 data URI. Set ise
+   *                       PhotoMaker `initial_image_url` (img2img
+   *                       referans) olarak kullanılır, kompozisyon
+   *                       (tek figür, çerçeveleme, kozmik arka plan)
+   *                       canvas'a benzer ama yüz kullanıcının
+   *                       kendisi olur. Route handler relative public
+   *                       path'i HTTP üzerinden fetch edip data URI'ya
+   *                       çeviriyor; bu sayede provider request-agnostic
+   *                       kalıyor (origin bilmesine gerek yok).
    */
-  faceSwapReferences?: {
-    sourceImage: string;
-    targetImage: string;
+  identityReferences?: {
+    selfieDataUri: string;
+    zodiac: Zodiac;
+    canvas: AvatarCanvas | null;
+    canvasImageDataUri?: string;
   };
 };
 
@@ -209,42 +232,48 @@ export async function renderPlayImage(input: RenderInput): Promise<RenderResult>
     ? resolveProviderKey(fallback, serverEnv.PLAY_AI_FALLBACK_API_KEY)
     : undefined;
 
-  // Face-swap hard-override. Caelinus shop görseli üzerine kullanıcının
-  // yüzünü yerleştirmek için `easel-ai/advanced-face-swap`'a gideriz.
-  // Bu yol bare avatar render gerektirmez; target image olarak
-  // pre-rendered shop hero shot kullanılır, dolayısıyla FASHN VTON
-  // veya gpt-image-1 hiç çağrılmaz. fal_key gerekli; yoksa stub'a
-  // düşeriz çünkü face-swap için fallback yok.
-  if (input.faceSwapReferences) {
-    const falKey = serverEnv.FAL_KEY;
-    if (falKey) {
+  // Replicate face swap hard-override (Caelinus Avatar Studio FİNAL).
+  //
+  // `cdingram/face-swap` — InsightFace tabanlı, 1.9M+ production
+  // run, $0.014/run, ~10s. Replicate'in en kanıtlanmış face swap
+  // modeli. Kullanıcı selfie'sinin yüzü Caelinus tarafsız tuvalin
+  // (silk/bodysuit/veil) yüzünün üzerine PIXEL-PERFECT transfer
+  // edilir; identity %100 korunur, sahne %100 korunur.
+  //
+  // Diğer tüm provider'lar (Replicate text-to-image, OpenAI, FASHN,
+  // nano-banana, PhotoMaker, Kontext, Easel) bypass edilir — selfie
+  // içeren tek "doğru" yol. PLAY_AI_API_KEY (Replicate token)
+  // gerekli; yoksa stub.
+  if (input.identityReferences) {
+    const replicateToken = serverEnv.PLAY_AI_API_KEY;
+    if (replicateToken) {
       const startedAt = Date.now();
       console.log(
-        `[play.provider] start provider=face-swap cacheKey=${input.cacheKey} ts=${new Date(
+        `[play.provider] start provider=replicate-faceswap cacheKey=${input.cacheKey} ts=${new Date(
           startedAt,
         ).toISOString()}`,
       );
       try {
-        const result = await renderFaceSwap(falKey, input);
+        const result = await renderReplicateFaceSwap(replicateToken, input);
         console.log(
-          `[play.provider] done provider=face-swap cacheKey=${input.cacheKey} durationMs=${
+          `[play.provider] done provider=replicate-faceswap cacheKey=${input.cacheKey} durationMs=${
             Date.now() - startedAt
           } bytes=${result.bytes.length} contentType=${result.contentType}`,
         );
         return result;
-      } catch (fsErr) {
+      } catch (rsErr) {
         const msg =
-          fsErr instanceof Error ? fsErr.message : String(fsErr);
+          rsErr instanceof Error ? rsErr.message : String(rsErr);
         console.error(
-          `[play.provider] fail provider=face-swap cacheKey=${input.cacheKey} durationMs=${
+          `[play.provider] fail provider=replicate-faceswap cacheKey=${input.cacheKey} durationMs=${
             Date.now() - startedAt
           } msg=${msg}`,
         );
-        throw fsErr;
+        throw rsErr;
       }
     }
     console.warn(
-      `[play.provider] face-swap requested but FAL_KEY unset — falling through to ${primary}. cacheKey=${input.cacheKey}`,
+      `[play.provider] replicate-faceswap requested but PLAY_AI_API_KEY unset — falling through to ${primary}. cacheKey=${input.cacheKey}`,
     );
   }
 
@@ -779,154 +808,171 @@ function extFromMime(mime: string): string {
   return "png";
 }
 
-/* ── Face swap via fal.ai (nano-banana / Gemini 2.5 Flash Image) ─ */
+/* ── Replicate face swap (cdingram/face-swap) ───────────────── */
 
 /**
- * Caelinus face-swap — Faz 2.1 v3.
+ * Caelinus Avatar Studio — `cdingram/face-swap` (Replicate).
  *
- * Senaryo: kullanıcı selfie yükler ve bir burç seçer. Burcun signature
- * shop görseli (`/play/shop/{zodiac}-look.jpg`) zaten tasarımcıların
- * çektiği yüksek kaliteli model + bikini fotoğrafı. Kullanıcının yüzü
- * o modelin yüzüne yerleştirilir; vücut, poz, kıyafet, ışık, sahne
- * tamamen hedef görselden gelir.
+ * Tarihçe — denenen ve neden başarısız olduğu:
+ *   • v2-v4 (Faz 3)   — `fal-ai/nano-banana/edit` (Gemini Flash Image).
+ *                       Dört prompt iterasyonu + boyut paritesi
+ *                       denendi; model hedef görseli pixel-perfect
+ *                       kopya döndürdü, identity transfer hiç yapmadı.
+ *   • v5 (Faz 4a)    — `fal-ai/photomaker`. SDXL tabanlı; queue'da
+ *                       timeout, 2026 standartlarında yetersiz.
+ *   • v6 (Faz 4b)    — `fal-ai/flux-pro/kontext/max/multi`. Black Forest
+ *                       Labs "preserve identity" claim'i ama gerçekte
+ *                       yüzü stilize edip kayboldu (sarı saç → esmer,
+ *                       mavi göz → kahverengi). Identity-preserving
+ *                       generation Caelinus için yanlış teknoloji.
+ *   • v7 (Faz 4c)    — `easel-ai/advanced-face-swap` (fal.ai). Hem queue
+ *                       hem sync endpoint 500 Internal Server Error
+ *                       döndü; Easel'in fal hosting'i şu an unstable.
+ *   • v8 (BU FİNAL)  — `cdingram/face-swap` (Replicate). InsightFace
+ *                       tabanlı, 1.9M+ production run (sektörün en
+ *                       çok kullanılan face swap modeli), $0.014/run,
+ *                       ~10s, A100. Replicate platform reliability'si
+ *                       fal'a göre kanıtlanmış.
  *
- * Niye nano-banana/edit (Gemini 2.5 Flash Image)?
- *   v2'de `easel-ai/advanced-face-swap` denedik, ama o endpoint
- *   resmi olarak deprecate edildi (fal model gallery'sinde "This
- *   model is no longer supported" + 500 Internal Server Error).
- *   nano-banana/edit aktif, multi-reference image alıyor, ticari
- *   lisans uyumlu, data URI destekliyor ve face/body swap dahil
- *   yüksek kaliteli prompt-based image edit yapıyor.
+ * Mimari farkı (önceki tüm modellerden):
+ *   • Identity-preserving generation → "bu yüze sahip yeni görsel üret"
+ *     (yüzü stilize, identity drift)
+ *   • Dedicated face swap (BU)        → "bu yüzü o yüzün üzerine yapıştır"
+ *     (pixel transfer; identity %100, sahne %100)
  *
- * Bu yaklaşım üç şey kazandırır:
- *   1. Bare avatar render etmek gerekmez — maliyet yarıdan aşağı.
- *   2. FASHN VTON'un "kullanıcının kendi vücuduna kıyafet boya"
- *      yanlışlığından kaçar — çünkü vücut zaten profesyonel.
- *   3. Static shop görselleri üretim kalitesinde, AI rendering
- *      yorumu yok; sadece yüz değişir.
+ * API:    `https://api.replicate.com/v1/predictions`
+ * Auth:   `Authorization: Token <REPLICATE_TOKEN>`
+ * Latency: ~10-15 saniye (A100 cold start dahil)
+ * Pricing: $0.014/run
  *
- * API: `https://fal.run/fal-ai/nano-banana/edit`
- * Auth: `Authorization: Key <FAL_KEY>` (FASHN ile aynı key).
- * Latency: ~5-10 saniye.
- * Pricing: ~$0.04 per edit.
+ * Input shape (`cdingram/face-swap`):
+ *   • `swap_image`  — required. Kullanıcı selfie (source face) — URL
+ *                     veya data URI.
+ *   • `input_image` — required. Caelinus canvas (target image) — URL
+ *                     veya data URI.
  *
- * Parametre seçimleri:
- *   • `prompt`           — face-swap için açık talimatlar; kıyafet,
- *                          vücut ve sahne korunmalı, sadece yüz
- *                          değişmeli. Birinci görsel = kullanıcı
- *                          (kaynak yüz), ikinci görsel = Caelinus
- *                          modeli (hedef vücut + kıyafet).
- *   • `image_urls`       — [selfie data URI, target data URI].
- *                          Target'ı da data URI yapıyoruz çünkü
- *                          dev'de localhost URL fal sunucusundan
- *                          erişilemez; prod'da da public CDN'i
- *                          ekstra bir hop atlayarak gönderiyor
- *                          oluruz, fark etmiyor.
- *   • `aspect_ratio`     — "auto"; target görseli ne ise onu sürdür.
- *   • `output_format`    — "png", lossless.
- *   • `safety_tolerance` — "5" — moderate. Bikini içerikleri için
- *                          "1-3" çok katı; "6" tamamen serbest. "5"
- *                          swimwear'a izin verir, açık explicit
- *                          içerik üretmez.
- *   • `num_images: 1`    — tek çıktı yeterli; reroll yok.
+ * Output: tek bir URI string (Replicate CDN'inde geçici final görsel).
  */
-async function renderFaceSwap(
-  falKey: string,
+async function renderReplicateFaceSwap(
+  token: string,
   input: RenderInput,
 ): Promise<RenderResult> {
-  const refs = input.faceSwapReferences!;
+  const refs = input.identityReferences!;
 
-  // Hedef görseli (Caelinus shop fotoğrafı) data URI'a çevir. Dev'de
-  // localhost URL'leri dış servisten erişilemez; data URI tüm
-  // ortamlarda eşit çalışır.
-  let targetDataUri = refs.targetImage;
-  if (!targetDataUri.startsWith("data:")) {
-    const targetRes = await fetch(refs.targetImage);
-    if (!targetRes.ok) {
-      throw new Error(
-        `Face-swap target fetch failed: ${targetRes.status} ${refs.targetImage}`,
-      );
-    }
-    const targetBuf = new Uint8Array(await targetRes.arrayBuffer());
-    const targetMime =
-      targetRes.headers.get("content-type") ?? "image/jpeg";
-    const b64 = Buffer.from(targetBuf).toString("base64");
-    targetDataUri = `data:${targetMime};base64,${b64}`;
-  }
-
-  // Prompt — Gemini'nin face-swap için en doğru cevabı vermesi için
-  // explicit, deterministic talimatlar. Birinci görselin yalnızca
-  // yüz kaynağı olduğu, diğer her şeyin (kıyafet, poz, sahne) ikinci
-  // görselden geleceği vurgulanır.
-  const facePrompt =
-    "Take the face from the first reference image and place it onto the woman in the second reference image. Keep everything else from the second image unchanged: the bikini outfit, body pose, hair style, hair color, lighting, background, scene, color grading, and overall composition must remain identical to the second image. Only the facial features (eyes, nose, mouth, face shape) should be transferred from the first image. The result must be a photorealistic, magazine-quality fashion photograph. Do not alter the swimwear, do not modify the background, do not change the body proportions.";
-
-  const body = {
-    prompt: facePrompt,
-    image_urls: [refs.sourceImage, targetDataUri],
-    num_images: 1,
-    aspect_ratio: "auto" as const,
-    output_format: "png" as const,
-    safety_tolerance: "5" as const,
-  };
-
-  const res = await fetch(
-    "https://fal.run/fal-ai/nano-banana/edit",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${falKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(body),
-    },
-  );
-
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
+  if (!refs.canvasImageDataUri) {
     throw new Error(
-      `Face-swap failed: ${res.status} ${txt.slice(0, 240)}`,
+      "Face-swap requires canvas image (target). " +
+        "User must select a base canvas before generating an avatar.",
     );
   }
 
-  const j = (await res.json()) as {
-    images?: { url?: string; content_type?: string }[];
-    description?: string;
-    error?: string;
-    detail?: unknown;
+  const reqInput = {
+    swap_image: refs.selfieDataUri,
+    input_image: refs.canvasImageDataUri,
   };
 
-  const first = j.images?.[0];
-  const imageUrl = first?.url;
-  if (!imageUrl) {
-    const summary = j.error ?? JSON.stringify(j.detail ?? j).slice(0, 240);
-    throw new Error(`Face-swap returned no image: ${summary}`);
+  console.log(
+    `[play.provider.faceswap] req cacheKey=${input.cacheKey} ` +
+      `selfieKB=${Math.round(refs.selfieDataUri.length / 1024)} ` +
+      `canvasKB=${Math.round(refs.canvasImageDataUri.length / 1024)} ` +
+      `canvas=${refs.canvas?.id ?? "none"} ` +
+      `model=cdingram/face-swap version=${REPLICATE_FACESWAP_VERSION.slice(0, 8)}`,
+  );
+
+  // Submit prediction
+  const startRes = await fetch("https://api.replicate.com/v1/predictions", {
+    method: "POST",
+    headers: {
+      Authorization: `Token ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      version: REPLICATE_FACESWAP_VERSION,
+      input: reqInput,
+    }),
+  });
+
+  if (!startRes.ok) {
+    const txt = await startRes.text().catch(() => "");
+    throw new Error(
+      `Replicate face-swap start failed: ${startRes.status} ${txt.slice(0, 320)}`,
+    );
   }
 
-  const imgRes = await fetch(imageUrl);
+  const startJson = (await startRes.json()) as {
+    id: string;
+    urls?: { get?: string };
+    status: string;
+  };
+
+  const pollUrl =
+    startJson.urls?.get ??
+    `https://api.replicate.com/v1/predictions/${startJson.id}`;
+
+  // Poll
+  type Prediction = {
+    status: string;
+    output?: string | string[] | null;
+    error?: string | null;
+  };
+
+  const deadline = Date.now() + REPLICATE_FACESWAP_DEADLINE_MS;
+  let prediction: Prediction | null = null;
+
+  while (Date.now() < deadline) {
+    await sleep(REPLICATE_FACESWAP_POLL_MS);
+    const pollRes = await fetch(pollUrl, {
+      headers: { Authorization: `Token ${token}` },
+    });
+    if (!pollRes.ok) continue;
+    const next = (await pollRes.json()) as Prediction;
+    prediction = next;
+    if (
+      next.status === "succeeded" ||
+      next.status === "failed" ||
+      next.status === "canceled"
+    ) {
+      break;
+    }
+  }
+
+  if (!prediction || prediction.status !== "succeeded") {
+    throw new Error(
+      `Replicate face-swap did not succeed (status=${prediction?.status ?? "timeout"}): ${
+        prediction?.error ?? ""
+      }`,
+    );
+  }
+
+  // Output is a single URI string (cdingram returns one image)
+  const outputUrl = Array.isArray(prediction.output)
+    ? prediction.output[0]
+    : prediction.output;
+  if (!outputUrl) {
+    throw new Error("Replicate face-swap succeeded but returned no output URL");
+  }
+
+  const imgRes = await fetch(outputUrl);
   if (!imgRes.ok) {
     throw new Error(
-      `Face-swap output fetch failed: ${imgRes.status} ${imageUrl}`,
+      `Replicate face-swap output fetch failed: ${imgRes.status} ${outputUrl}`,
     );
   }
   const buf = new Uint8Array(await imgRes.arrayBuffer());
-  const contentType =
-    first?.content_type ?? imgRes.headers.get("content-type") ?? "image/png";
+  const contentType = imgRes.headers.get("content-type") ?? "image/png";
   const extension = contentType.includes("jpeg")
     ? "jpg"
     : contentType.includes("webp")
       ? "webp"
       : "png";
+
   return {
     bytes: buf,
     contentType,
     extension,
-    // Provider enum sınırlı (replicate / openai / stub); fal.ai
-    // face-swap'i `openai` etiketleyerek mevcut play_renders şemasına
-    // uyuyoruz. Detaylı telemetri yapısal `[play.provider]`
-    // log satırlarında zaten var.
-    provider: "openai",
+    // Mevcut play_renders şemasındaki `provider` enum'una uy
+    // (replicate / openai / stub). Bu gerçekten Replicate, doğru tag.
+    provider: "replicate",
   };
 }
 

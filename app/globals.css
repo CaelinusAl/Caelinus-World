@@ -4501,7 +4501,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .avcfg-title {
@@ -4509,6 +4509,17 @@ main {
   font-size: 22px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.96);
+}
+
+/* Caelinus tonu: tipoloji yerine "kendi ölçün" çağrısı.
+ * Sliders'ın hemen üstünde manifesto sesinde tek satır. */
+.avcfg-panel-lede {
+  margin: 0 0 22px;
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  color: rgba(220, 215, 240, 0.55);
 }
 
 .avcfg-reset-btn {
@@ -24317,5 +24328,1661 @@ div.stage-card {
   .not-found-shell {
     padding: 64px 20px 96px;
     min-height: calc(100vh - 180px);
+  }
+}
+
+/* ── PDP linkleri (Faz 1) ─────────────────────────────────────
+   Ürün kartından /universe/shop/urun/<id> sayfasına geçişin
+   görsel ipucu. Mevcut .ecom-product-name tipografisini bozmaz;
+   yalnızca link state'i olduğunu hissettirir. */
+.ecom-product-name-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.ecom-product-name-link:hover .ecom-product-name {
+  color: rgba(220, 200, 255, 1);
+  text-decoration: underline;
+  text-decoration-color: rgba(220, 200, 255, 0.4);
+  text-underline-offset: 4px;
+}
+
+.shop-story-more {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(220, 200, 255, 0.3);
+  padding-bottom: 1px;
+}
+
+.shop-story-more:hover {
+  color: #ffffff;
+  border-bottom-color: rgba(220, 200, 255, 0.7);
+}
+
+/* ── StylistPanel (Faz 4) ─────────────────────────────────────
+   "Bugün ne giysem?" — catalog-bound AI moda danışmanı.
+   Shop'un "ai" mode panelinin başına otururken AiKombinPanel'in
+   hafif tipografisiyle uyumlu kalır. */
+.stylist-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  margin-bottom: 28px;
+  color: rgba(245, 240, 255, 0.92);
+}
+
+.stylist-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stylist-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.stylist-title {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 300;
+  margin: 4px 0 0;
+  color: #ffffff;
+  letter-spacing: -0.005em;
+}
+
+.stylist-sub {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(220, 215, 240, 0.7);
+}
+
+.stylist-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stylist-tab {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.stylist-tab:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(220, 200, 255, 0.32);
+}
+
+.stylist-tab.active {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.32), rgba(80, 140, 220, 0.28));
+  border-color: rgba(220, 200, 255, 0.6);
+}
+
+.stylist-tab-label {
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.stylist-tab-hint {
+  font-size: 11px;
+  color: rgba(220, 215, 240, 0.65);
+  line-height: 1.4;
+}
+
+.stylist-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stylist-chip {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  color: rgba(220, 215, 240, 0.85);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.stylist-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(220, 200, 255, 0.3);
+  color: #ffffff;
+}
+
+.stylist-chip.active {
+  background: rgba(220, 200, 255, 0.18);
+  border-color: rgba(220, 200, 255, 0.6);
+  color: #ffffff;
+}
+
+.stylist-intent {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.stylist-intent-label {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.6);
+}
+
+.stylist-intent-input {
+  appearance: none;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(220, 200, 255, 0.18);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.stylist-intent-input::placeholder {
+  color: rgba(220, 215, 240, 0.4);
+}
+
+.stylist-intent-input:focus {
+  outline: none;
+  border-color: rgba(220, 200, 255, 0.6);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.stylist-intent-btn {
+  appearance: none;
+  background: rgba(220, 200, 255, 0.16);
+  border: 1px solid rgba(220, 200, 255, 0.5);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.stylist-intent-btn:hover:not(:disabled) {
+  background: rgba(220, 200, 255, 0.28);
+}
+
+.stylist-intent-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stylist-warn {
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(255, 200, 80, 0.08);
+  border: 1px solid rgba(255, 200, 80, 0.3);
+  color: rgba(255, 220, 150, 0.9);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.stylist-empty {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(220, 215, 240, 0.6);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.stylist-look {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(220, 200, 255, 0.12);
+}
+
+.stylist-look-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stylist-look-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.stylist-look-slot {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.stylist-look-freq {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.4), rgba(80, 140, 220, 0.4));
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.stylist-look-title {
+  font-size: 22px;
+  margin: 4px 0 0;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.stylist-look-narr {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(230, 225, 250, 0.8);
+  font-style: italic;
+}
+
+.stylist-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.stylist-item {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.1);
+}
+
+.stylist-item-img {
+  width: 100%;
+  aspect-ratio: 1 / 1.2;
+  object-fit: cover;
+  display: block;
+}
+
+.stylist-item-body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stylist-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.stylist-item-rationale {
+  font-size: 11px;
+  color: rgba(220, 215, 240, 0.65);
+  line-height: 1.4;
+  min-height: 30px;
+}
+
+.stylist-item-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.stylist-item-price {
+  font-size: 13px;
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.stylist-item-btn {
+  appearance: none;
+  background: rgba(220, 200, 255, 0.1);
+  border: 1px solid rgba(220, 200, 255, 0.3);
+  color: rgba(245, 240, 255, 0.95);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.stylist-item-btn:hover {
+  background: rgba(220, 200, 255, 0.2);
+}
+
+.stylist-look-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(220, 200, 255, 0.18);
+}
+
+.stylist-look-total {
+  font-size: 14px;
+  color: rgba(245, 240, 255, 0.95);
+  letter-spacing: 0.06em;
+}
+
+.stylist-look-cta {
+  appearance: none;
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.55), rgba(80, 140, 220, 0.55));
+  border: 1px solid rgba(220, 200, 255, 0.7);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.stylist-look-cta:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.7), rgba(80, 140, 220, 0.7));
+}
+
+@media (max-width: 600px) {
+  .stylist-tabs {
+    grid-template-columns: 1fr;
+  }
+  .stylist-intent {
+    grid-template-columns: 1fr;
+  }
+  .stylist-intent-btn {
+    justify-self: stretch;
+  }
+}
+
+/* ── Shop Avatar Badge — Faz 3.2 ─────────────────────────────────── */
+/* Kullanıcının kayıtlı AI avatarını Shop sahnesinin köşesinde sticky
+ * olarak gösterir. Avatar yoksa "Avatarını yarat" daveti gösterir. */
+.shop-avatar-badge {
+  position: sticky;
+  top: 88px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin: 0 0 18px auto;
+  width: fit-content;
+  max-width: 320px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(150, 110, 230, 0.18),
+    rgba(80, 140, 220, 0.14)
+  );
+  border: 1px solid rgba(220, 200, 255, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  color: rgba(245, 240, 255, 0.92);
+}
+
+.shop-avatar-badge--empty {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 200, 255, 0.08),
+    rgba(150, 200, 255, 0.06)
+  );
+  border-color: rgba(220, 200, 255, 0.22);
+}
+
+.shop-avatar-badge-thumb-link {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  border: 1.5px solid rgba(220, 200, 255, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.shop-avatar-badge-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shop-avatar-badge-glyph-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(20, 14, 36, 0.92);
+  color: rgba(220, 200, 255, 0.95);
+  border: 1px solid rgba(220, 200, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.shop-avatar-badge-glyph {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: rgba(220, 200, 255, 0.85);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px dashed rgba(220, 200, 255, 0.4);
+}
+
+.shop-avatar-badge-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shop-avatar-badge-kicker {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+  margin: 0;
+}
+
+.shop-avatar-badge-zodiac {
+  font-size: 14px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.shop-avatar-badge-text {
+  font-size: 12px;
+  color: rgba(220, 215, 240, 0.78);
+  line-height: 1.4;
+  margin: 0;
+  max-width: 200px;
+}
+
+.shop-avatar-badge-cta {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ffffff;
+  background: rgba(220, 200, 255, 0.18);
+  border: 1px solid rgba(220, 200, 255, 0.45);
+  padding: 6px 12px;
+  border-radius: 999px;
+  width: fit-content;
+  transition: background 0.15s;
+}
+
+.shop-avatar-badge-cta:hover {
+  background: rgba(220, 200, 255, 0.32);
+}
+
+.shop-avatar-badge-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shop-avatar-badge-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  text-decoration: none;
+  padding: 0;
+}
+
+.shop-avatar-badge-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.shop-avatar-badge-link--ghost {
+  color: rgba(220, 200, 255, 0.55);
+}
+
+@media (max-width: 600px) {
+  .shop-avatar-badge {
+    max-width: none;
+    width: auto;
+    margin: 0 0 14px;
+  }
+}
+
+/* ── Stylist Avatar Preview Modal — Faz 3.2b ─────────────────────── */
+/* Stylist'in önerdiği look'u kullanıcının kayıtlı AI avatarı ile
+ * yan yana gösteren modal. Avatar yoksa "yarat" CTA'sı,
+ * avatar var ama burç farklıysa "yeniden yarat" akışı sunar. */
+
+.stylist-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(4, 6, 15, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: stylist-modal-fade 0.18s ease-out;
+}
+
+@keyframes stylist-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.stylist-modal {
+  position: relative;
+  background:
+    radial-gradient(circle at 15% 18%, rgba(150, 110, 230, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 82%, rgba(80, 140, 220, 0.14) 0%, transparent 55%),
+    rgba(8, 10, 22, 0.96);
+  border: 1px solid rgba(220, 200, 255, 0.28);
+  border-radius: 22px;
+  width: 100%;
+  max-width: 880px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 28px;
+  color: rgba(245, 240, 255, 0.92);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.stylist-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(220, 200, 255, 0.25);
+  color: rgba(245, 240, 255, 0.85);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+}
+.stylist-modal-close:hover {
+  background: rgba(220, 200, 255, 0.18);
+  transform: rotate(90deg);
+}
+
+.stylist-modal-head {
+  text-align: center;
+  margin-bottom: 22px;
+}
+.stylist-modal-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+  margin: 0 0 6px;
+}
+.stylist-modal-title {
+  font-size: 24px;
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: -0.005em;
+  background: linear-gradient(180deg, #fff 0%, rgba(220, 200, 255, 0.85) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Empty / mismatch state */
+.stylist-modal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 24px 12px;
+}
+.stylist-modal-glyph {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: rgba(220, 200, 255, 0.85);
+  background: rgba(220, 200, 255, 0.08);
+  border: 1px dashed rgba(220, 200, 255, 0.4);
+}
+.stylist-modal-avatar-mini {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(220, 200, 255, 0.5);
+}
+.stylist-modal-avatar-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stylist-modal-empty-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0;
+  color: #ffffff;
+}
+.stylist-modal-empty-body {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(220, 215, 240, 0.78);
+  margin: 0;
+  max-width: 480px;
+}
+
+/* Match state — 2-col grid */
+.stylist-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .stylist-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stylist-modal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stylist-modal-col-label {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+  margin: 0;
+}
+.stylist-modal-avatar-frame {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 200, 255, 0.18);
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stylist-modal-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.stylist-modal-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.stylist-modal-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 200, 255, 0.14);
+}
+.stylist-modal-item-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+.stylist-modal-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.stylist-modal-item-name {
+  font-size: 13px;
+  color: #ffffff;
+  line-height: 1.3;
+}
+.stylist-modal-item-price {
+  font-size: 12px;
+  color: rgba(220, 200, 255, 0.85);
+}
+
+.stylist-modal-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(220, 200, 255, 0.14);
+}
+.stylist-modal-total {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+.stylist-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stylist-modal-cta {
+  appearance: none;
+  background: rgba(220, 200, 255, 0.12);
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.stylist-modal-cta:hover {
+  background: rgba(220, 200, 255, 0.22);
+  border-color: rgba(220, 200, 255, 0.7);
+  transform: translateY(-1px);
+}
+.stylist-modal-cta--primary {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.55), rgba(80, 140, 220, 0.55));
+  border-color: rgba(220, 200, 255, 0.7);
+}
+
+/* StylistPanel'deki ghost CTA varyantı — primary olmayan
+ * "AI ile Avatarımda Gör" butonu için. */
+.stylist-look-cta--ghost {
+  background: transparent;
+  border: 1px solid rgba(220, 200, 255, 0.4);
+}
+.stylist-look-cta--ghost:hover {
+  background: rgba(220, 200, 255, 0.12);
+}
+
+/* ── AIAvatarStage — Faz 3.4 (avatar-first sahne) ───────────────── */
+/* Kullan\u0131c\u0131n\u0131n AI face-swap g\u00f6rseli Shop sahnesinin merkezi olur.
+ * 3D mesh sahnesinin yerini al\u0131r. K\u0131yafet etkile\u015fimi mant\u0131ksal
+ * olarak arka planda \u00e7al\u0131\u015fmaya devam eder (badge'lerle g\u00f6r\u00fcn\u00fcr). */
+
+.ai-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: 720px;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(150, 110, 230, 0.18) 0%, transparent 55%),
+    #04060f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-stage-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ai-stage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ai-stage-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 30%, transparent 50%, rgba(4, 6, 15, 0.55) 100%);
+}
+
+.ai-stage-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(220, 200, 255, 0.18) 0%, transparent 35%);
+  mix-blend-mode: screen;
+}
+
+.ai-stage-info-card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(8, 10, 22, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 200, 255, 0.22);
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.ai-stage-info-card--top-left {
+  top: 16px;
+  left: 16px;
+}
+.ai-stage-info-card--top-right {
+  top: 16px;
+  right: 16px;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.ai-stage-info-kicker {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.ai-stage-info-text {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.ai-stage-info-sub {
+  font-size: 11px;
+  color: rgba(220, 215, 240, 0.65);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ai-stage-change-link {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(220, 200, 255, 0.18);
+  border: 1px solid rgba(220, 200, 255, 0.45);
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.15s, transform 0.15s;
+}
+.ai-stage-change-link:hover {
+  background: rgba(220, 200, 255, 0.32);
+  transform: translateY(-1px);
+}
+
+.ai-stage-outfit-row {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 60%;
+}
+
+.ai-stage-outfit-badge {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  background: rgba(8, 10, 22, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(220, 200, 255, 0.28);
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* ── Avatar yoksa: 3D mesh + hero CTA banner ─────────────────── */
+
+.shop-avatar-hero-cta {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  max-width: 520px;
+  text-align: center;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(150, 110, 230, 0.32),
+    rgba(80, 140, 220, 0.26)
+  );
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  z-index: 5;
+}
+
+.shop-avatar-hero-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  margin: 0 0 6px;
+}
+
+.shop-avatar-hero-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+.shop-avatar-hero-sub {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(220, 215, 240, 0.85);
+  margin: 0 0 14px;
+}
+
+.shop-avatar-hero-btn {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ffffff;
+  background: rgba(220, 200, 255, 0.22);
+  border: 1px solid rgba(220, 200, 255, 0.6);
+  padding: 10px 18px;
+  border-radius: 999px;
+  transition: background 0.15s, transform 0.15s;
+}
+.shop-avatar-hero-btn:hover {
+  background: rgba(220, 200, 255, 0.36);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .ai-stage {
+    aspect-ratio: 4 / 5;
+  }
+  .ai-stage-info-card {
+    padding: 8px 10px;
+  }
+  .shop-avatar-hero-cta {
+    bottom: 12px;
+    padding: 14px 16px;
+  }
+  .shop-avatar-hero-title {
+    font-size: 16px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   CAELINUS BODY LIBRARY — kendi avatar studio'muz, body picker
+   ───────────────────────────────────────────────────────── */
+
+.body-picker {
+  width: 100%;
+  margin: 24px 0 36px;
+  padding: 24px 28px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(180, 150, 255, 0.12) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(40, 25, 80, 0.42) 0%, rgba(20, 15, 45, 0.55) 100%);
+  border: 1px solid rgba(180, 150, 255, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px -28px rgba(120, 90, 220, 0.45);
+}
+
+.body-picker-header {
+  margin-bottom: 18px;
+}
+
+.body-picker-kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.body-picker-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.body-picker-sub {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(230, 220, 255, 0.7);
+  margin: 0;
+  max-width: 620px;
+}
+
+.body-picker-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 220px;
+  gap: 14px;
+  padding: 4px 2px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180, 150, 255, 0.4) transparent;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.body-picker-rail::-webkit-scrollbar {
+  height: 6px;
+}
+.body-picker-rail::-webkit-scrollbar-thumb {
+  background: rgba(180, 150, 255, 0.4);
+  border-radius: 3px;
+}
+
+.body-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  padding: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(220, 200, 255, 0.16);
+  background: rgba(15, 10, 30, 0.6);
+  cursor: pointer;
+  overflow: hidden;
+  scroll-snap-align: start;
+  transition:
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+  font-family: inherit;
+  color: #fff;
+}
+
+.body-card:hover {
+  border-color: rgba(220, 200, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.body-card.is-active {
+  border-color: rgba(255, 215, 240, 0.85);
+  background: rgba(40, 25, 80, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 240, 0.45) inset,
+    0 18px 40px -18px rgba(212, 168, 255, 0.7);
+}
+
+.body-card-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(
+    135deg,
+    rgba(60, 40, 100, 0.7) 0%,
+    rgba(20, 15, 40, 0.9) 100%
+  );
+  overflow: hidden;
+}
+
+.body-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.body-card-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgba(212, 168, 255, 0.45) 0%,
+    rgba(20, 15, 40, 0.95) 70%
+  );
+}
+
+.body-card-thumb-fallback[data-vibe="feminine"] {
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(255, 200, 240, 0.4) 0%,
+    rgba(40, 18, 60, 0.95) 70%
+  );
+}
+
+.body-card-thumb-fallback[data-vibe="masculine"] {
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(140, 200, 255, 0.4) 0%,
+    rgba(15, 25, 50, 0.95) 70%
+  );
+}
+
+.body-card-thumb-monogram {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 64px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.4));
+}
+
+.body-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.body-card-badge--personal {
+  background: linear-gradient(135deg, rgba(255, 215, 240, 0.9) 0%, rgba(212, 168, 255, 0.9) 100%);
+  color: #1a0a30;
+}
+
+.body-card-badge--default {
+  background: rgba(20, 15, 40, 0.8);
+  color: rgba(220, 200, 255, 0.95);
+  border: 1px solid rgba(220, 200, 255, 0.3);
+}
+
+.body-card-meta {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.body-card-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.body-card-tagline {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(230, 220, 255, 0.7);
+}
+
+.body-card-vibe {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 215, 240, 0.65);
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .body-picker {
+    padding: 18px 14px;
+  }
+  .body-picker-rail {
+    grid-auto-columns: 180px;
+    gap: 10px;
+  }
+  .body-card-thumb-monogram {
+    font-size: 48px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   AVATURN — Banner & Modal (selfie-to-avatar foto-gerçek 3D)
+   (Şu an UI'dan kaldırıldı; Caelinus body library ana akış. Bu
+   stiller kullanılmıyor ama dosyalar opsiyonel için duruyor.)
+   ───────────────────────────────────────────────────────── */
+
+/* Banner — avatar studio sayfasının üstünde "Foto-Gerçek Avatar" CTA */
+.avaturn-banner {
+  width: 100%;
+  margin: 24px 0 36px;
+}
+
+.avaturn-banner-cta,
+.avaturn-banner-active {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 32px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(180, 150, 255, 0.18) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(40, 25, 80, 0.55) 0%, rgba(20, 15, 45, 0.65) 100%);
+  border: 1px solid rgba(180, 150, 255, 0.32);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px -28px rgba(120, 90, 220, 0.6);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.avaturn-banner-active-glow {
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(170, 140, 255, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(255, 200, 240, 0.25) 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: -1;
+  animation: avaturn-banner-pulse 6s ease-in-out infinite;
+}
+
+@keyframes avaturn-banner-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.avaturn-banner-active-content,
+.avaturn-banner-cta-content {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.avaturn-banner-kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.9);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.avaturn-banner-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(20px, 2.4vw, 28px);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+.avaturn-banner-title em {
+  font-style: italic;
+  color: rgba(255, 215, 240, 0.95);
+}
+
+.avaturn-banner-sub {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(230, 220, 255, 0.78);
+  margin: 0;
+}
+
+.avaturn-banner-id {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgba(220, 200, 255, 0.95);
+}
+
+.avaturn-banner-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.avaturn-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.avaturn-banner-btn--primary {
+  background: linear-gradient(135deg, #d4a8ff 0%, #f0b8e0 100%);
+  color: #1a0a30;
+  box-shadow: 0 12px 28px -10px rgba(180, 140, 255, 0.7);
+}
+.avaturn-banner-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px -10px rgba(180, 140, 255, 0.9);
+}
+
+.avaturn-banner-btn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(220, 200, 255, 0.35);
+}
+.avaturn-banner-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.avaturn-banner-btn--ghost {
+  background: transparent;
+  color: rgba(220, 200, 255, 0.7);
+  border-color: rgba(220, 200, 255, 0.2);
+}
+.avaturn-banner-btn--ghost:hover {
+  background: rgba(255, 100, 100, 0.1);
+  color: rgba(255, 180, 180, 0.95);
+  border-color: rgba(255, 100, 100, 0.4);
+}
+
+@media (max-width: 720px) {
+  .avaturn-banner-cta,
+  .avaturn-banner-active {
+    padding: 22px 18px;
+    gap: 16px;
+  }
+  .avaturn-banner-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .avaturn-banner-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* Modal — full-screen iframe overlay */
+.avaturn-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  animation: avaturn-modal-in 0.28s ease-out;
+}
+
+@keyframes avaturn-modal-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.avaturn-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(60, 40, 100, 0.45) 0%, rgba(5, 4, 12, 0.95) 70%),
+    rgba(5, 4, 12, 0.85);
+  backdrop-filter: blur(14px);
+}
+
+.avaturn-modal-shell {
+  position: relative;
+  width: min(1180px, 96vw);
+  height: min(820px, 92vh);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(20, 15, 38, 0.92) 0%, rgba(10, 8, 22, 0.96) 100%);
+  border: 1px solid rgba(180, 150, 255, 0.28);
+  box-shadow: 0 40px 120px -20px rgba(120, 90, 220, 0.5);
+}
+
+.avaturn-modal-header {
+  position: relative;
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid rgba(180, 150, 255, 0.16);
+  background: linear-gradient(180deg, rgba(40, 25, 80, 0.4) 0%, transparent 100%);
+}
+
+.avaturn-modal-kicker {
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.avaturn-modal-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.avaturn-modal-sub {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(230, 220, 255, 0.72);
+  margin: 0;
+}
+
+.avaturn-modal-sub em {
+  font-style: italic;
+  color: rgba(220, 200, 255, 0.85);
+}
+
+.avaturn-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 200, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.avaturn-modal-close:hover {
+  background: rgba(255, 100, 100, 0.18);
+  border-color: rgba(255, 150, 150, 0.5);
+  transform: rotate(90deg);
+}
+
+.avaturn-modal-frame-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  background: #0a0814;
+  overflow: hidden;
+}
+
+/* SDK iframe'i bu container'a enjekte ediyor — full-stretch yap */
+.avaturn-modal-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.avaturn-modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.avaturn-modal-loading,
+.avaturn-modal-exporting {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: rgba(10, 8, 22, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  font-size: 13.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  pointer-events: none;
+}
+
+.avaturn-modal-loading-pulse {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 168, 255, 0.6) 0%, transparent 70%);
+  animation: avaturn-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes avaturn-pulse {
+  0%, 100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.avaturn-modal-error {
+  padding: 14px 22px;
+  background: rgba(255, 60, 60, 0.12);
+  border-top: 1px solid rgba(255, 100, 100, 0.4);
+  color: rgba(255, 200, 200, 0.95);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.avaturn-modal-error-retry {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .avaturn-modal-shell {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  .avaturn-modal-title {
+    font-size: 20px;
   }
 }

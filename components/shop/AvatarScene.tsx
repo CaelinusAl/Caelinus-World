@@ -20,7 +20,7 @@ import {
   getStageConfig,
 } from "./scene";
 
-const MODEL_PATH = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL_PATH = "/models/caelinus-avatar.glb";
 const FEET_Y = -0.03;
 
 /* ═══════════════════════════════════════════
@@ -32,6 +32,8 @@ export type AvatarSceneProps = {
   skinTone?: string;
   auraColor?: string;
   avatarConfig?: AvatarConfig;
+  /** Custom avatar GLB URL — Avaturn avatarı varsa onu kullan, yoksa default Caelinus mesh */
+  avatarUrl?: string | null;
   /** Data URL or fetchable path — head decal */
   faceTextureUrl?: string | null;
   /** Parametric face shape deform */
@@ -73,6 +75,7 @@ function SceneContent({
   skinTone,
   auraColor,
   avatarConfig,
+  avatarUrl,
   faceTextureUrl,
   faceDeform,
   animationUrl,
@@ -83,6 +86,7 @@ function SceneContent({
   const stage = useMemo(() => getStageConfig(stageId), [stageId]);
   const skin = skinTone || avatarConfig?.skinTone || DEFAULT_AVATAR.skinTone;
   const aura = auraColor || stage.portalColor;
+  const modelUrl = avatarUrl || DEFAULT_MODEL_PATH;
 
   // Avatar root ref for outfit bone attachment
   const [avatarRoot, setAvatarRoot] = useState<THREE.Object3D | null>(null);
@@ -96,7 +100,7 @@ function SceneContent({
       <Portal color={stage.portalColor} />
 
       <ModelAvatar
-        url={MODEL_PATH}
+        url={modelUrl}
         skinTone={skin}
         auraColor={aura}
         avatarConfig={avatarConfig}
@@ -131,13 +135,21 @@ function SceneContent({
         color={aura}
       />
 
+      {/* OrbitControls auto-rotate hızı: drei/three default 2.0 ≈
+       * 30 saniye/devir; biz 0.6'da ~100s/devir'e yavaşlatmıştık,
+       * kullanıcı "11 saniye geri dönüş" hissini buradan alıyordu.
+       * Şimdi 4.0'a çekiyoruz — 1 devir ≈ 7.5 saniye, izlenebilir
+       * ama yavaş değil. damping factor sıkı (0.18) ki release
+       * sonrası ~3sn'de durulsun. */}
       <OrbitControls
         enablePan={false}
         enableZoom={false}
+        enableDamping
+        dampingFactor={0.18}
         minPolarAngle={Math.PI / 2.35}
         maxPolarAngle={Math.PI / 1.82}
         autoRotate
-        autoRotateSpeed={0.6}
+        autoRotateSpeed={4.0}
         rotateSpeed={0.5}
         target={[0, 1.3, 0]}
         makeDefault
@@ -188,4 +200,4 @@ export default function AvatarScene(props: AvatarSceneProps) {
   );
 }
 
-useGLTF.preload(MODEL_PATH);
+useGLTF.preload(DEFAULT_MODEL_PATH);

@@ -1,0 +1,303 @@
+/**
+ * Caelinus PDP — ürün hikâye sayfası stili.
+ *
+ * Bu stil sadece /universe/shop/urun/[slug] altında yüklenir; Shop'un
+ * kendi grid stillerine dokunmaz. Tasarım dili: nebula gradient + 1
+ * kartonun üstünde ürün, altında hikâye + üretici şeritleri.
+ */
+
+.pdp-scene {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  color: rgba(245, 240, 255, 0.92);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(150, 110, 230, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 82% 75%, rgba(80, 140, 220, 0.14) 0%, transparent 50%),
+    #04060f;
+  padding: 96px 24px 96px;
+  overflow: hidden;
+}
+
+.pdp-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.pdp-breadcrumbs {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(220, 215, 240, 0.55);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.pdp-breadcrumbs a {
+  color: rgba(220, 200, 255, 0.85);
+  text-decoration: none;
+}
+
+.pdp-breadcrumbs a:hover {
+  color: #ffffff;
+}
+
+.pdp-breadcrumbs-sep {
+  opacity: 0.4;
+}
+
+/* ── HERO ────────────────────────────────────────────────────── */
+
+.pdp-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: stretch;
+}
+
+@media (max-width: 920px) {
+  .pdp-hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.pdp-image-wrap {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  aspect-ratio: 4 / 5;
+  isolation: isolate;
+}
+
+.pdp-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pdp-freq-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(4, 6, 15, 0.7);
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+}
+
+.pdp-zodiac-tag {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.55), rgba(80, 140, 220, 0.55));
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.pdp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 12px 0;
+}
+
+.pdp-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.pdp-title {
+  font-size: clamp(32px, 4.4vw, 48px);
+  line-height: 1.1;
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: -0.005em;
+  color: #ffffff;
+}
+
+.pdp-designer {
+  font-size: 14px;
+  color: rgba(220, 215, 240, 0.7);
+}
+
+.pdp-designer strong {
+  color: rgba(245, 240, 255, 0.95);
+  font-weight: 500;
+}
+
+.pdp-price {
+  font-size: 28px;
+  font-weight: 300;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+
+.pdp-story-lead {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(235, 230, 255, 0.84);
+  font-style: italic;
+  margin: 0;
+  padding-left: 14px;
+  border-left: 1px solid rgba(220, 200, 255, 0.4);
+}
+
+.pdp-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.pdp-cta {
+  appearance: none;
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdp-cta:hover {
+  background: rgba(220, 200, 255, 0.12);
+  border-color: rgba(220, 200, 255, 0.7);
+  transform: translateY(-1px);
+}
+
+.pdp-cta--primary {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.5), rgba(80, 140, 220, 0.5));
+  border-color: rgba(220, 200, 255, 0.7);
+}
+
+.pdp-cta--ghost {
+  background: transparent;
+}
+
+/* ── STORY SECTIONS ──────────────────────────────────────────── */
+
+.pdp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pdp-section-heading {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+  margin: 0;
+}
+
+.pdp-section-title {
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 300;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.005em;
+}
+
+.pdp-section-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: rgba(230, 225, 250, 0.82);
+  max-width: 720px;
+  margin: 0;
+}
+
+.pdp-chapters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.pdp-chapter {
+  padding: 22px 22px 24px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pdp-chapter-mark {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: rgba(220, 200, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.pdp-chapter-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0;
+  color: #ffffff;
+}
+
+.pdp-chapter-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(220, 215, 240, 0.78);
+  margin: 0;
+}
+
+/* ── PROVENANCE ROW ──────────────────────────────────────────── */
+
+.pdp-provenance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 200, 255, 0.1);
+}
+
+.pdp-provenance-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pdp-provenance-label {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.6);
+}
+
+.pdp-provenance-value {
+  font-size: 15px;
+  color: #ffffff;
+  font-weight: 400;
+}

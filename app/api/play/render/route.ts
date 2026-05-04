@@ -18,6 +18,7 @@ import { z } from "zod";
 
 import {
   ArchetypeId,
+  findZodiac,
   lookCacheKey,
   SceneId,
   ZodiacId,
@@ -26,6 +27,10 @@ import {
   ZODIACS,
 } from "@/data/play-assets";
 import { findOutfit, PLAY_OUTFITS } from "@/data/play-outfits";
+import {
+  AVATAR_CANVAS_IDS,
+  findCanvas,
+} from "@/lib/avatar/canvases";
 import { briefHash, BRIEF_MAX_LENGTH, sanitizeBrief } from "@/lib/play/brief";
 import { checkBrief, moderationMessage } from "@/lib/play/moderation";
 import { renderPlayImage } from "@/lib/play/provider";
@@ -124,6 +129,27 @@ const RenderRequestSchema = z.object({
   /** UI language hint — only used to pick the rejection-message
    *  language when moderation triggers. Defaults to EN. */
   lang: z.enum(["tr", "en"]).optional().default("en"),
+
+  /**
+   * Faz 3.5 / Wardrobe Faz B — kullanıcının seçtiği base canvas.
+   *
+   * Set edildiğinde face-swap target image lookbook (`outfit.previewImage`)
+   * yerine `findCanvas(canvas).src` olur — yani kullanıcının seçtiği
+   * tarafsız tuval (silk/bodysuit/veil) face-swap edilir. Bu, eski
+   * "iki figürlü gemini lookbook üzerine swap" sorununu çözer:
+   *   • Single-figure tuval → yüz tek bir kişiye yerleşir,
+   *   • Text/logo overlay yok → sonuç "marketing afişi" gibi gözükmez,
+   *   • Yüz çerçevenin %20-25'i → kullanıcı kendini tanır.
+   *
+   * Cache key'e `-c<id>` (canvas suffix) eklenir; aynı selfie + farklı
+   * tuval ayrı cache row olur, kullanıcı tuval değiştirirse fresh
+   * render alır.
+   *
+   * Canvas + outfit aynı request'te gelirse canvas öncelikli (face-swap
+   * target). Outfit hala prompt fragment'i için kullanılır
+   * (Wardrobe Faz E'de bu route compose path'ine genişletilecek).
+   */
+  canvas: z.enum(AVATAR_CANVAS_IDS).optional(),
 });
 
 const STORAGE_BUCKET = "play-renders";
@@ -154,19 +180,26 @@ export async function POST(req: Request) {
   // catalogue updates that prune entries).
   const outfit = findOutfit(parsed.data.outfit);
 
-  // Faz 2.1 — selfie payload. Selfie'nin anlamlı olabilmesi için outfit
-  // şart (FASHN model_image + garment_image ikilisi gerekiyor); selfie
-  // tek başına gelirse görmezden geliyoruz, eski text-to-image yoluna
-  // düşmemek için. selfieDataUri ile selfieHash birlikte gelmeli;
-  // birinin eksikliği "selfie modu yok" kabul edilir.
-  const selfieDataUri =
-    outfit && parsed.data.selfieDataUri && parsed.data.selfieHash
-      ? parsed.data.selfieDataUri
-      : null;
-  const selfieHash =
-    outfit && parsed.data.selfieDataUri && parsed.data.selfieHash
-      ? parsed.data.selfieHash
-      : "";
+  // Wardrobe Faz B — kullanıcının seçtiği base canvas. Set edildiğinde
+  // face-swap target outfit lookbook'u DEĞİL bu canvas olur.
+  const canvas = findCanvas(parsed.data.canvas);
+
+  // Faz 2.1 / Wardrobe Faz B — selfie payload.
+  //
+  // Eski kural: "selfie outfit ile birlikte anlamlı". Wardrobe'da
+  // bu kuralı genişletiyoruz — selfie + canvas (lookbook olmadan) da
+  // anlamlı: kullanıcı kendi yüzünü tarafsız tuvalin üstüne koyuyor.
+  // Yani selfie {outfit OR canvas} ile aktif olur. selfieDataUri ile
+  // selfieHash birlikte gelmeli; birinin eksikliği "selfie modu yok"
+  // kabul edilir.
+  const selfieEligible =
+    !!parsed.data.selfieDataUri &&
+    !!parsed.data.selfieHash &&
+    (outfit !== null || canvas !== null);
+  const selfieDataUri = selfieEligible
+    ? parsed.data.selfieDataUri!
+    : null;
+  const selfieHash = selfieEligible ? parsed.data.selfieHash! : "";
 
   // ── Brief: sanitise → auth → moderate ──────────────────────
   // Anonymous users get the canonical (no-brief) render path. A brief
@@ -198,7 +231,7 @@ export async function POST(req: Request) {
   }
 
   const briefDigest = cleanBrief ? briefHash(cleanBrief) : "";
-  const cacheKey = lookCacheKey(
+  const baseCacheKey = lookCacheKey(
     archetype,
     zodiac,
     scene,
@@ -207,6 +240,28 @@ export async function POST(req: Request) {
     outfit?.id ?? "",
     selfieHash,
   );
+
+  // Cache key suffix'leri — selfie içeren Replicate face-swap path'i:
+  //
+  //   `-rsv1` (Faz 4d FİNAL) — Replicate cdingram/face-swap.
+  //     PIXEL-PERFECT dedicated face swap (InsightFace tabanlı).
+  //     1.9M+ production run, $0.014, ~10s.
+  //     Önceki tüm selfie cache'lerini bypass eder:
+  //     • nano-banana/edit (`fsv2-fsv4`): no-edit davranışı.
+  //     • PhotoMaker (`pmv1`): queue timeout, eski model.
+  //     • Kontext Max Multi (`fkmv1`): identity stilize edip kayboluyor.
+  //     • Easel/fal.ai (`esv1`): 500 Internal Server Error (unstable).
+  //     • cdingram/face-swap: identity %100, canvas %100 korunur.
+  //
+  //   `-c<id>` (Wardrobe Faz B) — canvas suffix.
+  //     Aynı selfie + farklı tuval ayrı cache row olur. Kullanıcı
+  //     "silk → bodysuit" geçerse fresh render alır.
+  //
+  // Yalnızca selfie modunda eklenir; normal text-to-image / VTON
+  // cache'leri etkilenmez (kendi cache key kuralları korunur).
+  const cacheKey = selfieDataUri
+    ? `${baseCacheKey}-rsv1${canvas ? `-c${canvas.id}` : ""}`
+    : baseCacheKey;
 
   let supabase;
   try {
@@ -309,30 +364,68 @@ export async function POST(req: Request) {
         category: "tops" | "bottoms" | "one-pieces" | "auto";
       }
     | undefined;
-  let faceSwapReferences:
+  let identityReferences:
     | {
-        sourceImage: string;
-        targetImage: string;
+        selfieDataUri: string;
+        zodiac: NonNullable<ReturnType<typeof findZodiac>>;
+        canvas: ReturnType<typeof findCanvas>;
+        canvasImageDataUri?: string;
       }
     | undefined;
 
-  // ── Selfie + outfit → face-swap (Caelinus shop hero shot üzerine
-  //    kullanıcı yüzü) ──────────────────────────────────────────
-  // Selfie yüklenmiş AND outfit'in kullanılabilir bir `previewImage`'ı
-  // varsa face-swap yolu zorla devreye girer; bare avatar render,
-  // FASHN VTON ve OpenAI image-edit yolları tamamen atlanır.
-  // previewImage Caelinus modelinin bikinili hâli olduğu için sadece
-  // yüzü değiştirip $0.04 maliyetinde son ürünü çıkarmak yeterli.
-  if (selfieDataUri && outfit?.previewImage) {
-    const origin = new URL(req.url).origin;
-    const targetImageUrl = new URL(outfit.previewImage, origin).href;
-    faceSwapReferences = {
-      sourceImage: selfieDataUri,
-      targetImage: targetImageUrl,
-    };
+  // ── Selfie → PhotoMaker identity yolu ─────────────────────────
+  //
+  // Selfie geldiğinde tüm diğer pipeline'ları (FASHN VTON, OpenAI
+  // image-edit, bare pre-render) bypass ederiz. PhotoMaker tek
+  // adımda identity-preserving portre üretir: kullanıcının yüzü
+  // embedding'e çevrilir, prompt sıfırdan yeni bir Caelinus
+  // portresi doğurur. Canvas opsiyonel img2img referansı; varsa
+  // kompozisyon (poz, çerçeveleme, atmosfer) korunur, yüz yine
+  // kullanıcının kendisi.
+  //
+  // Canvas image'ı route'ta önceden fetch edip base64'e çeviririz
+  // (provider'ı request-agnostic tutmak için; relative public path
+  // origin bilmeden fetch edilemez).
+  //
+  // Tarihçe: Faz 3'te face-swap (`nano-banana/edit`) target image'a
+  // bağımlıydı — pixel-perfect kopya döndürdü, identity transferi
+  // hiç yapmadı. Faz 4'te bu yol tamamen değiştirildi.
+  if (selfieDataUri) {
+    const zodiacObj = findZodiac(zodiac);
+    if (zodiacObj) {
+      let canvasImageDataUri: string | undefined;
+      if (canvas?.src) {
+        try {
+          const origin = new URL(req.url).origin;
+          const canvasUrl = new URL(canvas.src, origin).href;
+          const cRes = await fetch(canvasUrl);
+          if (cRes.ok) {
+            const cBuf = new Uint8Array(await cRes.arrayBuffer());
+            const cMime =
+              cRes.headers.get("content-type") ?? "image/jpeg";
+            canvasImageDataUri = `data:${cMime};base64,${Buffer.from(
+              cBuf,
+            ).toString("base64")}`;
+          }
+        } catch (err) {
+          console.warn(
+            `[play.render] canvas fetch failed → identity will use text-only path. ` +
+              `canvas=${canvas.id} err=${
+                err instanceof Error ? err.message : String(err)
+              }`,
+          );
+        }
+      }
+      identityReferences = {
+        selfieDataUri,
+        zodiac: zodiacObj,
+        canvas, // null OK — pure text-to-image yoluna düşer
+        canvasImageDataUri,
+      };
+    }
   }
 
-  if (outfit && !faceSwapReferences) {
+  if (outfit && !identityReferences) {
     const bareCacheKey = lookCacheKey(
       archetype,
       zodiac,
@@ -535,7 +628,7 @@ export async function POST(req: Request) {
       cacheKey,
       editReferences,
       vtonReferences,
-      faceSwapReferences,
+      identityReferences,
     });
   } catch (err) {
     // Surface the upstream message in the server log so we can

@@ -4,8 +4,20 @@ import Link from "next/link";
 import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import type { AvatarConfig } from "@/types/avatar";
 import { DEFAULT_AVATAR } from "@/types/avatar";
-import { saveAvatarConfig, loadAvatarConfig } from "@/lib/avatar-storage";
+import {
+  saveAvatarConfig,
+  loadAvatarConfig,
+  notifyAvatarConfigChanged,
+  saveAvatarBodyId,
+  loadAvatarBodyId,
+} from "@/lib/avatar-storage";
+import {
+  CAELINUS_BODY_LIBRARY,
+  DEFAULT_BODY_ID,
+  getBody,
+} from "@/lib/avatar-bodies";
 import AvatarSliders from "@/components/shop/AvatarSliders";
+import BodyPicker from "@/components/shop/BodyPicker";
 import { FaceUpload } from "@/components/shop/FaceUpload";
 import type { FaceUploadResult } from "@/lib/services";
 import { cropFaceFromUrl, type CropResult } from "@/lib/face-crop";
@@ -19,6 +31,8 @@ import {
 const AvatarConfigurator = lazy(
   () => import("@/components/shop/AvatarConfigurator")
 );
+
+void CAELINUS_BODY_LIBRARY; // tree-shake guard — registry referans
 
 type FaceState = "idle" | "detecting" | "applied" | "error";
 
@@ -43,6 +57,10 @@ export default function AvatarPage() {
   const [deformStrength, setDeformStrength] = useState(1);
   const [comparing, setComparing] = useState(false);
   const [modelCaps, setModelCaps] = useState<ModelCapabilities | null>(null);
+
+  // Caelinus body library — kullanıcının seçtiği base mesh
+  const [bodyId, setBodyId] = useState<string>(DEFAULT_BODY_ID);
+  const selectedBody = useMemo(() => getBody(bodyId), [bodyId]);
 
   const handleCapabilities = useCallback((caps: ModelCapabilities) => {
     setModelCaps(caps);
@@ -70,6 +88,17 @@ export default function AvatarPage() {
       const storedMetrics = localStorage.getItem(METRICS_KEY);
       if (storedMetrics) setFaceMetrics(JSON.parse(storedMetrics));
     } catch { /* corrupted storage */ }
+
+    // Body library — kullanıcı önceden hangi mesh'i seçmişse onu yükle
+    const storedBodyId = loadAvatarBodyId();
+    if (storedBodyId) setBodyId(storedBodyId);
+  }, []);
+
+  const handleBodySelect = useCallback((newBodyId: string) => {
+    setBodyId(newBodyId);
+    saveAvatarBodyId(newBodyId);
+    // body değiştiği için diğer sahneler (TryOnSection) bilsin
+    notifyAvatarConfigChanged();
   }, []);
 
   const handleChange = useCallback((cfg: AvatarConfig) => {
@@ -84,6 +113,7 @@ export default function AvatarPage() {
 
   const handleSave = useCallback(() => {
     saveAvatarConfig(config);
+    notifyAvatarConfigChanged();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }, [config]);
@@ -169,6 +199,9 @@ export default function AvatarPage() {
             Bedenini tanimla, yuzunu yukle, kimligini olustur.
           </p>
         </section>
+
+        {/* ── Caelinus Body Library — kendi avaturn'ümüz ── */}
+        <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
 
         <div className="avcfg-layout">
           {/* LEFT: sliders + face */}
@@ -414,8 +447,16 @@ export default function AvatarPage() {
             >
               <AvatarConfigurator
                 config={config}
-                faceTextureUrl={faceTextureUrl}
-                faceDeform={faceDeform}
+                avatarUrl={selectedBody.url}
+                // External textured mesh ise face decal/deform'u atla
+                // (mesh kendi yüzüyle gelir; Caelinus default bald olduğunda
+                // selfie face decal anlamlı olur).
+                faceTextureUrl={
+                  selectedBody.supportsSkinToneOverride ? faceTextureUrl : null
+                }
+                faceDeform={
+                  selectedBody.supportsSkinToneOverride ? faceDeform : null
+                }
                 onCapabilities={handleCapabilities}
               />
             </Suspense>
@@ -434,6 +475,7 @@ export default function AvatarPage() {
           </div>
         </div>
       </div>
+
     </main>
   );
 }

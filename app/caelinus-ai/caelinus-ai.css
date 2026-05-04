@@ -1,0 +1,1952 @@
+/* ─────────────────────────────────────────────────────────
+   CAELINUS AI — luxury fashion-tech (black / gold / nude)
+
+   Palet:
+     Mürekkep    #0a0806
+     Kömür       #15110d
+     Altın       #caa56a
+     Altın açık  #e8c889
+     Nude        #d4ad8a
+     Krem        #f4e7d0
+     Vurgu       #f5d97a
+     Gri         #a59c8e
+   ───────────────────────────────────────────────────────── */
+
+.cai-shell {
+  --cai-ink: #0a0806;
+  --cai-coal: #15110d;
+  --cai-stone: #1f1813;
+  --cai-gold: #caa56a;
+  --cai-gold-soft: #e8c889;
+  --cai-gold-glow: #f5d97a;
+  --cai-nude: #d4ad8a;
+  --cai-nude-soft: #ead0a8;
+  --cai-cream: #f4e7d0;
+  --cai-grey: #a59c8e;
+  --cai-line: rgba(202, 165, 106, 0.2);
+  --cai-line-strong: rgba(202, 165, 106, 0.45);
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--cai-ink);
+  color: var(--cai-cream);
+  font-feature-settings: "ss01", "ss02";
+  letter-spacing: 0.005em;
+  overflow-x: hidden;
+}
+
+/* zemin film grain + altın ışık halkası */
+.cai-shell-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cai-shell-bg-grain {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 35%, rgba(245, 217, 122, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 75% 65%, rgba(212, 173, 138, 0.03) 0%, transparent 50%);
+  mix-blend-mode: overlay;
+}
+
+.cai-shell-bg-glow {
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  height: 80vw;
+  max-width: 1200px;
+  max-height: 1200px;
+  background:
+    radial-gradient(circle, rgba(202, 165, 106, 0.10) 0%, transparent 65%);
+  filter: blur(40px);
+}
+
+/* ── Header ── */
+
+.cai-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 36px;
+  border-bottom: 1px solid var(--cai-line);
+  background: linear-gradient(180deg, rgba(10, 8, 6, 0.92) 0%, rgba(10, 8, 6, 0.5) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.cai-header-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--cai-cream);
+}
+
+.cai-header-mark-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--cai-gold);
+  color: var(--cai-gold);
+  font-size: 14px;
+}
+
+.cai-header-mark-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--cai-cream);
+}
+
+.cai-header-nav {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.cai-header-link {
+  font-size: 11.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cai-grey);
+  padding: 6px 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.cai-header-link:hover {
+  color: var(--cai-gold-soft);
+  border-bottom-color: var(--cai-gold);
+}
+
+.cai-header-link--ghost {
+  color: var(--cai-nude);
+}
+
+/* ── Main + page ── */
+
+.cai-main {
+  position: relative;
+  z-index: 1;
+  padding: 0 36px;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+.cai-page {
+  padding: 36px 0 72px;
+}
+
+.cai-hero {
+  text-align: center;
+  margin: 24px auto 36px;
+  max-width: 760px;
+}
+
+.cai-hero--narrow {
+  max-width: 620px;
+}
+
+.cai-hero-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.cai-hero-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--cai-cream);
+  margin: 0 0 14px;
+}
+
+.cai-hero-title em {
+  font-style: italic;
+  color: var(--cai-gold-soft);
+}
+
+.cai-hero-sub {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--cai-grey);
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+/* ── Avatar page grid ── */
+
+.cai-avatar-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr 460px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .cai-avatar-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cai-col--preview {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .cai-avatar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cai-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 22px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.6) 0%, rgba(15, 12, 10, 0.7) 100%);
+  border: 1px solid var(--cai-line);
+}
+
+.cai-col-heading {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cai-gold-soft);
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cai-line);
+}
+
+/* ── LuxButton ── */
+
+.lux-btn {
+  appearance: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.lux-btn--md {
+  font-size: 11.5px;
+  padding: 12px 22px;
+}
+
+.lux-btn--lg {
+  font-size: 13px;
+  padding: 16px 32px;
+}
+
+.lux-btn--gold {
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.24) inset,
+    0 16px 40px -16px rgba(202, 165, 106, 0.6);
+}
+.lux-btn--gold:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.38) inset,
+    0 22px 50px -18px rgba(245, 217, 122, 0.8);
+}
+
+.lux-btn--nude {
+  background: linear-gradient(180deg, var(--cai-nude-soft) 0%, var(--cai-nude) 100%);
+  color: #2a1c10;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.lux-btn--nude:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.lux-btn--ghost {
+  background: transparent;
+  color: var(--cai-gold-soft);
+  border-color: var(--cai-gold);
+}
+.lux-btn--ghost:hover:not(:disabled) {
+  background: rgba(202, 165, 106, 0.08);
+  border-color: var(--cai-gold-glow);
+  color: var(--cai-gold-glow);
+}
+
+.lux-btn:disabled,
+.lux-btn.is-loading {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lux-btn-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: lux-spin 0.7s linear infinite;
+}
+
+@keyframes lux-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Selfie capture ── */
+
+.selfie-capture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selfie-file-input {
+  display: none;
+}
+
+.selfie-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 22px;
+  border-radius: 14px;
+  border: 1.5px dashed var(--cai-line-strong);
+  background: rgba(10, 8, 6, 0.5);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.selfie-dropzone:hover,
+.selfie-dropzone.is-over {
+  border-color: var(--cai-gold);
+  background: rgba(202, 165, 106, 0.05);
+}
+
+.selfie-dropzone-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cai-gold);
+  color: var(--cai-gold);
+  font-size: 18px;
+}
+
+.selfie-dropzone-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--cai-cream);
+}
+
+.selfie-dropzone-sub {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cai-grey);
+  margin: 0;
+  max-width: 280px;
+}
+
+.selfie-dropzone-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.selfie-webcam {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selfie-webcam-video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background: var(--cai-coal);
+  object-fit: cover;
+  border: 1px solid var(--cai-line);
+}
+
+.selfie-webcam-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.selfie-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.selfie-preview-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--cai-line-strong);
+}
+
+.selfie-preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.selfie-error {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #f4d4ce;
+  background: rgba(220, 70, 70, 0.12);
+  border: 1px solid rgba(220, 70, 70, 0.35);
+  border-radius: 10px;
+}
+
+.cai-selfie-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+  padding-top: 4px;
+  border-top: 1px dashed var(--cai-line);
+}
+
+/* ── Style customizer ── */
+
+.style-customizer {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.style-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--cai-line);
+}
+
+.style-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.style-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.style-section-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  color: var(--cai-cream);
+  margin: 0;
+}
+
+.style-section-sub {
+  font-size: 12px;
+  color: var(--cai-grey);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.style-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.style-row-label {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-gold-soft);
+  font-weight: 600;
+}
+
+.style-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.style-chip {
+  appearance: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cai-line);
+  background: rgba(15, 12, 10, 0.6);
+  color: var(--cai-cream);
+  cursor: pointer;
+  transition: border-color 0.16s, background 0.16s, color 0.16s;
+}
+
+.style-chip:hover {
+  border-color: var(--cai-line-strong);
+}
+
+.style-chip.is-active {
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+  border-color: var(--cai-gold);
+}
+
+.style-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 32px);
+  gap: 8px;
+}
+
+.style-swatches--skin {
+  grid-template-columns: repeat(auto-fit, 38px);
+}
+
+.style-swatch {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.16s, border-color 0.16s, box-shadow 0.16s;
+  padding: 0;
+}
+
+.style-swatches--skin .style-swatch {
+  width: 38px;
+  height: 38px;
+}
+
+.style-swatch:hover {
+  transform: scale(1.08);
+}
+
+.style-swatch.is-active {
+  border-color: var(--cai-gold);
+  box-shadow: 0 0 0 2px rgba(202, 165, 106, 0.25);
+}
+
+.style-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.style-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--cai-line);
+  background: rgba(15, 12, 10, 0.6);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s, background 0.16s;
+}
+
+.style-card:hover {
+  border-color: var(--cai-line-strong);
+}
+
+.style-card.is-active {
+  border-color: var(--cai-gold);
+  background: linear-gradient(135deg, rgba(202, 165, 106, 0.16) 0%, rgba(202, 165, 106, 0.06) 100%);
+}
+
+.style-card-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--cai-cream);
+}
+
+.style-card-tagline {
+  font-size: 11px;
+  color: var(--cai-grey);
+  line-height: 1.45;
+}
+
+/* ── 3D canvas ── */
+
+.cai-canvas {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0a0806;
+  border: 1px solid var(--cai-line-strong);
+  box-shadow: 0 24px 50px -28px rgba(202, 165, 106, 0.4);
+}
+
+.cai-canvas-fallback {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  background: var(--cai-coal);
+  border: 1px solid var(--cai-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-size: 11.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.cai-canvas-pulse {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(202, 165, 106, 0.5) 0%, transparent 70%);
+  animation: cai-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes cai-pulse {
+  0%, 100% { transform: scale(0.7); opacity: 0.4; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Reading + progress ── */
+
+.cai-reading {
+  margin: 0;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(202, 165, 106, 0.1) 0%, rgba(15, 12, 10, 0.5) 100%);
+  border: 1px solid var(--cai-line);
+  position: relative;
+}
+
+.cai-reading-mark {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: var(--cai-gold);
+  font-size: 14px;
+}
+
+.cai-reading p {
+  margin: 0 0 8px;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 17px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--cai-cream);
+}
+
+.cai-reading-frequency {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cai-gold-soft);
+  margin-top: 4px;
+}
+
+.cai-reading-frequency strong {
+  color: var(--cai-gold-glow);
+  font-weight: 500;
+}
+
+.cai-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(15, 12, 10, 0.7);
+  border: 1px solid var(--cai-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.cai-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--cai-gold) 0%, var(--cai-gold-glow) 100%);
+  transition: width 0.4s ease;
+}
+
+.cai-progress-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cai-progress-phase {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-progress-text {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 15px;
+  font-style: italic;
+  color: var(--cai-cream);
+}
+
+.cai-error {
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: #f4d4ce;
+  background: rgba(220, 70, 70, 0.12);
+  border: 1px solid rgba(220, 70, 70, 0.35);
+  border-radius: 10px;
+}
+
+.cai-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.cai-cta-stack .lux-btn {
+  width: 100%;
+}
+
+.cai-cta-link {
+  text-decoration: none;
+  width: 100%;
+}
+
+.cai-cta-link .lux-btn {
+  width: 100%;
+}
+
+.cai-fineprint {
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: var(--cai-grey);
+  line-height: 1.5;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ── Try-on page ── */
+
+.cai-tryon-empty {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cai-tryon-empty-card {
+  position: relative;
+  max-width: 540px;
+  padding: 42px 36px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.85) 0%, rgba(15, 12, 10, 0.92) 100%);
+  border: 1px solid var(--cai-line-strong);
+  box-shadow: 0 40px 80px -28px rgba(202, 165, 106, 0.4);
+  text-align: center;
+  overflow: hidden;
+}
+
+.cai-tryon-empty-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 50% 30%, rgba(202, 165, 106, 0.25) 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.cai-tryon-empty-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cai-tryon-empty-kicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.cai-tryon-empty-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  color: var(--cai-cream);
+  margin: 0 0 12px;
+}
+
+.cai-tryon-empty-sub {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--cai-grey);
+  margin: 0 0 22px;
+}
+
+.cai-tryon-empty-cta {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.cai-tryon-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .cai-tryon-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cai-tryon-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cai-tryon-stage .cai-canvas {
+  aspect-ratio: 4 / 5;
+}
+
+.cai-tryon-stage-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(15, 12, 10, 0.7);
+  border: 1px solid var(--cai-line);
+  font-size: 12px;
+}
+
+.cai-tryon-stage-frequency {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--cai-gold-soft);
+}
+
+.cai-tryon-stage-trying {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cai-cream);
+}
+
+.cai-tryon-stage-trying-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cai-gold-glow);
+  box-shadow: 0 0 10px var(--cai-gold-glow);
+}
+
+.cai-tryon-stage-trying--idle {
+  color: var(--cai-grey);
+  font-style: italic;
+}
+
+.cai-tryon-edit-link {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  text-decoration: none;
+  align-self: flex-start;
+}
+.cai-tryon-edit-link:hover {
+  color: var(--cai-gold-glow);
+}
+
+.cai-tryon-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cai-tryon-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cai-tryon-filter {
+  appearance: none;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cai-line);
+  background: transparent;
+  color: var(--cai-grey);
+  cursor: pointer;
+  transition: color 0.16s, border-color 0.16s, background 0.16s;
+}
+
+.cai-tryon-filter:hover {
+  color: var(--cai-cream);
+  border-color: var(--cai-line-strong);
+}
+
+.cai-tryon-filter.is-active {
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+  border-color: var(--cai-gold);
+}
+
+.cai-tryon-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.cai-tryon-empty-cat {
+  padding: 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--cai-grey);
+  border-radius: 12px;
+  border: 1px dashed var(--cai-line);
+}
+
+/* ── Product card ── */
+
+.tryon-product-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.6) 0%, rgba(15, 12, 10, 0.7) 100%);
+  border: 1px solid var(--cai-line);
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tryon-product-card:hover {
+  border-color: var(--cai-line-strong);
+  transform: translateY(-2px);
+}
+
+.tryon-product-card.is-trying {
+  border-color: var(--cai-gold);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.25) inset,
+    0 24px 50px -22px rgba(245, 217, 122, 0.45);
+}
+
+.tryon-product-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: var(--cai-coal);
+}
+
+.tryon-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tryon-product-trying-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+}
+
+.tryon-product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 14px 16px;
+}
+
+.tryon-product-frequency {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.tryon-product-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--cai-cream);
+  margin: 0;
+}
+
+.tryon-product-story {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--cai-grey);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tryon-product-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--cai-line);
+}
+
+.tryon-product-price {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  color: var(--cai-gold-soft);
+}
+
+.tryon-product-designer {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.tryon-product-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tryon-product-actions .lux-btn {
+  flex: 1;
+  font-size: 10.5px;
+  padding: 10px 12px;
+  letter-spacing: 0.14em;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ANIMATIONS — luxury motion language
+   ───────────────────────────────────────────────────────── */
+
+@keyframes cai-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cai-fade-up {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cai-glow-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+    filter: blur(20px);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+    filter: blur(28px);
+  }
+}
+
+@keyframes cai-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes cai-rim-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes cai-tag-in {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.cai-fade-in {
+  animation: cai-fade-in 0.5s ease-out both;
+}
+
+.cai-fade-up {
+  animation: cai-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEPPER — 3 adımlı flow göstergesi
+   ───────────────────────────────────────────────────────── */
+
+.cai-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 8px auto 32px;
+  max-width: 720px;
+}
+
+.cai-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--cai-line);
+  background: rgba(15, 12, 10, 0.6);
+  color: var(--cai-grey);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.cai-step.is-active {
+  color: var(--cai-ink);
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  border-color: var(--cai-gold);
+  box-shadow: 0 0 0 1px rgba(245, 217, 122, 0.25) inset, 0 14px 30px -16px rgba(245, 217, 122, 0.6);
+}
+
+.cai-step.is-done {
+  color: var(--cai-gold-soft);
+  border-color: var(--cai-line-strong);
+}
+
+.cai-step-num {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 13px;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+.cai-step-line {
+  flex: 0 1 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cai-line) 0%, var(--cai-line-strong) 100%);
+}
+
+/* ─────────────────────────────────────────────────────────
+   COMPOSE PAGE — CTA illustration (3 nested rings)
+   ───────────────────────────────────────────────────────── */
+
+.cai-col--cta {
+  align-items: stretch;
+}
+
+.cai-cta-illustration {
+  position: relative;
+  height: 200px;
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cai-cta-illustration-ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 1px solid var(--cai-gold);
+  opacity: 0.35;
+  animation: cai-rim-spin 18s linear infinite;
+}
+
+.cai-cta-illustration-ring--mid {
+  width: 130px;
+  height: 130px;
+  opacity: 0.55;
+  border-color: var(--cai-gold-soft);
+  animation-direction: reverse;
+  animation-duration: 12s;
+}
+
+.cai-cta-illustration-ring--inner {
+  width: 80px;
+  height: 80px;
+  opacity: 0.85;
+  border-color: var(--cai-gold-glow);
+  border-style: dashed;
+  animation-duration: 8s;
+}
+
+.cai-cta-illustration-glyph {
+  position: relative;
+  z-index: 1;
+  font-size: 28px;
+  color: var(--cai-gold-glow);
+  text-shadow: 0 0 24px rgba(245, 217, 122, 0.7);
+}
+
+.cai-cta-explainer {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cai-grey);
+  margin: 0 0 4px;
+}
+
+.cai-cta-explainer strong {
+  color: var(--cai-gold-soft);
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────
+   AVATAR MATCH GRID — 6 kart + recommended highlight
+   ───────────────────────────────────────────────────────── */
+
+.cai-match-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.cai-match-grid-header {
+  text-align: center;
+}
+
+.cai-match-grid-kicker {
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cai-match-grid-title {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  color: var(--cai-cream);
+  margin: 0 0 8px;
+}
+
+.cai-match-grid-sub {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cai-grey);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cai-match-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.cai-match-card {
+  --energy-color: #caa56a;
+  appearance: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0;
+  font-family: inherit;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.7) 0%, rgba(15, 12, 10, 0.85) 100%);
+  border: 1px solid var(--cai-line);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  animation: cai-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cai-match-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--cai-line-strong);
+  box-shadow: 0 24px 50px -28px rgba(202, 165, 106, 0.35);
+}
+
+.cai-match-card.is-recommended {
+  border-color: var(--cai-gold);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.25) inset,
+    0 28px 60px -24px rgba(245, 217, 122, 0.45);
+}
+
+.cai-match-card.is-selected {
+  border-color: var(--cai-gold-glow);
+  box-shadow:
+    0 0 0 2px rgba(245, 217, 122, 0.45) inset,
+    0 32px 70px -22px rgba(245, 217, 122, 0.6);
+}
+
+.cai-match-card-recommend {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+  background-size: 200% 100%;
+  animation: cai-shimmer 4.5s ease-in-out infinite;
+}
+
+.cai-match-card-recommend-glyph {
+  font-size: 11px;
+}
+
+.cai-match-card-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--cai-coal);
+  border-bottom: 1px solid var(--cai-line);
+}
+
+.cai-match-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.cai-match-card-thumb-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(202, 165, 106, 0.18) 0%, transparent 70%),
+    linear-gradient(180deg, var(--cai-coal) 0%, var(--cai-ink) 100%);
+}
+
+.cai-match-card-thumb-mono {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 64px;
+  letter-spacing: 0.04em;
+  color: var(--cai-gold-soft);
+  opacity: 0.85;
+}
+
+.cai-match-card-thumb-glyph {
+  font-size: 16px;
+  color: var(--energy-color);
+  letter-spacing: 0.2em;
+}
+
+.cai-match-card-aura {
+  position: absolute;
+  inset: -20% -20% auto -20%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 80%, var(--energy-color) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.cai-match-card:hover .cai-match-card-aura,
+.cai-match-card.is-recommended .cai-match-card-aura,
+.cai-match-card.is-selected .cai-match-card-aura {
+  opacity: 0.35;
+}
+
+.cai-match-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 16px 18px;
+}
+
+.cai-match-card-energy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.cai-match-card-energy-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.cai-match-card-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--cai-cream);
+  margin: 0;
+}
+
+.cai-match-card-subtitle {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cai-gold-soft);
+  font-weight: 600;
+}
+
+.cai-match-card-mood {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cai-grey);
+  margin: 4px 0 0;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cai-match-card-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--cai-line);
+}
+
+.cai-match-card-score-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(202, 165, 106, 0.15);
+  overflow: hidden;
+}
+
+.cai-match-card-score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--energy-color) 0%, var(--cai-gold-glow) 100%);
+  border-radius: 999px;
+  transition: width 0.6s ease-out;
+}
+
+.cai-match-card-score-num {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--cai-gold-soft);
+  letter-spacing: 0.04em;
+}
+
+.cai-match-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.cai-progress--floating {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  min-width: 320px;
+  background: rgba(15, 12, 10, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--cai-line-strong);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+.cai-error--center {
+  text-align: center;
+  margin: 24px auto;
+  max-width: 420px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   READING CARD — Style Identity + Energy + Mood + Reading
+   ───────────────────────────────────────────────────────── */
+
+.cai-reading-card {
+  --energy-color: #caa56a;
+  position: relative;
+  padding: 28px 26px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.85) 0%, rgba(15, 12, 10, 0.92) 100%);
+  border: 1px solid var(--cai-line-strong);
+  overflow: hidden;
+}
+
+.cai-reading-card-glow {
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, var(--energy-color) 0%, transparent 65%);
+  opacity: 0.18;
+  filter: blur(40px);
+  animation: cai-glow-pulse 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.cai-reading-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.cai-reading-card-frequency {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-reading-card-identity {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 400;
+  color: var(--cai-cream);
+  margin: 0;
+  line-height: 1.05;
+  background: linear-gradient(110deg, var(--cai-cream) 0%, var(--cai-gold-glow) 50%, var(--cai-cream) 100%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: cai-shimmer 6s ease-in-out infinite;
+}
+
+.cai-reading-card-subtitle {
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cai-gold-soft);
+}
+
+.cai-reading-card-energy {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(15, 12, 10, 0.6);
+  border: 1px solid var(--cai-line);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cai-reading-card-energy-glyph {
+  font-size: 30px;
+  line-height: 1;
+  text-shadow: 0 0 20px currentColor;
+  animation: cai-glow-pulse 3.5s ease-in-out infinite;
+}
+
+.cai-reading-card-energy-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cai-reading-card-energy-label {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.cai-reading-card-energy-name {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 19px;
+  letter-spacing: 0.02em;
+}
+
+.cai-reading-card-mood {
+  margin: 0 0 14px;
+  padding: 0 0 14px;
+  border-bottom: 1px dashed var(--cai-line);
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--cai-cream);
+  position: relative;
+}
+
+.cai-reading-card-paragraph {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.72;
+  color: var(--cai-grey);
+  position: relative;
+}
+
+.cai-reading-card--compact {
+  padding: 18px 20px;
+}
+
+.cai-reading-card--compact .cai-reading-card-mood {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  font-size: 15px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FINALIZED — Reading + 3D side-by-side
+   ───────────────────────────────────────────────────────── */
+
+.cai-finalized {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.cai-finalized-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .cai-finalized-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cai-finalized-reading {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cai-finalized-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cai-finalized-actions .lux-btn {
+  width: 100%;
+}
+
+.cai-finalized-stage {
+  position: relative;
+}
+
+/* ─────────────────────────────────────────────────────────
+   3D CANVAS — try-on aura rim + tag overlay
+   ───────────────────────────────────────────────────────── */
+
+.cai-canvas {
+  --accent: #caa56a;
+  position: relative;
+}
+
+.cai-canvas-rim {
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0%,
+      var(--accent) 18%,
+      transparent 38%,
+      var(--accent) 62%,
+      transparent 82%,
+      var(--accent) 100%
+    );
+  opacity: 0;
+  filter: blur(6px);
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.cai-canvas.is-trying {
+  box-shadow:
+    0 0 0 1px rgba(202, 165, 106, 0.4) inset,
+    0 32px 70px -22px var(--accent);
+  transition: box-shadow 0.45s ease;
+}
+
+.cai-canvas.is-trying .cai-canvas-rim {
+  opacity: 0.55;
+  animation: cai-rim-spin 12s linear infinite, cai-glow-pulse 3s ease-in-out infinite;
+}
+
+.cai-canvas-tryon-tag {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(15, 12, 10, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--accent);
+  box-shadow: 0 8px 24px -8px var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-cream);
+  animation: cai-tag-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cai-canvas-tryon-tag-glyph {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.cai-canvas-tryon-tag-text strong {
+  color: var(--accent);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+/* ─────────────────────────────────────────────────────────
+   TRY-ON STAGE — mood banner + reading compact + smooth meta
+   ───────────────────────────────────────────────────────── */
+
+.cai-tryon-stage-meta {
+  transition: opacity 0.32s ease;
+}
+
+.cai-tryon-stage-meta.is-transitioning {
+  opacity: 0.55;
+}
+
+.cai-tryon-mood-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(202, 165, 106, 0.16) 0%, rgba(15, 12, 10, 0.65) 100%);
+  border: 1px solid var(--cai-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.cai-tryon-mood-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 217, 122, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: cai-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.cai-tryon-mood-glyph {
+  font-size: 18px;
+  color: var(--cai-gold-glow);
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.cai-tryon-mood-banner p {
+  margin: 0;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--cai-cream);
+  position: relative;
+}
+
+.cai-tryon-reading-compact {
+  margin-top: 4px;
+}
+
+.cai-tryon-variant-pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cai-gold-glow);
+  background: rgba(245, 217, 122, 0.08);
+  border: 1px solid var(--cai-line-strong);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   3D CANVAS — swap veil (mesh değişirken kısa shimmer overlay)
+   ───────────────────────────────────────────────────────── */
+
+.cai-canvas-swap-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.cai-canvas.is-swapping .cai-canvas-swap-veil {
+  opacity: 1;
+}
+
+.cai-canvas-swap-shimmer {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(10, 8, 6, 0.85) 0%, rgba(10, 8, 6, 0.35) 70%, transparent 100%),
+    linear-gradient(110deg, transparent 0%, rgba(245, 217, 122, 0.25) 50%, transparent 100%);
+  background-size: 100% 100%, 200% 100%;
+  animation: cai-shimmer 1s ease-in-out infinite;
+}
+
+.cai-canvas-swap-text {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--cai-gold-glow);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 14px rgba(245, 217, 122, 0.6);
+  animation: cai-glow-pulse 1.2s ease-in-out infinite;
+}
+
+.cai-tryon-product-wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.cai-tryon-product-wrapper > * {
+  width: 100%;
+}
+
+/* ── Footer ── */
+
+.cai-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 36px;
+  border-top: 1px solid var(--cai-line);
+  margin-top: 40px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.cai-footer-line {
+  color: var(--cai-gold-soft);
+}
+
+.cai-footer-tech {
+  font-style: italic;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}

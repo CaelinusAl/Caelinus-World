@@ -74,8 +74,20 @@ const T = {
     storyTr: { tr: "Hikâyesi (Türkçe)", en: "Story (Turkish)" },
     storyEn: { tr: "Hikâyesi (English)", en: "Story (English)" },
     storyHint: {
-      tr: "Ürün sayfasında uzun anlatı için yer.",
-      en: "Long-form text on the item page.",
+      tr: "Ürün sayfasında uzun anlatı için yer. Yayına alabilmen için en az hikâye veya bir hikâye bölümü gerekir.",
+      en: "Long-form text on the item page. Required (or at least one story chapter) to publish.",
+    },
+    narrativeVideo: {
+      tr: "Hikâye videosu (URL)",
+      en: "Narrative video (URL)",
+    },
+    narrativeVideoHint: {
+      tr: "Ürün sayfasının başında oynayacak kısa video bağlantısı (mp4 veya YouTube/Vimeo). İsteğe bağlı.",
+      en: "Short video shown at the top of the product page (mp4 or YouTube/Vimeo). Optional.",
+    },
+    chaptersNote: {
+      tr: "Faz 2.1 — Hikâye bölümleri (köken, niyet, üretim) editörü buraya gelecek; şimdilik PDP varsayılan bölümleri gösterir.",
+      en: "Phase 2.1 — Story chapter editor (origin, intent, production) lands here; PDP shows default chapters in the meantime.",
     },
     intent: { tr: "Niyet / kullanım", en: "Intent / use" },
     intentHint: {
@@ -149,6 +161,9 @@ export default function ItemFormBody({ mode, atelier, item }: Props) {
     item?.price_amount ? formatMinorUnits(item.price_amount, "tr") : "",
   );
   const [status, setStatus] = useState<ItemStatus>(item?.status ?? "draft");
+  const [narrativeVideoUrl, setNarrativeVideoUrl] = useState(
+    item?.narrative_video_url ?? "",
+  );
 
   // 4 fixed image slots, seeded from existing item.images.
   const initialImages = useMemo(() => {
@@ -206,6 +221,7 @@ export default function ItemFormBody({ mode, atelier, item }: Props) {
       position: item?.position ?? 0,
       collection_id: item?.collection_id ?? null,
       frequency_hz: item?.frequency_hz ?? null,
+      narrative_video_url: narrativeVideoUrl.trim() || null,
     };
   }
 
@@ -257,6 +273,7 @@ export default function ItemFormBody({ mode, atelier, item }: Props) {
         position: payload.position,
         collection_id: payload.collection_id,
         frequency_hz: payload.frequency_hz,
+        narrative_video_url: payload.narrative_video_url,
       };
 
       if (mode === "create") {
@@ -564,6 +581,34 @@ export default function ItemFormBody({ mode, atelier, item }: Props) {
               rows={5}
             />
           </label>
+
+          {/* ── narrative video (Faz 2) ──────────────────────── */}
+          <label className="atelier-field">
+            <span className="atelier-field-label">
+              {T.fields.narrativeVideo[L]}
+            </span>
+            <input
+              className="atelier-input"
+              type="url"
+              inputMode="url"
+              placeholder="https://…"
+              value={narrativeVideoUrl}
+              onChange={(e) => setNarrativeVideoUrl(e.target.value)}
+              maxLength={500}
+            />
+            <p className="atelier-field-hint">
+              {T.fields.narrativeVideoHint[L]}
+            </p>
+            {errors.narrative_video_url ? (
+              <p className="atelier-field-error">
+                {errors.narrative_video_url}
+              </p>
+            ) : null}
+          </label>
+
+          <p className="atelier-field-hint" style={{ opacity: 0.7 }}>
+            {T.fields.chaptersNote[L]}
+          </p>
 
           {/* ── status ───────────────────────────────────────── */}
           <fieldset className="atelier-field atelier-status-field">

@@ -1,0 +1,1059 @@
+/**
+ * Avatar Studio — sayfa scope'lu stil.
+ *
+ * "Caelinus tanrıçası olarak kendi yüzünü dene." Tek odak: selfie
+ * yükle, burç seç, AI avatarını gör. Layout iki sütun (mobilde stack).
+ *
+ * Bu stiller globals.css'in nebula değişkenlerinden bağımsız tutuluyor;
+ * /avatar dışına sızmaz.
+ */
+
+.avatar-scene {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  color: rgba(245, 240, 255, 0.92);
+  background:
+    radial-gradient(circle at 15% 18%, rgba(150, 110, 230, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 78%, rgba(80, 140, 220, 0.14) 0%, transparent 50%),
+    #04060f;
+  padding: 96px 24px 96px;
+  overflow: hidden;
+}
+
+.avatar-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.avatar-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar-kicker {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.avatar-title {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: -0.005em;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(220, 200, 255, 0.85) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.avatar-sub {
+  font-size: 15px;
+  color: rgba(220, 215, 240, 0.78);
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+/* ── 2-column layout ──────────────────────────────────────── */
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 36px;
+  align-items: stretch;
+}
+
+@media (max-width: 920px) {
+  .avatar-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.avatar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.avatar-card {
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.avatar-card-step {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.avatar-card-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0;
+  color: #ffffff;
+}
+
+.avatar-card-hint {
+  font-size: 13px;
+  color: rgba(220, 215, 240, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Selfie picker ─────────────────────────────────────────── */
+
+.avatar-selfie-drop {
+  position: relative;
+  border-radius: 16px;
+  border: 1px dashed rgba(220, 200, 255, 0.3);
+  background: rgba(255, 255, 255, 0.02);
+  aspect-ratio: 1 / 1;
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.avatar-selfie-drop.has-selfie {
+  border-style: solid;
+  border-color: rgba(220, 200, 255, 0.5);
+}
+
+.avatar-selfie-drop.is-drag {
+  background: rgba(220, 200, 255, 0.08);
+  border-color: rgba(220, 200, 255, 0.7);
+}
+
+.avatar-selfie-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-selfie-glyph {
+  font-size: 42px;
+  color: rgba(220, 200, 255, 0.5);
+}
+
+.avatar-selfie-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avatar-btn {
+  appearance: none;
+  background: rgba(220, 200, 255, 0.12);
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  text-decoration: none;
+}
+
+.avatar-btn:hover:not(:disabled) {
+  background: rgba(220, 200, 255, 0.2);
+  border-color: rgba(220, 200, 255, 0.7);
+  transform: translateY(-1px);
+}
+
+.avatar-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.avatar-btn--ghost {
+  background: transparent;
+}
+
+.avatar-btn--primary {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.55), rgba(80, 140, 220, 0.55));
+  border-color: rgba(220, 200, 255, 0.7);
+}
+
+.avatar-privacy {
+  font-size: 12px;
+  color: rgba(220, 215, 240, 0.55);
+  line-height: 1.5;
+}
+
+.avatar-error {
+  font-size: 13px;
+  color: rgba(255, 180, 180, 0.95);
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 120, 120, 0.3);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin: 0;
+}
+
+/* ── Zodiac chips ──────────────────────────────────────────── */
+
+.avatar-zodiacs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+  gap: 8px;
+}
+
+.avatar-zodiac {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.14);
+  color: rgba(220, 215, 240, 0.85);
+  border-radius: 12px;
+  padding: 10px 6px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.avatar-zodiac:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(220, 200, 255, 0.32);
+  transform: translateY(-1px);
+}
+
+.avatar-zodiac.active {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.32), rgba(80, 140, 220, 0.32));
+  border-color: rgba(220, 200, 255, 0.7);
+  color: #ffffff;
+}
+
+.avatar-zodiac-glyph {
+  font-size: 18px;
+}
+
+/* ── Generate / Result ─────────────────────────────────────── */
+
+.avatar-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar-result-card {
+  flex: 1;
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(220, 200, 255, 0.16);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 420px;
+}
+
+.avatar-result-frame {
+  position: relative;
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(220, 200, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+}
+
+.avatar-result-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-result-placeholder {
+  font-size: 13px;
+  color: rgba(220, 215, 240, 0.5);
+  text-align: center;
+  padding: 24px;
+  line-height: 1.6;
+}
+
+.avatar-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(220, 200, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: avatar-shimmer 1.6s linear infinite;
+}
+
+@keyframes avatar-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.avatar-result-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+}
+
+.avatar-saved-banner {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(150, 220, 180, 0.9);
+  border: 1px solid rgba(150, 220, 180, 0.4);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(80, 140, 100, 0.08);
+}
+
+.avatar-input {
+  display: none;
+}
+
+.avatar-back-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.avatar-back-link {
+  font-size: 12px;
+  color: rgba(220, 200, 255, 0.7);
+  text-decoration: none;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.avatar-back-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* ── Canvas chip seçici (Wardrobe Faz B) ────────────────────────
+ * 3 tarafsız tuvalin (silk/bodysuit/veil) chip görüntüleri.
+ * Mobilde stack (3 satır), masaüstünde 3 sütun. Aktif chip
+ * mor halo + hafif scale; recommended badge inline. */
+
+.avatar-canvases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.avatar-canvas-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(15, 12, 28, 0.55);
+  border: 1px solid rgba(220, 200, 255, 0.16);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.avatar-canvas-chip:hover {
+  border-color: rgba(220, 200, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.avatar-canvas-chip.active {
+  border-color: rgba(220, 200, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(220, 200, 255, 0.6),
+    0 12px 28px rgba(150, 110, 230, 0.32);
+  background: rgba(28, 18, 52, 0.7);
+}
+
+.avatar-canvas-thumb {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(220, 200, 255, 0.12);
+  background: #0a0814;
+}
+
+.avatar-canvas-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px 4px;
+}
+
+.avatar-canvas-label {
+  font-size: 13px;
+  color: rgba(245, 240, 255, 0.96);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.avatar-canvas-badge {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(150, 220, 180, 0.95);
+  background: rgba(80, 180, 140, 0.16);
+  border: 1px solid rgba(150, 220, 180, 0.4);
+  padding: 2px 6px;
+  border-radius: 999px;
+  line-height: 1.3;
+}
+
+.avatar-canvas-hint {
+  font-size: 11px;
+  color: rgba(220, 215, 240, 0.6);
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .avatar-canvases {
+    grid-template-columns: 1fr;
+  }
+  .avatar-canvas-chip {
+    flex-direction: row;
+    align-items: center;
+  }
+  .avatar-canvas-thumb {
+    width: 92px;
+    flex-shrink: 0;
+    aspect-ratio: 2 / 3;
+  }
+  .avatar-canvas-meta {
+    padding: 4px 0;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   DEPRECATION BANNER — 3D mesh primary path'e yönlendirme
+   ════════════════════════════════════════════════════════════ */
+
+.avatar-deprecation-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 0 auto 28px;
+  max-width: 920px;
+  padding: 14px 22px;
+  border-radius: 18px;
+  background: linear-gradient(
+    120deg,
+    rgba(150, 110, 230, 0.12) 0%,
+    rgba(80, 140, 220, 0.1) 100%
+  );
+  border: 1px solid rgba(220, 200, 255, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.avatar-deprecation-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.avatar-deprecation-text strong {
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: #f1e8d3;
+  font-weight: 500;
+}
+
+.avatar-deprecation-text span {
+  font-size: 12px;
+  color: rgba(245, 240, 255, 0.62);
+  letter-spacing: 0.01em;
+}
+
+.avatar-deprecation-cta {
+  font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #f1e8d3;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(230, 192, 137, 0.55);
+  background: rgba(11, 10, 31, 0.5);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.avatar-deprecation-cta:hover {
+  background: rgba(230, 192, 137, 0.16);
+  border-color: rgba(230, 192, 137, 0.85);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .avatar-deprecation-banner {
+    padding: 12px 16px;
+    border-radius: 14px;
+  }
+  .avatar-deprecation-cta {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   TAB BAR — "Kendi Yarat" vs "Selfie ile"
+   ════════════════════════════════════════════════════════════ */
+
+.avatar-tabbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.avatar-tabbar-btn {
+  background: rgba(20, 16, 32, 0.55);
+  border: 1px solid rgba(180, 160, 230, 0.18);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  color: rgba(245, 240, 255, 0.85);
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms, transform 120ms;
+  text-align: left;
+}
+
+.avatar-tabbar-btn:hover {
+  border-color: rgba(220, 200, 255, 0.45);
+  background: rgba(36, 28, 56, 0.65);
+}
+
+.avatar-tabbar-btn.active {
+  border-color: rgba(220, 200, 255, 0.85);
+  background: linear-gradient(135deg, rgba(120, 80, 180, 0.32), rgba(40, 30, 70, 0.5));
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.25), 0 18px 60px rgba(120, 80, 180, 0.22);
+}
+
+.avatar-tabbar-label {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.avatar-tabbar-hint {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(190, 180, 220, 0.6);
+}
+
+@media (max-width: 720px) {
+  .avatar-tabbar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   AVATAR FLOW WRAPPER (inside tab bar)
+   ════════════════════════════════════════════════════════════ */
+
+.avatar-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AVATAR BUILDER — preview + control panel
+   ════════════════════════════════════════════════════════════ */
+
+.ab-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 1.5fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .ab-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Preview column (sticky on desktop) ─────────────────── */
+
+.ab-preview-col {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 920px) {
+  .ab-preview-col {
+    position: static;
+  }
+}
+
+.ab-preview-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(180, 160, 230, 0.22);
+  background: radial-gradient(ellipse at top, rgba(60, 40, 90, 0.55), rgba(8, 6, 15, 1));
+  box-shadow: 0 30px 80px -20px rgba(120, 80, 180, 0.35);
+}
+
+.ab-preview-frame::after {
+  /* Yumuşak iç vignette — portreyi merkeze çeker */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.ab-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ── Control panel ───────────────────────────────────────── */
+
+.ab-controls {
+  background: rgba(18, 14, 30, 0.55);
+  border: 1px solid rgba(180, 160, 230, 0.16);
+  border-radius: 22px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  backdrop-filter: blur(8px);
+}
+
+.ab-controls-title {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(245, 240, 255, 0.95);
+}
+
+.ab-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid rgba(180, 160, 230, 0.12);
+  padding-bottom: 12px;
+}
+
+.ab-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(220, 215, 240, 0.6);
+  padding: 8px 14px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+
+.ab-tab:hover {
+  color: rgba(245, 240, 255, 0.92);
+  border-color: rgba(180, 160, 230, 0.25);
+}
+
+.ab-tab.active {
+  background: linear-gradient(135deg, rgba(120, 80, 180, 0.45), rgba(80, 60, 140, 0.35));
+  border-color: rgba(220, 200, 255, 0.55);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.2);
+}
+
+.ab-section-label {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(190, 180, 220, 0.68);
+  margin: 8px 0 6px 0;
+}
+
+.ab-group-label {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.55);
+  margin: 12px 0 6px 0;
+}
+
+/* ── Swatch grid ─────────────────────────────────────────── */
+
+.ab-swatch-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ab-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 8px;
+}
+
+.ab-swatch {
+  background: rgba(20, 16, 32, 0.45);
+  border: 1px solid rgba(180, 160, 230, 0.14);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 140ms, transform 100ms, background 140ms;
+  color: rgba(220, 215, 240, 0.78);
+}
+
+.ab-swatch:hover {
+  border-color: rgba(220, 200, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.ab-swatch.active {
+  border-color: rgba(220, 200, 255, 0.85);
+  background: linear-gradient(180deg, rgba(120, 80, 180, 0.25), rgba(40, 30, 70, 0.4));
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.28);
+}
+
+.ab-swatch-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.18),
+    0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.ab-swatch-label {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  line-height: 1.2;
+  color: inherit;
+}
+
+/* ── Chip row & chip grid ────────────────────────────────── */
+
+.ab-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ab-chip {
+  background: rgba(20, 16, 32, 0.45);
+  border: 1px solid rgba(180, 160, 230, 0.18);
+  color: rgba(220, 215, 240, 0.85);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 140ms, background 140ms;
+}
+
+.ab-chip:hover {
+  border-color: rgba(220, 200, 255, 0.45);
+}
+
+.ab-chip.active {
+  background: linear-gradient(135deg, rgba(120, 80, 180, 0.45), rgba(80, 60, 140, 0.35));
+  border-color: rgba(220, 200, 255, 0.7);
+  color: #fff;
+}
+
+.ab-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.ab-chip-card {
+  background: rgba(20, 16, 32, 0.45);
+  border: 1px solid rgba(180, 160, 230, 0.18);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 140ms, background 140ms, transform 120ms;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  color: rgba(220, 215, 240, 0.85);
+}
+
+.ab-chip-card:hover {
+  border-color: rgba(220, 200, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.ab-chip-card.active {
+  background: linear-gradient(135deg, rgba(120, 80, 180, 0.4), rgba(80, 60, 140, 0.32));
+  border-color: rgba(220, 200, 255, 0.75);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(220, 200, 255, 0.25);
+}
+
+.ab-chip-card-label {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.ab-chip-card-hint {
+  font-size: 11px;
+  color: rgba(190, 180, 220, 0.62);
+  letter-spacing: 0.04em;
+}
+
+/* ── Frequency picker ────────────────────────────────────── */
+
+.ab-freq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.ab-freq-chip {
+  background: rgba(20, 16, 32, 0.55);
+  border: 1px solid rgba(180, 160, 230, 0.18);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  color: rgba(220, 215, 240, 0.9);
+  transition: border-color 140ms, background 140ms;
+}
+
+.ab-freq-chip:hover {
+  background: rgba(40, 30, 70, 0.6);
+}
+
+.ab-freq-chip.active {
+  background: linear-gradient(135deg, rgba(120, 80, 180, 0.4), rgba(80, 60, 140, 0.32));
+  color: #fff;
+}
+
+.ab-freq-label {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.ab-freq-mood {
+  font-size: 11px;
+  color: rgba(190, 180, 220, 0.7);
+}
+
+.ab-hint {
+  font-size: 12px;
+  color: rgba(190, 180, 220, 0.7);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── Builder buttons (mirrors avatar-btn but scoped) ───── */
+
+.ab-btn {
+  background: rgba(20, 16, 32, 0.55);
+  border: 1px solid rgba(180, 160, 230, 0.3);
+  color: rgba(245, 240, 255, 0.92);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 140ms, border-color 140ms, transform 120ms;
+}
+
+.ab-btn:hover {
+  background: rgba(40, 30, 70, 0.7);
+  border-color: rgba(220, 200, 255, 0.6);
+}
+
+.ab-btn--ghost {
+  background: transparent;
+}
+
+.ab-btn--primary {
+  background: linear-gradient(135deg, rgba(180, 130, 230, 0.85), rgba(120, 80, 180, 0.85));
+  border-color: rgba(220, 200, 255, 0.8);
+  font-weight: 500;
+}
+
+.ab-btn--primary:hover {
+  background: linear-gradient(135deg, rgba(200, 150, 250, 1), rgba(140, 100, 200, 1));
+}
+
+/* ════════════════════════════════════════════════════════════
+   AI PORTRAIT — generated portrait inside preview frame
+   ════════════════════════════════════════════════════════════ */
+
+.ab-portrait-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* ── Generation overlay — moodboard üstüne shimmer + label ── */
+
+.ab-generating-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 6, 18, 0.65) 0%,
+    rgba(40, 25, 70, 0.55) 100%
+  );
+  backdrop-filter: blur(6px);
+  z-index: 5;
+  pointer-events: none;
+  text-align: center;
+}
+
+.ab-generating-text {
+  font-size: 16px;
+  margin: 0;
+  letter-spacing: 0.1em;
+  color: rgba(245, 240, 255, 0.95);
+  font-weight: 400;
+}
+
+.ab-generating-hint {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.7);
+  margin: 0;
+}
+
+/* Sweeping vertical light — "tanrıça doğuyor" hissi */
+.ab-generating-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(220, 200, 255, 0.18) 45%,
+    rgba(255, 240, 200, 0.32) 50%,
+    rgba(220, 200, 255, 0.18) 55%,
+    transparent 100%
+  );
+  animation: ab-shimmer-sweep 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ab-shimmer-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0.4;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   META ROW — provider + cache durumu
+   ════════════════════════════════════════════════════════════ */
+
+.avatar-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0;
+}
+
+.avatar-meta-pill {
+  background: rgba(20, 16, 32, 0.55);
+  border: 1px solid rgba(180, 160, 230, 0.22);
+  color: rgba(220, 215, 240, 0.78);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}

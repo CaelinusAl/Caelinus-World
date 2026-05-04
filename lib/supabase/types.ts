@@ -41,6 +41,17 @@ export interface ProfileRow {
   // Tombstone for soft-deleted accounts. Hard delete via auth admin
   // happens server-side; the row is kept briefly for audit/orders.
   deleted_at: string | null;
+  // Faz 3.3 — Avatar Studio AI render persistance. Genel `avatar_url`
+  // küçük profil fotoğrafı; bu alan kullanıcının Caelinus modelinin
+  // bedeninde face-swap edilmiş tam boy AI avatarı (user-avatars
+  // bucket'ında, path `{user_id}/caelinus.<ext>`).
+  caelinus_avatar_url: string | null;
+  caelinus_avatar_zodiac:
+    | "aries" | "taurus" | "gemini" | "cancer"
+    | "leo" | "virgo" | "libra" | "scorpio"
+    | "sagittarius" | "capricorn" | "aquarius" | "pisces"
+    | null;
+  caelinus_avatar_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +96,31 @@ export interface AtelierCollectionRow {
   updated_at: string;
 }
 
+/** Faz 2 — Hikâyeli ürün şeması (migration 0010).
+ *  Bir bölüm bir kart olarak PDP'de render edilir. Çift dilli; en
+ *  az TR alanları gereklidir, EN opsiyoneldir. */
+export interface ItemStoryChapter {
+  /** "I", "II", "III"… ya da "Niyet", "Köken" gibi kısa rozet. */
+  mark?: string;
+  title_tr: string;
+  text_tr: string;
+  title_en?: string | null;
+  text_en?: string | null;
+  image_url?: string | null;
+}
+
+/** Faz 2 — Köken hattı. PDP'de "Provenance" satırı bu objeden
+ *  beslenir. Tüm alanlar opsiyoneldir; alanların hepsi boşsa PDP
+ *  varsayılan ürün/atelier alanlarına düşer. */
+export interface ItemProvenance {
+  /** Gaia region id: ege | akdeniz | … */
+  region?: string;
+  /** Üretici/zanaatkar referansı (opsiyonel — Faz 6 producers tablosu). */
+  producer_id?: string;
+  atelier_origin?: string;
+  materials?: { name: string; source?: string }[];
+}
+
 export interface AtelierItemRow {
   id: string;
   atelier_id: string;
@@ -107,6 +143,12 @@ export interface AtelierItemRow {
   images: string[]; // public storage URLs in display order
   story_tr: string | null;
   story_en: string | null;
+  /** Faz 2 — sıralı hikâye bölümleri. Boş dizi varsayılan. */
+  story_chapters: ItemStoryChapter[];
+  /** Faz 2 — köken hattı objesi. Boş obje varsayılan. */
+  provenance: ItemProvenance;
+  /** Faz 2 — kısa hikâye videosu (PDP başında oynar). */
+  narrative_video_url: string | null;
   status: ItemStatus;
   position: number;
   created_at: string;

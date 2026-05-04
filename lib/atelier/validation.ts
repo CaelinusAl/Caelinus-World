@@ -288,6 +288,14 @@ export const itemEditSchema = z.object({
   status: z.enum(ITEM_STATUSES as unknown as [ItemStatus, ...ItemStatus[]]),
   position: z.number().int().min(0).default(0),
   collection_id: z.string().uuid().nullable().optional(),
+  narrative_video_url: z
+    .string()
+    .trim()
+    .url({ message: "Geçerli bir video URL'i (https://…)" })
+    .max(500)
+    .nullable()
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ItemEditInput = z.infer<typeof itemEditSchema>;

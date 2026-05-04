@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
 import type { ProductExtended, ProductSize } from "@/types/play";
 import type { AvatarProductRecommendation } from "@/lib/avatar-recommendations";
 
@@ -69,7 +70,13 @@ export default function ProductCard({
       </div>
 
       <div className="ecom-product-body">
-        <h4 className="ecom-product-name">{product.name}</h4>
+        <Link
+          href={`/universe/shop/urun/${product.id}`}
+          className="ecom-product-name-link"
+          prefetch={false}
+        >
+          <h4 className="ecom-product-name">{product.name}</h4>
+        </Link>
         <div className="ecom-product-brand">{product.brand}</div>
 
         <div className="ecom-product-price-row">
@@ -92,7 +99,16 @@ export default function ProductCard({
               {showStory ? "Kapat" : "Hikayesini Oku"}
             </button>
             {showStory && (
-              <p className="shop-product-story">{product.story}</p>
+              <>
+                <p className="shop-product-story">{product.story}</p>
+                <Link
+                  href={`/universe/shop/urun/${product.id}`}
+                  className="shop-story-more"
+                  prefetch={false}
+                >
+                  Tüm hikâyeyi gör →
+                </Link>
+              </>
             )}
           </>
         )}

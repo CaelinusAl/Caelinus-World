@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { AvatarConfig } from "@/types/avatar";
 import { DEFAULT_AVATAR } from "@/types/avatar";
 import type { AvatarFaceDeformConfig, ModelCapabilities, MorphTargetMapping } from "@/lib/face";
@@ -33,19 +34,86 @@ const ROOT_Y = 0;
 
 const BUST_SCALE: Record<string, number> = { s: 0.92, m: 1.0, l: 1.1, xl: 1.22 };
 
-/** @returns true if the model uses bones (skeletal), false if vertex-only */
-function applyBodyDeformation(scene: THREE.Object3D, cfg: AvatarConfig): boolean {
-  const heightFactor = cfg.height / 170;
-  const weightFactor = 0.7 + (cfg.weight / 100) * 0.6;
-  const bustFactor = BUST_SCALE[cfg.bustSize] ?? 1;
+/**
+ * Applies the user's BODY config (height/weight/bust/hip) to the GLB.
+ *
+ * Strategy resolution:
+ *
+ *   1. **skinned bones**  — preferred. We scale named bones (Hips,
+ *      Spine, UpperLeg, etc.); the SkinnedMesh follows because its
+ *      vertices are weighted to those bones. Slider hareketi gerçek
+ *      anatomic deformation üretir.
+ *
+ *   2. **bones present but mesh isn't skinned** — common with AI-
+ *      generated GLBs (Meshy, Hunyuan3D). Bones exist as scene-graph
+ *      siblings but no vertex has weight on them. Bone scaling
+ *      becomes a no-op visually. Bu durumda otomatik olarak vertex
+ *      deform'a düşüyoruz.
+ *
+ *   3. **no bones at all** — pure static mesh. Vertex deform.
+ *
+ * Deformation magnitudes — Mayıs 2026 dramatize patch'i. Önceki
+ * sürümde slider 30→100 kg sadece %20 fark üretiyordu; kullanıcı
+ * "çalışmıyor" hissi yaşıyordu. Şimdi:
+ *   • Boy   150-200 → 0.85x to 1.20x (head height)
+ *   • Kilo  30-100  → 0.70x to 1.55x (XZ scale)
+ *   • Hip   0.6-1.4 → direct multiplier
+ *   • Bust  s/m/l/xl → 0.85 / 1.00 / 1.20 / 1.45 (was 0.92-1.22)
+ *
+ * @returns one of "bones-skinned", "bones-cosmetic", "vertex", "none"
+ *   so the caller (and console diagnostic) knows which branch ran.
+ */
+
+const DRAMATIC_BUST_SCALE: Record<string, number> = {
+  s: 0.85,
+  m: 1.0,
+  l: 1.2,
+  xl: 1.45,
+};
+
+type BodyDeformResult = {
+  strategy: "bones-skinned" | "bones-cosmetic" | "vertex" | "none";
+  bonesScaled: number;
+  meshesDeformed: number;
+  factors: {
+    height: number;
+    weight: number;
+    bust: number;
+    hip: number;
+  };
+  matchedBoneNames: string[];
+};
+
+function applyBodyDeformation(
+  scene: THREE.Object3D,
+  cfg: AvatarConfig,
+): BodyDeformResult {
+  // Dramatize edilmiş faktörler — slider hareketi görünür sonuç versin.
+  const heightFactor = 0.85 + ((cfg.height - 150) / 50) * 0.35; // 150→0.85, 200→1.20
+  const weightFactor = 0.7 + ((cfg.weight - 30) / 70) * 0.85;   // 30→0.70, 100→1.55
+  const bustFactor = DRAMATIC_BUST_SCALE[cfg.bustSize] ?? 1;
   const hipFactor = cfg.hipRatio;
 
+  // Skinned mesh tespiti — bone'lar varsa ama mesh skinned değilse,
+  // bone scaling visual hiçbir şey yapmaz. Bu durumda vertex
+  // deform'a düşmek lazım.
   let hasBones = false;
+  let hasSkinnedMesh = false;
+  let bonesScaled = 0;
+  let meshesDeformed = 0;
+  const matchedBoneNames: string[] = [];
 
   scene.traverse((obj) => {
-    if (obj instanceof THREE.Bone) {
-      hasBones = true;
+    if (obj instanceof THREE.Bone) hasBones = true;
+    if (obj instanceof THREE.SkinnedMesh) hasSkinnedMesh = true;
+  });
+
+  // ── Strategy 1: skinned bones ──────────────────────────────
+  if (hasBones && hasSkinnedMesh) {
+    scene.traverse((obj) => {
+      if (!(obj instanceof THREE.Bone)) return;
       const n = obj.name.toLowerCase();
+      let matched = true;
 
       if (/hip|pelvis/i.test(n)) {
         obj.scale.set(hipFactor * weightFactor, 1, hipFactor * weightFactor);
@@ -53,61 +121,114 @@ function applyBodyDeformation(scene: THREE.Object3D, cfg: AvatarConfig): boolean
         obj.scale.set(weightFactor, 1, weightFactor);
       } else if (/bust|breast/i.test(n)) {
         obj.scale.set(bustFactor, bustFactor, bustFactor);
-      } else if (/thigh|upperleg/i.test(n)) {
-        obj.scale.set(weightFactor * hipFactor * 0.95, heightFactor, weightFactor * hipFactor * 0.95);
-      } else if (/calf|lowerleg|shin/i.test(n)) {
-        obj.scale.set(weightFactor * 0.9, heightFactor, weightFactor * 0.9);
-      } else if (/upperarm|shoulder/i.test(n)) {
+      } else if (/thigh|upperleg|upleg/i.test(n)) {
+        obj.scale.set(
+          weightFactor * hipFactor * 0.95,
+          1,
+          weightFactor * hipFactor * 0.95,
+        );
+      } else if (/calf|lowerleg|leg|shin/i.test(n)) {
+        obj.scale.set(weightFactor * 0.9, 1, weightFactor * 0.9);
+      } else if (/upperarm|shoulder|arm/i.test(n) && !/forearm/i.test(n)) {
         obj.scale.set(weightFactor * 0.85, 1, weightFactor * 0.85);
-      }
-    }
-  });
-
-  if (!hasBones) {
-    scene.traverse((obj) => {
-      if (!(obj instanceof THREE.Mesh)) return;
-      const geo = obj.geometry;
-      if (!geo || !geo.attributes.position) return;
-
-      if (!geo.userData) geo.userData = {};
-      if (!geo.userData._originalPos) {
-        geo.userData._originalPos = geo.attributes.position.array.slice();
+      } else if (/forearm/i.test(n)) {
+        obj.scale.set(weightFactor * 0.8, 1, weightFactor * 0.8);
+      } else {
+        matched = false;
       }
 
-      const orig = geo.userData._originalPos as Float32Array;
-      const pos = geo.attributes.position.array as Float32Array;
-      const count = pos.length / 3;
-
-      const bBox = new THREE.Box3().setFromBufferAttribute(
-        geo.attributes.position as THREE.BufferAttribute
-      );
-      const minY = bBox.min.y;
-      const maxY = bBox.max.y;
-      const totalH = maxY - minY || 1;
-
-      for (let i = 0; i < count; i++) {
-        const ox = orig[i * 3];
-        const oy = orig[i * 3 + 1];
-        const oz = orig[i * 3 + 2];
-        const t = (oy - minY) / totalH;
-
-        let xzScale = weightFactor;
-        if (t > 0.55 && t < 0.75) xzScale *= bustFactor;
-        if (t > 0.3 && t < 0.5) xzScale *= hipFactor;
-        if (t < 0.3) xzScale *= hipFactor * 0.95;
-
-        pos[i * 3] = ox * xzScale;
-        pos[i * 3 + 1] = oy * heightFactor;
-        pos[i * 3 + 2] = oz * xzScale;
+      if (matched) {
+        bonesScaled++;
+        if (matchedBoneNames.length < 12) matchedBoneNames.push(obj.name);
       }
-
-      geo.attributes.position.needsUpdate = true;
-      geo.computeBoundingBox();
-      geo.computeBoundingSphere();
     });
+
+    return {
+      strategy: "bones-skinned",
+      bonesScaled,
+      meshesDeformed: 0,
+      factors: {
+        height: heightFactor,
+        weight: weightFactor,
+        bust: bustFactor,
+        hip: hipFactor,
+      },
+      matchedBoneNames,
+    };
   }
 
-  return hasBones;
+  // ── Strategy 2/3: vertex deform ────────────────────────────
+  // Bone'lar var ama mesh skinned değilse (cosmetic skeleton) ya da
+  // hiç bone yoksa, mesh vertex'lerini doğrudan rebuild ediyoruz.
+  scene.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const geo = obj.geometry;
+    if (!geo || !geo.attributes.position) return;
+
+    if (!geo.userData) geo.userData = {};
+    if (!geo.userData._originalPos) {
+      geo.userData._originalPos = geo.attributes.position.array.slice();
+    }
+
+    const orig = geo.userData._originalPos as Float32Array;
+    const pos = geo.attributes.position.array as Float32Array;
+    const count = pos.length / 3;
+
+    const bBox = new THREE.Box3().setFromBufferAttribute(
+      geo.attributes.position as THREE.BufferAttribute,
+    );
+    const minY = bBox.min.y;
+    const maxY = bBox.max.y;
+    const totalH = maxY - minY || 1;
+
+    for (let i = 0; i < count; i++) {
+      const ox = orig[i * 3];
+      const oy = orig[i * 3 + 1];
+      const oz = orig[i * 3 + 2];
+      const t = (oy - minY) / totalH;
+
+      let xzScale = weightFactor;
+      // Vücut bölgesi → XZ scale ayarla
+      if (t >= 0.55 && t <= 0.78) {
+        // Göğüs bölgesi
+        xzScale *= bustFactor;
+      } else if (t >= 0.30 && t < 0.50) {
+        // Kalça-bel
+        xzScale *= hipFactor;
+      } else if (t < 0.30) {
+        // Bacaklar
+        xzScale *= hipFactor * 0.95;
+      } else if (t > 0.78 && t < 0.92) {
+        // Omuz-üst gövde
+        xzScale *= 0.92;
+      }
+
+      pos[i * 3] = ox * xzScale;
+      pos[i * 3 + 1] = oy * heightFactor;
+      pos[i * 3 + 2] = oz * xzScale;
+    }
+
+    geo.attributes.position.needsUpdate = true;
+    geo.computeBoundingBox();
+    geo.computeBoundingSphere();
+    if (geo.attributes.normal) {
+      geo.computeVertexNormals();
+    }
+    meshesDeformed++;
+  });
+
+  return {
+    strategy: hasBones ? "bones-cosmetic" : meshesDeformed > 0 ? "vertex" : "none",
+    bonesScaled: 0,
+    meshesDeformed,
+    factors: {
+      height: heightFactor,
+      weight: weightFactor,
+      bust: bustFactor,
+      hip: hipFactor,
+    },
+    matchedBoneNames: [],
+  };
 }
 
 export default function ModelAvatar({
@@ -126,7 +247,16 @@ export default function ModelAvatar({
   const auraRef = useRef<THREE.Mesh>(null);
 
   const gltf = useGLTF(url);
-  const scene = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  // SkeletonUtils.clone — Three.js'in SkinnedMesh-aware clone'u.
+  // Standart Object3D.clone(true) bone'ları kopyalar AMA
+  // SkinnedMesh hâlâ orijinal skeleton'a bind kalır, bu yüzden
+  // bone scale değişimleri MESH'E yansımaz (sadece bone helper
+  // gizli olarak hareket eder). SkeletonUtils.clone bone'ları
+  // klonlar ve klonlanmış SkinnedMesh'leri yeni skeleton'a
+  // doğru rebind eder. Bu olmadan slider hareketleri görünmez
+  // — "ten rengi haricinde hiçbir şey çalışmıyor" semptomunun
+  // kaynağı kelimenin tam anlamıyla budur.
+  const scene = useMemo(() => cloneSkinned(gltf.scene), [gltf.scene]);
 
   // ── Imperatively load external animation GLB + retarget tracks ──
   const [extClips, setExtClips] = useState<THREE.AnimationClip[]>([]);
@@ -233,26 +363,80 @@ export default function ModelAvatar({
 
     if (process.env.NODE_ENV === "development") {
       const bones: string[] = [];
+      const skinnedMeshes: { name: string; boneCount: number; bound: boolean }[] = [];
       scene.traverse((obj) => {
         if (obj instanceof THREE.Bone) bones.push(obj.name);
+        if (obj instanceof THREE.SkinnedMesh) {
+          // Skeleton'ın bone'ları scene graph'taki bone'larla eşleşiyor
+          // mu? Eğer SkeletonUtils.clone iyi yaptıysa eşleşir; standart
+          // clone yaptıysa eşleşmez (bound=false).
+          const skelBoneNames = obj.skeleton.bones.map((b) => b.name);
+          const sceneBones = new Set(bones);
+          const overlap = skelBoneNames.filter((n) => sceneBones.has(n)).length;
+          skinnedMeshes.push({
+            name: obj.name || "(unnamed)",
+            boneCount: obj.skeleton.bones.length,
+            bound: overlap === skelBoneNames.length,
+          });
+        }
       });
-      if (bones.length) {
-        console.info("[ModelAvatar] skeleton bones:", bones.join(", "));
+      console.info(
+        "[ModelAvatar] inspection complete:\n" +
+          `  scene bones    : ${bones.length}\n` +
+          `  skinned meshes : ${skinnedMeshes.length}\n` +
+          `  ${skinnedMeshes.map((s) => `→ "${s.name}" boneCount=${s.boneCount} bound=${s.bound}`).join("\n  ")}\n` +
+          (bones.length ? `  bone names     : ${bones.join(", ")}` : ""),
+      );
+
+      const allBound = skinnedMeshes.every((s) => s.bound);
+      if (skinnedMeshes.length > 0 && !allBound) {
+        console.error(
+          "[ModelAvatar] ❌ SkinnedMesh skeleton orphan'd — clone yanlış! " +
+            "SkeletonUtils.clone çalışmamış olabilir. Bone scaling MESH'i etkilemez.",
+        );
+      } else if (skinnedMeshes.length > 0) {
+        console.info(
+          "[ModelAvatar] ✓ SkinnedMesh'ler doğru bind edilmiş — bone scaling çalışmalı.",
+        );
       }
     }
   }, [scene, onCapabilities, onSceneReady]);
 
   // 1) Scale & center on ground
+  //
+  // Doğal yükseklik tek seferlik cache. SkinnedMesh + bone deform
+  // sahnesinde `Box3.setFromObject` her run'da farklı sonuç verir
+  // (bind pose vs deformed pose vs propagated bone scales). Önceki
+  // "her cfg değişiminde reset + remeasure" yaklaşımı kompound
+  // hatalar üretiyordu — kullanıcı ekrana yakın bir kütle olarak
+  // gördüğü bug'ın kaynağı buydu. Çözüm: ilk yüklemede natural
+  // height'ı bir kere ölç, userData'ya yaz, sonra her boy
+  // değişiminde sadece o cache değerine göre absolute scale set et.
   useEffect(() => {
     try {
-      const box = new THREE.Box3().setFromObject(scene);
-      const size = new THREE.Vector3();
-      box.getSize(size);
+      let naturalH = scene.userData._naturalHeight as number | undefined;
+      if (!naturalH || naturalH < 0.001) {
+        scene.scale.setScalar(1);
+        scene.position.set(0, 0, 0);
+        scene.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(scene);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        naturalH = size.y;
+        scene.userData._naturalHeight = naturalH;
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            `[ModelAvatar] natural height measured: ${naturalH.toFixed(3)}`,
+          );
+        }
+      }
 
-      const targetH = BASE_HEIGHT * (cfg.height / 170);
-      const scale = targetH / (size.y || 1);
+      const heightScale = 0.85 + ((cfg.height - 150) / 50) * 0.35;
+      const targetH = BASE_HEIGHT * heightScale;
+      const scale = naturalH > 0.001 ? targetH / naturalH : 1;
       scene.scale.setScalar(scale);
 
+      scene.updateMatrixWorld(true);
       const scaled = new THREE.Box3().setFromObject(scene);
       const sMin = scaled.min;
       const sCenter = new THREE.Vector3();
@@ -261,6 +445,13 @@ export default function ModelAvatar({
       scene.position.x -= sCenter.x;
       scene.position.z -= sCenter.z;
       scene.position.y -= sMin.y;
+
+      if (process.env.NODE_ENV === "development") {
+        console.info(
+          `[ModelAvatar] height scale => ${heightScale.toFixed(3)} ` +
+            `(cfg.height=${cfg.height}cm, scale=${scale.toFixed(4)})`,
+        );
+      }
     } catch {
       /* GLB might still be loading */
     }
@@ -269,11 +460,47 @@ export default function ModelAvatar({
   // 2) Body deform + face deform (strategy-aware)
   useEffect(() => {
     try {
-      const usedBones = applyBodyDeformation(scene, cfg);
+      const result = applyBodyDeformation(scene, cfg);
+
+      // Comprehensive diagnostic — kullanıcı slider hareket ettirip
+      // gerçekten mesh'in deform olup olmadığını anlamak için bunu
+      // konsola yazıyoruz. Production'da gürültü olur ama Faz 4
+      // pivot süresince açık kalsın.
+      if (process.env.NODE_ENV === "development") {
+        console.info(
+          "[ModelAvatar] body deform =>\n" +
+            `  strategy        : ${result.strategy}\n` +
+            `  bones scaled    : ${result.bonesScaled}` +
+            (result.matchedBoneNames.length
+              ? ` (${result.matchedBoneNames.join(", ")})`
+              : "") +
+            "\n" +
+            `  meshes deformed : ${result.meshesDeformed}\n` +
+            `  cfg             : height=${cfg.height} weight=${cfg.weight} bust=${cfg.bustSize} hip=${cfg.hipRatio}\n` +
+            `  factors         : H=${result.factors.height.toFixed(3)}  W=${result.factors.weight.toFixed(3)}  Bust=${result.factors.bust.toFixed(3)}  Hip=${result.factors.hip.toFixed(3)}`,
+        );
+
+        if (result.strategy === "bones-cosmetic") {
+          console.warn(
+            "[ModelAvatar] ⚠ Bone'lar var ama SkinnedMesh yok — bone scaling görsel " +
+              "etki yapmıyordu. Otomatik vertex deform'a düşüldü. Daha temiz bir " +
+              "sonuç için Blender'da mesh'i armature'a 'with empty groups' / " +
+              "automatic weights ile bind etmek gerekir.",
+          );
+        }
+        if (result.strategy === "none") {
+          console.error(
+            "[ModelAvatar] ❌ Ne bone ne deform edilebilir mesh — GLB bozuk veya boş.",
+          );
+        }
+      }
+
       const caps = capsRef.current;
       const strategy = caps?.strategy ?? "vertex";
 
-      if (strategy === "vertex" && !usedBones) {
+      // Vertex deform yapıldıysa face decal base'i temizle (eski
+      // geometry üzerine bind etmiş olabilir)
+      if (strategy === "vertex" && result.strategy !== "bones-skinned") {
         clearFaceDeformBase(scene);
       }
 
@@ -281,7 +508,7 @@ export default function ModelAvatar({
         scene,
         faceDeform ?? IDENTITY_DEFORM,
         caps,
-        morphMapRef.current
+        morphMapRef.current,
       );
     } catch (e) {
       console.warn("[ModelAvatar] deform pipeline error:", e);
@@ -289,7 +516,78 @@ export default function ModelAvatar({
   }, [scene, cfg, faceDeform]);
 
   // 3) Materials
+  //
+  // İki avatar tipini ayrı ele alıyoruz:
+  //
+  // a) Caelinus default GLB — bald + tek mesh, aura'lı renkli skin
+  //    material'ı bütün scene'i kaplıyor. Skin tone slider'ı bu
+  //    yolu kullanır (eski davranış).
+  //
+  // b) Avaturn / 3rd-party fotoğraf-gerçek avatarları — her bir alt mesh
+  //    (yüz / saç / iris / kıyafet) kendi PBR material'ına sahip,
+  //    selfie texture'ı yüzü kaplıyor. Material override edersek bu
+  //    foto-gerçek görüntü boyalı manken'e dönüşür. Bu yüzden
+  //    "external avatar" tespit edersek material'ları olduğu gibi
+  //    bırakıyor, sadece shadow flag'larını + body mesh'inde hafif
+  //    kozmik emissive aura uyguluyoruz.
+  //
+  // Tespit heuristic'leri:
+  //   • Avaturn: birden fazla SkinnedMesh içerir (body + head +
+  //     outfit_top + outfit_bottom + footwear). Caelinus default
+  //     mesh tek SkinnedMesh ya da Mesh.
+  //   • Wolf3D_* / EyeLeft / EyeRight isimleri (RPM, MetaHuman vb.
+  //     diğer foto-gerçek pipeline'larından da geliyor olabilir)
   useEffect(() => {
+    let isExternalAvatar = false;
+    let skinnedMeshCount = 0;
+
+    scene.traverse((obj) => {
+      if (
+        obj instanceof THREE.Mesh &&
+        (obj.name.startsWith("Wolf3D_") ||
+          obj.name.startsWith("EyeLeft") ||
+          obj.name.startsWith("EyeRight") ||
+          /^avaturn[_-]/i.test(obj.name) ||
+          /^outfit[_-]/i.test(obj.name) ||
+          /^head[_-]?mesh/i.test(obj.name))
+      ) {
+        isExternalAvatar = true;
+      }
+      if (obj instanceof THREE.SkinnedMesh) skinnedMeshCount++;
+    });
+
+    // Birden fazla SkinnedMesh + Mixamo bone'lar → external avatar
+    // (Avaturn / Mixamo karakterleri / foto-gerçek pipelines)
+    if (skinnedMeshCount >= 3) {
+      isExternalAvatar = true;
+    }
+
+    if (isExternalAvatar) {
+      const aura = new THREE.Color(auraColor);
+      scene.traverse((obj) => {
+        if (!(obj instanceof THREE.Mesh)) return;
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+        const mat = obj.material as THREE.MeshStandardMaterial | undefined;
+        if (
+          mat &&
+          mat instanceof THREE.MeshStandardMaterial &&
+          /body|skin/i.test(obj.name)
+        ) {
+          mat.emissive = aura;
+          mat.emissiveIntensity = 0.08;
+          mat.needsUpdate = true;
+        }
+      });
+      if (process.env.NODE_ENV === "development") {
+        console.info(
+          `[ModelAvatar] external avatar detected (skinnedMeshes=${skinnedMeshCount}) — preserving original materials`,
+        );
+      }
+      return;
+    }
+
+    // Default Caelinus mesh yolu — eski davranış (full override)
     const aura = new THREE.Color(auraColor);
     const base = new THREE.Color(resolvedSkin);
 

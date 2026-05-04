@@ -1,8 +1,25 @@
 "use client";
 
+/**
+ * AvatarSliders — Caelinus body builder UI.
+ *
+ * Faz 4 (Mayıs 2026) tonu: Caelinus manifestosu "her beden bir
+ * tapınak" diyor — bu yüzden eskiden burada olan "Petite / Balanced
+ * / Curvy / Runway" tipoloji preset'leri kaldırıldı. Tipoloji moda
+ * endüstrisinin kategorize etme alışkanlığını yansıtıyor; bizim
+ * çağrımız tam tersi: tipolojiyi atla, kendi ölçülerini gir.
+ *
+ * Kontroller:
+ *   • Boy (cm)            — 150-200
+ *   • Kilo (kg)           — 40-110
+ *   • Kalça Oranı         — 0.8-1.25 (1.0 = referans)
+ *   • Göğüs (S/M/L/XL)    — kıyafetin doğru oturması için fonksiyonel
+ *   • Ten Rengi           — 8 ton (Porcelain → Espresso)
+ */
+
 import { memo } from "react";
-import type { AvatarConfig, BodyType, BustSize } from "@/types/avatar";
-import { BODY_TYPE_PRESETS, SKIN_TONES, DEFAULT_AVATAR } from "@/types/avatar";
+import type { AvatarConfig, BustSize } from "@/types/avatar";
+import { SKIN_TONES } from "@/types/avatar";
 
 type Props = {
   config: AvatarConfig;
@@ -56,56 +73,34 @@ function Slider({
   );
 }
 
-const BODY_TYPES = Object.keys(BODY_TYPE_PRESETS) as BodyType[];
 const BUST_SIZES: BustSize[] = ["s", "m", "l", "xl"];
 
 function AvatarSlidersInner({ config, onChange, onReset }: Props) {
   const set = (partial: Partial<AvatarConfig>) =>
     onChange({ ...config, ...partial });
 
-  const setBodyType = (bt: BodyType) => {
-    const preset = BODY_TYPE_PRESETS[bt];
-    onChange({ ...config, bodyType: bt, ...preset.values });
-  };
-
   return (
     <div className="avcfg-panel">
       <div className="avcfg-panel-header">
-        <h2 className="avcfg-title">Avatarini Olustur</h2>
+        <h2 className="avcfg-title">Bedenini Ölç</h2>
         {onReset && (
           <button className="avcfg-reset-btn" onClick={onReset}>
-            Sifirla
+            Sıfırla
           </button>
         )}
       </div>
 
-      {/* Body Type Presets */}
-      <div className="avcfg-section">
-        <div className="avcfg-section-label">Vucut Tipi</div>
-        <div className="avcfg-preset-grid">
-          {BODY_TYPES.map((bt) => {
-            const meta = BODY_TYPE_PRESETS[bt];
-            return (
-              <button
-                key={bt}
-                className={`avcfg-preset-card ${config.bodyType === bt ? "active" : ""}`}
-                onClick={() => setBodyType(bt)}
-              >
-                <span className="avcfg-preset-label">{meta.label}</span>
-                <span className="avcfg-preset-desc">{meta.description}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <p className="avcfg-panel-lede">
+        Tipoloji yok — bedenin kendi ölçüsünde, kendi frekansında.
+      </p>
 
-      {/* Sliders */}
+      {/* Sliders — Boy / Kilo / Oran */}
       <div className="avcfg-section">
         <Slider
           label="Boy"
           value={config.height}
           min={150}
-          max={195}
+          max={200}
           step={1}
           unit=" cm"
           onChange={(v) => set({ height: v })}
@@ -120,7 +115,7 @@ function AvatarSlidersInner({ config, onChange, onReset }: Props) {
           onChange={(v) => set({ weight: v })}
         />
         <Slider
-          label="Kalca Orani"
+          label="Kalça Oranı"
           value={config.hipRatio}
           min={0.8}
           max={1.25}
@@ -130,9 +125,9 @@ function AvatarSlidersInner({ config, onChange, onReset }: Props) {
         />
       </div>
 
-      {/* Bust Size */}
+      {/* Bust Size — kıyafetin doğru oturması için fonksiyonel */}
       <div className="avcfg-section">
-        <div className="avcfg-section-label">Gogus</div>
+        <div className="avcfg-section-label">Göğüs</div>
         <div className="avcfg-bust-row">
           {BUST_SIZES.map((sz) => (
             <button

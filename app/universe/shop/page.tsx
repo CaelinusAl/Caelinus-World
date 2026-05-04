@@ -1,17 +1,68 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useSceneStore } from "@/stores/scene-store";
 import { useCartStore } from "@/stores/cart-store";
+import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
+import { productsExtended } from "@/data/products";
 import ShopHeader from "./_components/ShopHeader";
 import TryOnSection from "./_components/TryOnSection";
 import ProductSection from "./_components/ProductSection";
 import OutfitBuilder from "./_components/OutfitBuilder";
 import AiKombinPanel from "./_components/AiKombinPanel";
+import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
 import FrequencyShelf from "./_components/FrequencyShelf";
+import AvatarBadge from "./_components/AvatarBadge";
+
+/**
+ * TryOnLauncher — PDP'den (`/universe/shop/urun/<id>`) gelen
+ * `?try=<id>` veya `?dress=<id>` parametresini avatara aktarır.
+ *
+ *   try=<id>   → ürünü TryOn paneline yükler (yan paneli açar, beden seç).
+ *   dress=<id> → ürünü doğrudan dressedSlots'a ekler (avatara giydirir).
+ *
+ * Her iki halde mod `tryon` olur, URL geçmişten temizlenir
+ * (replaceState) — sayfa yenilense de aynı ürün ikinci kez tetiklenmez.
+ *
+ * useSearchParams Next 16'da Suspense gerektirdiği için ShopPage
+ * altında kendi sınırı olan ayrı bir bileşen olarak duruyor.
+ */
+function TryOnLauncher() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tryId = searchParams.get("try");
+    const dressId = searchParams.get("dress");
+    const targetId = tryId ?? dressId;
+    if (!targetId) return;
+
+    const product = productsExtended.find((p) => p.id === targetId);
+    if (!product) return;
+
+    useSceneStore.getState().setMode("tryon");
+    if (dressId) {
+      useWardrobeStore.getState().dressProduct(product);
+    } else {
+      useWardrobeStore.getState().setTryOnProduct(product);
+    }
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("try");
+      url.searchParams.delete("dress");
+      window.history.replaceState({}, "", url.toString());
+
+      const stage = document.querySelector(".shop-avatar-stage");
+      stage?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [searchParams]);
+
+  return null;
+}
 
 export default function ShopPage() {
   const activeMode = useSceneStore((s) => s.activeMode);
@@ -39,10 +90,19 @@ export default function ShopPage() {
         ))}
       </div>
 
+      <Suspense fallback={null}>
+        <TryOnLauncher />
+      </Suspense>
+
       <div className="shop-shell">
         <ShopHeader />
 
         <FrequencyShelf />
+
+        {/* Faz 3.2 — Kullanıcının kayıtlı AI avatarı (yoksa "yarat"
+         * daveti) sahnenin üzerinde sticky. Vizyonun "her sayfada
+         * benim avatarım" sürekliliği için. */}
+        <AvatarBadge />
 
         <section className="shop-main">
           {/* 1. AVATAR STAGE — Always visible */}
@@ -54,8 +114,9 @@ export default function ShopPage() {
             <OutfitBuilder />
           </div>
 
-          {/* 3. AI KOMBIN MODE */}
+          {/* 3. AI KOMBIN MODE — Faz 4: catalog-bound stylist + haftalık kombinler */}
           <div className={`shop-section-panel ${activeMode === "ai" ? "visible" : ""}`}>
+            <StylistPanel />
             <AiKombinPanel />
           </div>
 

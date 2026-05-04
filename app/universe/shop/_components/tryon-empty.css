@@ -1,0 +1,231 @@
+/**
+ * Faz 3.4b — Avatar yokken TryOn sahnesi.
+ *
+ * Önceki sürümde 3D mesh + StageControls + outfit chips açık
+ * görünüyor, kullanıcı butonlara basınca boş yüzlü mankenin
+ * değişmediğini görüp "ekleme yapmıyor" hissi yaşıyordu. Bu CSS
+ * sahnenin merkezine TEK bir net çağrı koyar — tüm interaktif
+ * kontroller render edilmediği için artık "havada kalan buton"
+ * yok.
+ *
+ * Route-scoped — globals.css yerine burada tutuluyor ki dosya
+ * büyümesin ve avatar UX'i bağımsız iterate edilebilsin.
+ */
+
+.tryon-empty-scene {
+  position: relative;
+  width: 100%;
+  min-height: 540px;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(150, 110, 230, 0.22) 0%, transparent 55%),
+    radial-gradient(circle at 50% 90%, rgba(80, 140, 220, 0.12) 0%, transparent 60%),
+    #04060f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+}
+
+.tryon-empty-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(220, 200, 255, 0.18) 0%, transparent 35%);
+  animation: tryon-empty-pulse 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes tryon-empty-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.tryon-empty-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 540px;
+  padding: 32px 32px 28px;
+  border-radius: 24px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 14, 36, 0.78),
+    rgba(8, 10, 22, 0.82)
+  );
+  border: 1px solid rgba(220, 200, 255, 0.32);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.tryon-empty-kicker {
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.85);
+  margin: 0;
+}
+
+.tryon-empty-title {
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 300;
+  margin: 0;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(220, 200, 255, 0.85) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tryon-empty-sub {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(220, 215, 240, 0.82);
+  margin: 0;
+  max-width: 460px;
+}
+
+.tryon-empty-steps {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.tryon-empty-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(245, 240, 255, 0.92);
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 200, 255, 0.14);
+}
+
+.tryon-empty-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(220, 200, 255, 0.22);
+  border: 1px solid rgba(220, 200, 255, 0.5);
+  color: #ffffff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tryon-empty-cta {
+  margin-top: 6px;
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    rgba(150, 110, 230, 0.65),
+    rgba(80, 140, 220, 0.6)
+  );
+  border: 1px solid rgba(220, 200, 255, 0.7);
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 8px 24px rgba(150, 110, 230, 0.35);
+}
+
+.tryon-empty-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(150, 110, 230, 0.5);
+}
+
+.tryon-empty-fineprint {
+  font-size: 11px;
+  color: rgba(220, 215, 240, 0.55);
+  margin: 4px 0 0;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 600px) {
+  .tryon-empty-scene {
+    min-height: 480px;
+    padding: 20px 14px;
+  }
+  .tryon-empty-card {
+    padding: 24px 20px;
+  }
+}
+
+/* ── 3D sahne içinde "Avatarımı Düzenle" floating link ──────
+ * Kullanıcı sahne aktifken bedenini değiştirmek istediğinde tek
+ * tıkla 3D builder'a döner. Sağ üst köşede subtle bir pill —
+ * 3D canvas'ı kapatmaz, hover'da belirginleşir.
+ */
+.tryon-edit-avatar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  font-family: var(--font-mono, "Space Mono", ui-monospace, monospace);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 211, 0.78);
+  background: rgba(11, 10, 31, 0.62);
+  border: 1px solid rgba(200, 162, 255, 0.32);
+  border-radius: 999px;
+  padding: 8px 16px;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+  pointer-events: auto;
+}
+
+.tryon-edit-avatar:hover {
+  color: #f1e8d3;
+  border-color: rgba(230, 192, 137, 0.6);
+  background: rgba(11, 10, 31, 0.82);
+}
+
+.tryon-scene-canvas {
+  position: relative;
+}
+
+/* ── Sidebar empty placeholder ─────────────────────────────
+ * Önceden inline style ile yazılıydı; artık class'a taşındı.
+ */
+.tryon-sidebar-empty {
+  text-align: center;
+  padding: 40px 14px;
+  color: rgba(241, 232, 211, 0.42);
+  font-size: 13px;
+  font-style: italic;
+  border: 1px dashed rgba(200, 162, 255, 0.18);
+  border-radius: 16px;
+  margin: 12px 0;
+}
+
+.tryon-sidebar-empty p {
+  margin: 0;
+  letter-spacing: 0.01em;
+}

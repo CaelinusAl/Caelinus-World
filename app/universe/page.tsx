@@ -14,6 +14,19 @@ type Particle = {
 
 const portals = [
   { label: "Find Your Frequency", href: "/onboarding", symbol: "✦", cls: "gold" },
+  // AI Moodboard — Caelinus Stylist'in açılış kapısı (keşif). Kullanıcı
+  // bir his yazar (mevsim, renk, hatıra), AI dört editöryel kareyi
+  // (atmosfer · doku · figür · nesne) ve beş paragraflık manifesto
+  // okumasını üretir. Discovery surface — paletten Shop ürünlerine
+  // köprü kurma yolu. (Faz: Caelinus Stylist · AI Moodboard.)
+  { label: "AI Moodboard", href: "/universe/moodboard", symbol: "❖", cls: "violet" },
+  // 3D Avatar Studio — Caelinus'un primary avatar yolu. Kullanıcı
+  // bedenini sliders ile şekillendirir (vücut tipi, boy, kilo, göğüs,
+  // ten rengi); opsiyonel olarak selfie yükler ve MediaPipe metrics
+  // ile yüz mesh'i deform edilir. Bu avatar Shop'ta 3D ürün try-on'un
+  // canvas'ı olur — bone-bound GLB garmentler avatar üzerinde live
+  // dener. (Faz 4: 3D Mesh + Bone-Bound Try-On.)
+  { label: "3D Avatar Studio", href: "/universe/shop/avatar", symbol: "◉", cls: "magenta" },
   { label: "Gaia's Garden", href: "/universe/gaia", symbol: "✦", cls: "green" },
   { label: "Caelinus Shop", href: "/universe/shop", symbol: "◐", cls: "gold" },
   { label: "Caelinus Play", href: "/play", symbol: "∞", cls: "blue" },
