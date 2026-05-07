@@ -46,6 +46,19 @@ export type AvatarSceneProps = {
   debugBindings?: boolean;
   /** Outfit binding lifecycle callback (loading/ready/error) */
   onOutfitStatus?: (status: OutfitBindingStatus) => void;
+
+  /**
+   * Try-on illüzyon rengi — bir ürün aktif denenirken sahnenin
+   * conic-gradient rim halkası + tepe key-light bu renge kayar.
+   * `lib/shop/illusion-tryon.ts → productAccent(p)` ile hesaplanır.
+   * null/undefined → sahne nötr-luxury altın halkada kalır.
+   */
+  tryOnAccent?: string | null;
+  /**
+   * Try-on tag etiketi — sahnenin üst kısmında "✦ Bedeninde · {ürün}"
+   * rozeti olarak fade-in animasyonu ile gösterilir.
+   */
+  tryOnLabel?: string | null;
 };
 
 /* ═══════════════════════════════════════════
@@ -82,10 +95,12 @@ function SceneContent({
   outfitBindings,
   debugBindings = false,
   onOutfitStatus,
+  tryOnAccent,
 }: AvatarSceneProps) {
   const stage = useMemo(() => getStageConfig(stageId), [stageId]);
   const skin = skinTone || avatarConfig?.skinTone || DEFAULT_AVATAR.skinTone;
-  const aura = auraColor || stage.portalColor;
+  // Try-on aksent varsa aura'yı onunla bas; yoksa stage portal rengi.
+  const aura = tryOnAccent || auraColor || stage.portalColor;
   const modelUrl = avatarUrl || DEFAULT_MODEL_PATH;
 
   // Avatar root ref for outfit bone attachment
@@ -185,9 +200,37 @@ function ErrorFallback() {
    ═══════════════════════════════════════════ */
 
 export default function AvatarScene(props: AvatarSceneProps) {
+  const { tryOnAccent = null, tryOnLabel = null } = props;
+  // CSS değişkeni: rim/tag halkasının rengi try-on rengine kayar.
+  const sceneStyle = tryOnAccent
+    ? ({ ["--shop-tryon-accent" as string]: tryOnAccent } as React.CSSProperties)
+    : undefined;
+  const isTrying = Boolean(tryOnLabel);
+
   return (
     <SceneErrorBoundary fallback={<ErrorFallback />}>
-      <div className="shop-avatar-canvas">
+      <div
+        className={`shop-avatar-canvas ${isTrying ? "is-trying" : ""}`}
+        style={sceneStyle}
+      >
+        {/*
+         * Try-on illüzyon overlay'leri:
+         *   • shop-canvas-rim — conic-gradient halka, is-trying iken pulse
+         *   • shop-canvas-tryon-tag — "✦ Bedeninde · {ürün}" rozeti
+         * Cloth simulation YOK; bu CSS katmanları sahnede kıyafetin
+         * "değişme" hissini tek başına vermek için yeterli (caelinus-ai
+         * sayfasında aynı pattern başarıyla çalışıyor).
+         */}
+        <div className="shop-canvas-rim" aria-hidden="true" />
+        {tryOnLabel && (
+          <div className="shop-canvas-tryon-tag" key={tryOnLabel}>
+            <span className="shop-canvas-tryon-tag-glyph">✦</span>
+            <span className="shop-canvas-tryon-tag-text">
+              Bedeninde · <strong>{tryOnLabel}</strong>
+            </span>
+          </div>
+        )}
+
         <Suspense fallback={<LoadingFallback />}>
           <Canvas camera={{ position: [0, 1.3, 7.0], fov: 32 }}>
             <Suspense fallback={null}>

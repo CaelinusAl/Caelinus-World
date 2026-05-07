@@ -53,6 +53,17 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
 
+  // Next.js 16 dev: telefon LAN IP'sinden /_next/* asset'lerini çekerken
+  // cross-origin uyarısı vermesin. Caelinus Avatar Core'un QR akışında
+  // mobil aynı WiFi'deki LAN IP'si üzerinden bağlanır. Production'da
+  // bu config no-op (server origin URL ile aynıdır).
+  allowedDevOrigins: [
+    "192.168.1.21",
+    "192.168.1.0/24",
+    "192.168.0.0/24",
+    "10.0.0.0/8",
+  ],
+
   outputFileTracingExcludes: {
     "*": [
       "public/**/*",

@@ -17,17 +17,78 @@
  *     gösterir, fade-in/out animasyonu vardır.
  */
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
   ContactShadows,
+  Html,
   useGLTF,
 } from "@react-three/drei";
 
 import ModelAvatar from "@/components/shop/ModelAvatar";
 import type { GeneratedAvatar } from "@/lib/caelinus-ai";
+
+/**
+ * Sahnede mesh yüklenirken in-canvas görünür fallback —
+ * Suspense `null` döndürdüğünde kullanıcı siyah ekranla baş başa
+ * kalmasın diye küçük altın bir nefes ile sahnenin ortasında durur.
+ */
+function SceneLoading({ label = "Sahne örülüyor" }: { label?: string }) {
+  return (
+    <Html center transform={false} zIndexRange={[10, 0]}>
+      <div className="cai-scene-inline-loading" role="status">
+        <span className="cai-scene-inline-glyph">✦</span>
+        <span>{label}</span>
+      </div>
+    </Html>
+  );
+}
+
+/**
+ * GLB load hatasını yakala — `useGLTF` 404'lerde ya da CORS
+ * sorununda throw eder, normalde Suspense bu hatayı yutar ve
+ * sayfa siyah kalır. Burada hatayı yakalayıp sahnenin ortasında
+ * okunabilir bir mesaj gösteriyoruz ki teşhis kolay olsun.
+ */
+class SceneErrorBoundary extends Component<
+  { children: ReactNode; onError?: (e: Error) => void },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("[Caelinus3DScene] GLB error:", error);
+    this.props.onError?.(error);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <Html center transform={false} zIndexRange={[10, 0]}>
+          <div className="cai-scene-inline-error" role="alert">
+            <span className="cai-scene-inline-glyph">⚠</span>
+            <span>Sahne yüklenemedi — sayfayı yenile</span>
+          </div>
+        </Html>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const DEFAULT_MODEL = "/models/caelinus-avatar.glb";
 
@@ -77,17 +138,23 @@ export default function Caelinus3DScene({
 
   // GLB değiştiğinde kısa swap shimmer overlay'ini tetikle —
   // mesh yeniden yükleniyor süresince kullanıcıya "değişim" hissi verir.
+  //
+  // ÖNEMLİ — StrictMode safety:
+  // React 19 + StrictMode dev modda effect'i mount/unmount/mount
+  // sırasıyla iki kez çalıştırır. Önceki sürümde "lastUrlRef === url
+  // → return" guard'ı, ikinci mount'ta `setSwapping(false)` adımını
+  // hiç çağırmıyordu ve veil sonsuza takılıyordu. Cleanup'ta state'i
+  // her durumda kapatarak sorunu sıfırladık.
   const [swapping, setSwapping] = useState(false);
-  const swapTimerRef = useRef<number | null>(null);
   const lastUrlRef = useRef<string>(url);
   useEffect(() => {
     if (lastUrlRef.current === url) return;
     lastUrlRef.current = url;
     setSwapping(true);
-    if (swapTimerRef.current) window.clearTimeout(swapTimerRef.current);
-    swapTimerRef.current = window.setTimeout(() => setSwapping(false), 900);
+    const timer = window.setTimeout(() => setSwapping(false), 700);
     return () => {
-      if (swapTimerRef.current) window.clearTimeout(swapTimerRef.current);
+      window.clearTimeout(timer);
+      setSwapping(false);
     };
   }, [url]);
 
@@ -116,34 +183,34 @@ export default function Caelinus3DScene({
       )}
 
       <Canvas camera={{ position: [0, 1.4, 8.5], fov: 32 }} shadows>
-        <Suspense fallback={null}>
-          <color attach="background" args={["#0a0806"]} />
-          <fog attach="fog" args={["#0a0806", 8, 20]} />
+        <color attach="background" args={["#0a0806"]} />
+        <fog attach="fog" args={["#0a0806", 8, 20]} />
 
-          <ambientLight intensity={0.55} />
-          <directionalLight
-            position={[3, 4, 3]}
-            intensity={1.4}
+        <ambientLight intensity={0.55} />
+        <directionalLight
+          position={[3, 4, 3]}
+          intensity={1.4}
+          color={lightTint}
+          castShadow
+        />
+        <directionalLight
+          position={[-3, 2, -2]}
+          intensity={0.6}
+          color="#e8c8a8"
+        />
+        <pointLight position={[0, 6, 4]} intensity={0.5} color="#fff5d5" />
+        {tryOnAccent && (
+          <pointLight
+            position={[0, 1.6, 4]}
+            intensity={1.2}
             color={lightTint}
-            castShadow
+            distance={8}
+            decay={2}
           />
-          <directionalLight
-            position={[-3, 2, -2]}
-            intensity={0.6}
-            color="#e8c8a8"
-          />
-          <pointLight position={[0, 6, 4]} intensity={0.5} color="#fff5d5" />
-          {tryOnAccent && (
-            <pointLight
-              position={[0, 1.6, 4]}
-              intensity={1.2}
-              color={lightTint}
-              distance={8}
-              decay={2}
-            />
-          )}
+        )}
 
-          <Suspense fallback={null}>
+        <SceneErrorBoundary>
+          <Suspense fallback={<SceneLoading label="Bedenin geliyor…" />}>
             <ModelAvatar
               key={url}
               url={url}
@@ -152,32 +219,34 @@ export default function Caelinus3DScene({
               animationUrl={animationUrl}
             />
           </Suspense>
+        </SceneErrorBoundary>
 
-          <ContactShadows
-            position={[0, -0.02, 0]}
-            opacity={0.45}
-            scale={6}
-            blur={3}
-            far={4}
-            color="#000000"
-          />
+        <ContactShadows
+          position={[0, -0.02, 0]}
+          opacity={0.45}
+          scale={6}
+          blur={3}
+          far={4}
+          color="#000000"
+        />
 
+        <Suspense fallback={null}>
           <Environment preset="warehouse" environmentIntensity={0.45} />
-
-          <OrbitControls
-            enablePan={false}
-            enableDamping
-            dampingFactor={0.18}
-            autoRotate={autoRotate}
-            autoRotateSpeed={0.6}
-            minDistance={4}
-            maxDistance={14}
-            minPolarAngle={Math.PI / 3}
-            maxPolarAngle={Math.PI / 1.7}
-            target={[0, 1.4, 0]}
-            makeDefault
-          />
         </Suspense>
+
+        <OrbitControls
+          enablePan={false}
+          enableDamping
+          dampingFactor={0.18}
+          autoRotate={autoRotate}
+          autoRotateSpeed={0.6}
+          minDistance={4}
+          maxDistance={14}
+          minPolarAngle={Math.PI / 3}
+          maxPolarAngle={Math.PI / 1.7}
+          target={[0, 1.4, 0]}
+          makeDefault
+        />
       </Canvas>
     </div>
   );

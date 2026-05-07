@@ -1,0 +1,9 @@
+# Caelinus AI — RunPod face-analyze worker dependencies.
+#
+# Versionlar pinned — RunPod build cache'inin bozulmaması için.
+# MediaPipe Tasks Vision Apache 2.0; Pillow + NumPy permissive lisans.
+
+runpod==1.7.0
+mediapipe==0.10.18
+Pillow==11.0.0
+numpy==1.26.4

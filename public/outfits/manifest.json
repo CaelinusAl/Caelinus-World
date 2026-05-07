@@ -1,0 +1,41 @@
+{
+  "_comment": "Caelinus AI — Outfit manifest. Canonical registry of garment GLBs that can be bound onto an avatar at runtime. Actual files live under public/models/Meshy_Al/ for historical reasons; the binding configuration lives in data/products.ts (OUTFIT_GLB_MAP) and lib/config/outfit-binding-config.ts.",
+  "version": "0.2.0",
+  "updatedAt": "2026-05-07",
+  "convention": {
+    "newOutfitsGoUnder": "public/models/Meshy_Al/",
+    "registerInCode": "data/products.ts → OUTFIT_GLB_MAP, mergeOutfitBinding(category, glbPath)",
+    "categoryPresets": "lib/config/outfit-binding-config.ts (per-category bone targets + scale)",
+    "tryOnVariants": "lib/caelinus-ai/try-on-variants.ts → 9 selin*.glb body silhouettes used as a 'wore the outfit' illusion in MVP"
+  },
+  "outfits": [
+    { "productId": "b1",  "category": "bikini", "zodiac": "aries",       "url": "/models/Meshy_Al/aries.glb"     },
+    { "productId": "b3",  "category": "bikini", "zodiac": "gemini",      "url": "/models/Meshy_Al/gemini.glb"    },
+    { "productId": "b4",  "category": "bikini", "zodiac": "cancer",      "url": "/models/Meshy_Al/cancer.glb"    },
+    { "productId": "b6",  "category": "bikini", "zodiac": "virgo",       "url": "/models/Meshy_Al/virgo.glb"     },
+    { "productId": "b7",  "category": "bikini", "zodiac": "libra",       "url": "/models/Meshy_Al/libra.glb"     },
+    { "productId": "b8",  "category": "bikini", "zodiac": "scorpio",     "url": "/models/Meshy_Al/scorpione.glb" },
+    { "productId": "b10", "category": "bikini", "zodiac": "capricorn",   "url": "/models/Meshy_Al/capricorn.glb" },
+    { "productId": "b12", "category": "bikini", "zodiac": "pisces",      "url": "/models/Meshy_Al/pices.glb"     }
+  ],
+  "missing": [
+    { "productId": "b2",  "zodiac": "taurus",      "note": "Taurus bikini GLB henüz üretilmedi" },
+    { "productId": "b5",  "zodiac": "leo",         "note": "Leo bikini GLB henüz üretilmedi" },
+    { "productId": "b9",  "zodiac": "sagittarius", "note": "Sagittarius bikini GLB henüz üretilmedi" },
+    { "productId": "b11", "zodiac": "aquarius",    "note": "Aquarius bikini GLB henüz üretilmedi" },
+    { "productId": "pr1", "category": "pareo",     "note": "Pareo GLB'ler henüz üretilmedi" },
+    { "productId": "pr2", "category": "pareo",     "note": "Pareo GLB'ler henüz üretilmedi" },
+    { "productId": "pr3", "category": "pareo",     "note": "Pareo GLB'ler henüz üretilmedi" }
+  ],
+  "tryOnVariants": [
+    "/models/selin.glb",
+    "/models/selin (1).glb",
+    "/models/selin(2).glb",
+    "/models/selin(3).glb",
+    "/models/selin (3).glb",
+    "/models/selin(4).glb",
+    "/models/selin (5).glb",
+    "/models/selin (6).glb",
+    "/models/selin (7).glb"
+  ]
+}

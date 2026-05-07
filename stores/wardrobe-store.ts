@@ -43,7 +43,11 @@ export const useWardrobeStore = create<WardrobeState>((set) => ({
   tryOnProduct: null,
   dressedSlots: {},
   outfitStatus: null,
-  catwalkOn: false,
+  // Default açık — kapalıyken avatar T-pose'da donuyordu (kullanıcı
+  // "kollar yatay" rapor etti, screenshot kanıtı). Catwalk açık iken
+  // ise sahnede zarif ritimli bir yürüyüş döner; "Catwalk" butonuyla
+  // kapatılabilir.
+  catwalkOn: true,
   debugBindings: false,
   tunerOverride: null,
   showTuner: false,
@@ -98,4 +102,30 @@ export function useOutfitBindings(): OutfitBindingConfig[] {
 
 export function useDressedCount(): number {
   return useWardrobeStore((s) => Object.keys(s.dressedSlots).length);
+}
+
+/**
+ * Aktif "denenen / giyilen" ürünü döner — illüzyon overlay'leri (aura,
+ * tag, mood banner) bunu okur.
+ *
+ * Öncelik sırası — kullanıcının dikkati nerede ise oraya:
+ *   1. tryOnProduct  (kullanıcı bilinçli olarak "Ürünü Dene" dedi)
+ *   2. dressedSlots.top      (üst parça en görünür — bikini, pareo top)
+ *   3. dressedSlots.bottom
+ *   4. dressedSlots.shoes / accessory / bag
+ *
+ * Eski mantık yalnızca `tryOnProduct`'a bakıyordu; PDP'deki "Giydir"
+ * (`?dress=...`) akışı bunu set etmediği için illüzyon overlay'leri
+ * sahnede sessiz kalıyordu (kullanıcı raporu).
+ */
+export function useActiveTryOnProduct(): Product | null {
+  return useWardrobeStore((s) => {
+    if (s.tryOnProduct) return s.tryOnProduct;
+    const order: OutfitSlot[] = ["top", "bottom", "shoes", "accessory", "bag"];
+    for (const slot of order) {
+      const p = s.dressedSlots[slot];
+      if (p) return p;
+    }
+    return null;
+  });
 }

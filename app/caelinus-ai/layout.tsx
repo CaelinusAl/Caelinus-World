@@ -33,6 +33,9 @@ export default function CaelinusAILayout({
           <Link href="/caelinus-ai/try-on" className="cai-header-link">
             Try-on
           </Link>
+          <Link href="/caelinus-ai/shop" className="cai-header-link">
+            Bütik
+          </Link>
           <Link href="/universe" className="cai-header-link cai-header-link--ghost">
             Universe
           </Link>

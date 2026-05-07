@@ -52,23 +52,36 @@ const BUST_SCALE: Record<string, number> = { s: 0.92, m: 1.0, l: 1.1, xl: 1.22 }
  *
  *   3. **no bones at all** — pure static mesh. Vertex deform.
  *
- * Deformation magnitudes — Mayıs 2026 dramatize patch'i. Önceki
- * sürümde slider 30→100 kg sadece %20 fark üretiyordu; kullanıcı
- * "çalışmıyor" hissi yaşıyordu. Şimdi:
- *   • Boy   150-200 → 0.85x to 1.20x (head height)
- *   • Kilo  30-100  → 0.70x to 1.55x (XZ scale)
- *   • Hip   0.6-1.4 → direct multiplier
- *   • Bust  s/m/l/xl → 0.85 / 1.00 / 1.20 / 1.45 (was 0.92-1.22)
+ * Deformation magnitudes — Mayıs 2026 anatomic-sanity patch.
+ *
+ * Önceki "dramatize" sürümde slider'lar görünür sonuç versin diye
+ * faktörler aşırı agresifti (kilo max 1.55x, bust XL 1.45x). Üç
+ * neden bu yaklaşımı bozdu:
+ *   • Bust bone, Chest bone'un child'ıdır — weight scale (1.55x)
+ *     bust bone'a inherit oluyor, üstüne kendi 1.45x scale'i
+ *     binince visual çarpan ~2.25x oluyordu (kullanıcı "dev
+ *     göğüsler" raporladı, screenshot kanıtı var).
+ *   • Bust bone X/Y/Z üç eksende scale'leniyordu → balon efekti.
+ *   • Kilo 1.55x topuk-baş hattını da bozuyor.
+ *
+ * Yeni güvenli aralıklar:
+ *   • Boy   150-200 → 0.92x to 1.10x (Y scale, ayak-baş hattı)
+ *   • Kilo  30-100  → 0.88x to 1.18x (XZ scale)
+ *   • Hip   0.6-1.4 → direct multiplier (zaten makul)
+ *   • Bust  s/m/l/xl → 0.92 / 1.00 / 1.06 / 1.12 (was 0.85-1.45)
+ *     ve **chest weight scale'i compansate ediliyor** → bust local
+ *     scale = (bustFactor / weightFactor) → visual = bustFactor.
+ *     Y ekseni 1.0 sabit; sadece X/Z ile genişletiliyor.
  *
  * @returns one of "bones-skinned", "bones-cosmetic", "vertex", "none"
  *   so the caller (and console diagnostic) knows which branch ran.
  */
 
 const DRAMATIC_BUST_SCALE: Record<string, number> = {
-  s: 0.85,
+  s: 0.92,
   m: 1.0,
-  l: 1.2,
-  xl: 1.45,
+  l: 1.06,
+  xl: 1.12,
 };
 
 type BodyDeformResult = {
@@ -88,9 +101,10 @@ function applyBodyDeformation(
   scene: THREE.Object3D,
   cfg: AvatarConfig,
 ): BodyDeformResult {
-  // Dramatize edilmiş faktörler — slider hareketi görünür sonuç versin.
-  const heightFactor = 0.85 + ((cfg.height - 150) / 50) * 0.35; // 150→0.85, 200→1.20
-  const weightFactor = 0.7 + ((cfg.weight - 30) / 70) * 0.85;   // 30→0.70, 100→1.55
+  // Anatomic-sanity faktörleri — slider hareketi hâlâ görünür ama
+  // proporsiyonu bozmayan aralıkta.
+  const heightFactor = 0.92 + ((cfg.height - 150) / 50) * 0.18; // 150→0.92, 200→1.10
+  const weightFactor = 0.88 + ((cfg.weight - 30) / 70) * 0.30;  // 30→0.88, 100→1.18
   const bustFactor = DRAMATIC_BUST_SCALE[cfg.bustSize] ?? 1;
   const hipFactor = cfg.hipRatio;
 
@@ -120,7 +134,13 @@ function applyBodyDeformation(
       } else if (/spine|torso|chest/i.test(n)) {
         obj.scale.set(weightFactor, 1, weightFactor);
       } else if (/bust|breast/i.test(n)) {
-        obj.scale.set(bustFactor, bustFactor, bustFactor);
+        // ÖNEMLİ — compound compensation:
+        // Bust bone, Chest bone'un child'ı; chest XZ scale'i (weightFactor)
+        // bust'a inherit oluyor. İstediğimiz görsel scale = bustFactor.
+        // Bu yüzden local scale'i (bustFactor / weightFactor) yapıyoruz.
+        // Y ekseni 1.0 sabit — balon efektini önler, sadece XZ'de genişler.
+        const localBust = bustFactor / Math.max(weightFactor, 0.1);
+        obj.scale.set(localBust, 1, localBust);
       } else if (/thigh|upperleg|upleg/i.test(n)) {
         obj.scale.set(
           weightFactor * hipFactor * 0.95,

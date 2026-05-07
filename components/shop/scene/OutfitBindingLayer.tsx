@@ -183,7 +183,32 @@ export default function OutfitBindingLayer({
     );
     setResolution(res);
 
-    const anchorBone = res.resolvedBone ?? avatarRoot;
+    // ÖNEMLİ — bind hatası kontrolü:
+    // Bone resolve ettikten sonra resolvedBone null ise (avatar
+    // beklenen bone'a sahip değil), eski sürümde avatarRoot'a
+    // fallback ediyorduk. Sonuç: garment "kayıt anchor" olmadığı
+    // için config.position değerleriyle sahnenin etrafında yüzüyor,
+    // bazen ekrana göre dev boyutta görünüyordu (kullanıcı
+    // screenshot kanıtı verdi).
+    //
+    // Şimdi bone resolve fail olunca outfit'i gizle + status error
+    // bildir; sahneye saçılmasın.
+    if (!res.resolvedBone) {
+      console.warn(
+        `[OutfitBinding] ⚠ bone not found for "${config.bindingTarget}" ` +
+          `(fallbacks: ${(config.fallbackTargets ?? []).join(", ") || "—"}), ` +
+          `hiding outfit ${config.glbUrl}`,
+      );
+      container.visible = false;
+      reportStatus({
+        state: "error",
+        glbUrl: config.glbUrl,
+        message: `bone "${config.bindingTarget}" bulunamadı`,
+      });
+      return;
+    }
+
+    const anchorBone = res.resolvedBone;
 
     // Log all bone names for debugging (first time only)
     if (process.env.NODE_ENV === "development") {
@@ -214,12 +239,38 @@ export default function OutfitBindingLayer({
     const worldMax = Math.max(worldSize.x, worldSize.y, worldSize.z);
 
     // ── auto-scale ──
-    const TARGET_FRAC = 0.40;
-    let sf = 1;
+    // Önceki sürüm yalnızca `ratio > 1.5 || ratio < 0.05` durumunda
+    // auto-scale uyguluyordu. Bikini GLB'lerinin native worldMax'ı
+    // avatar boyuna yakındı (ratio ~1.2) → guard tetiklenmiyor →
+    // garment 1:1 native scale'inde kalıp avatardan büyük görünüyordu
+    // (kullanıcı "bikini etrafımda sarkıyor" raporladı).
+    //
+    // Şimdi auto-scale **her zaman** uygulanıyor ve hedef oran
+    // kategoriye göre (`config.targetFraction`) seçiliyor:
+    //   • bikini one-piece → 0.42
+    //   • pareo            → 0.55
+    //   • bag              → 0.18
+    //   • heels            → 0.10
+    //   • necklace         → 0.12
+    //   • earring/bracelet → 0.05–0.06
+    const TARGET_FRAC = config.targetFraction ?? 0.40;
     const ratio = worldMax > 0.001 && avatarH > 0.001 ? worldMax / avatarH : 1;
+    let sf = (avatarH * TARGET_FRAC) / Math.max(worldMax, 0.001);
 
-    if (ratio > 1.5 || ratio < 0.05) {
-      sf = (avatarH * TARGET_FRAC) / worldMax;
+    // Defansif: avatar/garment ölçümü dejenere ise (NaN/Infinity)
+    // gizle — sahneye dev boyutta yüzmesin.
+    if (!Number.isFinite(sf) || sf <= 0 || worldMax <= 0 || avatarH <= 0) {
+      console.warn(
+        `[OutfitBinding] ⚠ degenerate measurement for ${config.glbUrl}: ` +
+          `sf=${sf}, worldMax=${worldMax}, avatarH=${avatarH} — hiding`,
+      );
+      container.visible = false;
+      reportStatus({
+        state: "error",
+        glbUrl: config.glbUrl,
+        message: "ölçüm anomalisi (auto-scale)",
+      });
+      return;
     }
 
     outfitScene.scale.setScalar(sf);
@@ -241,17 +292,20 @@ export default function OutfitBindingLayer({
     }
     container.visible = visible;
 
-    // ── debug helpers (always-on for now) ──
-    // Red wireframe box around outfit bbox
-    const bh = new THREE.BoxHelper(outfitScene, 0xff0000);
-    bh.update();
-    container.add(bh);
-    boxHelperRef.current = bh;
+    // ── debug helpers (gated by `debug` prop / wardrobe-store) ──
+    // Önceden "always-on for now" idi → kırmızı bbox ve eksenler
+    // sahnede sürekli görünüp ürünü kesiyordu. Artık yalnızca
+    // StageControls'taki "Debug ON" butonu açıkken çiziliyor.
+    if (debug) {
+      const bh = new THREE.BoxHelper(outfitScene, 0xff0000);
+      bh.update();
+      container.add(bh);
+      boxHelperRef.current = bh;
 
-    // Axes at the anchor point (container origin = bone position)
-    const ax = new THREE.AxesHelper(0.3);
-    container.add(ax);
-    axesRef.current = ax;
+      const ax = new THREE.AxesHelper(0.3);
+      container.add(ax);
+      axesRef.current = ax;
+    }
 
     // ── z-offset for materials ──
     const zo = config.zOffset;

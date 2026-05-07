@@ -1915,6 +1915,43 @@
   animation: cai-glow-pulse 1.2s ease-in-out infinite;
 }
 
+/* ── In-canvas (drei <Html>) loading + error fallback ── */
+
+.cai-scene-inline-loading,
+.cai-scene-inline-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 1px solid rgba(245, 217, 122, 0.32);
+  border-radius: 999px;
+  background: rgba(10, 8, 6, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--cai-nude, #e7d9c4);
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  box-shadow: 0 0 24px rgba(245, 217, 122, 0.12);
+}
+
+.cai-scene-inline-loading {
+  animation: cai-glow-pulse 1.4s ease-in-out infinite;
+}
+
+.cai-scene-inline-error {
+  border-color: rgba(220, 100, 80, 0.45);
+  color: #f0c8b6;
+}
+
+.cai-scene-inline-glyph {
+  font-size: 16px;
+  color: var(--cai-gold-glow, #f5d97a);
+}
+
 .cai-tryon-product-wrapper {
   display: flex;
   height: 100%;
@@ -1949,4 +1986,741 @@
   font-style: italic;
   letter-spacing: 0.06em;
   text-transform: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   AVATAR CAROUSEL — body picker (shop + future avatar pages)
+   ───────────────────────────────────────────────────────── */
+
+.cai-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.55) 0%, rgba(15, 12, 10, 0.7) 100%);
+  border: 1px solid var(--cai-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.cai-carousel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% -20%, rgba(245, 217, 122, 0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cai-carousel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.cai-carousel-heading-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cai-carousel-kicker {
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-carousel-heading {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 400;
+  color: var(--cai-cream);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.cai-carousel-subtitle {
+  font-size: 12px;
+  color: var(--cai-grey);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cai-carousel-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cai-carousel-nav-btn {
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--cai-line);
+  background: transparent;
+  color: var(--cai-cream);
+  font-size: 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+  line-height: 1;
+}
+
+.cai-carousel-nav-btn:hover {
+  border-color: var(--cai-gold);
+  color: var(--cai-gold-glow);
+  background: rgba(202, 165, 106, 0.08);
+}
+
+.cai-carousel-counter {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: center;
+}
+
+.cai-carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(202, 165, 106, 0.35) transparent;
+  padding: 4px 2px 8px;
+  position: relative;
+  z-index: 1;
+  outline: none;
+}
+
+.cai-carousel-track:focus-visible {
+  box-shadow: 0 0 0 1px var(--cai-line-strong);
+  border-radius: 12px;
+}
+
+.cai-carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+.cai-carousel-track::-webkit-scrollbar-thumb {
+  background: rgba(202, 165, 106, 0.3);
+  border-radius: 999px;
+}
+
+.cai-carousel-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 168px;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--cai-line);
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.7) 0%, rgba(15, 12, 10, 0.8) 100%);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cai-carousel-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cai-line-strong);
+}
+
+.cai-carousel-card.is-selected {
+  border-color: var(--cai-gold);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.25) inset,
+    0 22px 44px -22px rgba(245, 217, 122, 0.45);
+}
+
+.cai-carousel-card.is-recommended {
+  border-color: var(--cai-gold);
+}
+
+.cai-carousel-card.is-user-generated::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(245, 217, 122, 0.55) 22%,
+    transparent 38%,
+    rgba(202, 165, 106, 0.45) 62%,
+    transparent 82%
+  );
+  filter: blur(8px);
+  opacity: 0.45;
+  z-index: -1;
+}
+
+.cai-carousel-card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: rgba(15, 12, 10, 0.85);
+  color: var(--cai-cream);
+  border: 1px solid var(--cai-line);
+}
+
+.cai-carousel-card-badge--gold {
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+  border-color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-carousel-card-thumb {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f1813 0%, #0a0806 70%);
+}
+
+.cai-carousel-card-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cai-carousel-card-thumb-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--cai-gold-soft);
+  background: radial-gradient(circle at 50% 35%, rgba(202, 165, 106, 0.18) 0%, transparent 70%);
+}
+
+.cai-carousel-card-thumb-mono {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 32px;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+  color: var(--cai-cream);
+}
+
+.cai-carousel-card-thumb-glyph {
+  font-size: 11px;
+  color: var(--cai-gold);
+}
+
+.cai-carousel-card-aura {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 100%, rgba(202, 165, 106, 0.18) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.cai-carousel-card.is-selected .cai-carousel-card-aura,
+.cai-carousel-card:hover .cai-carousel-card-aura {
+  opacity: 1;
+}
+
+.cai-carousel-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cai-carousel-card-name {
+  margin: 0;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--cai-cream);
+  line-height: 1.25;
+}
+
+.cai-carousel-card-tagline {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--cai-grey);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cai-carousel-card-vibe {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-carousel--thumbs .cai-carousel-card {
+  width: 124px;
+}
+
+.cai-carousel--thumbs .cai-carousel-card-thumb {
+  aspect-ratio: 1 / 1;
+}
+
+.cai-carousel--thumbs .cai-carousel-card-name {
+  font-size: 13px;
+}
+
+.cai-carousel--thumbs .cai-carousel-card-tagline {
+  -webkit-line-clamp: 1;
+}
+
+.cai-carousel-empty-text {
+  margin: 0;
+  font-size: 12px;
+  color: var(--cai-grey);
+  text-align: center;
+  padding: 16px;
+}
+
+.cai-carousel-hint {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(245, 217, 122, 0.06);
+  border: 1px dashed var(--cai-line);
+  color: var(--cai-grey);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.cai-carousel-hint-link {
+  color: var(--cai-gold);
+  text-decoration: none;
+  font-weight: 500;
+}
+.cai-carousel-hint-link:hover {
+  color: var(--cai-gold-glow);
+}
+
+@media (max-width: 720px) {
+  .cai-carousel-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cai-carousel-nav {
+    justify-content: flex-end;
+  }
+  .cai-carousel-card {
+    width: 142px;
+  }
+  .cai-carousel--thumbs .cai-carousel-card {
+    width: 108px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   SHOP PAGE — /caelinus-ai/shop
+   Layout: SOL → 3D sahne + carousel,  SAĞ → ürün ızgarası,
+   ALT → floating cart bar (sepet doluysa).
+   ───────────────────────────────────────────────────────── */
+
+.cai-shop-page {
+  position: relative;
+  padding-bottom: 120px;
+}
+
+.cai-shop-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .cai-shop-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cai-shop-stage-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+@media (max-width: 1080px) {
+  .cai-shop-stage-col {
+    position: static;
+    top: auto;
+  }
+}
+
+.cai-shop-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cai-shop-stage .cai-canvas {
+  aspect-ratio: 4 / 5;
+}
+
+.cai-shop-stage-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(15, 12, 10, 0.7);
+  border: 1px solid var(--cai-line);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.cai-shop-stage-frequency {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--cai-gold-soft);
+}
+
+.cai-shop-stage-trying {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cai-cream);
+  flex-wrap: wrap;
+}
+
+.cai-shop-stage-trying-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cai-gold-glow);
+  box-shadow: 0 0 10px var(--cai-gold-glow);
+}
+
+.cai-shop-stage-trying--idle {
+  color: var(--cai-grey);
+  font-style: italic;
+}
+
+.cai-shop-stage-variant {
+  margin-left: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-gold-glow);
+  background: rgba(245, 217, 122, 0.08);
+  border: 1px solid var(--cai-line-strong);
+  font-weight: 600;
+}
+
+.cai-shop-carousel {
+  margin-top: 4px;
+}
+
+.cai-shop-stage-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cai-shop-stage-link {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+.cai-shop-stage-link:hover {
+  color: var(--cai-gold-glow);
+}
+
+.cai-shop-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cai-shop-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cai-shop-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.cai-shop-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(31, 24, 19, 0.6) 0%, rgba(15, 12, 10, 0.7) 100%);
+  border: 1px solid var(--cai-line);
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cai-shop-product-card:hover {
+  border-color: var(--cai-line-strong);
+  transform: translateY(-2px);
+}
+
+.cai-shop-product-card.is-trying {
+  border-color: var(--cai-gold);
+  box-shadow:
+    0 0 0 1px rgba(245, 217, 122, 0.25) inset,
+    0 24px 50px -22px rgba(245, 217, 122, 0.45);
+}
+
+.cai-shop-product-card.is-just-added {
+  animation: cai-shop-pulse 1.6s ease-out;
+}
+
+@keyframes cai-shop-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 217, 122, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(245, 217, 122, 0);
+  }
+}
+
+.cai-shop-product-thumb {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f1813 0%, #0a0806 80%);
+}
+
+.cai-shop-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.cai-shop-product-card:hover .cai-shop-product-thumb img {
+  transform: scale(1.04);
+}
+
+.cai-shop-product-trying-tag,
+.cai-shop-product-added-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: rgba(15, 12, 10, 0.85);
+  color: var(--cai-gold-glow);
+  border: 1px solid var(--cai-gold);
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  animation: cai-tag-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cai-shop-product-added-tag {
+  background: linear-gradient(180deg, var(--cai-gold-soft) 0%, var(--cai-gold) 100%);
+  color: var(--cai-ink);
+}
+
+.cai-shop-product-meta {
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cai-shop-product-frequency {
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cai-gold);
+  font-weight: 600;
+}
+
+.cai-shop-product-name {
+  margin: 0;
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--cai-cream);
+  line-height: 1.25;
+}
+
+.cai-shop-product-story {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cai-grey);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cai-shop-product-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--cai-line);
+  margin-top: 2px;
+}
+
+.cai-shop-product-price {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 18px;
+  color: var(--cai-gold-glow);
+  letter-spacing: 0.02em;
+}
+
+.cai-shop-product-designer {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cai-grey);
+}
+
+.cai-shop-product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.cai-shop-product-actions .lux-btn {
+  width: 100%;
+}
+
+/* ── Floating cart bar ── */
+
+.cai-shop-cartbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  padding: 12px 16px;
+  background: linear-gradient(0deg, rgba(10, 8, 6, 0.96) 0%, rgba(15, 12, 10, 0.85) 100%);
+  border-top: 1px solid var(--cai-line-strong);
+  backdrop-filter: blur(10px);
+  animation: cai-cartbar-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cai-cartbar-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cai-shop-cartbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cai-shop-cartbar-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cai-shop-cartbar-glyph {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--cai-gold);
+  color: var(--cai-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 0 18px rgba(245, 217, 122, 0.25);
+}
+
+.cai-shop-cartbar-count {
+  font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 18px;
+  color: var(--cai-cream);
+  line-height: 1.2;
+}
+
+.cai-shop-cartbar-sub {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--cai-grey);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .cai-shop-cartbar-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cai-shop-cartbar-meta {
+    justify-content: center;
+  }
+  .cai-shop-cartbar-inner .lux-btn {
+    width: 100%;
+  }
 }

@@ -38,7 +38,11 @@
 import Link from "next/link";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useSceneStore } from "@/stores/scene-store";
-import { useWardrobeStore, useOutfitBindings } from "@/stores/wardrobe-store";
+import {
+  useWardrobeStore,
+  useOutfitBindings,
+  useActiveTryOnProduct,
+} from "@/stores/wardrobe-store";
 import { useCartStore } from "@/stores/cart-store";
 import { scenes } from "@/data/scenes";
 import { archetypes } from "@/data/archetypes";
@@ -53,6 +57,7 @@ import { getBody, DEFAULT_BODY_ID, type BodyEntry } from "@/lib/avatar-bodies";
 import { TryOnProductPanel } from "@/components/shop/TryOnProductPanel";
 import type { OutfitId } from "@/types/play";
 import StageControls from "./StageControls";
+import { buildIllusionState } from "@/lib/shop/illusion-tryon";
 import "./tryon-empty.css";
 
 const AvatarScene = lazy(() => import("@/components/shop/AvatarScene"));
@@ -89,6 +94,19 @@ export default function TryOnSection() {
   const setTunerOverride = useWardrobeStore((s) => s.setTunerOverride);
   const outfitBindings = useOutfitBindings();
   const addToCart = useCartStore((s) => s.addToCart);
+
+  // ── Try-on illüzyon meta'sı ───────────────────────────────
+  // Ürün → enerji rengi + tag + mood. AvatarScene aura/tag bunu
+  // okur, ProductSection / TryOnProductPanel mood'u gösterebilir.
+  //
+  // useActiveTryOnProduct hem `tryOnProduct` hem `dressedSlots`'taki
+  // ana ürünü kapsar — PDP'den "Giydir" (?dress=...) ile gelinen
+  // akışta da illüzyon halkası ve tag tetiklenir.
+  const activeTryOnProduct = useActiveTryOnProduct();
+  const illusion = useMemo(
+    () => buildIllusionState(activeTryOnProduct),
+    [activeTryOnProduct],
+  );
 
   /* ── 3D body + face state ──────────────────────────────── */
   // Hydration safety: localStorage sadece client'ta. SSR'da default
@@ -212,6 +230,14 @@ export default function TryOnSection() {
               outfitBindings={outfitBindings}
               debugBindings={debugBindings}
               onOutfitStatus={setOutfitStatus}
+              // Illüzyon try-on: ürün seçildiğinde sahnenin aura halkası
+              // ürünün enerji rengine kayar, üstte "✦ Bedeninde · {ürün}"
+              // tag'i fade-in olur. Cloth simulation YOK — pareo, çanta,
+              // takı gibi GLB binding'i olmayan kategorilerde bile "denedim"
+              // hissi veriyor. Bikini gibi gerçek GLB'si olan ürünlerde
+              // ise binding ile birlikte ek vurgu olur.
+              tryOnAccent={illusion.accent}
+              tryOnLabel={illusion.tag}
             />
           </Suspense>
 

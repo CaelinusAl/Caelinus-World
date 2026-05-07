@@ -102,6 +102,27 @@ export type OutfitBindingConfig = {
    *  Values are mesh-name substrings (case-insensitive). */
   hiddenMeshParts?: string[];
 
+  /**
+   * Avatar boyuna göre garment'ın hedef yüksekliği (0–1).
+   * OutfitBindingLayer auto-scale'i `garmentScale = avatarH * targetFraction / worldMax`
+   * formülüyle hesaplar. Değer kategoriye göre değişir:
+   *   • bikini one-piece → 0.42 (gövde belden hipe)
+   *   • bikini_top       → 0.18 (sadece bust)
+   *   • bikini_bottom    → 0.18 (sadece kalça)
+   *   • pareo            → 0.55 (boydan diz altına)
+   *   • bag              → 0.18 (kalça yanı küçük obje)
+   *   • heels            → 0.10 (ayak)
+   *   • necklace         → 0.12 (boyun)
+   *   • earring          → 0.05 (kulak)
+   *   • bracelet         → 0.06 (bilek)
+   *
+   * Belirtilmezse OutfitBindingLayer 0.40 default'unu kullanır.
+   * Ayrıca **her zaman** uygulanır (eski "ratio out of bounds" guard'ı
+   * kaldırıldı — bikini ratio 1.2 olduğunda guard tetiklenmiyordu ve
+   * garment 1:1 native scale'inde dev görünüyordu).
+   */
+  targetFraction?: number;
+
   /** Material overrides applied after GLB load (future) */
   materialOverrides?: import("./scene-layers").WearableMaterialOverride;
 };
