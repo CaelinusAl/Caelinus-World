@@ -48,8 +48,12 @@ git push
 2. **Custom Source** seç, sonra **GitHub** sekmesi
 3. Repo: `caelinus/caelinus-word` (veya senin repo adın)
 4. Branch: `main`
-5. **Dockerfile path**: `caelinus/runpod/face-analyze/Dockerfile`
-6. **Build context path**: `caelinus/runpod/face-analyze`
+5. **Dockerfile path**: `runpod/face-analyze/Dockerfile`
+6. **Build context path**: `runpod/face-analyze`
+
+> ⚠️ **Build context önemli!** Repo root (`.`) seçersen build context ~1.3 GB olur (public/models GLB dosyaları), RunPod build limitini aşar → "Build Failed" hatası. Mutlaka `runpod/face-analyze` yaz (sadece worker klasörü, ~20 KB).
+>
+> Git root'unun ne olduğunu kontrol et: `git rev-parse --show-toplevel`. Bizim caselimizda root `caelinus/` olduğu için path'lerde `caelinus/` prefix'i YOK.
 
 ### 3. Worker config
 

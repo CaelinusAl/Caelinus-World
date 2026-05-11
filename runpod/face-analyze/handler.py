@@ -63,5 +63,7 @@ def handler(job: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-if __name__ == "__main__":
-    runpod.serverless.start({"handler": handler})
+# RunPod serverless'ı modül düzeyinde başlat — RunPod'un GitHub scanner'ı
+# bu çağrıyı static AST taraması ile bulabilsin. Container CMD bu modülü
+# çalıştırdığında otomatik olarak event loop başlar.
+runpod.serverless.start({"handler": handler})
