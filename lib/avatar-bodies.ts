@@ -71,7 +71,10 @@ const SELIN_VARIANTS: BodyEntry[] = [
     label: "Selin",
     tagline: "Senin frekansın — gerçek bir bedenden 3D'ye taşınmış mesh",
     url: "/models/selin.glb",
-    preview: "/models/previews/selin.png",
+    // Önizleme thumbnail'ları S3+ (real head topology bake) sonrası
+    // server-side render edilecek. Şimdilik AvatarCarousel'ın CSS
+    // gradient fallback'i (initials + ✦) tüm body'lerde tutarlı kalsın
+    // diye `preview` field'i bilerek boş.
     isPersonal: true,
     gender: "feminine",
     vibe: "Auteur — kendi hikâyesini dokuyan",

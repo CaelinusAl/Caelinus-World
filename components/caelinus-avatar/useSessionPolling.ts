@@ -12,6 +12,14 @@
  *
  * Polling Vercel'de native — WebSocket'e geçmek istersen aynı state
  * machine korunur, sadece transport değişir.
+ *
+ * S2 — Resource hijyen (`AbortController` + mount-guard):
+ *   • Her `tick()` kendi AbortController'ını kurar; unmount/yeni session
+ *     halinde `controller.abort()` çağrılır, uçuştaki fetch hemen düşer.
+ *   • `mountedRef` setState'i unmount sonrası tetiklemekten korur
+ *     (React 19 + StrictMode dev double-mount'ında console warning yok).
+ *   • Cleanup sırasında pending setTimeout `clearTimeout` ile iptal edilir
+ *     ve `stoppedRef.current = true` ile tick döngüsü kendiliğinden çıkar.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -31,6 +39,15 @@ export function useSessionPolling(sessionId: string | null): State {
   const failCountRef = useRef(0);
   const timerRef = useRef<number | null>(null);
   const stoppedRef = useRef(false);
+  const mountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!sessionId) {
@@ -41,21 +58,38 @@ export function useSessionPolling(sessionId: string | null): State {
     stoppedRef.current = false;
     failCountRef.current = 0;
 
+    /** Mount-safe state setter — unmount sonrası no-op. */
+    const safeSetState = (next: State | ((s: State) => State)) => {
+      if (!mountedRef.current) return;
+      setState(next);
+    };
+
     const tick = async () => {
       if (stoppedRef.current) return;
+
+      // Bu tick'in kendi AbortController'ı — unmount sırasında
+      // cleanup'tan abort edilir, fetch promise hemen reddeder.
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+
       try {
         const res = await fetch(`/api/avatar/session/${sessionId}`, {
           cache: "no-store",
+          signal: ctrl.signal,
         });
+        if (stoppedRef.current) return;
+
         if (res.status === 404) {
-          setState({ session: null, error: "Session süresi doldu." });
+          safeSetState({ session: null, error: "Session süresi doldu." });
           stoppedRef.current = true;
           return;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as { session: AvatarSession };
+        if (stoppedRef.current) return;
+
         failCountRef.current = 0;
-        setState({ session: data.session, error: null });
+        safeSetState({ session: data.session, error: null });
 
         if (
           data.session.status === "ready" ||
@@ -65,10 +99,14 @@ export function useSessionPolling(sessionId: string | null): State {
           stoppedRef.current = true;
           return;
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        // Cleanup'tan kaynaklanan abort — sessizce çık, retry sayma.
+        if ((err as { name?: string })?.name === "AbortError") {
+          return;
+        }
         failCountRef.current += 1;
         if (failCountRef.current >= MAX_NETWORK_FAILS) {
-          setState((s) => ({
+          safeSetState((s) => ({
             ...s,
             error: "Backend ile bağlantı kurulamıyor.",
           }));
@@ -76,9 +114,13 @@ export function useSessionPolling(sessionId: string | null): State {
           return;
         }
         console.warn("[useSessionPolling] tick error:", err);
+      } finally {
+        // Bu tick bitince controller referansını temizle —
+        // bir sonraki tick yeni controller alır.
+        if (abortRef.current === ctrl) abortRef.current = null;
       }
 
-      if (!stoppedRef.current) {
+      if (!stoppedRef.current && mountedRef.current) {
         timerRef.current = window.setTimeout(tick, INTERVAL_MS);
       }
     };
@@ -91,6 +133,9 @@ export function useSessionPolling(sessionId: string | null): State {
         window.clearTimeout(timerRef.current);
         timerRef.current = null;
       }
+      // Uçuştaki fetch'i kes — leak'i kapat
+      abortRef.current?.abort();
+      abortRef.current = null;
     };
   }, [sessionId]);
 

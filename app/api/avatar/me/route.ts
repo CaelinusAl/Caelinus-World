@@ -62,8 +62,21 @@ export async function GET() {
       .maybeSingle();
     error = partialSelect.error;
     if (partialSelect.data) {
+      // Supabase-js v2.104+'da `.select(...)` zincir narrowing'i bazen
+      // `never`'a çöküyor — `from("profiles").update(...)` için codebase'de
+      // `as never` workaround'u zaten uygulanmış (atelier orders actions).
+      // Burada okuma tarafında runtime shape'i biz biliyoruz, o yüzden
+      // explicit Pick cast ile narrowing'i atlatıyoruz.
+      const p = partialSelect.data as Pick<
+        import("@/lib/supabase/types").ProfileRow,
+        "caelinus_avatar_url"
+        | "caelinus_avatar_zodiac"
+        | "caelinus_avatar_updated_at"
+      >;
       data = {
-        ...partialSelect.data,
+        caelinus_avatar_url: p.caelinus_avatar_url,
+        caelinus_avatar_zodiac: p.caelinus_avatar_zodiac,
+        caelinus_avatar_updated_at: p.caelinus_avatar_updated_at,
         caelinus_avatar_base: null,
       };
     }

@@ -22,7 +22,7 @@ export type {
   ApiError,
 } from "./types";
 
-/* Session store (server-only) */
+/* Session store (server-only) — eski sync API geriye dönük uyumlu */
 export {
   createSession,
   getSession,
@@ -30,7 +30,12 @@ export {
   setStatus,
   deleteSession,
   activeSessionCount,
+  /** Async-aware namespace — production deploy'da Supabase backend için
+   *  bu namespace kullanılır. CAELINUS_AVATAR_SESSION_STORE=supabase
+   *  + SUPABASE_SERVICE_ROLE_KEY env'leriyle aktif olur. */
+  sessionStoreAsync,
 } from "./session-store";
+export type { SessionStore, CreateOptions } from "./session-store";
 
 /* Preset libraries */
 export {

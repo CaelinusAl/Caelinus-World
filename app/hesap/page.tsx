@@ -58,6 +58,12 @@ export default async function AccountPage() {
     notify_marketing: false,
     marketing_consent_at: null,
     deleted_at: null,
+    // Migration 0011 + 0013 — kullanıcı avatar'ı henüz yok.
+    // Bu kolonlar nullable; AccountBody bunları opsiyonel okur.
+    caelinus_avatar_url: null,
+    caelinus_avatar_zodiac: null,
+    caelinus_avatar_updated_at: null,
+    caelinus_avatar_base: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

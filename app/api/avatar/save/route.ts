@@ -181,16 +181,24 @@ export async function POST(req: Request) {
   // Bu yüzden iki aşamalı: önce mevcut kolonlar (Migration 0011)
   // ile dene; başarılıysa, canvas verildiyse 0012 kolonunu ayrı bir
   // update'le dene ve hatayı sessizce yut (eski şemada ek hint döner).
-  const updatePayload: Record<string, string> = {
+  // Inferred literal type — Supabase-js `update()` overload'u
+  // `Partial<ProfileRow>` ile uyumlu olsun diye explicit Record yerine
+  // dar literal tipi kullanıyoruz. zod-validated zodiac string ProfileRow'un
+  // 12-burç union'una zaten daralır.
+  const updatePayload = {
     caelinus_avatar_url: publicUrl,
     caelinus_avatar_zodiac: zodiac,
     caelinus_avatar_updated_at: updatedAt,
     updated_at: updatedAt,
-  };
+  } as const;
 
+  // `as never` — Supabase-js v2.104+ `update()` generic'i bazı durumlarda
+  // Database["public"]["Tables"]["profiles"]["Update"] yerine `never`'a
+  // çöküyor (overload narrowing bug). Codebase'de aynı pattern
+  // atelier/dashboard/siparisler/_actions/orders.ts'de zaten uygulanmış.
   const update = await admin
     .from("profiles")
-    .update(updatePayload)
+    .update(updatePayload as never)
     .eq("id", user.id);
 
   if (update.error) {
@@ -213,7 +221,7 @@ export async function POST(req: Request) {
   if (canvas) {
     const canvasUpdate = await admin
       .from("profiles")
-      .update({ caelinus_avatar_base: canvas })
+      .update({ caelinus_avatar_base: canvas } as never)
       .eq("id", user.id);
     if (canvasUpdate.error) {
       const msg = canvasUpdate.error.message;

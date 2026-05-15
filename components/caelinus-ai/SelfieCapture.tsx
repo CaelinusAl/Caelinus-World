@@ -22,11 +22,43 @@ import type { SelfieInput } from "@/lib/caelinus-ai";
 const MAX_EDGE = 1024;
 const ACCEPTED = "image/png,image/jpeg,image/webp";
 
+/**
+ * Resize/encode kalite eğrisi — iki kademe.
+ *
+ * Selfie iki yere gidiyor:
+ *   1) Browser-side MediaPipe FaceLandmarker (tarayıcıda kalır)
+ *   2) RunPod /runsync POST body (server → GPU container)
+ *
+ * (1) için 0.92 quality fazlasıyla yeterli (478 landmark için kalite
+ * threshold'unu çoktan geçer). (2) için cold-start + bandwidth
+ * önemli; payload ne kadar küçük olursa o kadar iyi.
+ *
+ * Adaptive strateji:
+ *   • İlk encode 0.85 — tipik selfie ~120-200 KB.
+ *   • Çıktı hâlâ TARGET_BYTES'i aşıyorsa (kompleks arka plan,
+ *     yüksek detay), 0.78'de tekrar encode et.
+ *   • İkinci pass yine yetmezse (nadiren), olduğu gibi taşı —
+ *     server tarafında MAX_DATAURL_BYTES (3.5MB) cap'i hâlâ var.
+ */
+const PRIMARY_QUALITY = 0.85;
+const FALLBACK_QUALITY = 0.78;
+const TARGET_BYTES = 220 * 1024;
+
 type Props = {
   initialDataUrl?: string | null;
   onCapture: (selfie: SelfieInput) => void;
   onClear?: () => void;
 };
+
+/** Base64 dataUrl'ün ham byte boyutunu hesapla (header çıkarılarak). */
+function dataUrlByteSize(dataUrl: string): number {
+  const commaIdx = dataUrl.indexOf(",");
+  if (commaIdx < 0) return dataUrl.length;
+  const base64 = dataUrl.slice(commaIdx + 1);
+  // Base64 → byte: ~3/4 * length, padding düzeltmesi
+  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
+  return Math.floor((base64.length * 3) / 4) - padding;
+}
 
 async function resizeImage(dataUrl: string): Promise<{
   dataUrl: string;
@@ -49,8 +81,21 @@ async function resizeImage(dataUrl: string): Promise<{
         return;
       }
       ctx.drawImage(img, 0, 0, outW, outH);
+
+      // İlk encode — tipik durumda burada bırakırız.
+      let out = canvas.toDataURL("image/jpeg", PRIMARY_QUALITY);
+
+      // Adaptive fallback — eğer hâlâ büyükse daha agresif sıkıştır.
+      // İkinci toDataURL aynı canvas üzerinde çalışır, ek render yok.
+      if (dataUrlByteSize(out) > TARGET_BYTES) {
+        const tighter = canvas.toDataURL("image/jpeg", FALLBACK_QUALITY);
+        if (dataUrlByteSize(tighter) < dataUrlByteSize(out)) {
+          out = tighter;
+        }
+      }
+
       resolve({
-        dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+        dataUrl: out,
         width: outW,
         height: outH,
       });

@@ -4,7 +4,7 @@
   "updatedAt": "2026-05-07",
   "convention": {
     "newAvatarsGoUnder": "public/models/",
-    "thumbnailsGoUnder": "public/models/previews/",
+    "thumbnailsGoUnder": "public/models/previews/ (S3+ — şu an yok, AvatarCarousel CSS fallback'i kullanıyor)",
     "registerInCode": "lib/avatar-bodies.ts → CAELINUS_BODY_LIBRARY",
     "futureMobileSelfieFlow": "QR endpoint will write user-generated GLBs here under public/avatars/users/<id>.glb",
     "urlEncodingNote": "GLB filenames with spaces (e.g. 'selin (1).glb') survive modern fetch; Three.js GLTFLoader handles them. lib/caelinus-ai/try-on-variants.ts ALSO encodeURI()'s these for safety in legacy code paths."
@@ -15,7 +15,6 @@
       "label": "Selin",
       "tagline": "Senin frekansın — gerçek bir bedenden 3D'ye taşınmış mesh",
       "url": "/models/selin.glb",
-      "preview": "/models/previews/selin.png",
       "isPersonal": true,
       "gender": "feminine",
       "vibe": "Auteur — kendi hikâyesini dokuyan",

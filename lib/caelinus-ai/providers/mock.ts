@@ -28,6 +28,7 @@ import {
   pickBody,
   scoreMatch,
 } from "../archetypes";
+import { PHASE_MESSAGES, PHASE_PROGRESS } from "../phase-messages";
 import type {
   AvatarProvider,
   GenerateInput,
@@ -106,25 +107,22 @@ function classifyFaceShape(metrics: {
 
 /* ─────────────────────────────────────────────────────────
    Provider implementasyonu
-   ───────────────────────────────────────────────────────── */
 
-const PHASE_MESSAGES: Record<ProgressUpdate["phase"], string> = {
-  preparing: "Caelinus ışık çemberi açılıyor…",
-  "analyzing-selfie": "Yüzünden bir frekans okuyoruz…",
-  "matching-archetype": "Arketipini eşleştiriyoruz…",
-  "generating-variants": "Altı farklı sen oluşuyor…",
-  rigging: "Bedenini hizalıyoruz, kemikleri ışıkla bağlanıyor…",
-  rendering: "Kozmik atölyede dokunuluyor…",
-  polishing: "Son rötuş — saç, ten, dudak…",
-  ready: "Caelinus bedenin hazır.",
-};
+   PHASE_MESSAGES + PHASE_PROGRESS artık `lib/caelinus-ai/phase-messages.ts`
+   modülünden geliyor — studio runner ile single source of truth. UI
+   parity garantili (mock vs. studio aynı text + aynı progress eğrisi).
+   ───────────────────────────────────────────────────────── */
 
 function emit(
   cb: ((u: ProgressUpdate) => void) | undefined,
   phase: ProgressUpdate["phase"],
-  progress: number,
+  progress?: number,
 ): void {
-  cb?.({ phase, progress, message: PHASE_MESSAGES[phase] });
+  cb?.({
+    phase,
+    progress: progress ?? PHASE_PROGRESS[phase],
+    message: PHASE_MESSAGES[phase],
+  });
 }
 
 async function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -227,20 +225,22 @@ export const mockProvider: AvatarProvider = {
   async generateMatches(input: GenerateInput): Promise<AvatarMatch[]> {
     const { selfie, style, onProgress, signal } = input;
 
-    emit(onProgress, "preparing", 5);
+    // Progress değerleri PHASE_PROGRESS'ten alınıyor (canonical) —
+    // emit() default'ları kullanır, studio runner'la birebir eşleşir.
+    emit(onProgress, "preparing");
     await sleep(250, signal);
 
     let analysis: SelfieAnalysis | undefined;
     if (selfie) {
-      emit(onProgress, "analyzing-selfie", 22);
+      emit(onProgress, "analyzing-selfie");
       analysis = await analyzeSelfieImpl(selfie);
       await sleep(450, signal);
     }
 
-    emit(onProgress, "matching-archetype", 48);
+    emit(onProgress, "matching-archetype");
     await sleep(500, signal);
 
-    emit(onProgress, "generating-variants", 80);
+    emit(onProgress, "generating-variants");
     await sleep(700, signal);
 
     const faceShape = analysis?.faceShape ?? "oval";
@@ -271,7 +271,7 @@ export const mockProvider: AvatarProvider = {
     );
     matches[topIdx].isRecommended = true;
 
-    emit(onProgress, "ready", 100);
+    emit(onProgress, "ready");
     return matches;
   },
 
@@ -281,11 +281,11 @@ export const mockProvider: AvatarProvider = {
     onProgress,
     signal,
   }): Promise<GeneratedAvatar> {
-    emit(onProgress, "rigging", 20);
+    emit(onProgress, "rigging");
     await sleep(300, signal);
-    emit(onProgress, "rendering", 60);
+    emit(onProgress, "rendering");
     await sleep(500, signal);
-    emit(onProgress, "polishing", 90);
+    emit(onProgress, "polishing");
     await sleep(250, signal);
 
     let analysis: SelfieAnalysis | undefined;
@@ -316,7 +316,7 @@ export const mockProvider: AvatarProvider = {
       matchId: match.id,
     };
 
-    emit(onProgress, "ready", 100);
+    emit(onProgress, "ready");
     return generated;
   },
 

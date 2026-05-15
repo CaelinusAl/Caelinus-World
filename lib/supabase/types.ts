@@ -52,6 +52,10 @@ export interface ProfileRow {
     | "sagittarius" | "capricorn" | "aquarius" | "pisces"
     | null;
   caelinus_avatar_updated_at: string | null;
+  // Wardrobe Faz B (Migration 0013) — kullanıcının seçtiği base canvas.
+  // 3 sabit tuval: 'silk' | 'bodysuit' | 'veil'. Migration uygulanana dek
+  // null kabul edilir; runtime fallback'i `lib/avatar/canvases.ts` taşır.
+  caelinus_avatar_base: "silk" | "bodysuit" | "veil" | null;
   created_at: string;
   updated_at: string;
 }

@@ -182,33 +182,8 @@ export type JobEvent =
 
 /* ────────── Faz → mesaj sözlüğü (Türkçe poetic) ────────── */
 
-export const JOB_PHASE_MESSAGES: Record<JobStatus, string> = {
-  queued: "Caelinus seni kuyruğa alıyor…",
-  preparing: "Caelinus ışık çemberi açılıyor…",
-  "analyzing-selfie": "Yüzünden bir frekans okuyoruz…",
-  "matching-archetype": "Arketipini eşleştiriyoruz…",
-  "generating-variants": "Altı farklı sen oluşuyor…",
-  "matches-ready": "Caelinus altı eşleşme buldu — seç.",
-  rigging: "Bedenini hizalıyoruz, kemikleri ışıkla bağlanıyor…",
-  rendering: "Kozmik atölyede dokunuluyor…",
-  polishing: "Son rötuş — saç, ten, dudak…",
-  finalized: "Caelinus bedenin hazır.",
-  cancelled: "İşlem iptal edildi.",
-  failed: "Caelinus seni yeniden okumalı — bir daha dene.",
-};
-
-/** Bu durumdaki job için varsayılan progress yüzdesi. */
-export const JOB_PHASE_PROGRESS: Record<JobStatus, number> = {
-  queued: 2,
-  preparing: 8,
-  "analyzing-selfie": 24,
-  "matching-archetype": 48,
-  "generating-variants": 80,
-  "matches-ready": 100,
-  rigging: 25,
-  rendering: 60,
-  polishing: 90,
-  finalized: 100,
-  cancelled: 0,
-  failed: 0,
-};
+// Re-export from shared single-source-of-truth module — mock provider
+// + studio runner + UI step component aynı dosyadan okur. Mesajları
+// `lib/caelinus-ai/phase-messages.ts` içinde düzenle; her iki path'de
+// (mock + studio) UI parity garantili.
+export { JOB_PHASE_MESSAGES, JOB_PHASE_PROGRESS } from "../phase-messages";
