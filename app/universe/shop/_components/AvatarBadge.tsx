@@ -20,7 +20,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ZODIACS, type ZodiacId } from "@/data/play-assets";
-import { clearUserAvatar, useUserAvatar } from "@/lib/user-avatar";
+import { clearUserAvatar } from "@/lib/user-avatar";
+import { useCaelinusIdentity } from "@/lib/identity/caelinus-identity";
 
 const ZODIAC_GLYPHS: Record<ZodiacId, string> = {
   aries: "♈",
@@ -38,11 +39,16 @@ const ZODIAC_GLYPHS: Record<ZodiacId, string> = {
 };
 
 export default function AvatarBadge() {
-  const avatar = useUserAvatar();
+  // Faz 1 — kanonik kimlikten oku. Portre URL'i buradan; burç ise
+  // portre meta YOKSA frekans profilinden çözülür (artık tek "doğru"
+  // zodiac, üç store arasında çelişki yok).
+  const identity = useCaelinusIdentity();
   const router = useRouter();
 
-  // Avatar yok / hidrasyon öncesi → "yarat" davetkar CTA.
-  if (!avatar) {
+  const portrait = identity.portrait;
+
+  // Portre yok / hidrasyon öncesi → "yarat" davetkar CTA.
+  if (!portrait) {
     return (
       <aside className="shop-avatar-badge shop-avatar-badge--empty" aria-label="Avatar Studio">
         <div className="shop-avatar-badge-glyph" aria-hidden="true">
@@ -61,17 +67,19 @@ export default function AvatarBadge() {
     );
   }
 
-  const zodiacLabel = avatar.meta
-    ? ZODIACS.find((z) => z.id === avatar.meta!.zodiac)?.label.tr ?? avatar.meta.zodiac
+  // Kanonik burç — portre meta'sı boş olsa bile frekans profilinden gelir.
+  const zodiac = identity.zodiac;
+  const zodiacLabel = zodiac
+    ? ZODIACS.find((z) => z.id === zodiac)?.label.tr ?? zodiac
     : null;
-  const glyph = avatar.meta ? ZODIAC_GLYPHS[avatar.meta.zodiac] : "◉";
+  const glyph = zodiac ? ZODIAC_GLYPHS[zodiac] : "◉";
 
   return (
     <aside className="shop-avatar-badge" aria-label="Senin avatarın">
       <Link href="/avatar" className="shop-avatar-badge-thumb-link" aria-label="Avatar Studio'ya git">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={avatar.url}
+          src={portrait.url}
           alt="Senin Caelinus avatarın"
           className="shop-avatar-badge-thumb"
           loading="lazy"

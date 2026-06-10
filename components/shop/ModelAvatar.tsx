@@ -324,13 +324,18 @@ export default function ModelAvatar({
             // If avatar already has this bone, keep as-is
             if (avatarBones.has(boneName)) return track;
 
-            // Try to find a matching avatar bone (case-insensitive, stripped prefix)
+            // Try to find a matching avatar bone (case-insensitive, stripped prefix).
+            // Normalize the "mixamorig" prefix AND a trailing ":" or "_" — Blender's
+            // FBX→GLB round-trip keeps Mixamo's colon ("mixamorig:Hips"), while the
+            // catwalk clip may use the colon-less form ("mixamorigHips"). Strip both
+            // so either convention retargets cleanly.
+            const stripMixamo = (s: string) => s.replace(/^mixamorig[:_]?/i, "");
             const boneLC = boneName.toLowerCase();
-            const stripped = boneLC.replace(/^mixamorig/i, "");
+            const stripped = stripMixamo(boneLC);
             let match: string | null = null;
             for (const ab of avatarBones) {
               const abLC = ab.toLowerCase();
-              if (abLC === boneLC || abLC === stripped || abLC.replace(/^mixamorig/i, "") === stripped) {
+              if (abLC === boneLC || abLC === stripped || stripMixamo(abLC) === stripped) {
                 match = ab;
                 break;
               }
@@ -341,6 +346,26 @@ export default function ModelAvatar({
               return newTrack;
             }
             return track;
+          })
+          // Strip ROOT MOTION: drop the hips/root POSITION track so the avatar
+          // animates IN PLACE on the stage instead of traveling off-camera.
+          // Mixamo "walk/dance" clips bake forward locomotion into Hips.position;
+          // without this the character walks straight out of the frame and the
+          // mesh appears to "vanish". Rotation tracks are kept, so the full pose
+          // still plays. (Hips.quaternion etc. are untouched.)
+          // Keep rotation (the pose) + bone positions, but drop:
+          //   • ALL scale tracks — a Mixamo FBX→GLB round-trip can bake a
+          //     non-identity (100x) scale that would blow the avatar up.
+          //   • the Hips/root POSITION track — removes forward locomotion so the
+          //     avatar walks IN PLACE on the stage instead of off-camera.
+          // This works ONLY when the catwalk skeleton shares the avatar's scale
+          // space (transforms applied at export). Bone positions must match the
+          // avatar's bind lengths or the mesh stretches into "tubes".
+          .filter((track) => {
+            if (/\.scale$/i.test(track.name)) return false;
+            const isPosition = /\.position$/i.test(track.name);
+            const isRoot = /hips$/i.test(track.name.split(".")[0]);
+            return !(isPosition && isRoot);
           });
 
           return new THREE.AnimationClip(clip.name || "ext_anim", clip.duration, newTracks, clip.blendMode);
@@ -359,10 +384,16 @@ export default function ModelAvatar({
     return () => { cancelled = true; };
   }, [animationUrl, scene]);
 
-  const allClips = useMemo(
-    () => [...gltf.animations, ...extClips],
-    [gltf.animations, extClips]
-  );
+  const allClips = useMemo(() => {
+    // When an external animation (catwalk) is requested, play ONLY the external
+    // clips. The model's own embedded clips can otherwise collide by name (the
+    // Mixamo→Blender export bakes a residual "Armature|mixamo.com|Layer0" action
+    // into the avatar GLB with the SAME name as the catwalk clip) and the static
+    // pose ends up winning — the avatar freezes in T-pose. Ignoring embedded
+    // clips while an external one is active removes that ambiguity.
+    if (animationUrl) return extClips;
+    return [...gltf.animations];
+  }, [animationUrl, gltf.animations, extClips]);
 
   const { actions, names } = useAnimations(allClips, rootRef);
 
@@ -615,6 +646,10 @@ export default function ModelAvatar({
       if (!(obj instanceof THREE.Mesh)) return;
       obj.castShadow = true;
       obj.receiveShadow = true;
+      // Preserve hair (and other explicitly non-skin parts) — overriding it with
+      // the skin-tone material would paint the hair flesh-colored. Hair meshes
+      // ship their own PBR material from Blender, so we leave them untouched.
+      if (/hair|sac|saç|brow|lash|eye/i.test(obj.name)) return;
       obj.material = new THREE.MeshPhysicalMaterial({
         color: base,
         emissive: aura,
@@ -626,6 +661,19 @@ export default function ModelAvatar({
       });
     });
   }, [scene, auraColor, resolvedSkin]);
+
+  // 3b) Disable frustum culling on all meshes.
+  //
+  // A SkinnedMesh computes its bounding sphere from the BIND pose. Once the
+  // catwalk clip plays, vertices move outside that stale sphere, so Three.js'
+  // frustum test decides the mesh is off-screen and culls it — the avatar
+  // "appears then vanishes". Turning culling off for these few meshes is the
+  // standard, cheap fix.
+  useEffect(() => {
+    scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) obj.frustumCulled = false;
+    });
+  }, [scene]);
 
   // 4) Animations — prefer external clip, then idle, then first available
   const activeClipRef = useRef<string | null>(null);
@@ -641,12 +689,36 @@ export default function ModelAvatar({
 
     let preferred: string | undefined;
 
-    if (animationUrl && extClipNamesRef.current.size > 0) {
-      // Prefer matching name, else take any external clip
-      preferred =
-        names.find((n) => extClipNamesRef.current.has(n) && /catwalk|walk|runway/i.test(n)) ??
-        names.find((n) => extClipNamesRef.current.has(n)) ??
-        undefined;
+    if (animationUrl && extClips.length > 0) {
+      // A single Mixamo/Cinema4D GLB often ships SEVERAL clips: a real
+      // skeletal clip, a root-motion-only clip ("Girl Dancer" → 1 node),
+      // and sometimes a clip authored for a totally different rig
+      // ("CINEMA_4D_Main" → DAZ Genesis names). Picking "the first external
+      // clip" is unreliable. Instead, score each retargeted clip by how many
+      // of its tracks actually resolve to THIS avatar's bones, and play the
+      // best-matching one. Falls back gracefully when nothing matches.
+      const avatarBoneSet = new Set<string>();
+      scene.traverse((o) => {
+        if (o instanceof THREE.Bone) avatarBoneSet.add(o.name);
+      });
+
+      const scoreClip = (clip: THREE.AnimationClip) =>
+        clip.tracks.reduce((acc, t) => {
+          const boneName = t.name.split(".")[0];
+          return acc + (avatarBoneSet.has(boneName) ? 1 : 0);
+        }, 0);
+
+      const ranked = extClips
+        .filter((c) => names.includes(c.name))
+        .map((c) => ({ name: c.name, score: scoreClip(c), tracks: c.tracks.length }))
+        .sort((a, b) => b.score - a.score);
+
+      console.info(
+        "[ModelAvatar] external clip ranking (by matched bones):",
+        ranked.map((r) => `${r.name}: ${r.score}/${r.tracks}`),
+      );
+
+      preferred = ranked.find((r) => r.score > 0)?.name ?? ranked[0]?.name;
     }
 
     if (!preferred) {
@@ -675,7 +747,7 @@ export default function ModelAvatar({
       if (action) action.fadeOut(0.4);
       activeClipRef.current = null;
     };
-  }, [actions, names, animationUrl]);
+  }, [actions, names, animationUrl, extClips, scene]);
 
   // Breathing + gentle rotation
   useFrame((state) => {

@@ -173,6 +173,19 @@ const SELIN_VARIANTS: BodyEntry[] = [
 ];
 
 export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
+  {
+    id: "caelinus-goddess",
+    label: "Caelinus Tanrıça",
+    tagline:
+      "Sıfırdan dokunan ilk Caelinus bedeni — MakeHuman CC0 base, tam skinli, Mixamo rig",
+    url: "/models/caelinus-goddess.glb",
+    isPersonal: true,
+    gender: "feminine",
+    vibe: "Tanrıça — manifestonun ete kemiğe bürünmüş hâli",
+    baseHeightM: 1.75,
+    supportsSkinToneOverride: true,
+    animationCompat: "mixamo",
+  },
   ...SELIN_VARIANTS,
   {
     id: "caelinus-default",

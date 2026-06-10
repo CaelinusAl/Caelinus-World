@@ -36,3 +36,7 @@ Thumbs.db
 # Python bytecode
 __pycache__/
 *.py[cod]
+
+# avatar pipeline scratch / working files (FBX, zip, previews — not for repo)
+public/models/_wip/
+public/models/_backup/
