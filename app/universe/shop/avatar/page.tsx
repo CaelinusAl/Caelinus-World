@@ -448,6 +448,10 @@ export default function AvatarPage() {
               <AvatarConfigurator
                 config={config}
                 avatarUrl={selectedBody.url}
+                // Catwalk animasyonu — bu olmadan avatar donuk durur
+                // (gömülü selin klipleri ~0.04sn = tek kare). Retarget
+                // mantığı ModelAvatar'da bone-name eşleştirmesiyle çalışır.
+                animationUrl="/models/catwalk.glb"
                 // External textured mesh ise face decal/deform'u atla
                 // (mesh kendi yüzüyle gelir; Caelinus default bald olduğunda
                 // selfie face decal anlamlı olur).
