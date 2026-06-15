@@ -55,7 +55,16 @@ export default function UniversePage() {
 
   return (
     <main className="cu-scene">
-      <div className="cu-bg" />
+      <video
+        className="cu-bg-video"
+        src="/universe/caelinus-universe.mp4"
+        poster="/universe/caelinus-universe.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      />
       <div className="cu-overlay" />
       <div className="cu-nebula cu-nebula-left" />
       <div className="cu-nebula cu-nebula-right" />
