@@ -61,7 +61,6 @@ export default function UniversePage() {
         poster="/universe/caelinus-universe.jpg"
         autoPlay
         muted
-        loop
         playsInline
         preload="auto"
       />
