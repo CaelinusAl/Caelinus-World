@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
+import { createTimeline } from "animejs";
+import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
 
 type Star = {
   id: number;
@@ -16,8 +18,8 @@ type Star = {
 
 export default function HomePage() {
   const router = useRouter();
-  const [warp, setWarp] = useState(false);
   const [flash, setFlash] = useState(false);
+  const enteringRef = useRef(false);
 
   const stars = useMemo<Star[]>(
     () =>
@@ -39,27 +41,60 @@ export default function HomePage() {
     []
   );
 
+  // "Ayın içine dalış" geçişi: ay (moon-wrap + içindeki backglow/ring/pembe
+  // veil) ekranı yutana kadar büyür, yıldızlar dışa savrulur, beyaz bloom
+  // patlar ve /universe açılır (orada pembe-ay video dünyası karşılar).
   const enterUniverse = () => {
-    if (warp) return;
+    if (enteringRef.current) return;
+    enteringRef.current = true;
 
-    setWarp(true);
-
-    setTimeout(() => {
-      setFlash(true);
-    }, 1050);
-
-    setTimeout(() => {
+    if (prefersReducedMotion()) {
       router.push("/universe");
-    }, 2050);
+      return;
+    }
+
+    // Per-frame transform'la CSS transition çakışmasın diye kapat.
+    document
+      .querySelectorAll<HTMLElement>(".moon-wrap, .stars-layer")
+      .forEach((el) => {
+        el.style.transition = "none";
+      });
+
+    const tl = createTimeline();
+    tl.add(
+      ".logo-wrap, .subtitle, .tap, .nebula",
+      { opacity: 0, duration: 550, ease: "out(2)" },
+      0,
+    )
+      .add(
+        ".stars-layer",
+        { scale: 2.6, opacity: [1, 0], duration: 1500, ease: "in(2.5)" },
+        0,
+      )
+      .add(
+        ".moon-wrap",
+        {
+          // translate'i sabit tutarak merkezleme korunur; sadece scale büyür.
+          translateX: "-50%",
+          translateY: "-50%",
+          scale: [1, 18],
+          duration: 1500,
+          ease: "in(2.6)",
+        },
+        0,
+      );
+
+    window.setTimeout(() => setFlash(true), 1150);
+    window.setTimeout(() => router.push("/universe"), 1550);
   };
 
   return (
-    <main className={`scene ${warp ? "warp" : ""}`}>
+    <main className="scene">
       <div className="nebula nebula-left" />
       <div className="nebula nebula-right" />
       <div className="nebula nebula-bottom" />
 
-      <div className={`stars-layer ${warp ? "stars-warp" : ""}`}>
+      <div className="stars-layer">
         {stars.map((star) => {
           const style: CSSProperties = {
             left: `${star.left}%`,
@@ -72,13 +107,7 @@ export default function HomePage() {
             ["--pull-y" as string]: `${star.dy * 1.9}vh`,
           };
 
-          return (
-            <span
-              key={star.id}
-              className={`star ${warp ? "star-warp" : ""}`}
-              style={style}
-            />
-          );
+          return <span key={star.id} className="star" style={style} />;
         })}
       </div>
 
@@ -103,6 +132,7 @@ export default function HomePage() {
           className="moon"
           draggable={false}
         />
+        <div className="moon-pink" aria-hidden="true" />
       </button>
 
       <p className="subtitle">Enter the Caelinus Universe</p>
@@ -110,16 +140,6 @@ export default function HomePage() {
       <button type="button" className="tap" onClick={enterUniverse}>
         DISCOVER CAELINUS
       </button>
-
-      <div className={`vortex-field ${warp ? "active" : ""}`}>
-        <div className="vortex-core" />
-        <div className="vortex-spiral spiral-a" />
-        <div className="vortex-spiral spiral-b" />
-        <div className="vortex-ring vr-1" />
-        <div className="vortex-ring vr-2" />
-        <div className="vortex-ring vr-3" />
-        <div className="vortex-shock" />
-      </div>
 
       <div className={`screen-flash ${flash ? "active" : ""}`} />
     </main>

@@ -22,6 +22,80 @@ export type AtelierKind =
   | "herbalist"
   | "other";
 
+/* ─── Frekans Ağı (migration 0015) ──────────────────────────────────── */
+
+/** Bir üye birden çok yaratıcı rolü taşıyabilir. */
+export type MemberRole = "writer" | "artist" | "designer" | "producer" | "seeker";
+export type MemberElement = "fire" | "earth" | "air" | "water";
+export type MemberIntent = "calm" | "power" | "love" | "clarity";
+export type MemberZodiac =
+  | "aries" | "taurus" | "gemini" | "cancer"
+  | "leo" | "virgo" | "libra" | "scorpio"
+  | "sagittarius" | "capricorn" | "aquarius" | "pisces";
+
+/**
+ * JSON-serileştirilebilir değer. postgrest-js'in write (insert/update)
+ * parametre çıkarımı jsonb kolonların `Json`-uyumlu olmasını ister;
+ * `Record<string, unknown>` kullanmak `unknown` yüzünden param'ı `never`'a
+ * çökertir, o yüzden jsonb kolonlarını bu tiple yazarız.
+ */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+/** profiles.links jsonb — bilinen sosyal/web bağlantı anahtarları. */
+export type MemberLinks = {
+  instagram?: string;
+  website?: string;
+  x?: string;
+  behance?: string;
+};
+
+/* ─── Ortak Üretim — Faz 2 (migration 0016) ─────────────────────────── */
+
+export type ContributionKind = "lore" | "verse" | "visual" | "note";
+export type ContributionStatus = "draft" | "pending" | "published" | "rejected";
+export type ContributionTier = "community" | "canon";
+
+export interface ContributionRow {
+  id: string;
+  author_user_id: string;
+  kind: ContributionKind;
+  title: string;
+  body: string | null;
+  media_url: string | null;
+  // SANRI 81 şehir-kodundan hangisine bağlı (1..81) — opsiyonel.
+  code: number | null;
+  status: ContributionStatus;
+  tier: ContributionTier;
+  rejected_reason: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** `public_contributions` view — yayımlanmış katkı + güvenli yazar bilgisi. */
+export interface PublicContributionRow {
+  id: string;
+  kind: ContributionKind;
+  title: string;
+  body: string | null;
+  media_url: string | null;
+  code: number | null;
+  tier: ContributionTier;
+  published_at: string | null;
+  created_at: string;
+  author_user_id: string;
+  author_handle: string | null;
+  author_name: string | null;
+  author_avatar: string | null;
+  author_element: MemberElement | null;
+}
+
 export type AtelierStatus = "draft" | "pending" | "approved" | "rejected";
 
 export type CollectionStatus = "draft" | "published" | "archived";
@@ -56,8 +130,50 @@ export interface ProfileRow {
   // 3 sabit tuval: 'silk' | 'bodysuit' | 'veil'. Migration uygulanana dek
   // null kabul edilir; runtime fallback'i `lib/avatar/canvases.ts` taşır.
   caelinus_avatar_base: "silk" | "bodysuit" | "veil" | null;
+  // ── Frekans Ağı — Faz 0 (migration 0015) ──────────────────────────
+  // Bir üye birden çok rol taşıyabilir; varsayılan ['seeker'].
+  roles: MemberRole[];
+  // Public kullanıcı adı (/u/<handle>). null → üye ağ dizininde görünmez.
+  handle: string | null;
+  element: MemberElement | null;
+  // SANRI 81 şehir-kodundan üyenin "yuvası" (1..81).
+  home_code: number | null;
+  headline: string | null;
+  bio: string | null;
+  links: MemberLinks;
+  intent: MemberIntent | null;
+  frequency_hz: number | null;
+  // Tam FrequencyProfile (lib/frequency) — localStorage'dan hesaba taşınır.
+  frequency_profile: Json | null;
+  // Private; sadece sahibi RLS ile okur. Public view'a dahil değildir.
+  dob: string | null;
+  is_public: boolean;
+  network_joined_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * `public_members` view satırı — profiles'ın yalnız PUBLIC-güvenli
+ * kolonları (email / dob / bildirim tercihleri HARİÇ). Frekans ağı
+ * dizini ve /u/<handle> profil sayfaları bunu okur.
+ */
+export interface PublicMemberRow {
+  id: string;
+  handle: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  caelinus_avatar_url: string | null;
+  roles: MemberRole[];
+  element: MemberElement | null;
+  home_code: number | null;
+  headline: string | null;
+  bio: string | null;
+  links: MemberLinks;
+  zodiac: MemberZodiac | null;
+  frequency_hz: number | null;
+  network_joined_at: string | null;
+  created_at: string;
 }
 
 export interface AtelierRow {
@@ -356,8 +472,24 @@ export type Database = {
         Update: Partial<AtelierOrderItemRow>;
         Relationships: [];
       };
+      contributions: {
+        Row: ContributionRow;
+        Insert: Partial<ContributionRow> &
+          Pick<ContributionRow, "author_user_id" | "kind" | "title">;
+        Update: Partial<ContributionRow>;
+        Relationships: [];
+      };
     };
-    Views: { [_ in never]: never };
+    Views: {
+      public_members: {
+        Row: PublicMemberRow;
+        Relationships: [];
+      };
+      public_contributions: {
+        Row: PublicContributionRow;
+        Relationships: [];
+      };
+    };
     Functions: { [_ in never]: never };
     Enums: {
       atelier_kind: AtelierKind;

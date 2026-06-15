@@ -13,31 +13,20 @@
  *     için tutarlı bir variant seçilir (aynı ürün hep aynı görünür)
  *   • Scene avatar.glbUrl'ünü bu variant'a override eder
  *
- * Sonuç: kullanıcı her ürünü tıkladığında bedeninin görünümü gerçekten
- * değişir — Caelinus o ürünün enerjisinde başka bir "sen"i gösterir.
- *
- * URL encoding: dosya isimlerinde boşluk olabilir (`selin (1).glb`).
- * Tarayıcı için `encodeURI` ile space → %20.
+ * Sadeleştirme (2026-06): eski 9 "selin*.glb" silüet varyantı kaldırıldı.
+ * Avatarlar yapımda (2026): kalan tüm bedenler de hatalı oldukları için
+ * kaldırıldı, liste şu an BOŞ. Try-on yüzeyi (TryOnSection) zaten
+ * AVATARS_IN_PRODUCTION ile placeholder'a düştüğünden buradaki URL'ler
+ * render'a ulaşmaz; API geriye dönük uyumluluk için korunur ve boş listede
+ * güvenle "" döner.
  */
 
 import type { Product } from "@/types/play";
 
 /**
- * /public/models altındaki Caelinus selin varyantları. Sıra önemli
- * (deterministic hash bu sıraya göre map yapar). Yeni dosya eklenirse
- * SONUNA eklenmeli — yoksa mevcut ürün-variant eşlemeleri kayar.
+ * Try-on beden varyantları — şu an BOŞ (avatarlar yapımda).
  */
-const RAW_VARIANTS = [
-  "/models/selin.glb",
-  "/models/selin (1).glb",
-  "/models/selin(2).glb",
-  "/models/selin(3).glb",
-  "/models/selin (3).glb",
-  "/models/selin(4).glb",
-  "/models/selin (5).glb",
-  "/models/selin (6).glb",
-  "/models/selin (7).glb",
-] as const;
+const RAW_VARIANTS: readonly string[] = [];
 
 /** URL-encoded variant listesi — Three.js GLTFLoader buradan alır. */
 export const TRYON_VARIANTS: string[] = RAW_VARIANTS.map((u) => encodeURI(u));
@@ -62,6 +51,7 @@ function hashString(s: string): number {
  * tek bir tohum yapar — aynı ürün her zaman aynı varyantta görünür.
  */
 export function getVariantForProduct(p: Product): string {
+  if (TRYON_VARIANTS.length === 0) return "";
   const seed = `${p.id}|${p.zodiac ?? p.category}`;
   const idx = hashString(seed) % TRYON_VARIANTS.length;
   return TRYON_VARIANTS[idx];
@@ -69,6 +59,7 @@ export function getVariantForProduct(p: Product): string {
 
 /** Variant index — kullanıcıya "X. siluet" gibi gösterilebilir. */
 export function getVariantIndexForProduct(p: Product): number {
+  if (TRYON_VARIANTS.length === 0) return 0;
   const seed = `${p.id}|${p.zodiac ?? p.category}`;
   return hashString(seed) % TRYON_VARIANTS.length;
 }

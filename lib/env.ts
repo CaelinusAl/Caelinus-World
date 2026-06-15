@@ -113,7 +113,7 @@ const ServerEnvSchema = z.object({
      and CI without leaking real mail. */
   RESEND_API_KEY: z.string().optional(),
   /* Mailbox we send FROM. Must be a verified Resend domain. Example:
-     "Caelinus <hello@mail.caelinus.world>". */
+     "Caelinus <hello@mail.caelinus.ai>". */
   EMAIL_FROM: z.string().optional(),
   /* Stripe (atelier e-commerce). Three keys:
      - STRIPE_SECRET_KEY      sk_live_… / sk_test_… (server only)

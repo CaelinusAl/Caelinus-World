@@ -17,6 +17,7 @@
 
 import {
   CAELINUS_BODY_LIBRARY,
+  getBody,
   type BodyEntry,
 } from "../avatar-bodies";
 import type {
@@ -60,7 +61,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "minimal",
       hair: { length: "medium", texture: "straight", color: "#1a1410" },
     },
-    preferredBodies: ["caelinus-default", "caelinus-light", "selin-v1"],
+    preferredBodies: ["selin-v1", "caelinus-goddess"],
     moods: [
       "Az dokuda çok niyet — sessizliğin formdaki hâli.",
       "Hava gibi hafif, kuşlar gibi belirgin.",
@@ -83,7 +84,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "noir-luxe",
       hair: { length: "long", texture: "wavy", color: "#0c0908" },
     },
-    preferredBodies: ["selin-v1", "caelinus-textured", "caelinus-hires"],
+    preferredBodies: ["selin-v1", "caelinus-goddess"],
     moods: [
       "Aydan akarak geliyorsun.",
       "Suyun en derin sarkısı sende.",
@@ -106,7 +107,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "couture",
       hair: { length: "long", texture: "wavy", color: "#3b2a1f" },
     },
-    preferredBodies: ["caelinus-textured", "caelinus-hires", "model-texture"],
+    preferredBodies: ["caelinus-goddess", "selin-v1"],
     moods: [
       "Yangının zarafetinde duruyorsun.",
       "Işık seninle birlikte yanıyor.",
@@ -129,7 +130,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "bohemian",
       hair: { length: "long", texture: "curly", color: "#6b4226" },
     },
-    preferredBodies: ["caelinus-textured", "selin-v1", "caelinus-default"],
+    preferredBodies: ["selin-v1", "caelinus-goddess"],
     moods: [
       "Toprağın sabrını giyiniyorsun.",
       "Köklerinden yükseliyorsun.",
@@ -152,7 +153,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "futurist",
       hair: { length: "short", texture: "straight", color: "#cfc8c0" },
     },
-    preferredBodies: ["caelinus-light", "caelinus-default", "model-texture"],
+    preferredBodies: ["caelinus-goddess", "selin-v1"],
     moods: [
       "Geleceğin sesini bugünden duyuyorsun.",
       "Metalik ışık senin ikinci derin.",
@@ -175,7 +176,7 @@ export const ARCHETYPES: ArchetypeSpec[] = [
       outfitMood: "ritualistic",
       hair: { length: "veil", texture: "wavy", color: "#7d2f5a" },
     },
-    preferredBodies: ["caelinus-hires", "caelinus-textured", "selin-v1"],
+    preferredBodies: ["caelinus-goddess", "selin-v1"],
     moods: [
       "Her parçan bir geçit.",
       "Tören senin doğal akışın.",
@@ -202,7 +203,8 @@ export function pickBody(preferred: string[]): BodyEntry {
     const found = CAELINUS_BODY_LIBRARY.find((b) => b.id === id);
     if (found) return found;
   }
-  return CAELINUS_BODY_LIBRARY[0];
+  // Kütüphane boşsa (avatarlar yapımda) güvenli sentinel döner.
+  return CAELINUS_BODY_LIBRARY[0] ?? getBody(null);
 }
 
 export function buildReading(

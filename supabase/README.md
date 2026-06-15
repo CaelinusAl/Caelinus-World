@@ -5,14 +5,20 @@ Bu klasör, Caelinus'un sunucu tarafı altyapısını barındırır:
 ```
 supabase/
 ├── migrations/
-│   ├── 0001_init.sql         # tablolar + enum'lar
-│   ├── 0002_triggers.sql     # otomatik profile + updated_at + admin helper
-│   ├── 0003_rls.sql          # row-level security politikaları
-│   └── 0004_storage.sql      # depolama bucket'ları + politikaları
-└── README.md                 # bu dosya
+│   ├── 0001_init.sql              # tablolar + enum'lar
+│   ├── 0002_triggers.sql          # otomatik profile + updated_at + admin helper
+│   ├── 0003_rls.sql               # row-level security politikaları
+│   ├── 0004_storage.sql           # depolama bucket'ları + politikaları
+│   ├── 0005–0010                  # play renders, sipariş, atelier, profil ekleri
+│   ├── 0011_caelinus_avatar.sql   # caelinus_avatar_url / zodiac / updated_at
+│   ├── 0013_avatar_base.sql       # caelinus_avatar_base (silk|bodysuit|veil)
+│   ├── 0014_caelinus_avatar_session.sql  # QR mobil selfie oturumu
+│   ├── 0015_members_network.sql   # frekans ağı (roller, handle, public_members view)
+│   └── 0016_contributions.sql     # üye katkıları + public_contributions view
+└── README.md                      # bu dosya
 ```
 
-Migration'lar idempotent yazıldı — `if not exists` ve `drop policy if exists` kullanır, bu yüzden tekrar çalıştırmak güvenlidir.
+Migration'lar idempotent yazıldı — `if not exists` ve `drop policy if exists` kullanır, bu yüzden tekrar çalıştırmak güvenlidir. Boş bir projeyi sıfırdan kurmak için migration'ları `0001`'den itibaren sırayla SQL Editor'de çalıştır.
 
 ---
 
@@ -27,11 +33,11 @@ Migration'lar idempotent yazıldı — `if not exists` ve `drop policy if exists
      - `anon public` → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
      - `service_role` (⚠️ gizli) → `SUPABASE_SERVICE_ROLE_KEY`
    - **Authentication → URL Configuration**:
-     - **Site URL** = `http://localhost:3000` (geliştirme) ya da `https://caelinus.world` (prod)
+     - **Site URL** = `http://localhost:3000` (geliştirme) ya da `https://caelinus.ai` (prod)
      - **Redirect URLs** → şunları ekle:
        ```
        http://localhost:3000/auth/callback
-       https://caelinus.world/auth/callback
+       https://caelinus.ai/auth/callback
        ```
    - **Authentication → Providers → Email**:
      - **Enable Email Signups** ✅

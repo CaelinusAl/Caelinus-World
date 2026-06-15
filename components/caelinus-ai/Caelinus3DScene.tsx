@@ -36,6 +36,8 @@ import {
 } from "@react-three/drei";
 
 import ModelAvatar from "@/components/shop/ModelAvatar";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import type { GeneratedAvatar } from "@/lib/caelinus-ai";
 
 /**
@@ -157,6 +159,12 @@ export default function Caelinus3DScene({
       setSwapping(false);
     };
   }, [url]);
+
+  // Avatarlar yapımda — kütüphane boşken 3D yerine placeholder.
+  // (Hook'lardan SONRA: rules-of-hooks için erken return en sonda.)
+  if (AVATARS_IN_PRODUCTION) {
+    return <AvatarsInProduction className={`cai-canvas ${className}`.trim()} />;
+  }
 
   return (
     <div

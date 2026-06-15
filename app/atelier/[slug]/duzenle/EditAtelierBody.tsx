@@ -398,7 +398,7 @@ export default function EditAtelierBody({ atelier, items }: Props) {
       <main className="atelier-edit">
         <header className="atelier-edit-head">
           <h1 className="atelier-edit-title">{name || atelier.name}</h1>
-          <p className="atelier-edit-handle">caelinus.world/atelier/{atelier.slug}</p>
+          <p className="atelier-edit-handle">caelinus.ai/atelier/{atelier.slug}</p>
         </header>
 
         {/* ── status card ─────────────────────────────────────── */}
@@ -652,7 +652,7 @@ export default function EditAtelierBody({ atelier, items }: Props) {
                 <input
                   className="atelier-input"
                   type="text"
-                  placeholder="caelinus.world"
+                  placeholder="caelinus.ai"
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
                 />

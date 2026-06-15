@@ -97,6 +97,24 @@ type BodyDeformResult = {
   matchedBoneNames: string[];
 };
 
+/**
+ * Sadece görünür mesh'lerin (Mesh/SkinnedMesh) birleşik bounding box'ı.
+ * armature/bone/helper node'ları yok sayar — `Box3.setFromObject(scene)`
+ * iskelet uzantıları yüzünden yanlış yükseklik verip ölçek hesabını
+ * bozmasın diye. (bkz. lib/3d/useFitToView.ts)
+ */
+function measureVisibleMeshBox(root: THREE.Object3D): THREE.Box3 {
+  const box = new THREE.Box3();
+  root.traverse((o) => {
+    const obj = o as THREE.Object3D & { isMesh?: boolean };
+    if (obj.isMesh && obj.visible !== false) {
+      const meshBox = new THREE.Box3().setFromObject(o);
+      if (!meshBox.isEmpty()) box.union(meshBox);
+    }
+  });
+  return box;
+}
+
 function applyBodyDeformation(
   scene: THREE.Object3D,
   cfg: AvatarConfig,
@@ -470,10 +488,16 @@ export default function ModelAvatar({
         scene.scale.setScalar(1);
         scene.position.set(0, 0, 0);
         scene.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(scene);
+        // SADECE görünür mesh'leri ölç — armature/bone/helper node'ları
+        // dahil edersek (Box3.setFromObject(scene)) iskelet uzantıları
+        // yanlış (çoğu zaman küçük) bir yükseklik verir; scale = targetH /
+        // naturalH patlar ve model devasa/kırpık görünür. (bkz. useFitToView)
+        const meshBox = measureVisibleMeshBox(scene);
+        if (meshBox.isEmpty()) return; // GLB hâlâ yükleniyor — sonra yeniden ölç
         const size = new THREE.Vector3();
-        box.getSize(size);
+        meshBox.getSize(size);
         naturalH = size.y;
+        if (!naturalH || naturalH < 0.001) return;
         scene.userData._naturalHeight = naturalH;
         if (process.env.NODE_ENV === "development") {
           console.info(
@@ -488,7 +512,7 @@ export default function ModelAvatar({
       scene.scale.setScalar(scale);
 
       scene.updateMatrixWorld(true);
-      const scaled = new THREE.Box3().setFromObject(scene);
+      const scaled = measureVisibleMeshBox(scene);
       const sMin = scaled.min;
       const sCenter = new THREE.Vector3();
       scaled.getCenter(sCenter);

@@ -23,8 +23,10 @@
 import { useState } from "react";
 import {
   CAELINUS_BODY_LIBRARY,
+  AVATARS_IN_PRODUCTION,
   type BodyEntry,
 } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 
 type Props = {
   selectedId: string;
@@ -32,6 +34,13 @@ type Props = {
 };
 
 export default function BodyPicker({ selectedId, onSelect }: Props) {
+  if (AVATARS_IN_PRODUCTION) {
+    return (
+      <section className="body-picker">
+        <AvatarsInProduction compact />
+      </section>
+    );
+  }
   return (
     <section className="body-picker">
       <header className="body-picker-header">

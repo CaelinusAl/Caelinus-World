@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/universe", label: "Universe" },
   { href: "/universe/shop", label: "Shop" },
   { href: "/universe/gaia", label: "Gaia" },
+  { href: "/network", label: "Ağ" },
   { href: "/manifesto", label: "Manifesto" },
   { href: "/ai", label: "Ask" },
 ];

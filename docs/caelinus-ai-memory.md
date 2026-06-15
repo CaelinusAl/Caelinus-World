@@ -97,6 +97,20 @@ Users enter Caelinus AI and:
 
 All three pages share `app/caelinus-ai/layout.tsx` (header + footer + bg shell) and `caelinus-ai.css` (~2.5k lines of bespoke palette).
 
+### Canonical avatar/shop routes (2026-06 cleanup)
+
+To avoid confusion across overlapping avatar entry points, the canonical map is:
+
+| Concern | Canonical route | Notes |
+|---|---|---|
+| Ana mağaza + try-on + checkout | `/universe/shop` | TopBar + sitemap'te olan tek mağaza |
+| 3D beden konfigüratörü | `/universe/shop/avatar` | sliders + body picker (Tanrıça + Selin) |
+| AI selfie → eşleştirme akışı | `/caelinus-ai/avatar` | AI ürün kabuğu (mock/gerçek provider) |
+| 2D portre stüdyosu | `/avatar` | builder + face-swap, nav-dışı |
+| QR mobil selfie | `/caelinus-avatar/create` (+ `/m/[sessionId]`) | masaüstü→telefon oturumu |
+
+`/caelinus-ai/shop` ve `/caelinus-ai/try-on`, `/caelinus-ai/avatar` kabuğunun parçası olarak korunur (kasıtlı paralel UX). Avaturn entegrasyonu kaldırıldı (kurucu vizyonu: Caelinus kendi mimarisinin sahibi). `/atelier/n-yardimci/test` dev aday-galerisi kaldırıldı.
+
 ---
 
 ## 5. Folder Structure

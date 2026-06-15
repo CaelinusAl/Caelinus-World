@@ -6,7 +6,7 @@
  *
  *   1) Locale resolution (i18n)
  *      Parse the locale from the request host (subdomain strategy:
- *      `www.erospai.com` → tr, `en.erospai.com` → en) and inject
+ *      `www.caelinus.ai` → tr, `en.caelinus.ai` → en) and inject
  *      `x-caelinus-locale` so server components / generateMetadata /
  *      route handlers can call `getLocale()` cheaply.
  *

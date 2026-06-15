@@ -34,8 +34,6 @@ type ModelCandidate = { url: string; kind: ModelKind };
 const MODEL_CANDIDATES: ModelCandidate[] = [
   { url: "/models/n.yardimci.tulum.glb", kind: "glb" },
   { url: "/models/model_texture.glb", kind: "glb" },
-  { url: "/models/caelibus-avatar.glb", kind: "glb" },
-  { url: "/models/caelibus-avatar.fbx", kind: "fbx" },
 ];
 
 const T = {

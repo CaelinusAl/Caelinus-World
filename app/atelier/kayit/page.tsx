@@ -104,7 +104,7 @@ export default function KayitPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="ada@caelinus.world"
+            placeholder="ada@caelinus.ai"
           />
         </label>
 

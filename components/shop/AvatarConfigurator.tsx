@@ -5,6 +5,8 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, useGLTF } from "@react-three/drei";
 import type { AvatarConfig } from "@/types/avatar";
 import type { AvatarFaceDeformConfig, ModelCapabilities } from "@/lib/face";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import ModelAvatar from "./ModelAvatar";
 
 const DEFAULT_MODEL_PATH = "/models/caelinus-avatar.glb";
@@ -27,6 +29,9 @@ export default function AvatarConfigurator({
   animationUrl = null,
   onCapabilities,
 }: Props) {
+  if (AVATARS_IN_PRODUCTION) {
+    return <AvatarsInProduction className="avcfg-canvas" />;
+  }
   const modelUrl = avatarUrl || DEFAULT_MODEL_PATH;
   return (
     <div className="avcfg-canvas">
@@ -44,6 +49,7 @@ export default function AvatarConfigurator({
           <directionalLight position={[-2, 1, -2]} intensity={0.7} color="#7b8dff" />
 
           <ModelAvatar
+            key={modelUrl}
             url={modelUrl}
             skinTone={config.skinTone}
             auraColor="#8b6fff"

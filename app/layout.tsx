@@ -3,6 +3,9 @@ import "./globals.css";
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
 import JsonLd from "@/components/seo/JsonLd";
+import MemberSyncBridge from "@/components/members/MemberSyncBridge";
+import WorldBackdrop from "@/components/world/WorldBackdrop";
+import JourneyProvider from "@/components/journey/JourneyProvider";
 import { absoluteUrl, htmlLang, type Locale } from "@/lib/i18n/locale";
 import { buildLocaleMetadata } from "@/lib/i18n/metadata";
 import { getLocale } from "@/lib/i18n/server";
@@ -117,9 +120,13 @@ export default async function RootLayout({
     <html lang={htmlLang(locale)}>
       <body>
         <JsonLd nodes={orgNode} />
-        <TopBar />
-        {children}
-        <Footer />
+        <MemberSyncBridge />
+        <WorldBackdrop />
+        <JourneyProvider>
+          <TopBar />
+          {children}
+          <Footer />
+        </JourneyProvider>
       </body>
     </html>
   );

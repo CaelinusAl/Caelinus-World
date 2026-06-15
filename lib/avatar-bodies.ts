@@ -54,200 +54,41 @@ export type BodyEntry = {
 };
 
 /**
- * Selin body varyantları — `selin.glb` orijinal mesh, geri kalan 8'i
- * (selin (1)…selin (7), iki "selin (3)" varyantı dâhil) farklı poz /
- * silüet / texture sahnelerinden çıkarılmış aynı karakterin alternatif
- * mesh'leri. Her birine Caelinus dilinde bir `vibe` veriyoruz — element
- * (fire/water/air/earth) ima eden tek kelime. Hepsi Mixamo-uyumlu rig
- * taşır (catwalk + outfit binding çalışmaya devam eder).
+ * Caelinus beden kütüphanesi — şu an BOŞ ("avatarlar yapımda").
  *
- * Dosya isimleri parantezli ve boşluklu ("selin (1).glb"); GLTFLoader
- * için `encodeURI` ile space → %20 dönüşümü gerekir. Bu library raw
- * yolları taşır; URL encoding'i caller (3D scene loader) yapar.
+ * Önceki tüm bedenler (Tanrıça + Selin + varyantlar) hatalı/eksik mesh
+ * oldukları için kaldırıldı. Yeni bedenler Şeyma Karaş ile sıfırdan
+ * dokunuyor (bkz. docs/avatar-system-and-sema-brief.md). Kütüphane boş
+ * olduğu sürece tüm avatar yüzeyleri "Avatarlar yapımda" boş-durumunu
+ * gösterir (AVATARS_IN_PRODUCTION).
+ *
+ * Yeni GLB teslim edildiğinde: dosyayı /public/models/ altına koy, buraya
+ * bir BodyEntry ekle, public/avatars/manifest.json'a yansıt — gerisi
+ * otomatik açılır.
  */
-const SELIN_VARIANTS: BodyEntry[] = [
-  {
-    id: "selin-v1",
-    label: "Selin",
-    tagline: "Senin frekansın — gerçek bir bedenden 3D'ye taşınmış mesh",
-    url: "/models/selin.glb",
-    // Önizleme thumbnail'ları S3+ (real head topology bake) sonrası
-    // server-side render edilecek. Şimdilik AvatarCarousel'ın CSS
-    // gradient fallback'i (initials + ✦) tüm body'lerde tutarlı kalsın
-    // diye `preview` field'i bilerek boş.
-    isPersonal: true,
-    gender: "feminine",
-    vibe: "Auteur — kendi hikâyesini dokuyan",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-aurora",
-    label: "Selin · Aurora",
-    tagline: "Şafak ışığında belirme — havanın ilk kırılma rengi",
-    url: "/models/selin (1).glb",
-    gender: "feminine",
-    vibe: "Aurora — havanın açılması",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-noir",
-    label: "Selin · Noir",
-    tagline: "Gecenin içine yerleşmiş bir duruş — mürekkebe yakın",
-    url: "/models/selin(2).glb",
-    gender: "feminine",
-    vibe: "Noir — gece dokusu",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-solar",
-    label: "Selin · Solar",
-    tagline: "Altın saatin tanrıçası — ışık dokuda saklı",
-    url: "/models/selin(3).glb",
-    gender: "feminine",
-    vibe: "Solar — yangın hâli",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-tide",
-    label: "Selin · Tide",
-    tagline: "Denizin nabzıyla akan beden — su dokuya geçince",
-    url: "/models/selin (3).glb",
-    gender: "feminine",
-    vibe: "Tide — suyun ritmi",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-temple",
-    label: "Selin · Temple",
-    tagline: "Ritüel taşı gibi — toprağın sabrı içinde",
-    url: "/models/selin(4).glb",
-    gender: "feminine",
-    vibe: "Temple — toprağın anısı",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-veil",
-    label: "Selin · Veil",
-    tagline: "Bir perdenin ardından belirme — havanın örtüsü",
-    url: "/models/selin (5).glb",
-    gender: "feminine",
-    vibe: "Veil — havanın perdesi",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-prism",
-    label: "Selin · Prism",
-    tagline: "Kristalden kırılan ışık — futurist oracle dokusu",
-    url: "/models/selin (6).glb",
-    gender: "feminine",
-    vibe: "Prism — ışığın kırılışı",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "selin-echo",
-    label: "Selin · Echo",
-    tagline: "Ay yansımasının kendisi — sessiz, derin, geri dönen",
-    url: "/models/selin (7).glb",
-    gender: "feminine",
-    vibe: "Echo — yansımanın hâli",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-];
+export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [];
 
-export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
-  {
-    id: "caelinus-goddess",
-    label: "Caelinus Tanrıça",
-    tagline:
-      "Sıfırdan dokunan ilk Caelinus bedeni — MakeHuman CC0 base, tam skinli, Mixamo rig",
-    url: "/models/caelinus-goddess.glb",
-    isPersonal: true,
-    gender: "feminine",
-    vibe: "Tanrıça — manifestonun ete kemiğe bürünmüş hâli",
-    baseHeightM: 1.75,
-    supportsSkinToneOverride: true,
-    animationCompat: "mixamo",
-  },
-  ...SELIN_VARIANTS,
-  {
-    id: "caelinus-default",
-    label: "Caelinus Aslı",
-    tagline: "Bald base mesh — boy/kilo/ten rengi tamamen senin elinde",
-    url: "/models/caelinus-avatar.glb",
-    isDefault: true,
-    gender: "neutral",
-    vibe: "Saf form — manifestonun başlangıç noktası",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: true,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "caelinus-textured",
-    label: "Caelinus Detaylı",
-    tagline: "Texture'lu, daha gerçekçi — orta poly count, hızlı yükleme",
-    url: "/models/caelinus-avatar5.glb",
-    gender: "feminine",
-    vibe: "Tanrıça — derinin nehir gibi aktığı",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "caelinus-light",
-    label: "Caelinus Hafif",
-    tagline: "Düşük poly — mobil + yavaş cihazlar için",
-    url: "/models/caelinus-avatar4.glb",
-    gender: "neutral",
-    vibe: "Heykel — basit, kalıcı, az detayda çok hikâye",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: true,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "caelinus-hires",
-    label: "Caelinus Yüksek",
-    tagline: "26MB high-poly — masaüstü + iyi GPU için",
-    url: "/models/caelinus-avatar3.glb",
-    gender: "feminine",
-    vibe: "Ritüel — her dokuda zaman var",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-  {
-    id: "model-texture",
-    label: "Model Texture",
-    tagline: "PBR texture'lı, sahne-altı denemeler için",
-    url: "/models/model_texture.glb",
-    gender: "feminine",
-    vibe: "Atelier — ölçü prototipinin kendisi",
-    baseHeightM: 1.70,
-    supportsSkinToneOverride: false,
-    animationCompat: "mixamo",
-  },
-];
+/** Kütüphane boşken true — UI 3D yerine "yapımda" placeholder gösterir. */
+export const AVATARS_IN_PRODUCTION = CAELINUS_BODY_LIBRARY.length === 0;
 
 export const DEFAULT_BODY_ID = "selin-v1";
 
+/**
+ * Kütüphane boşken döndürülen güvenli sentinel — `.url` "" olduğundan
+ * hiçbir 3D yüzey gerçek GLB yüklemez (sahne sarmalayıcıları zaten
+ * AVATARS_IN_PRODUCTION ile placeholder'a düşer).
+ */
+const IN_PRODUCTION_BODY: BodyEntry = {
+  id: "__in_production__",
+  label: "Avatar",
+  tagline: "",
+  url: "",
+  gender: "neutral",
+  animationCompat: "static",
+};
+
 export function getBody(id: string | null | undefined): BodyEntry {
+  if (CAELINUS_BODY_LIBRARY.length === 0) return IN_PRODUCTION_BODY;
   if (!id) {
     return (
       CAELINUS_BODY_LIBRARY.find((b) => b.id === DEFAULT_BODY_ID) ??
@@ -259,8 +100,4 @@ export function getBody(id: string | null | undefined): BodyEntry {
     CAELINUS_BODY_LIBRARY.find((b) => b.id === DEFAULT_BODY_ID) ??
     CAELINUS_BODY_LIBRARY[0]
   );
-}
-
-export function getBodyUrl(id: string | null | undefined): string {
-  return getBody(id).url;
 }

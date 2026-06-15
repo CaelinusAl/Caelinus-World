@@ -1,13 +1,9 @@
 import https from "node:https";
 
 const hosts = [
-  "en.erospai.com",
-  "www.erospai.com",
-  "erospai.com",
-  "caelinus.world",
-  "www.caelinus.world",
-  "caelinus.com",
-  "www.caelinus.com",
+  "caelinus.ai",
+  "www.caelinus.ai",
+  "en.caelinus.ai",
 ];
 
 for (const host of hosts) {

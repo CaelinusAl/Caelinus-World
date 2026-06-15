@@ -14,10 +14,12 @@ import {
 import {
   CAELINUS_BODY_LIBRARY,
   DEFAULT_BODY_ID,
+  AVATARS_IN_PRODUCTION,
   getBody,
 } from "@/lib/avatar-bodies";
 import AvatarSliders from "@/components/shop/AvatarSliders";
 import BodyPicker from "@/components/shop/BodyPicker";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import { FaceUpload } from "@/components/shop/FaceUpload";
 import type { FaceUploadResult } from "@/lib/services";
 import { cropFaceFromUrl, type CropResult } from "@/lib/face-crop";
@@ -184,6 +186,26 @@ export default function AvatarPage() {
 
   const faceApplied = faceState === "applied" && !!faceTextureUrl;
   const det = cropResult?.detection;
+
+  // Avatarlar yapımda — beden kütüphanesi boşken tüm configurator
+  // akışını "yapımda" boş-durumu ile değiştir (slider/yüz-yükleme
+  // boş bir avatar üzerinde anlamsız kalmasın).
+  if (AVATARS_IN_PRODUCTION) {
+    return (
+      <main className="avcfg-page">
+        <div className="avcfg-page-bg" />
+        <div className="avcfg-page-overlay" />
+        <div className="avcfg-page-vignette" />
+        <div className="avcfg-page-shell">
+          <section className="avcfg-page-hero">
+            <div className="avcfg-page-kicker">CAELINUS AVATAR</div>
+            <h1 className="avcfg-page-title">AVATARINI OLUSTUR</h1>
+          </section>
+          <AvatarsInProduction />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="avcfg-page">

@@ -1,7 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { animate, stagger, utils } from "animejs";
+import { useAnimeScope } from "@/components/anime/useAnimeScope";
+import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
+import JourneyLink from "@/components/journey/JourneyLink";
+
+// Portal sınıfı → dalış veil rengi (o dünyanın imzası).
+const PORTAL_COLOR: Record<string, string> = {
+  gold: "#f5d486",
+  violet: "#b69cff",
+  magenta: "#ff7ad9",
+  green: "#79e6a0",
+  blue: "#7aa2ff",
+  pink: "#ff9ec4",
+  cyan: "#7fe3ff",
+};
 
 type Particle = {
   id: number;
@@ -53,9 +67,70 @@ export default function UniversePage() {
     []
   );
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Anime.js v4 giriş koreografisi — başlık bloğu yumuşakça belirir,
+  // portal kartları stagger ile sırayla açılır. Kartlardaki inline
+  // transform animasyon bitince temizlenir; aksi hâlde CSS :hover
+  // transform'u (translateY/scale) inline stile yenik düşerdi.
+  const root = useAnimeScope<HTMLElement>(() => {
+    // reduced-motion → animasyon yok; içerik zaten default hâliyle görünür.
+    if (prefersReducedMotion()) return;
+
+    const headings = [".cu-kicker", ".cu-title", ".cu-subtitle"];
+
+    // ÖNEMLİ: opacity'yi önceden utils.set ile GİZLEMİYORUZ. anime'in
+    // [from, to] keyframe'i opacity'yi 0→1 sürer; böylece herhangi bir
+    // hata/StrictMode revert durumunda bile kartlar gizli takılı kalmaz.
+    animate(headings, {
+      opacity: [0, 1],
+      y: [18, 0],
+      duration: 900,
+      delay: stagger(140, { start: 100 }),
+      ease: "out(3)",
+    });
+
+    animate(".cu-portal", {
+      opacity: [0, 1],
+      y: [26, 0],
+      duration: 760,
+      delay: stagger(60, { start: 420 }),
+      ease: "out(3)",
+      onComplete: () => {
+        // CSS :hover transform'u çalışsın diye anime'in bıraktığı inline
+        // transform/opacity'yi temizle (stil kontrolü CSS'e geri döner).
+        utils.$(".cu-portal").forEach((el) => {
+          (el as HTMLElement).style.transform = "";
+          (el as HTMLElement).style.opacity = "";
+        });
+      },
+    });
+  });
+
+  // Erişilebilirlik: prefers-reduced-motion açıksa arka plan videosu
+  // oynamasın — poster karesi (caelinus-universe.jpg) sabit kalır.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (prefersReducedMotion()) {
+      v.autoplay = false;
+      v.pause();
+    }
+  }, []);
+
   return (
-    <main className="cu-scene">
-      <div className="cu-bg" />
+    <main className="cu-scene" ref={root}>
+      <video
+        ref={videoRef}
+        className="cu-bg-video"
+        src="/universe/caelinus-universe.mp4"
+        poster="/universe/caelinus-universe.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      />
       <div className="cu-overlay" />
       <div className="cu-nebula cu-nebula-left" />
       <div className="cu-nebula cu-nebula-right" />
@@ -75,31 +150,6 @@ export default function UniversePage() {
         })}
       </div>
 
-      <img
-        src="/universe/fairy.png"
-        alt=""
-        className="cu-fairy fairy-a"
-        draggable={false}
-      />
-      <img
-        src="/universe/fairy.png"
-        alt=""
-        className="cu-fairy fairy-b"
-        draggable={false}
-      />
-      <img
-        src="/universe/bird-light.png"
-        alt=""
-        className="cu-bird bird-a"
-        draggable={false}
-      />
-      <img
-        src="/universe/bird-light.png"
-        alt=""
-        className="cu-bird bird-b"
-        draggable={false}
-      />
-
       <section className="cu-content">
         <div className="cu-title-wrap">
           <div className="cu-kicker">✦ CAELINUS UNIVERSE ✦</div>
@@ -111,13 +161,18 @@ export default function UniversePage() {
 
         <div className="cu-portal-grid">
           {portals.map((item) => (
-            <Link key={item.label} href={item.href} className={`cu-portal ${item.cls}`}>
+            <JourneyLink
+              key={item.label}
+              href={item.href}
+              color={PORTAL_COLOR[item.cls] ?? "#8aa0ff"}
+              className={`cu-portal ${item.cls}`}
+            >
               <div className="cu-portal-core" />
               <div className="cu-portal-ring ring-one" />
               <div className="cu-portal-ring ring-two" />
               <div className="cu-portal-symbol">{item.symbol}</div>
               <div className="cu-portal-label">{item.label}</div>
-            </Link>
+            </JourneyLink>
           ))}
         </div>
       </section>

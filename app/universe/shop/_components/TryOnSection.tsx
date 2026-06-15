@@ -53,7 +53,13 @@ import {
   loadAvatarBodyId,
   AVATAR_BODY_ID_KEY,
 } from "@/lib/avatar-storage";
-import { getBody, DEFAULT_BODY_ID, type BodyEntry } from "@/lib/avatar-bodies";
+import {
+  getBody,
+  DEFAULT_BODY_ID,
+  AVATARS_IN_PRODUCTION,
+  type BodyEntry,
+} from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import { TryOnProductPanel } from "@/components/shop/TryOnProductPanel";
 import type { OutfitId } from "@/types/play";
 import StageControls from "./StageControls";
@@ -147,6 +153,15 @@ export default function TryOnSection() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
+
+  /* ── Avatarlar yapımda — kütüphane boşken 3D yerine placeholder ── */
+  if (AVATARS_IN_PRODUCTION) {
+    return (
+      <div className="shop-avatar-stage">
+        <AvatarsInProduction />
+      </div>
+    );
+  }
 
   /* Body seçimi yapılmışsa "avatarı var" sayılır — gate aç. */
   const effectiveHasAvatar = hasAvatar;
