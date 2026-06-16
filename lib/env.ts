@@ -112,9 +112,25 @@ const ServerEnvSchema = z.object({
      Without it the sender falls back to console logging — useful in dev
      and CI without leaking real mail. */
   RESEND_API_KEY: z.string().optional(),
-  /* Mailbox we send FROM. Must be a verified Resend domain. Example:
-     "Caelinus <hello@mail.caelinus.ai>". */
+  /* Mailbox we send FROM. Resend kullanılıyorsa doğrulanmış domain;
+     Titan SMTP kullanılıyorsa SMTP_USER ile aynı kutu olmalı. Örnek:
+     "Caelinus <hello@caelinus.ai>". */
   EMAIL_FROM: z.string().optional(),
+  /* Titan (veya herhangi bir) SMTP ile transactional mail. Hepsi tanımlıysa
+     sender Resend yerine SMTP'yi kullanır. Titan değerleri:
+       SMTP_HOST=smtp.titan.email
+       SMTP_PORT=465           (SSL; STARTTLS için 587)
+       SMTP_USER=hello@caelinus.ai
+       SMTP_PASS=<posta kutusu şifresi>
+       SMTP_SECURE=true        (465 için true, 587 için false) */
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v == null ? undefined : v === "true")),
   /* Stripe (atelier e-commerce). Three keys:
      - STRIPE_SECRET_KEY      sk_live_… / sk_test_… (server only)
      - STRIPE_WEBHOOK_SECRET  whsec_… signing secret for /api/stripe/webhook
@@ -184,6 +200,11 @@ function parseServerEnv() {
     FAL_KEY: process.env.FAL_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
+    SMTP_SECURE: process.env.SMTP_SECURE,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_CURRENCY_DEFAULT: process.env.STRIPE_CURRENCY_DEFAULT,
