@@ -41,7 +41,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "animejs": "^4.4.1",
     "jszip": "^3.10.1",
-    "next": "16.1.6",
+    "next": "16.2.9",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -56,7 +56,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"
