@@ -157,6 +157,7 @@ export default async function ProductPage({
           isTr={isTr}
           playHref={playHref}
           videoSrc={storyVideo}
+          priceUsd={productExt?.numericPrice ?? null}
         />
 
         {/* ── PROVENANCE ───────────────────────────────────── */}

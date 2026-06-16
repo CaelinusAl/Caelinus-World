@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import type { CartItemExtended, OrderItem, OrderMetadata, SceneId } from "@/types/play";
 import { loadCart, removeItemFromCart, clearCart, cartTotal } from "@/lib/cart-storage";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
+import PriceDual from "@/components/shop/PriceDual";
 
 type CheckoutStep = "cart" | "address" | "confirm";
 
@@ -204,7 +205,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="checkout-item-right">
                       <span className="checkout-item-price">
-                        ${item.product.numericPrice * item.qty}
+                        <PriceDual usd={item.product.numericPrice * item.qty} />
                       </span>
                       <button
                         className="checkout-remove-btn"
@@ -221,7 +222,7 @@ export default function CheckoutPage() {
               <div className="checkout-total-row">
                 <span className="checkout-total-label">Toplam</span>
                 <span className="checkout-total-amount">
-                  ${total.toFixed(0)}
+                  <PriceDual usd={total} />
                 </span>
               </div>
             </div>

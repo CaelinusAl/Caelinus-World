@@ -25,6 +25,7 @@ import {
 import { useProfileStore } from "@/stores/profile-store";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
 import JourneyLink from "@/components/journey/JourneyLink";
+import PriceDual from "@/components/shop/PriceDual";
 
 type Product = (typeof productsExtended)[number];
 
@@ -141,7 +142,7 @@ function ZodiacCard({
         <div className="zc-name">{product.name}</div>
         {product.story && <div className="zc-story">{product.story}</div>}
         <div className="zc-foot">
-          <span className="zc-price">{product.price}</span>
+          <span className="zc-price"><PriceDual usd={product.numericPrice} /></span>
           <span className="zc-enter">Hikâyeye gir →</span>
         </div>
       </div>

@@ -8564,6 +8564,14 @@ main {
   color: #ffe9b8;
 }
 
+/* USD birincil · TL ikincil (canlı kur) */
+.price-try {
+  opacity: 0.66;
+  font-size: 0.86em;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CAELINUS MANIFESTO — PRODUCT-GRADE PAGE
    ═══════════════════════════════════════════════════════════════ */

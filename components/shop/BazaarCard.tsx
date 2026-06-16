@@ -20,6 +20,7 @@ import type { ProductExtended, ProductSize } from "@/types/play";
 import type { AvatarProductRecommendation } from "@/lib/avatar-recommendations";
 import { ZODIAC_LABEL, type Zodiac } from "@/lib/frequency";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
+import PriceDual from "@/components/shop/PriceDual";
 
 type Props = {
   product: ProductExtended;
@@ -162,7 +163,9 @@ export default function BazaarCard({
         </div>
 
         <div className="bazaar-price-row">
-          <span className="bazaar-price">${product.numericPrice}</span>
+          <span className="bazaar-price">
+            <PriceDual usd={product.numericPrice} />
+          </span>
           <span
             className={`bazaar-stock ${totalStock === 0 ? "out" : totalStock < 10 ? "low" : ""}`}
           >

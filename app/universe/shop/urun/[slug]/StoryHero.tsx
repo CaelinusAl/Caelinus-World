@@ -14,6 +14,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import type { Product } from "@/types/play";
+import PriceDual from "@/components/shop/PriceDual";
 import TryOnCTA from "./TryOnCTA";
 
 type Props = {
@@ -22,6 +23,8 @@ type Props = {
   isTr: boolean;
   playHref: string;
   videoSrc: string | null;
+  /** USD fiyatı (varsa). null ise product.price metni gösterilir. */
+  priceUsd: number | null;
 };
 
 export default function StoryHero({
@@ -30,6 +33,7 @@ export default function StoryHero({
   isTr,
   playHref,
   videoSrc,
+  priceUsd,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -133,7 +137,9 @@ export default function StoryHero({
 
         {product.story ? <p className="pdp-story-lead">{product.story}</p> : null}
 
-        <div className="pdp-price">{product.price}</div>
+        <div className="pdp-price">
+          {priceUsd != null ? <PriceDual usd={priceUsd} /> : product.price}
+        </div>
 
         <div className="pdp-cta-row">
           <TryOnCTA
