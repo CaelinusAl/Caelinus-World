@@ -21,7 +21,30 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/).
 
 ## [Yayınlanmamış]
 
-_(Sıradaki sürüme girecek değişiklikler buraya.)_
+### Güvenlik
+- **PII sızıntısı kapatıldı (`GET /api/orders`):** Endpoint artık
+  `requireAdmin()` ile korunuyor; auth yoksa/yetkisizse `403`. Daha önce tüm
+  siparişleri (ad, e-posta, telefon, adres) kimlik doğrulaması olmadan
+  dönüyordu.
+- **Korumasız biyometrik yükleme kaldırıldı (`/api/upload-face`):** Rota
+  tamamen silindi — hiçbir yerden çağrılmıyordu (ölü kod), auth'suzdu,
+  `public/`'e yazıyordu (Vercel read-only FS → 500 riski) ve uzantı
+  sanitizasyonu yoktu. Gerçek selfie akışı `avatar/session/[id]/selfie`
+  üzerinden ilerliyor.
+- **`/gizlilik` biyometrik/yüz verisi bölümü:** Açık rıza temelli KVKK
+  metni eklendi (özel nitelikli veri tanımı, amaçla sınırlı saklama, rıza
+  geri çekme ve silme hakkı).
+
+### Düzeltildi
+- **Mobil portal ekranı (`/universe`):** Telefonda kapı kartları ekran
+  kenarlarından kesiliyordu (yatay taşma) ve alttaki kapılar
+  `100vh + overflow:hidden` yüzünden hiç görünmüyordu. ≤600px için kapı/halka/
+  disk küçültüldü, grid daraltıldı; sahne büyüyebilir yapılıp arka plan
+  sabitlendi — 10 kapının tamamı kaydırılarak erişilebiliyor.
+
+### Altyapı
+- **`public/universe/gaia-garden.mp4` 52.1 MB → 1.5 MB** (ffmpeg; 1280px,
+  ses yok, faststart). Orijinal `_raw/` yedeğine alındı (gitignore).
 
 ---
 
