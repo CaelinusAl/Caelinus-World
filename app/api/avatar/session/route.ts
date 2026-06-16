@@ -15,7 +15,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
-import { createSession } from "@/lib/caelinus-avatar-core";
+import { createSession } from "@/lib/caelinus-avatar-core/session-store";
 import type { CreateSessionResponse } from "@/lib/caelinus-avatar-core";
 
 export const runtime = "nodejs";

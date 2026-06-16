@@ -23,7 +23,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession, setStatus } from "@/lib/caelinus-avatar-core";
+import { getSession, setStatus } from "@/lib/caelinus-avatar-core/session-store";
 import type {
   SelfieUploadRequest,
   SelfieUploadResponse,
