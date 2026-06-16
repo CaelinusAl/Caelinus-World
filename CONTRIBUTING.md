@@ -72,6 +72,19 @@ npm run build      # (büyük değişikliklerde) prod build geçiyor
 - **Yorum:** Sadece "niçin"i açıkla; bariz olanı tekrar etme.
 - **Gizli veri:** Secret'ı koda gömme. `.env.local` + `lib/env.ts`.
 
+## Avatar body kaydı — iki dosya birlikte
+
+Bir avatar body'si eklerken/çıkarırken **iki kaynak senkron kalmalı**, yoksa
+seçici (`BodyPicker`, `AvatarCarousel`) ile gerçek varlık uyuşmaz:
+
+1. `lib/avatar-bodies.ts → CAELINUS_BODY_LIBRARY` — kod tarafı kayıt
+   (`BodyEntry`: id, etiket, GLB yolu, arketip vb.).
+2. `public/avatars/manifest.json` — varlık manifesti (GLB dosyaları, önizleme).
+
+Kural: birini değiştiren PR **diğerini de** aynı PR'da günceller. `id`'ler
+birebir eşleşmeli. (Şu an ikisi de boş/placeholder — `AVATARS_IN_PRODUCTION`
+flag'i aktif; gerçek body'ler eklenince bu kural devreye girer.)
+
 ## Ağır asset kuralı
 
 - Medya commit'lemeden önce sıkıştır (`npm run shop:*`). Hedef: arka plan

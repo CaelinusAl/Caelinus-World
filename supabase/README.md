@@ -11,10 +11,12 @@ supabase/
 │   ├── 0004_storage.sql           # depolama bucket'ları + politikaları
 │   ├── 0005–0010                  # play renders, sipariş, atelier, profil ekleri
 │   ├── 0011_caelinus_avatar.sql   # caelinus_avatar_url / zodiac / updated_at
+│   ├── 0012_caelinus_ai_studio.sql # caelinus_ai_jobs / _events / _avatars (AI studio)
 │   ├── 0013_avatar_base.sql       # caelinus_avatar_base (silk|bodysuit|veil)
 │   ├── 0014_caelinus_avatar_session.sql  # QR mobil selfie oturumu
 │   ├── 0015_members_network.sql   # frekans ağı (roller, handle, public_members view)
-│   └── 0016_contributions.sql     # üye katkıları + public_contributions view
+│   ├── 0016_contributions.sql     # üye katkıları + public_contributions view
+│   └── 0017_preorders.sql         # yumuşak lansman ön siparişleri (service-role yazar, RLS kapalı)
 └── README.md                      # bu dosya
 ```
 
