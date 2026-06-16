@@ -284,7 +284,14 @@ export default function ModelAvatar({
   const rootRef = useRef<THREE.Group>(null);
   const auraRef = useRef<THREE.Mesh>(null);
 
-  const gltf = useGLTF(url);
+  // Dosya isimleri boşluk/parantez içerebilir ("selin (1).glb").
+  // GLTFLoader ham URL'i fetch'e verince kırılgan; %20 encode şart.
+  // Zaten encode edilmiş (%) URL'i iki kez encode etmemek için guard.
+  const safeUrl = useMemo(
+    () => (/%[0-9a-f]{2}/i.test(url) ? url : encodeURI(url)),
+    [url],
+  );
+  const gltf = useGLTF(safeUrl);
   // SkeletonUtils.clone — Three.js'in SkinnedMesh-aware clone'u.
   // Standart Object3D.clone(true) bone'ları kopyalar AMA
   // SkinnedMesh hâlâ orijinal skeleton'a bind kalır, bu yüzden
@@ -303,8 +310,11 @@ export default function ModelAvatar({
     if (!animationUrl) { setExtClips([]); return; }
     let cancelled = false;
     const extLoader = new GLTFLoader();
+    const safeAnimUrl = /%[0-9a-f]{2}/i.test(animationUrl)
+      ? animationUrl
+      : encodeURI(animationUrl);
     extLoader.load(
-      animationUrl,
+      safeAnimUrl,
       (gltfResult) => {
         if (cancelled) return;
 

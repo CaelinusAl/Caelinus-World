@@ -22,19 +22,16 @@ export type {
   ApiError,
 } from "./types";
 
-/* Session store (server-only) — eski sync API geriye dönük uyumlu */
-export {
-  createSession,
-  getSession,
-  patchSession,
-  setStatus,
-  deleteSession,
-  activeSessionCount,
-  /** Async-aware namespace — production deploy'da Supabase backend için
-   *  bu namespace kullanılır. CAELINUS_AVATAR_SESSION_STORE=supabase
-   *  + SUPABASE_SERVICE_ROLE_KEY env'leriyle aktif olur. */
-  sessionStoreAsync,
-} from "./session-store";
+/* Session store (server-only) — TYPES ONLY in the barrel.
+ *
+ * ÖNEMLİ: Session store `import "server-only"` zincirine bağlı
+ * (session-store → session-store.supabase → supabase/admin). Bu barrel'ı
+ * bir client component import ettiğinde (örn. /caelinus-avatar/create),
+ * value re-export'u server-only kodu client bundle'a sürüklüyor ve
+ * "'server-only' cannot be imported from a Client Component" 500'ü
+ * patlıyordu. Tipler derlemede silindiği için güvenli; runtime
+ * fonksiyonları ise server route'lar doğrudan
+ * `@/lib/caelinus-avatar-core/session-store` üzerinden alır. */
 export type { SessionStore, CreateOptions } from "./session-store";
 
 /* Preset libraries */

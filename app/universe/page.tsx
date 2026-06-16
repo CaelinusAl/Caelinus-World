@@ -112,6 +112,7 @@ export default function UniversePage() {
         className="cu-bg-video"
         src="/universe/caelinus-universe.mp4"
         poster="/universe/caelinus-universe.jpg"
+        loop={false}
         decorative={false}
       />
       <div className="cu-overlay" />

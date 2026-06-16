@@ -1494,29 +1494,34 @@ main {
 }
 
 .cu-kicker {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 4px;
-  color: rgba(232, 240, 255, 0.86);
+  color: rgba(245, 249, 255, 0.96);
   margin-bottom: 14px;
-  text-shadow: 0 0 16px rgba(180, 210, 255, 0.22);
+  text-shadow:
+    0 0 16px rgba(180, 210, 255, 0.3),
+    0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
 .cu-title {
   margin: 0;
   color: white;
   font-size: clamp(54px, 7vw, 110px);
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-shadow:
-    0 0 20px rgba(255,255,255,0.16),
-    0 0 44px rgba(160,190,255,0.18);
+    0 0 24px rgba(255, 255, 255, 0.28),
+    0 0 52px rgba(160, 190, 255, 0.3),
+    0 4px 30px rgba(0, 0, 0, 0.78),
+    0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .cu-subtitle {
   margin-top: 12px;
-  color: rgba(235, 240, 252, 0.86);
+  color: rgba(244, 248, 255, 0.95);
   font-size: clamp(14px, 1.4vw, 22px);
   letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
 .cu-portal-grid {
@@ -1539,8 +1544,26 @@ main {
   transition: transform 0.35s ease, filter 0.35s ease;
 }
 
+/* Koyu cam disk — her seçeneğin video uzerinde net okunmasini saglar */
+.cu-portal::before {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6, 9, 20, 0.62) 0%, rgba(6, 9, 20, 0.42) 58%, transparent 80%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 0;
+  transition: background 0.35s ease;
+}
+
 .cu-portal:hover {
   transform: translateY(-8px) scale(1.03);
+}
+
+.cu-portal:hover::before {
+  background: radial-gradient(circle, rgba(6, 9, 20, 0.72) 0%, rgba(6, 9, 20, 0.5) 58%, transparent 82%);
 }
 
 .cu-portal-core {
@@ -1556,10 +1579,10 @@ main {
 .cu-portal-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(220,235,255,0.26);
+  border: 1.5px solid rgba(225,238,255,0.55);
   box-shadow:
-    0 0 18px rgba(190,220,255,0.10),
-    inset 0 0 16px rgba(255,255,255,0.04);
+    0 0 22px rgba(190,220,255,0.28),
+    inset 0 0 18px rgba(255,255,255,0.10);
   animation: cuRingBreath 5s ease-in-out infinite;
 }
 
@@ -1590,16 +1613,20 @@ main {
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 13.5px;
+  font-weight: 600;
   letter-spacing: 0.04em;
   color: white;
-  background: rgba(8, 12, 24, 0.38);
-  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(8, 12, 24, 0.66);
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   white-space: nowrap;
+  z-index: 4;
 }
 
 .cu-portal.green .cu-portal-core,
@@ -5333,6 +5360,8 @@ main {
   overflow-x: hidden;
   background: #060914;
   color: white;
+  /* Fixed global topbar ile çakışmayı önle — içerik topbar altından başlar. */
+  padding-top: calc(var(--cae-topbar-h, 72px) + 16px);
 }
 
 .avcfg-page-bg {
@@ -8285,6 +8314,16 @@ main {
    CAELINUS GLOBAL TOP BAR
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
+:root {
+  /* Sabit (fixed) global menü yüksekliği — sayfalar içeriklerini bu
+     kadar aşağıdan başlatıp topbar ile çakışmayı önler. Geniş ekranda
+     topbar ~64px; ama dar/tablet genişliklerde (720–900px) "Frekansını
+     Bul" rozeti iki satıra kayıp ~76px'e çıkıyor. 72px taban + sayfa
+     başına +16px nefes payı bu en kötü durumu da net temizler. Mobilde
+     (≤720px) topbar küçülür → 56px override. */
+  --cae-topbar-h: 72px;
+}
+
 .cae-topbar {
   position: fixed;
   top: 0;
@@ -8412,6 +8451,9 @@ main {
 }
 
 @media (max-width: 720px) {
+  :root {
+    --cae-topbar-h: 56px;
+  }
   .cae-topbar {
     padding: 12px 16px;
   }
@@ -19618,6 +19660,8 @@ select.atelier-input option {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  /* Fixed global topbar ile çakışmayı önle. */
+  padding-top: calc(var(--cae-topbar-h, 72px) + 16px);
   background:
     radial-gradient(circle at 22% 18%, rgba(118, 60, 168, 0.32) 0%, transparent 55%),
     radial-gradient(circle at 78% 82%, rgba(40, 56, 138, 0.36) 0%, transparent 60%),

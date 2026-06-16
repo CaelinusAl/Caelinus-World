@@ -136,7 +136,9 @@
 }
 
 .cav-page {
-  padding: 36px 0 72px;
+  /* Üst boşluk fixed global topbar'ı (var --cae-topbar-h) temizler +
+     hero için nefes payı; eskiden 36px sabitti ve topbar başlığa biniyordu. */
+  padding: calc(var(--cae-topbar-h, 72px) + 16px) 0 72px;
 }
 
 .cav-hero {

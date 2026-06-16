@@ -27,6 +27,8 @@ type Props = {
   poster: string;
   className?: string;
   style?: CSSProperties;
+  /** Döngü. false → video bir kez oynar (örn. anasayfa girişi). Varsayılan true. */
+  loop?: boolean;
   /** Arka plan dekoru ise true (ekran okuyuculardan gizle). Varsayılan true. */
   decorative?: boolean;
 };
@@ -36,6 +38,7 @@ export default function BackgroundVideo({
   poster,
   className,
   style,
+  loop = true,
   decorative = true,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -86,7 +89,7 @@ export default function BackgroundVideo({
       poster={poster}
       autoPlay
       muted
-      loop
+      loop={loop}
       playsInline
       preload="metadata"
       aria-hidden={decorative}

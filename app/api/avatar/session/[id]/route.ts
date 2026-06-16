@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { deleteSession, getSession } from "@/lib/caelinus-avatar-core";
+import { deleteSession, getSession } from "@/lib/caelinus-avatar-core/session-store";
 import type { SessionResponse } from "@/lib/caelinus-avatar-core";
 
 export const runtime = "nodejs";
