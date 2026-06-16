@@ -44,7 +44,7 @@ export default function OutfitBuilder() {
     for (const product of Object.values(dressedSlots)) {
       if (!product) continue;
       const ext = productsExtended.find((p) => p.id === product.id);
-      if (ext) addToCart(ext, "M");
+      if (ext) addToCart(ext, "M-L");
     }
   };
 

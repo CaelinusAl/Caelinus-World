@@ -57,7 +57,7 @@ export type Product = {
 
 export type OutfitSlot = "top" | "bottom" | "bag" | "shoes" | "accessory";
 
-export type ProductSize = "XS" | "S" | "M" | "L" | "XL";
+export type ProductSize = "XS-S" | "M-L";
 
 /* ═══════════════════════════════════════════
    Runtime GLB Outfit Binding

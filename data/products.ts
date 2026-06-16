@@ -82,15 +82,16 @@ function parsePrice(p: string): number {
   return parseFloat(p.replace(/[^0-9.]/g, "")) || 0;
 }
 
-const ALL_SIZES: ProductSize[] = ["XS", "S", "M", "L", "XL"];
+// Caelinus mayo/bikini koleksiyonu iki bedende: XS-S ve M-L.
+const ALL_SIZES: ProductSize[] = ["XS-S", "M-L"];
 
 function defaultStock(): Partial<Record<ProductSize, number>> {
-  return { XS: 5, S: 12, M: 18, L: 14, XL: 8 };
+  return { "XS-S": 14, "M-L": 14 };
 }
 
 export const productsExtended: ProductExtended[] = products.map((p) => ({
   ...p,
-  sizes: p.category === "bag" || p.category === "jewelry" ? ["S", "M", "L"] : ALL_SIZES,
+  sizes: ALL_SIZES,
   stock: defaultStock(),
   numericPrice: parsePrice(p.price),
   outfitGlb: OUTFIT_GLB_MAP[p.id],

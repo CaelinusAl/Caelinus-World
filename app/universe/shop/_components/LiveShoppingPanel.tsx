@@ -75,7 +75,7 @@ export default function LiveShoppingPanel() {
                   <div className="shop-product-actions">
                     <button
                       className="shop-cart-btn"
-                      onClick={() => ext && addToCart(ext, "M")}
+                      onClick={() => ext && addToCart(ext, "M-L")}
                       style={{ flex: "1 1 100%" }}
                     >
                       🛒 Sepete At
