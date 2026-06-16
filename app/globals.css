@@ -1781,6 +1781,91 @@ main {
     font-size: clamp(38px, 10vw, 64px);
   }
 }
+
+/* ── Telefon (≤600px) ──────────────────────────────────────────────────
+   İki sorun çözülür:
+   1) Yatay taşma: 2×180px + boşluk telefon genişliğini aşıyordu, kapılar
+      ekran kenarlarında kesiliyordu → kapı + halka + disk küçültülür,
+      grid daraltılır.
+   2) Dikey kesilme: .cu-scene 100vh + overflow:hidden tüm portalları
+      kırpıyordu (10 kapı sığmaz) → sahne büyüyebilir, arka plan/overlay
+      sabitlenir, body kayar; tüm kapılara ulaşılır. */
+@media (max-width: 600px) {
+  .cu-scene {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  /* Arka plan + overlay viewport'a sabit; içerik üstünden akar. */
+  .cu-bg,
+  .cu-bg-video,
+  .cu-overlay {
+    position: fixed;
+  }
+
+  .cu-content {
+    height: auto;
+    min-height: 100dvh;
+    padding-top: 38px;
+    padding-bottom: 72px;
+  }
+
+  .cu-portal-grid {
+    width: min(440px, 92vw);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px 12px;
+    margin-top: 38px;
+  }
+
+  .cu-portal {
+    width: 156px;
+    height: 156px;
+  }
+
+  .cu-portal::before {
+    width: 120px;
+    height: 120px;
+  }
+
+  .cu-portal-core {
+    width: 58px;
+    height: 58px;
+  }
+
+  .cu-portal .ring-one {
+    width: 88px;
+    height: 88px;
+  }
+
+  .cu-portal .ring-two {
+    width: 116px;
+    height: 116px;
+  }
+
+  .cu-portal-symbol {
+    font-size: 32px;
+  }
+
+  .cu-portal-label {
+    bottom: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: normal;
+    max-width: 140px;
+    text-align: center;
+  }
+
+  .cu-title {
+    font-size: clamp(32px, 9vw, 52px);
+  }
+
+  .cu-subtitle {
+    font-size: 13px;
+  }
+}
 /* =========================
    GAIA PAGE - FINAL RESET
    ========================= */
