@@ -94,21 +94,23 @@ export default function HomePage() {
       <div className="nebula nebula-right" />
       <div className="nebula nebula-bottom" />
 
-      <div className="stars-layer">
-        {stars.map((star) => {
-          const style: CSSProperties = {
-            left: `${star.left}%`,
-            top: `${star.top}%`,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            animationDelay: `${star.delay}s`,
-            animationDuration: `${star.duration}s`,
-            ["--pull-x" as string]: `${star.dx * 1.9}vw`,
-            ["--pull-y" as string]: `${star.dy * 1.9}vh`,
-          };
+      <div className="stars-parallax">
+        <div className="stars-layer">
+          {stars.map((star) => {
+            const style: CSSProperties = {
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              animationDelay: `${star.delay}s`,
+              animationDuration: `${star.duration}s`,
+              ["--pull-x" as string]: `${star.dx * 1.9}vw`,
+              ["--pull-y" as string]: `${star.dy * 1.9}vh`,
+            };
 
-          return <span key={star.id} className="star" style={style} />;
-        })}
+            return <span key={star.id} className="star" style={style} />;
+          })}
+        </div>
       </div>
 
       <div className="logo-wrap">

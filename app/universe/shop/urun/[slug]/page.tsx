@@ -23,8 +23,52 @@ import { absoluteUrl } from "@/lib/i18n/locale";
 import { buildLocaleMetadata } from "@/lib/i18n/metadata";
 import { getLocale } from "@/lib/i18n/server";
 
-import TryOnCTA from "./TryOnCTA";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+import StoryHero from "./StoryHero";
 import "./pdp.css";
+
+const PUBLIC = join(process.cwd(), "public");
+const VIDEO_RE = /\.(mp4|mov|m4v|webm)$/i;
+
+/**
+ * "Hikâyeyi Yaşa" — gerçek çekim canlı videosu (gerçek modeller üzerinde,
+ * ürünün ön & arkası). Çözüm sırası:
+ *   1. public/products/<burç>/ klasöründeki ilk video (isim ne olursa olsun:
+ *      kova.mp4, balık.mp4, koc.mp4 …) — Türkçe karakterler de çalışır.
+ *   2. public/products/<burç>.mp4 (düz konuma kaydedilirse)
+ *   3. eski AI look videosu play/shop/<burç>-look.mp4
+ * Hiçbiri yoksa null → buton /play linkine düşer. Sunucuda doğrulanır;
+ * URL segmentleri encode edilir (Türkçe harfler için).
+ */
+function resolveStoryVideo(zodiac?: string | null): string | null {
+  if (!zodiac) return null;
+
+  const dir = join(PUBLIC, "products", zodiac);
+  if (existsSync(dir)) {
+    try {
+      const vid = readdirSync(dir).filter((f) => VIDEO_RE.test(f)).sort()[0];
+      if (vid) return `/products/${zodiac}/${encodeURIComponent(vid)}`;
+    } catch {
+      /* yoksay */
+    }
+  }
+
+  try {
+    const flat = readdirSync(join(PUBLIC, "products"))
+      .filter((f) => VIDEO_RE.test(f) && f.toLowerCase().startsWith(zodiac))
+      .sort()[0];
+    if (flat) return `/products/${encodeURIComponent(flat)}`;
+  } catch {
+    /* yoksay */
+  }
+
+  if (existsSync(join(PUBLIC, "play", "shop", `${zodiac}-look.mp4`)))
+    return `/play/shop/${zodiac}-look.mp4`;
+
+  return null;
+}
 
 type Params = { slug: string };
 
@@ -93,6 +137,8 @@ export default async function ProductPage({
   const productExt = productsExtended.find((p) => p.id === product.id);
   const has3D = !!productExt?.outfitGlb;
 
+  const storyVideo = resolveStoryVideo(product.zodiac);
+
   return (
     <main className="pdp-scene">
       <div className="pdp-shell">
@@ -105,55 +151,13 @@ export default async function ProductPage({
         </nav>
 
         {/* ── HERO ─────────────────────────────────────────── */}
-        <section className="pdp-hero">
-          <div className="pdp-image-wrap">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.image}
-              alt={product.name}
-              className="pdp-image"
-              loading="eager"
-            />
-            {product.frequency ? (
-              <div className="pdp-freq-tag">{product.frequency}</div>
-            ) : null}
-            {product.zodiac ? (
-              <div className="pdp-zodiac-tag">{product.zodiac}</div>
-            ) : null}
-          </div>
-
-          <div className="pdp-info">
-            <div className="pdp-kicker">
-              ✦ {isTr ? "Caelinus · Hikâyeli Parça" : "Caelinus · Storied Piece"}
-            </div>
-            <h1 className="pdp-title">{product.name}</h1>
-            <div className="pdp-designer">
-              {isTr ? "Tasarımcı" : "Designer"}: <strong>{product.designer}</strong>
-              <span style={{ opacity: 0.5, padding: "0 8px" }}>·</span>
-              {product.brand}
-            </div>
-
-            {product.story ? (
-              <p className="pdp-story-lead">{product.story}</p>
-            ) : null}
-
-            <div className="pdp-price">{product.price}</div>
-
-            <div className="pdp-cta-row">
-              <TryOnCTA
-                productId={product.id}
-                hasOutfitGlb={has3D}
-                isTr={isTr}
-              />
-              <Link href={playHref} className="pdp-cta">
-                {isTr ? "Hikâyeyi Yaşa" : "Live the Story"}
-              </Link>
-              <Link href="/manifesto" className="pdp-cta pdp-cta--ghost">
-                {isTr ? "Manifesto" : "Manifesto"}
-              </Link>
-            </div>
-          </div>
-        </section>
+        <StoryHero
+          product={product}
+          hasOutfitGlb={has3D}
+          isTr={isTr}
+          playHref={playHref}
+          videoSrc={storyVideo}
+        />
 
         {/* ── PROVENANCE ───────────────────────────────────── */}
         <section className="pdp-section">

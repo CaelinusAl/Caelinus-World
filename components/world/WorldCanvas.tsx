@@ -29,6 +29,7 @@ export default function WorldCanvas({ scene }: { scene: WorldSceneId }) {
   const quality = useWorldStore((s) => s.quality);
   const setQuality = useWorldStore((s) => s.setQuality);
   const sceneOverride = useWorldStore((s) => s.sceneOverride);
+  const resonance = useWorldStore((s) => s.resonance);
 
   const [dpr, setDpr] = useState(1.4);
 
@@ -60,6 +61,7 @@ export default function WorldCanvas({ scene }: { scene: WorldSceneId }) {
           scene={active}
           reducedMotion={reducedMotion}
           quality={quality}
+          resonance={resonance}
         />
       </Canvas>
     </div>

@@ -7,6 +7,7 @@ import { useSceneStore } from "@/stores/scene-store";
 import { useCartStore } from "@/stores/cart-store";
 import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import { productsExtended } from "@/data/products";
 import ShopHeader from "./_components/ShopHeader";
 import TryOnSection from "./_components/TryOnSection";
@@ -15,8 +16,8 @@ import OutfitBuilder from "./_components/OutfitBuilder";
 import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
-import FrequencyShelf from "./_components/FrequencyShelf";
 import AvatarBadge from "./_components/AvatarBadge";
+import BackgroundVideo from "@/components/media/BackgroundVideo";
 
 /**
  * TryOnLauncher — PDP'den (`/universe/shop/urun/<id>`) gelen
@@ -74,8 +75,13 @@ export default function ShopPage() {
 
   return (
     <main className="shop-page">
-      {/* BG */}
+      {/* BG — tüm burçların sahnede yürüdüğü look.mp4 tam sayfa arka plan */}
       <div className="shop-bg" />
+      <BackgroundVideo
+        className="shop-bg-video"
+        src="/play/shop/look.mp4"
+        poster="/play/shop/leo-look.jpg"
+      />
       <div className="shop-overlay" />
       <div className="shop-vignette" />
 
@@ -97,16 +103,14 @@ export default function ShopPage() {
       <div className="shop-shell">
         <ShopHeader />
 
-        <FrequencyShelf />
-
         {/* Faz 3.2 — Kullanıcının kayıtlı AI avatarı (yoksa "yarat"
          * daveti) sahnenin üzerinde sticky. Vizyonun "her sayfada
          * benim avatarım" sürekliliği için. */}
         <AvatarBadge />
 
         <section className="shop-main">
-          {/* 1. AVATAR STAGE — Always visible */}
-          <TryOnSection />
+          {/* 1. AVATAR STAGE — avatarlar yapımdayken gizli (placeholder gösterilmez) */}
+          {!AVATARS_IN_PRODUCTION && <TryOnSection />}
 
           {/* 2. VIRTUAL TRY-ON MODE */}
           <div className={`shop-section-panel ${activeMode === "tryon" ? "visible" : ""}`}>

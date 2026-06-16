@@ -40,3 +40,9 @@ __pycache__/
 # avatar pipeline scratch / working files (FBX, zip, previews — not for repo)
 public/models/_wip/
 public/models/_backup/
+
+# shop video optimization backups (originals kept locally, optimized ones committed)
+public/play/shop/_raw/
+
+# product photo optimization backups
+public/products/_raw/

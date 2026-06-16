@@ -9,6 +9,7 @@
 
 import { create } from "zustand";
 import type { WorldSceneId } from "./config";
+import { DEFAULT_RESONANCE, type Resonance } from "./resonance";
 
 export type WorldQuality = "high" | "medium" | "low";
 
@@ -19,17 +20,22 @@ type WorldState = {
   quality: WorldQuality;
   /** prefers-reduced-motion açık mı — animasyonları dindir. */
   reducedMotion: boolean;
+  /** Kullanıcının frekansına göre türetilen sahne parametreleri (5D). */
+  resonance: Resonance;
 
   setSceneOverride: (scene: WorldSceneId | null) => void;
   setQuality: (q: WorldQuality) => void;
   setReducedMotion: (b: boolean) => void;
+  setResonance: (r: Resonance) => void;
 };
 
 export const useWorldStore = create<WorldState>((set) => ({
   sceneOverride: null,
   quality: "high",
   reducedMotion: false,
+  resonance: DEFAULT_RESONANCE,
   setSceneOverride: (scene) => set({ sceneOverride: scene }),
   setQuality: (quality) => set({ quality }),
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+  setResonance: (resonance) => set({ resonance }),
 }));

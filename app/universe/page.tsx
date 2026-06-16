@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { animate, stagger, utils } from "animejs";
 import { useAnimeScope } from "@/components/anime/useAnimeScope";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
 import JourneyLink from "@/components/journey/JourneyLink";
+import BackgroundVideo from "@/components/media/BackgroundVideo";
 
 // Portal sınıfı → dalış veil rengi (o dünyanın imzası).
 const PORTAL_COLOR: Record<string, string> = {
@@ -67,8 +68,6 @@ export default function UniversePage() {
     []
   );
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   // Anime.js v4 giriş koreografisi — başlık bloğu yumuşakça belirir,
   // portal kartları stagger ile sırayla açılır. Kartlardaki inline
   // transform animasyon bitince temizlenir; aksi hâlde CSS :hover
@@ -107,29 +106,13 @@ export default function UniversePage() {
     });
   });
 
-  // Erişilebilirlik: prefers-reduced-motion açıksa arka plan videosu
-  // oynamasın — poster karesi (caelinus-universe.jpg) sabit kalır.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (prefersReducedMotion()) {
-      v.autoplay = false;
-      v.pause();
-    }
-  }, []);
-
   return (
     <main className="cu-scene" ref={root}>
-      <video
-        ref={videoRef}
+      <BackgroundVideo
         className="cu-bg-video"
         src="/universe/caelinus-universe.mp4"
         poster="/universe/caelinus-universe.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
+        decorative={false}
       />
       <div className="cu-overlay" />
       <div className="cu-nebula cu-nebula-left" />
