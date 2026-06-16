@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Order, OrderItem, OrderMetadata } from "@/types/play";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { sendEmail, getSiteUrl } from "@/lib/email/sender";
+import { preorderReceivedEmail } from "@/lib/email/templates/preorder-received";
+import { COMPANY } from "@/lib/company";
 
 const memoryOrders: Order[] = [];
 
@@ -52,6 +55,61 @@ async function persistPreorder(payload: {
   }
 }
 
+/**
+ * Ön sipariş bildirimleri — best-effort. Müşteriye onay, ekibe haber.
+ * RESEND_API_KEY yoksa sender konsola düşer (UX kırılmaz).
+ */
+async function notifyPreorder(payload: {
+  email: string;
+  fullName?: string;
+  phone?: string;
+  items: OrderItem[];
+  total: number;
+  orderId: string;
+}): Promise<void> {
+  const siteUrl = getSiteUrl();
+  const name = payload.fullName?.trim() || "Caelinus dostu";
+  const lines = payload.items.map((i) => ({
+    name: i.name,
+    size: i.size,
+    qty: i.qty,
+  }));
+
+  try {
+    const mail = preorderReceivedEmail({
+      buyerName: name,
+      orderId: payload.orderId,
+      items: lines,
+      locale: "tr",
+      siteUrl,
+    });
+    await sendEmail({
+      to: payload.email,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
+      replyTo: COMPANY.email,
+    });
+  } catch (err) {
+    console.warn("[preorder] customer mail skipped:", (err as Error).message);
+  }
+
+  try {
+    const summary = payload.items
+      .map((i) => `· ${i.name}${i.size ? ` (${i.size})` : ""} × ${i.qty}`)
+      .join("\n");
+    await sendEmail({
+      to: COMPANY.email,
+      subject: `Yeni ön sipariş · ${payload.orderId}`,
+      html: `<pre style="font:14px/1.6 monospace">Yeni ön sipariş\n\nAd: ${payload.fullName ?? "-"}\nE-posta: ${payload.email}\nTelefon: ${payload.phone ?? "-"}\nToplam: $${payload.total}\n\n${summary}</pre>`,
+      text: `Yeni ön sipariş\n\nAd: ${payload.fullName ?? "-"}\nE-posta: ${payload.email}\nTelefon: ${payload.phone ?? "-"}\nToplam: $${payload.total}\n\n${summary}`,
+      replyTo: payload.email,
+    });
+  } catch (err) {
+    console.warn("[preorder] team mail skipped:", (err as Error).message);
+  }
+}
+
 export async function GET() {
   return NextResponse.json({ orders: memoryOrders });
 }
@@ -88,13 +146,24 @@ export async function POST(req: NextRequest) {
 
   memoryOrders.push(order);
 
+  const phone = (address as { phone?: string }).phone;
+
   const persisted = await persistPreorder({
     email,
     fullName: address.fullName,
-    phone: (address as { phone?: string }).phone,
+    phone,
     items,
     address,
     total,
+  });
+
+  await notifyPreorder({
+    email,
+    fullName: address.fullName,
+    phone,
+    items,
+    total,
+    orderId: order.id,
   });
 
   return NextResponse.json({ success: true, order, persisted }, { status: 201 });
