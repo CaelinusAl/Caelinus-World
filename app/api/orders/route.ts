@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sendEmail, getSiteUrl } from "@/lib/email/sender";
 import { preorderReceivedEmail } from "@/lib/email/templates/preorder-received";
 import { COMPANY } from "@/lib/company";
+import { requireAdmin } from "@/lib/atelier/admin";
 
 const memoryOrders: Order[] = [];
 
@@ -110,7 +111,16 @@ async function notifyPreorder(payload: {
   }
 }
 
+/**
+ * Sipariş listesi — PII içerir (ad, e-posta, telefon, adres). Yalnızca
+ * Caelinus admin'leri erişebilir. Auth yoksa/yetkisizse 403.
+ */
 export async function GET() {
+  try {
+    await requireAdmin();
+  } catch {
+    return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 403 });
+  }
   return NextResponse.json({ orders: memoryOrders });
 }
 

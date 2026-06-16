@@ -49,7 +49,32 @@ export default function GizlilikPage() {
           çerezler aracılığıyla toplanan kullanım verileri (bkz.{" "}
           <a href="/cerez-politikasi">Çerez Politikası</a>).
         </li>
+        <li>
+          <strong>Biyometrik / görüntü verileri (yalnızca avatar özelliğini
+          kullanırsanız):</strong> Avatar oluşturmak için isteğe bağlı olarak
+          yüklediğiniz fotoğraf/selfie görüntüleri ve bunlardan üretilen avatar
+          modeli. Bu veriler <strong>yalnızca açık rızanızla</strong> işlenir.
+        </li>
       </ul>
+
+      <h2>2.1. Yüz / Selfie Görüntülerinin İşlenmesi (Özel Nitelikli Veri)</h2>
+      <p>
+        Avatar oluşturma özelliği opsiyoneldir. Bu özelliği kullanmayı
+        seçerseniz yüklediğiniz görüntü, KVKK kapsamında özel nitelikli kişisel
+        veri sayılabilir ve <strong>yalnızca açık rızanızla</strong>, sadece
+        avatarınızı üretmek amacıyla işlenir. Görüntüler:
+      </p>
+      <ul>
+        <li>üçüncü kişilerle pazarlama amacıyla paylaşılmaz,</li>
+        <li>yalnızca avatar üretimi için gerekli süre boyunca saklanır ve
+          işlem tamamlandığında veya talebiniz üzerine silinir,</li>
+        <li>rızanızı dilediğiniz an geri çekebilirsiniz; geri çektiğinizde
+          ilgili görüntü ve türetilmiş veriler silinir.</li>
+      </ul>
+      <p>
+        Bu özelliği kullanmadığınız sürece herhangi bir biyometrik/görüntü
+        verisi işlenmez.
+      </p>
 
       <h2>3. İşleme Amaçları</h2>
       <ul>
