@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import FrequencyBadge from "./FrequencyBadge";
 
+// v1 yumuşak lansman kapsamı — yalnızca tamamlanmış çekirdek alanlar menüde.
+// Gaia / Ağ / Ask gibi deneysel alanlar geçici olarak gizli (rotalar yaşıyor
+// ama menüden link verilmiyor; hazır oldukça geri eklenir).
 const NAV_ITEMS = [
   { href: "/universe", label: "Universe" },
   { href: "/universe/shop", label: "Shop" },
-  { href: "/universe/gaia", label: "Gaia" },
-  { href: "/network", label: "Ağ" },
+  { href: "/atelier", label: "Atelier" },
   { href: "/manifesto", label: "Manifesto" },
-  { href: "/ai", label: "Ask" },
 ];
 
 const HIDDEN_PATHS = ["/", "/universe", "/onboarding"];

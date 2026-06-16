@@ -119,7 +119,7 @@ export default function OutfitBuilder() {
                   Toplam: <strong>${total.toFixed(0)}</strong>
                 </div>
                 <Link href="/universe/shop/checkout" className="shop-checkout-btn">
-                  Satin Al
+                  Ön Sipariş Ver
                 </Link>
               </>
             )}

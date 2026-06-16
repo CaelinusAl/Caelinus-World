@@ -7810,6 +7810,20 @@ main {
   cursor: not-allowed;
 }
 
+.checkout-presale-note {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 162, 94, 0.28);
+  background: rgba(200, 162, 94, 0.07);
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(240, 230, 210, 0.82);
+}
+.checkout-presale-note strong {
+  color: #f0d59a;
+}
+
 .checkout-remove-btn {
   width: 28px;
   height: 28px;
@@ -8526,6 +8540,27 @@ main {
 }
 
 .cae-footer-meta a:hover {
+  color: #ffe9b8;
+}
+
+.cae-footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.42;
+  text-transform: uppercase;
+}
+.cae-footer-legal a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cae-footer-legal a:hover {
   color: #ffe9b8;
 }
 

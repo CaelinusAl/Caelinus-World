@@ -110,7 +110,7 @@ export default function LiveShoppingPanel() {
                 className="shop-checkout-btn"
                 style={{ marginTop: "14px", display: "block", textAlign: "center", textDecoration: "none" }}
               >
-                💫 Satin Al
+                💫 Ön Sipariş Ver
               </Link>
             </>
           )}
