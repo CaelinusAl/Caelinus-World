@@ -4262,6 +4262,8 @@ main {
   overflow-x: hidden;
   background: #060914;
   color: white;
+  /* Fixed global topbar ile çakışmayı önle — içerik topbar altından başlar. */
+  padding-top: calc(var(--cae-topbar-h, 72px) + 16px);
 }
 
 .avcfg-page-bg {
@@ -7214,6 +7216,16 @@ main {
    CAELINUS GLOBAL TOP BAR
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
+:root {
+  /* Sabit (fixed) global menü yüksekliği — sayfalar içeriklerini bu
+     kadar aşağıdan başlatıp topbar ile çakışmayı önler. Geniş ekranda
+     topbar ~64px; ama dar/tablet genişliklerde (720–900px) "Frekansını
+     Bul" rozeti iki satıra kayıp ~76px'e çıkıyor. 72px taban + sayfa
+     başına +16px nefes payı bu en kötü durumu da net temizler. Mobilde
+     (≤720px) topbar küçülür → 56px override. */
+  --cae-topbar-h: 72px;
+}
+
 .cae-topbar {
   position: fixed;
   top: 0;
@@ -7341,6 +7353,9 @@ main {
 }
 
 @media (max-width: 720px) {
+  :root {
+    --cae-topbar-h: 56px;
+  }
   .cae-topbar {
     padding: 12px 16px;
   }
@@ -18405,6 +18420,8 @@ select.atelier-input option {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  /* Fixed global topbar ile çakışmayı önle. */
+  padding-top: calc(var(--cae-topbar-h, 72px) + 16px);
   background:
     radial-gradient(circle at 22% 18%, rgba(118, 60, 168, 0.32) 0%, transparent 55%),
     radial-gradient(circle at 78% 82%, rgba(40, 56, 138, 0.36) 0%, transparent 60%),
