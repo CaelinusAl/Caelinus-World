@@ -114,8 +114,14 @@ export default function HomePage() {
       </div>
 
       <div className="logo-wrap">
-        <div className="logo-kicker">✦ CAELINUS UNIVERSE ✦</div>
-        <h1 className="logo-text">CAELINUS</h1>
+        <h1 className="logo-emblem-wrap">
+          <img
+            src="/logo/frekansin-sanati.jpeg"
+            alt="Caelinus — Frekansın Sanatı"
+            className="logo-emblem"
+            draggable={false}
+          />
+        </h1>
         <p className="logo-tagline">
           Wear your frequency — a living universe of fashion, ritual &amp; earth.
         </p>

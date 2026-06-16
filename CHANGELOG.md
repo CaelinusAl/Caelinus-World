@@ -22,6 +22,10 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/).
 ## [Yayınlanmamış]
 
 ### Değişti
+- **Marka logosu (Frekansın Sanatı):** Altın kanatlı vektörel logo
+  (`public/logo/frekansin-sanati.jpeg`) landing'de metin "CAELINUS" yerine ve
+  TopBar markasında kullanılıyor. Siyah zemin `mix-blend-mode: screen` ile
+  düşürülüp yalnızca altın + parıltı gösteriliyor (koyu sayfalara uygun).
 - **Landing'e bilgi kokusu:** `/` artık "Caelinus nedir"i söyleyen tek satır
   içeriyor ("Wear your frequency — a living universe of fashion, ritual &
   earth."); marka önerisi yalnızca görünmez `<head>` metadata'sında değil.

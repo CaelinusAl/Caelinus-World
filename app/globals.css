@@ -132,6 +132,24 @@ main {
     0 0 72px rgba(130, 185, 255, 0.10);
 }
 
+/* Altın kanatlı marka amblemi — vektörel logo. JPEG siyah zeminli; ekranda
+   mix-blend screen ile siyah düşer, sadece altın + parıltı kalır (koyu
+   sayfalarda mükemmel; siyah dolgu ayın üstünden geçse bile ay görünür). */
+.logo-emblem-wrap {
+  margin: 0;
+  line-height: 0;
+}
+
+.logo-emblem {
+  display: block;
+  width: min(380px, 76vw);
+  height: auto;
+  margin: 0 auto;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 34px rgba(255, 200, 110, 0.16));
+  user-select: none;
+}
+
 /* Bilgi kokusu — landing'de Caelinus'un ne olduğunu söyleyen tek satır.
    Önceden marka önerisi sadece <head> metadata'sındaydı. */
 .logo-tagline {
@@ -8555,6 +8573,15 @@ main {
   color: #c8b888;
 }
 
+/* Navbar amblemi — siyah zemin mix-blend screen ile düşer. */
+.cae-topbar-logo {
+  display: block;
+  height: 44px;
+  width: auto;
+  mix-blend-mode: screen;
+  user-select: none;
+}
+
 .cae-topbar-nav {
   display: flex;
   align-items: center;
@@ -8657,6 +8684,9 @@ main {
   .cae-topbar-brand {
     letter-spacing: 0.3em;
     font-size: 12px;
+  }
+  .cae-topbar-logo {
+    height: 34px;
   }
   .cae-topbar-nav {
     gap: 14px;
