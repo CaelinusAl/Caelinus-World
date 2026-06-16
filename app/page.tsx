@@ -116,6 +116,9 @@ export default function HomePage() {
       <div className="logo-wrap">
         <div className="logo-kicker">✦ CAELINUS UNIVERSE ✦</div>
         <h1 className="logo-text">CAELINUS</h1>
+        <p className="logo-tagline">
+          Wear your frequency — a living universe of fashion, ritual &amp; earth.
+        </p>
       </div>
 
       <button

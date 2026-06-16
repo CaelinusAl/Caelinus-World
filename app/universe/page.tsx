@@ -27,8 +27,19 @@ type Particle = {
   duration: number;
 };
 
-const portals = [
-  { label: "Find Your Frequency", href: "/onboarding", symbol: "✦", cls: "gold" },
+type Portal = {
+  label: string;
+  href: string;
+  symbol: string;
+  cls: string;
+  featured?: boolean;
+};
+
+const portals: Portal[] = [
+  // Duygusal-önce giriş: "Find Your Frequency" yönlendirilmiş başlangıç
+  // (featured). Diğer 9 portalla eşit görsel ağırlıkta değil — "buradan
+  // başla" vurgusuyla karar felcini kırar, Shop'tan (satış) önce gelir.
+  { label: "Find Your Frequency", href: "/onboarding", symbol: "✦", cls: "gold", featured: true },
   // AI Moodboard — Caelinus Stylist'in açılış kapısı (keşif). Kullanıcı
   // bir his yazar (mevsim, renk, hatıra), AI dört editöryel kareyi
   // (atmosfer · doku · figür · nesne) ve beş paragraflık manifesto
@@ -141,6 +152,11 @@ export default function UniversePage() {
           <p className="cu-subtitle">
             Enter the portal world you want to explore.
           </p>
+          <p className="cu-guide">
+            New here? Begin with{" "}
+            <span className="cu-guide-mark">✦ Find Your Frequency</span> — the
+            rest of the universe unfolds from there.
+          </p>
         </div>
 
         <div className="cu-portal-grid">
@@ -149,8 +165,11 @@ export default function UniversePage() {
               key={item.label}
               href={item.href}
               color={PORTAL_COLOR[item.cls] ?? "#8aa0ff"}
-              className={`cu-portal ${item.cls}`}
+              className={`cu-portal ${item.cls}${item.featured ? " featured" : ""}`}
             >
+              {item.featured && (
+                <div className="cu-portal-hint">✦ Start here</div>
+              )}
               <div className="cu-portal-core" />
               <div className="cu-portal-ring ring-one" />
               <div className="cu-portal-ring ring-two" />

@@ -21,6 +21,15 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/).
 
 ## [Yayınlanmamış]
 
+### Değişti
+- **Landing'e bilgi kokusu:** `/` artık "Caelinus nedir"i söyleyen tek satır
+  içeriyor ("Wear your frequency — a living universe of fashion, ritual &
+  earth."); marka önerisi yalnızca görünmez `<head>` metadata'sında değil.
+- **Yönlendirilmiş başlangıç (`/universe`):** "Find Your Frequency" featured
+  portal oldu — altın aura + "Start here" rozeti + başlık altı yönlendirme.
+  10 eşit portalın yarattığı karar felci kırıldı; duygusal giriş, Shop
+  (satış) önünde görsel ağırlık kazandı.
+
 ### Güvenlik
 - **PII sızıntısı kapatıldı (`GET /api/orders`):** Endpoint artık
   `requireAdmin()` ile korunuyor; auth yoksa/yetkisizse `403`. Daha önce tüm
