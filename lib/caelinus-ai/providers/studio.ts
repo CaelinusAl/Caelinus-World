@@ -182,7 +182,17 @@ async function createJob(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      selfie: input.selfie,
+      // Selfie GÖRÜNTÜSÜ sunucuya gönderilmez — analiz tarayıcıda yapıldı,
+      // görüntü cihazda kalır (KVKK). Yalnızca görüntü-içermeyen meta
+      // (telemetri) + hesaplanmış analiz gider.
+      selfieMeta: input.selfie
+        ? {
+            source: input.selfie.source,
+            capturedAt: input.selfie.capturedAt,
+            width: input.selfie.width,
+            height: input.selfie.height,
+          }
+        : undefined,
       analysis,
       style: input.style,
       quality: "balanced",

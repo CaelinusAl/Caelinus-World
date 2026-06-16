@@ -31,14 +31,8 @@ import type {
   AvatarMatch,
   GeneratedAvatar,
   SelfieAnalysis,
-  SelfieInput,
 } from "../types";
 
-import {
-  getCachedAnalysis,
-  selfieHash,
-  setCachedAnalysis,
-} from "./analyze-cache";
 import { getJobStore } from "./store";
 import type { JobRecord, JobStatus } from "./types";
 
@@ -118,29 +112,22 @@ function deterministicStubAnalysis(seed: number): SelfieAnalysis {
 }
 
 function resolveSelfieAnalysis(
-  selfie: SelfieInput | undefined,
+  hasSelfie: boolean,
   browserAnalysis: SelfieAnalysis | undefined,
   styleHash: number,
 ): SelfieAnalysis {
-  if (!selfie) return { detected: false };
-
-  const hash = selfieHash(selfie.dataUrl);
-
-  // Tarayıcıda hesaplanmış gerçek analiz — authoritative kaynak.
+  // Tarayıcıda hesaplanmış gerçek analiz — authoritative kaynak. Selfie
+  // görüntüsü sunucuya gelmez; analiz zaten cihazda hesaplandı.
   if (browserAnalysis && browserAnalysis.detected) {
-    setCachedAnalysis(hash, browserAnalysis);
     return browserAnalysis;
   }
 
-  // Aynı selfie daha önce analiz edildiyse cache'ten.
-  const cached = getCachedAnalysis(hash);
-  if (cached) return cached;
+  // Kullanıcı hiç selfie vermediyse — analiz yok.
+  if (!hasSelfie) return { detected: false };
 
-  // Son çare: deterministic stub (tarayıcı yüz tespit edemedi ya da
-  // analiz iliştirilmedi).
-  const fallback = deterministicStubAnalysis(styleHash);
-  setCachedAnalysis(hash, fallback);
-  return fallback;
+  // Selfie verildi ama analiz gelmedi (tarayıcı yüz tespit edemedi) →
+  // deterministic stub, pipeline kırılmasın.
+  return deterministicStubAnalysis(styleHash);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -230,8 +217,9 @@ export async function runJob(jobId: string, signal?: AbortSignal): Promise<void>
     //    iliştirilmiş sonucu çözüyoruz (yoksa deterministic fallback).
     if (!(await ensureNotTerminated(jobId))) return;
     await store.update(jobId, { status: "analyzing-selfie" });
+    const hasSelfie = Boolean(job.input.selfie || job.input.selfieMeta);
     const analysis = resolveSelfieAnalysis(
-      job.input.selfie,
+      hasSelfie,
       job.input.analysis,
       styleHash,
     );

@@ -21,6 +21,7 @@ import type {
   GeneratedAvatar,
   SelfieAnalysis,
   SelfieInput,
+  SelfieMeta,
 } from "../types";
 
 /** Job'ın yaşam döngüsü durumu. */
@@ -81,8 +82,15 @@ export const PRE_FINALIZE_STATUSES: ReadonlySet<JobStatus> = new Set<JobStatus>(
 /* ────────── Job giriş/çıkış payload'ları ────────── */
 
 export type JobInput = {
-  /** Selfie referansı — base64 dataUrl, R2 url, veya selfieId. */
+  /**
+   * Selfie GÖRÜNTÜSÜ (legacy / opsiyonel). Browser-side MediaPipe
+   * mimarisinde selfie cihazdan çıkmaz, bu yüzden studio provider bunu
+   * GÖNDERMEZ — yalnızca `selfieMeta` + `analysis` gelir. Alan, görüntüyü
+   * sunucuya iletmek isteyen başka bir caller için geriye uyumlu kalır.
+   */
   selfie?: SelfieInput;
+  /** Selfie görüntüsüz meta (kaynak, zaman, boyut) — telemetri için. */
+  selfieMeta?: SelfieMeta;
   /** Selfie blob'unu separate yüklemişse — id. */
   selfieId?: string;
   /**

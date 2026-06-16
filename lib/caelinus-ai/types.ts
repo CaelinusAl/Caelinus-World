@@ -23,6 +23,13 @@ export type SelfieInput = {
   height?: number;
 };
 
+/**
+ * Selfie metadatası — GÖRÜNTÜ İÇERMEZ. Browser-side MediaPipe mimarisinde
+ * selfie cihazdan çıkmaz; backend'e yalnızca bu görüntüsüz meta (telemetri)
+ * + hesaplanmış `SelfieAnalysis` gider.
+ */
+export type SelfieMeta = Omit<SelfieInput, "dataUrl">;
+
 /* ────────── Stil profili — kullanıcının estetik kararları ────────── */
 
 export type HairLength = "short" | "bob" | "medium" | "long" | "veil";
