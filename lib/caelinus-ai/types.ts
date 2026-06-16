@@ -68,12 +68,15 @@ export type AvatarStyleProfile = {
 
 /* ────────── Selfie analiz çıktısı (face detection sonrası) ────────── */
 
+/** Yüz şekli sınıfları — `lib/face/shape.ts` classifier'ı bunu üretir. */
+export type FaceShape = "oval" | "round" | "heart" | "square" | "long";
+
 export type SelfieAnalysis = {
   detected: boolean;
   /** MediaPipe'den çıkan landmarks (nokta sayısı) — debug ve provider'a ipucu. */
   landmarkCount?: number;
   /** Yüz şekli sınıflandırması (heuristic). */
-  faceShape?: "oval" | "round" | "heart" | "square" | "long";
+  faceShape?: FaceShape;
   /** Tahmini ten tonu (kullanıcı override edebilir). */
   estimatedSkinTone?: ColorHex;
   /** Tahmini göz rengi (kullanıcı override edebilir). */

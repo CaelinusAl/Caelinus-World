@@ -18,6 +18,12 @@ export const LM = {
   leftJawMid: 136,
   rightJawMid: 365,
 
+  // ─── Cheekbones & forehead corners (face-shape classifier) ───
+  leftForehead: 103,
+  rightForehead: 332,
+  leftCheek: 116,
+  rightCheek: 345,
+
   // ─── Eyes – left ───
   leftEyeInner: 133,
   leftEyeOuter: 33,

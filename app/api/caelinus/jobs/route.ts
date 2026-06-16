@@ -23,7 +23,11 @@ import {
   type JobInput,
   type JobRecord,
 } from "@/lib/caelinus-ai/jobs";
-import type { AvatarStyleProfile, SelfieInput } from "@/lib/caelinus-ai";
+import type {
+  AvatarStyleProfile,
+  SelfieAnalysis,
+  SelfieInput,
+} from "@/lib/caelinus-ai";
 import { DEFAULT_STYLE_PROFILE } from "@/lib/caelinus-ai";
 
 export const runtime = "nodejs";
@@ -31,6 +35,8 @@ export const dynamic = "force-dynamic";
 
 type CreateBody = {
   selfie?: SelfieInput;
+  /** Tarayıcıda hesaplanmış MediaPipe selfie analizi (browser-side). */
+  analysis?: SelfieAnalysis;
   style?: Partial<AvatarStyleProfile>;
   quality?: "fast" | "balanced" | "high";
   inputHash?: string;
@@ -77,6 +83,7 @@ export async function POST(
 
   const input: JobInput = {
     selfie: body.selfie,
+    analysis: body.analysis,
     style,
     quality: body.quality ?? "balanced",
     inputHash: body.inputHash,

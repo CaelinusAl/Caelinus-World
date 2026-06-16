@@ -21,7 +21,13 @@ import type {
   GenerateInput,
   ProgressUpdate,
 } from "../provider";
-import type { AvatarMatch, GeneratedAvatar, SelfieAnalysis } from "../types";
+import type {
+  AvatarMatch,
+  GeneratedAvatar,
+  SelfieAnalysis,
+  SelfieInput,
+} from "../types";
+import { analyzeSelfie as analyzeSelfieInBrowser } from "../../face/analyze-selfie";
 
 /* ────────── Backend event tipleri (server'la senkron) ────────── */
 
@@ -168,12 +174,16 @@ async function* subscribeJobStream(
 
 /* ────────── Backend HTTP helpers ────────── */
 
-async function createJob(input: GenerateInput): Promise<string> {
+async function createJob(
+  input: GenerateInput,
+  analysis: SelfieAnalysis | undefined,
+): Promise<string> {
   const res = await fetch("/api/caelinus/jobs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       selfie: input.selfie,
+      analysis,
       style: input.style,
       quality: "balanced",
     }),
@@ -235,17 +245,34 @@ export const caelinusStudioProvider: AvatarProvider = {
   estimatedLatencyMs: 4500,
 
   /**
-   * Server-side analyze opsiyonel — backend zaten generateMatches içinde
-   * MediaPipe çağrısı yapıyor. Standalone analiz isteyen UI yolu yok
-   * şu an. S2'de ayrı bir endpoint açılırsa burası implement edilir.
+   * Selfie analizi — TARAYICIDA, MediaPipe ile. Selfie cihazdan çıkmaz.
+   * `lib/face/analyze-selfie.ts` 478 landmark + yüz şekli + ten/saç rengi
+   * üretir. Sonuç backend job'una iliştirilir (sunucu tarafı analiz yok).
    */
-  async analyzeSelfie(): Promise<SelfieAnalysis> {
-    return { detected: false };
+  async analyzeSelfie(selfie: SelfieInput): Promise<SelfieAnalysis> {
+    return analyzeSelfieInBrowser(selfie);
   },
 
   async generateMatches(input: GenerateInput): Promise<AvatarMatch[]> {
     const { onProgress, signal } = input;
-    const jobId = await createJob(input);
+
+    // Yüz analizini tarayıcıda yap — selfie sunucuya analiz için gitmez.
+    let analysis: SelfieAnalysis | undefined;
+    if (input.selfie) {
+      onProgress?.({
+        phase: "analyzing-selfie",
+        progress: 8,
+        message: "Yüzünden bir frekans okuyoruz…",
+      });
+      try {
+        analysis = await analyzeSelfieInBrowser(input.selfie);
+      } catch (err) {
+        // Analiz başarısızsa pipeline kırılmasın — backend fallback'e düşer.
+        console.warn("[caelinus-ai/studio] tarayıcı selfie analizi başarısız:", err);
+      }
+    }
+
+    const jobId = await createJob(input, analysis);
     lastJobId = jobId;
 
     const onAbort = () => void cancelJob(jobId);

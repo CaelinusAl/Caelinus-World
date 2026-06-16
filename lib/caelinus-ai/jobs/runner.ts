@@ -5,10 +5,11 @@
  * sırayla yürütür, her fazda store'u günceller (store da SSE consumer'lara
  * push eder).
  *
- * S1'de "GPU work" mock — gerçek pipeline yerine deterministic stub
- * üretiyor. ARAMA YERLERİ aşağıda `// S2:` / `// S3:` yorumlarıyla
- * işaretli; gerçek RunPod call'u o satırlara takılacak. Üst katman
- * (provider, UI) hiç değişmeyecek.
+ * Yüz analizi TARAYICIDA yapılır (MediaPipe, `lib/face/analyze-selfie.ts`);
+ * sonuç job'a `input.analysis` olarak iliştirilir. Runner bu hazır analizi
+ * kullanır — sunucu tarafı yüz analizi (RunPod) yoktur. Avatar varyant
+ * üretimi şimdilik deterministic stub; ağır GPU işi eklenirse o adım
+ * ayrı bir servise taşınır. Üst katman (provider, UI) hiç değişmez.
  *
  * KRİTİK: bu fonksiyon API route'larından *non-blocking* çağrılmalı —
  * yani route handler `runJob(id)` döndürmesini beklemeden response döner,
@@ -38,10 +39,6 @@ import {
   selfieHash,
   setCachedAnalysis,
 } from "./analyze-cache";
-import {
-  isRunPodFaceAnalyzeConfigured,
-  runPodFaceAnalyze,
-} from "./runpod-client";
 import { getJobStore } from "./store";
 import type { JobRecord, JobStatus } from "./types";
 
@@ -86,24 +83,23 @@ async function ensureNotTerminated(jobId: string): Promise<JobRecord | null> {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Selfie analizi — 3-katmanlı strateji
-     1. Selfie yoksa  → { detected: false }
-     2. Cache hit     → cache'ten döndür
-     3. RunPod env var → /runsync çağrı
-     4. RunPod env yoksa veya hata → stub (deterministic)
-   Üst katman bu fonksiyonun imzasına bağımlı; RunPod aktivasyonu UI'da
-   tek bir çizgi bile değiştirmez.
+   Selfie analizi — browser-side MediaPipe stratejisi
+     1. Selfie yoksa                → { detected: false }
+     2. Browser analizi iliştirilmiş → onu kullan (cache + döndür)
+     3. Cache hit                   → cache'ten döndür
+     4. Hiçbiri yoksa               → deterministic stub (fallback)
+
+   YÜZ ANALİZİ ARTIK SUNUCUDA YAPILMIYOR. Selfie cihazdan çıkmadan
+   tarayıcıda MediaPipe ile analiz edilir (`lib/face/analyze-selfie.ts`);
+   sonuç job'a `input.analysis` olarak gelir. RunPod kaldırıldı.
    ───────────────────────────────────────────────────────── */
 
 /**
- * Style profile + selfie hash kombinasyonundan deterministic bir
- * face shape türet — RunPod yokken UI'ın hâlâ "AI okuma yaptı" hissi
- * vermesi için.
+ * Selfie + style hash'inden deterministic bir face shape türet — tarayıcı
+ * analizi gelmediği nadir durumda (örn. yüz tespit edilemedi) UI'ın hâlâ
+ * "AI okuma yaptı" hissi vermesi için son-çare fallback.
  */
-function deterministicStubAnalysis(
-  selfie: SelfieInput,
-  seed: number,
-): SelfieAnalysis {
+function deterministicStubAnalysis(seed: number): SelfieAnalysis {
   const shapes: NonNullable<SelfieAnalysis["faceShape"]>[] = [
     "oval",
     "round",
@@ -121,54 +117,28 @@ function deterministicStubAnalysis(
   };
 }
 
-async function resolveSelfieAnalysis(
+function resolveSelfieAnalysis(
   selfie: SelfieInput | undefined,
+  browserAnalysis: SelfieAnalysis | undefined,
   styleHash: number,
-  signal?: AbortSignal,
-): Promise<SelfieAnalysis> {
+): SelfieAnalysis {
   if (!selfie) return { detected: false };
 
-  // Cache lookup — aynı selfie ikinci kez gelirse RunPod çağırmıyoruz
   const hash = selfieHash(selfie.dataUrl);
+
+  // Tarayıcıda hesaplanmış gerçek analiz — authoritative kaynak.
+  if (browserAnalysis && browserAnalysis.detected) {
+    setCachedAnalysis(hash, browserAnalysis);
+    return browserAnalysis;
+  }
+
+  // Aynı selfie daha önce analiz edildiyse cache'ten.
   const cached = getCachedAnalysis(hash);
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
 
-  // RunPod yapılandırılmış mı? Değilse hızlı yoldan stub.
-  if (!isRunPodFaceAnalyzeConfigured()) {
-    const stub = deterministicStubAnalysis(selfie, styleHash);
-    setCachedAnalysis(hash, stub);
-    return stub;
-  }
-
-  // RunPod /runsync — başarısızsa stub'a düş, pipeline kırılmasın
-  const { analysis, error } = await runPodFaceAnalyze(selfie.dataUrl, {
-    sampleColors: true,
-    signal,
-  });
-
-  if (analysis && analysis.detected !== false) {
-    if (analysis._meta) {
-      console.info(
-        `[caelinus-ai/runner] RunPod face-analyze hit: detected=${analysis.detected} faceShape=${analysis.faceShape ?? "n/a"} elapsed=${analysis._meta.elapsed_ms}ms`,
-      );
-    }
-    setCachedAnalysis(hash, analysis);
-    return analysis;
-  }
-
-  if (error) {
-    console.warn(
-      `[caelinus-ai/runner] RunPod face-analyze fail (${error.reason}): ${error.message} — stub'a düşülüyor.`,
-    );
-  } else if (analysis?.detected === false) {
-    console.info(
-      `[caelinus-ai/runner] RunPod face-analyze: yüz tespit edilmedi — stub'a düşülüyor.`,
-    );
-  }
-
-  const fallback = deterministicStubAnalysis(selfie, styleHash);
+  // Son çare: deterministic stub (tarayıcı yüz tespit edemedi ya da
+  // analiz iliştirilmedi).
+  const fallback = deterministicStubAnalysis(styleHash);
   setCachedAnalysis(hash, fallback);
   return fallback;
 }
@@ -256,19 +226,17 @@ export async function runJob(jobId: string, signal?: AbortSignal): Promise<void>
     await store.update(jobId, { status: "preparing" });
     await sleep(PHASE_DELAY_MS.preparing!, signal);
 
-    // 2. Analyze selfie — RunPod varsa gerçek MediaPipe; yoksa stub.
+    // 2. Analyze selfie — analiz tarayıcıda yapıldı; burada sadece
+    //    iliştirilmiş sonucu çözüyoruz (yoksa deterministic fallback).
     if (!(await ensureNotTerminated(jobId))) return;
     await store.update(jobId, { status: "analyzing-selfie" });
-    const analysis = await resolveSelfieAnalysis(
+    const analysis = resolveSelfieAnalysis(
       job.input.selfie,
+      job.input.analysis,
       styleHash,
-      signal,
     );
-    // RunPod 0.5-3sn aralığında dönüyor → ek sleep yok. Stub yolunda
-    // pipeline çok hızlı bitmesin diye küçük bir nefes payı verelim.
-    if (!isRunPodFaceAnalyzeConfigured()) {
-      await sleep(PHASE_DELAY_MS["analyzing-selfie"]!, signal);
-    }
+    // Pipeline çok hızlı bitip "anlık" hissi vermesin diye küçük nefes payı.
+    await sleep(PHASE_DELAY_MS["analyzing-selfie"]!, signal);
 
     // 3. Match archetype
     if (!(await ensureNotTerminated(jobId))) return;

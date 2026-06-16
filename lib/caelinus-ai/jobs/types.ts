@@ -85,6 +85,13 @@ export type JobInput = {
   selfie?: SelfieInput;
   /** Selfie blob'unu separate yüklemişse — id. */
   selfieId?: string;
+  /**
+   * Tarayıcıda hesaplanmış selfie analizi (MediaPipe). Browser-side
+   * MediaPipe mimarisinde yüz analizi cihazda yapılır; sonuç buraya
+   * iliştirilir. Varsa runner bunu olduğu gibi kullanır — sunucu tarafı
+   * yüz analizi (RunPod) artık yok.
+   */
+  analysis?: SelfieAnalysis;
   /** Kullanıcının estetik kararları. */
   style: AvatarStyleProfile;
   /** Provider'a hint — "kalite vs hız" tercihi. */
