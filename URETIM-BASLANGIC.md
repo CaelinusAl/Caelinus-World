@@ -28,9 +28,27 @@
 | [1] Base mesh (feminen, ~1.695 m) | ✅ | `Human` mesh, 19.158 vert / 18.486 poly (~37k tris) |
 | [3] Rig — Mixamo isimleri | ✅ | `Human.rig`, 52 bone, `mixamorig:` ön ekli, çekirdek 12 tam, skinli (19158/19158 weight) |
 | [4] ARKit blendshape (52 adet, **düz** isim) | ✅ | min-5 dahil hepsi birebir: `eyeBlinkLeft/Right`, `jawOpen`, `mouthSmileLeft/Right` |
-| [2] Skin material / texture | ⏳ | şu an gri default — PBR skin gerek |
+| [2] Skin material / texture | ✅ | `Human.body` — `bobby_03_young_female_hairless` (skins01 CC0 pack), 2048² diffuse, Principled BSDF (metallic 0 / roughness 0.7), texture `.blend`'e pack'li |
 | BAKE uyarısı | ⚠️ | 10 adet `$md-` modelleme key'i değeri ≠0 (feminen şekli taşıyor) → export'tan ÖNCE basis'e bake et, yoksa beden nötre döner |
 | [5] Apply transforms / [6] Export / [7] Validate / [8] Repo | ⏳ | sırada |
+
+> Skin paketleri kuruldu: `skins01_cc0.zip` (99MB, 23 kadın deri) → MPFB `.user/...mpfb/data/skins/`.
+> Alpha notu: deri materyali alpha'yı diffuse PNG'nin alpha kanalından alıyor (HASHED) → glTF'de `MASK` modu olur; export sonrası gövdede istenmeyen saydamlık olup olmadığını validate et.
+
+### ⏭️ SIRADAKİ GÖREV: BAKE + Export pipeline
+
+Resume noktası — yeni/sıkıştırılmış session başlarken:
+1. Blender'a bağlan (BlenderMCP, port 9876). Sahne boşsa `_work/caelinus-body-base-fem.blend`'i aç:
+   `bpy.ops.wm.open_mainfile(filepath=r"...\_work\caelinus-body-base-fem.blend")`
+2. Doğrula: `Human` mesh + `Human.rig` (52 bone) + 52 ARKit shape key + `Human.body` materyal var mı.
+3. **BAKE:** 10 adet `$md-` modelleme shape key'i (değeri ≠0, feminen şekli taşıyor) basis'e bake et.
+   ARKit (`!ex-`/düz) key'lerini KORU. Yöntem: `$md-` key value'larını basis'e uygula → sadece `$md-` olanları sil.
+4. **Apply transforms:** scale [1,1,1], rotation 0, Y-up, metre (rig + mesh).
+5. **Export:** glTF 2.0 binary (.glb), `-hires`, **SIKIŞTIRMASIZ** (KTX2/Draco/Meshopt YOK), embed textures,
+   +Y up, "Selected Objects" (Human + Human.rig), shape keys + skinning dahil.
+   Hedef: `public/models/caelinus-body-base-fem.glb`
+6. **Validate:** `node _tools/validate-avatar.js public/models/caelinus-body-base-fem.glb` → 0 error.
+7. **Repo:** BodyEntry (`lib/avatar-bodies.ts`) + `manifest.json` + PR (bkz. §5).
 
 **Motor doğrulaması (kanıt):** `mixamorig:` ön eki sorun değil — `components/shop/ModelAvatar.tsx` deform regex'i (`/hip/`, `/spine/`…) küçük-harf substring; catwalk retarget'ı `stripMixamo = s.replace(/^mixamorig[:_]?/i,"")` ile üç convention'ı da normalize ediyor. Yani prefix korunabilir, `catwalk.glb` ile birebir uyumlu.
 
