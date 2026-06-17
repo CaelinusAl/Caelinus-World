@@ -24,7 +24,9 @@ Kullanıcı şunu hissetmeli:
 
 İzole sayfa yok. **Bir uygarlığın bölgeleri (districts)** var.
 
-Kuzey yıldızı cümlesi: **"Frekansını giy · Wear your frequency."**
+Kuzey yıldızı (evrenin kurucu cümlesi): **"Ait olmak için değil, birlikte
+yaratmak için."**
+Bazaar ana sloganı & marka frekansı: **"Frekansını giy · Wear your frequency."**
 Marka imzası: **CAELINUS — Frekansın Sanatı.**
 
 ---
@@ -49,11 +51,16 @@ Evrensel palet (token isimleri kod için bağlayıcıdır):
 | Rol | Token | Hex | Kullanım |
 |-----|-------|-----|----------|
 | Birincil — derin kozmik siyah | `--cae-black` | `#03060f` | Zemin, boşluk, sessizlik |
-| İkincil — gece yarısı mavisi | `--cae-midnight` | `#0b1530` | Katman, derinlik |
-| Aksan — sıcak metalik altın | `--cae-gold` | `#d4b78a` | Marka, eşik, vurgu |
-| Yumuşak altın | `--cae-gold-soft` | `#ffe9b8` | Glow, hover, ışıma |
-| Fildişi | `--cae-ivory` | `#f4ecd8` | Metin, sıcak nötr |
-| Ay gümüşü | `--cae-silver` | `#c9d4e6` | Soğuk metin, ay ışığı |
+| İkincil — gece yarısı | `--cae-midnight` | `#07111f` | Katman, derinlik |
+| Aksan — metalik altın | `--cae-gold` | `#c9a45c` | Marka, eşik, vurgu |
+| Yumuşak altın | `--cae-soft-gold` | `#e8d7a3` | Glow, hover, ışıma, metin |
+| Fildişi | `--cae-ivory` | `#f5efe1` | Metin, sıcak nötr |
+| Ay gümüşü | `--cae-moon-silver` | `#cfd6df` | Soğuk metin, ay ışığı |
+| Portal moru (aura) | `--cae-violet-glow` | `rgba(160,110,255,.24)` | Eşik / portal enerjisi |
+
+> Eski isimler `--cae-gold-soft` ve `--cae-silver` geriye uyum için alias
+> olarak korunur (yeni isimlere işaret eder). Değerler `app/styles/tokens.css`
+> içinde **canlıdır**.
 
 Her dünyanın bir **imza aksanı** vardır (§5). Bu aksanlar mevcut
 `PORTAL_COLOR` haritasıyla hizalıdır — Bible onu resmîleştirir.
@@ -64,7 +71,7 @@ Işık kuralı: glow yalnızca **eşik, hover ve kutsal an**larda. Sürekli parl
 
 ## 3. Tipografi
 
-Hiyerarşi (öneri — onaylanınca `next/font` ile self-host):
+Hiyerarşi (**uygulandı** — `next/font` ile self-host, `app/layout.tsx`):
 
 | Katman | Aile | Token | His |
 |--------|------|-------|-----|
@@ -114,8 +121,10 @@ platformdan bağımsızdır (web/mobil/VR'da aynı kalır).
 - **Hikâye:** Kişinin rüyalarına, sembollerine ve bilincine indiği sığınak.
   Burada hız yoktur; fısıltı vardır. Defter, ritüeller, hafıza.
 - **Geçiş dili:** Yavaş, gümüş-mavi sisli veil; ses kısılır gibi. Açılış nefes alır.
-- **Ses tonu:** Sakin, şiirsel, az kelime. Soru sorar, dayatmaz.
-  *"Bu gece içindeki gökyüzü neyi hatırlıyor?"*
+- **Ses tonu:** **Bilinç aynası** — mistik bir rehber değil. Cevap veren değil,
+  *yansıtan*. Öğreten değil, *alan açan*. Kullanıcıya ne hissetmesi gerektiğini
+  söylemez; gördüğünü ona geri verir, kararı ona bırakır. Sakin, şiirsel, az
+  kelime. *"Bugün gördüklerini buraya bırak; ayna saklar."*
 
 ---
 
@@ -158,6 +167,7 @@ platformdan bağımsızdır (web/mobil/VR'da aynı kalır).
   *keşfedilir*. Her ürün kartı taşır: hikâye · enerji · koleksiyon · yaratıcı ·
   *avatarda dene* · *frekansını giy* — sadece fiyat + sepete ekle değil.
 - **Geçiş dili:** Altın-fildişi ışıltı; bir ayna/vitrin parlar ve ürün belirir.
+- **Ana slogan:** **"Frekansını giy · Wear your frequency."** (Bazaar'ın imza cümlesi.)
 - **Ses tonu:** Arzu uyandıran ama soğukkanlı lüks; abartısız.
   *"Bu sana ait değil — bu senin frekansın."*
 

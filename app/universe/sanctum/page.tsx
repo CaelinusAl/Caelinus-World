@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 
+import WorldShell from "@/components/world/WorldShell";
 import { useLangStore } from "@/stores/lang-store";
 import { useProfileStore } from "@/stores/profile-store";
 import { useSanctumStore } from "@/stores/sanctum-store";
@@ -182,59 +183,52 @@ export default function SanctumHubPage() {
     ? T.greetingTuned[lang](ZODIAC_LABEL[profile.zodiac][lang])
     : T.greetingPlain[lang];
 
+  const langSwitch = (
+    <div
+      className="sanctum-lang-switch"
+      role="group"
+      aria-label={T.langAria[lang]}
+    >
+      <button
+        type="button"
+        className={`sanctum-lang-btn ${lang === "tr" ? "is-active" : ""}`}
+        aria-pressed={lang === "tr"}
+        onClick={() => setLang("tr")}
+      >
+        TR
+      </button>
+      <span className="sanctum-lang-divider" aria-hidden="true">·</span>
+      <button
+        type="button"
+        className={`sanctum-lang-btn ${lang === "en" ? "is-active" : ""}`}
+        aria-pressed={lang === "en"}
+        onClick={() => setLang("en")}
+      >
+        EN
+      </button>
+    </div>
+  );
+
   return (
-    <main className="sanctum-page">
-      <div className="sanctum-bg" aria-hidden="true" />
-      <div className="sanctum-overlay" aria-hidden="true" />
-      <div className="sanctum-vignette" aria-hidden="true" />
-      <div className="sanctum-glow sanctum-glow-a" aria-hidden="true" />
-      <div className="sanctum-glow sanctum-glow-b" aria-hidden="true" />
-
-      <header className="sanctum-ribbon">
-        <Link href="/universe/gaia" className="sanctum-ribbon-back">
-          ← {T.back[lang]}
-        </Link>
-        <div className="sanctum-ribbon-mark">{T.ribbonMark[lang]}</div>
-        <div
-          className="sanctum-lang-switch"
-          role="group"
-          aria-label={T.langAria[lang]}
-        >
-          <button
-            type="button"
-            className={`sanctum-lang-btn ${lang === "tr" ? "is-active" : ""}`}
-            aria-pressed={lang === "tr"}
-            onClick={() => setLang("tr")}
-          >
-            TR
-          </button>
-          <span className="sanctum-lang-divider" aria-hidden="true">·</span>
-          <button
-            type="button"
-            className={`sanctum-lang-btn ${lang === "en" ? "is-active" : ""}`}
-            aria-pressed={lang === "en"}
-            onClick={() => setLang("en")}
-          >
-            EN
-          </button>
-        </div>
-      </header>
-
+    <WorldShell
+      world="sanri"
+      locale={lang}
+      back={{ href: "/universe/gaia", label: T.back[lang] }}
+      aside={langSwitch}
+      kicker={T.kicker[lang]}
+      title={T.title[lang]}
+      subtitle={T.subtitle[lang]}
+    >
       <section className="sanctum-shell">
-        <div className="sanctum-hero">
-          <div className="sanctum-kicker">{T.kicker[lang]}</div>
-          <h1 className="sanctum-title">{T.title[lang]}</h1>
-          <p className="sanctum-subtitle">{T.subtitle[lang]}</p>
-          <p className="sanctum-greeting">{greeting}</p>
-          {!profile ? (
-            <Link href="/onboarding" className="sanctum-attune-cta">
-              <span className="sanctum-attune-text">{T.attuneCta[lang]}</span>
-              <span className="sanctum-attune-button">
-                {T.attuneCtaButton[lang]} →
-              </span>
-            </Link>
-          ) : null}
-        </div>
+        <p className="sanctum-greeting">{greeting}</p>
+        {!profile ? (
+          <Link href="/onboarding" className="sanctum-attune-cta">
+            <span className="sanctum-attune-text">{T.attuneCta[lang]}</span>
+            <span className="sanctum-attune-button">
+              {T.attuneCtaButton[lang]} →
+            </span>
+          </Link>
+        ) : null}
 
         {whisper && whisperPlant ? (
           <Link
@@ -349,6 +343,6 @@ export default function SanctumHubPage() {
           ✦ {T.vow[lang]}
         </div>
       </section>
-    </main>
+    </WorldShell>
   );
 }

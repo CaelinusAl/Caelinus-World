@@ -21,11 +21,84 @@ Biçim: [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/).
 
 ## [Yayınlanmamış]
 
-### Değişti
-- **Marka logosu (Frekansın Sanatı):** Altın kanatlı vektörel logo
-  (`public/logo/frekansin-sanati.jpeg`) landing'de metin "CAELINUS" yerine ve
-  TopBar markasında kullanılıyor. Siyah zemin `mix-blend-mode: screen` ile
-  düşürülüp yalnızca altın + parıltı gösteriliyor (koyu sayfalara uygun).
+_Henüz yayınlanmamış değişiklik yok. Yeni geliştirmeler buraya eklenir; sürüm
+kesilince tarihiyle aşağı taşınır._
+
+---
+
+## [0.3.0] — 2026-06-17 · Yaşayan Evren Kapısı + Design System P1
+
+### Eklendi
+- **Hero "bir dünyaya yaklaşma" deneyimi (`/`):** Landing artık gökyüzü değil,
+  Caelinus medeniyetinin kapısı.
+  - **Arka plan videosu canlı:** `public/hero/hero.mp4` (higgsfield üretimi)
+    ffmpeg ile 9.25MB → **891KB** optimize edildi (sessiz, faststart);
+    `hero-poster.webp` (44KB) + `hero-mobile.webp` (16KB) türetildi. Ham dosya
+    `_raw/` (gitignore).
+  - **`HeroHorizon` — çok katmanlı parallax medeniyet ufku:** uzak/yakın tapınak
+    silüetleri, yaşayan altın pencere ışıkları (yavaş flicker) ve merkezde
+    nabız atan **portal kemeri** ("Orada ne var?" merakı). Parallax `.scene`'in
+    `--par-x/y`'sinden, katman başına farklı hız + yavaş organik bob.
+  - **Çift ay çözümü:** video kendi ayını taşıdığı için CSS ay görseli video
+    modunda gizlendi; merkez tıklanabilir kaldı.
+  - **Geçiş evrildi:** "aya dalış" yerine **dünyaya yaklaşma → portal açılır**
+    (ufuk öne uçar + gökyüzü yakınlaşır + beyaz bloom). Yönlendirme aynı.
+  - Tümü `prefers-reduced-motion` ve mobilde sakinleşir; `HERO_VIDEO_ENABLED`
+    ile tek satırda klasik CSS-ay hero'ya dönülebilir.
+
+### Değişti · Atmosfer & Tipografi
+- **Landing (`/`) premium pas — tipografi + atmosfer:** "AI sayfası" hissinden
+  "lüks evren kapısı"na. Yönlendirme/dalış geçişi korundu.
+  - **Tipografi token'lardan:** ana slogan iki bloğa ayrıldı — serif başlık
+    *"Wear Your Frequency"* (Cormorant 500) + Inter light alt satır
+    *"A living universe of fashion, ritual and earth."* Net hiyerarşi:
+    logo → slogan → ay → "Enter the Caelinus Universe" → CTA.
+  - **CTA:** glassmorphism (ince gold border, koyu translucent, hover'da gold
+    glow), pill, Inter medium, uppercase; metin → *"Enter the Universe"*.
+  - **Ay/portal:** ~%44 boyuta indirildi; gold + violet aura + ay-arkası nebula
+    glow; offset'ler yeniden hesaplandı.
+  - **Palet:** `tokens.css` premium değerlere güncellendi (midnight `#07111f`,
+    gold `#c9a45c`, soft-gold `#e8d7a3`, ivory `#f5efe1`, moon-silver `#cfd6df`,
+    violet-glow); eski isimler alias'landı (WorldShell/SANRI kırılmadan).
+  - **Pointer-parallax:** çok hafif (≤4px), yalnızca masaüstü + ince pointer,
+    `prefers-reduced-motion` kapalı, transform tabanlı, hareketsizken rAF uyur.
+  - **Arka plan:** deep-black→midnight radial, rafine/sakin yıldızlar, ince
+    gold-dust; tüm hareket yavaş ve organik.
+
+### Eklendi · Design System
+- **Design System — P1 temeli (Caelinus Bible §2–§5, §9):** Yaşayan dijital
+  uygarlığın kod omurgası kuruldu. Canlı ticaret akışlarına (shop/checkout/cart)
+  dokunulmadı.
+  - `app/styles/tokens.css` — tek kaynak token'lar: renk paleti, dünya imza
+    aksanları, tipografi ölçeği (clamp/akışkan), boşluk, radius, glow, z-index,
+    geçiş süreleri. globals.css en üstünde import; mevcut stiller etkilenmiyor.
+  - **Tipografi (`next/font`):** Cormorant Garamond (başlık) + Inter (gövde)
+    self-host edildi; CSS değişkenleriyle (`--font-cormorant`, `--font-inter`)
+    token'lara bağlandı. `<html>`'e variable sınıfları eklendi.
+  - **İkon ailesi (`components/icons`):** Tek elden altı çekirdek sembol —
+    `wing · star · flame · portal · mirror · sacred-circle`, `currentColor`,
+    tutarlı stroke. `<Icon name=.. />` çözücüsü.
+  - **Dünya kaydı (`lib/world/worlds.ts`):** Bible §5'in kod aynası — altı
+    dünyanın isim/duygu/imza renk/sembol/rota kimliği (kimlik katmanı; WebGL
+    sahne eşlemesinden ayrı).
+  - **`WorldShell` page-wrapper (`components/world/WorldShell.tsx` + .css):**
+    her dünyaya ortak çerçeve (atmosfer + ribbon + eşik + hero). Eşik dönüşü
+    JourneyProvider veil'iyle dünya renginde geçiş yapar.
+  - **SANRI referans uygulaması:** `/universe/sanctum` WorldShell ile sarıldı
+    (ay-gümüşü imza, ayna sembolü); iç içerik (defter/ritüel/hafıza) korundu.
+- **Bible düzeltmeleri:** Kuzey yıldızı → *"Ait olmak için değil, birlikte
+  yaratmak için."*; "Frekansını giy" Bazaar ana sloganı olarak ayrıldı;
+  SANRI ses tonu *"bilinç aynası"* (yansıtan, alan açan) olarak netleştirildi.
+
+### Değişti · Marka & Yönlendirme
+- **Marka mührü (Frekansın Sanatı):** Altın kanatlı logo landing'de metin
+  "CAELINUS" yerine ve TopBar markasında kullanılıyor.
+  - **Transparan asset (asıl çözüm):** Siyah zeminli JPEG'den parlaklık-tabanlı
+    alfa (ffmpeg `geq`) ile temiz transparan PNG üretildi
+    (`public/logo/caelinus-mark.png`); logonun sınırına kırpıldı. Eski
+    `mix-blend-mode: screen` hack'i landing + TopBar'dan kaldırıldı — logo artık
+    siyah kutu/poster gibi değil, sayfa atmosferine gömülü marka mührü gibi.
+  - **Boyut:** marka mührü ölçeği — desktop 260px, mobil 180px (`clamp`).
 - **Landing'e bilgi kokusu:** `/` artık "Caelinus nedir"i söyleyen tek satır
   içeriyor ("Wear your frequency — a living universe of fashion, ritual &
   earth."); marka önerisi yalnızca görünmez `<head>` metadata'sında değil.

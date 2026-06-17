@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
 html,
 body {
@@ -19,11 +20,503 @@ main {
 .scene {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  min-height: 100svh;
+  height: 100svh;
   overflow: hidden;
+  /* Deep-black → midnight radial; token tabanlı. */
   background:
-    radial-gradient(circle at center, rgba(70, 110, 190, 0.12) 0%, rgba(10, 12, 22, 0.04) 28%, rgba(2, 4, 10, 1) 70%),
-    #02040a;
+    radial-gradient(ellipse 120% 82% at 50% 38%, var(--cae-midnight) 0%, transparent 62%),
+    radial-gradient(circle at 50% 50%, rgba(8, 14, 28, 0.55) 0%, var(--cae-black) 74%),
+    var(--cae-black);
+}
+
+/* Hero arka plan video katmanı — en arkada "nefes alan gökyüzü". */
+.hero-video-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-video,
+.hero-video-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* Statik fallback görseline neredeyse fark edilmez yavaş drift (video kendi
+   kamera kaymasını taşır; yalnızca still'e uygulanır). */
+.hero-video-img {
+  animation: heroDrift 44s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+/* Ay = yaşayan portal — videoya neredeyse fark edilmez nefes (1.00↔1.02). */
+.hero-video {
+  transform-origin: center;
+  animation: heroVideoBreath 12s ease-in-out infinite alternate;
+}
+
+/* Enerji dalgaları — mor + altın, screen-blend (yalnızca parlak ayı aydınlatır,
+   koyu gökte kaybolur). Yavaş yörünge + nefes; "içinde bir şey yaşıyor". */
+.hero-moon-energy {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.hme-blob {
+  position: absolute;
+  left: 50%;
+  top: 31%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  filter: blur(30px);
+  mix-blend-mode: screen;
+}
+
+.hme-violet {
+  width: 38vmin;
+  height: 38vmin;
+  background: radial-gradient(circle, rgba(160, 110, 255, 0.30), transparent 68%);
+  animation: hmeDriftViolet 17s ease-in-out infinite;
+}
+
+.hme-gold {
+  width: 31vmin;
+  height: 31vmin;
+  background: radial-gradient(circle, rgba(232, 215, 163, 0.24), transparent 70%);
+  animation: hmeDriftGold 13s ease-in-out infinite;
+}
+
+@keyframes heroVideoBreath {
+  from { transform: scale(1); }
+  to { transform: scale(1.02); }
+}
+@keyframes hmeDriftViolet {
+  0%, 100% { transform: translate(-52%, -50%) scale(1); opacity: 0.85; }
+  50% { transform: translate(-46%, -54%) scale(1.08); opacity: 1; }
+}
+@keyframes hmeDriftGold {
+  0%, 100% { transform: translate(-48%, -48%) scale(1.05); opacity: 0.7; }
+  50% { transform: translate(-54%, -52%) scale(1); opacity: 1; }
+}
+
+/* %35–50 siyah gradient overlay — atmosferi koyulaştırır, metni okunur tutar. */
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: var(--hero-overlay, 0.42);
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(3, 6, 15, 0.55) 0%,
+      rgba(3, 6, 15, 0.32) 46%,
+      rgba(3, 6, 15, 0.72) 100%
+    );
+}
+
+@keyframes heroDrift {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.06); }
+}
+
+/* ── Hero · Caelinus uygarlığı ufku ───────────────────────────────────────
+   "Gökyüzünün içine girmiş insan" hissi: ayın altında, KEŞFEDİLECEK bir şehir.
+   Arkadan aydınlatılmış (şafak bandı) silüetler → net ufuk çizgisi + merak. */
+.hero-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(48vh, 520px);
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: 50% 80%;
+  overflow: hidden;
+  /* Buton hover'ında "görünmez çekim" — ufuk çok hafif yaklaşır. */
+  transition: transform 0.6s ease;
+}
+
+/* Şafak bandı — şehrin ARKASINDA altın→mor backlight; net ufuk çizgisi. */
+.hh-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 150%;
+  height: 60%;
+  /* Soluk kadim şafak — DNA: altın → eflatun → lila (nefes gibi). */
+  background: radial-gradient(
+    62% 100% at 50% 100%,
+    rgba(255, 217, 143, 0.13) 0%,
+    rgba(202, 164, 255, 0.09) 30%,
+    rgba(140, 109, 255, 0.06) 54%,
+    transparent 80%
+  );
+  filter: blur(10px);
+  animation: hhGlowBreath 9s ease-in-out infinite;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+/* Atmosferik altın sis — şehirden yükselir, silüet tabanını yumuşatır. */
+.hh-haze {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: linear-gradient(
+    to top,
+    rgba(201, 164, 92, 0.12) 0%,
+    rgba(201, 164, 92, 0.05) 36%,
+    transparent 100%
+  );
+}
+
+.hh-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Üç derinlik katmanı — farklı parallax hızları = "evrenin içindeyim". */
+.hh-far {
+  opacity: 0.9;
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 0.45),
+    calc(var(--par-y, 0px) * 0.3),
+    0
+  );
+}
+.hh-mid {
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 1.0),
+    calc(var(--par-y, 0px) * 0.6),
+    0
+  );
+}
+.hh-near {
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 1.7),
+    calc(var(--par-y, 0px) * 0.9),
+    0
+  );
+}
+
+.hh-bob {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.hh-bob-far { animation: hhBob 21s ease-in-out infinite; }
+.hh-bob-mid { animation: hhBob 16s ease-in-out infinite reverse; }
+.hh-bob-near { animation: hhBob 13s ease-in-out infinite; }
+
+.hh-svg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(1700px, 160vw);
+  height: 100%;
+}
+
+/* altın pencere ışıkları — yaşayan şehir */
+.hh-light {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cae-soft-gold, #e8d7a3);
+  box-shadow:
+    0 0 4px rgba(232, 215, 163, 0.9),
+    0 0 12px rgba(201, 164, 92, 0.6);
+  animation-name: hhFlicker;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Merkez KAPI — şehrin kalbi. DOM'da far ile mid arasında → sütunlar
+   parıltıyı çerçeveler; içinden ışık sızar. */
+.hh-gate {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  transform: translateX(-50%);
+  width: clamp(60px, 8vw, 130px);
+  height: clamp(110px, 18vh, 240px);
+  border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+  background: linear-gradient(
+    to top,
+    rgba(255, 236, 190, 0.6) 0%,
+    rgba(232, 215, 163, 0.4) 30%,
+    rgba(201, 164, 92, 0.2) 56%,
+    rgba(160, 110, 255, 0.12) 80%,
+    transparent 100%
+  );
+  filter: blur(9px);
+  /* Alev ritmi — düzenli değil, organik flicker. */
+  animation: hhGate 7s ease-in-out infinite;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+/* Kapının içinden sızan ince altın ışın — sütunlar çerçeveler. */
+.hh-gate-beam {
+  position: absolute;
+  left: 50%;
+  bottom: 3%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: clamp(80px, 14vh, 200px);
+  background: linear-gradient(
+    to top,
+    rgba(255, 236, 190, 0) 0%,
+    rgba(255, 236, 190, 0.5) 30%,
+    rgba(160, 110, 255, 0.3) 80%,
+    transparent 100%
+  );
+  filter: blur(1px);
+  opacity: 0.55;
+  animation: hhBeam 4.5s ease-in-out infinite;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes hhBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes hhFlicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes hhGlowBreath {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+/* Alev ritmi — asimetrik adımlar, organik nabız. */
+@keyframes hhGate {
+  0%   { opacity: 0.66; transform: translateX(-50%) scaleY(1.0); }
+  18%  { opacity: 0.9;  transform: translateX(-50%) scaleY(1.04); }
+  33%  { opacity: 0.74; transform: translateX(-50%) scaleY(0.99); }
+  52%  { opacity: 1.0;  transform: translateX(-50%) scaleY(1.07); }
+  70%  { opacity: 0.8;  transform: translateX(-50%) scaleY(1.02); }
+  100% { opacity: 0.66; transform: translateX(-50%) scaleY(1.0); }
+}
+@keyframes hhBeam {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) scaleY(0.9); }
+  50% { opacity: 0.7; transform: translateX(-50%) scaleY(1.06); }
+}
+
+/* "Enter When Ready" hover → kapı çağırır: ışık yükselir, ufuk yaklaşır/titrer. */
+.scene:has(.tap:hover) .hero-horizon {
+  transform: translateY(-5px);
+}
+.scene:has(.tap:hover) .hh-gate {
+  opacity: 1;
+  filter: blur(7px) brightness(1.45);
+}
+.scene:has(.tap:hover) .hh-gate-beam {
+  opacity: 0.95;
+}
+.scene:has(.tap:hover) .hh-glow {
+  opacity: 1;
+  filter: blur(6px) brightness(1.18);
+}
+
+/* Video modu — videonun kendi ayı var; çift ay olmasın diye CSS ayı gizlenir,
+   ama merkez tıklanabilir kalır (videodaki ay = portal). Yıldız/nebula kısılır
+   (video zaten yıldız taşıyor). */
+.scene--video .moon,
+.scene--video .moon-pink,
+.scene--video .moon-backglow,
+.scene--video .moon-ring {
+  display: none;
+}
+.scene--video .stars-parallax { opacity: 0.4; }
+.scene--video .nebula { opacity: 0.14; }
+
+/* ── Hero sahne görseli modu — hayalindeki giriş evreni yaşar ────────────
+   Görsel tam-kanvas arka plan; üstüne ince hayat (nefes, altın toz, kapı
+   parıltısı, parallax) + okunabilirlik vignette'i + metin biner. Prosedürel
+   nebula/dust pseudo-elementleri kapatılır (kompozisyon zaten görselde). */
+.scene--image { background: #06060c; }
+.scene--image::before,
+.scene--image::after { display: none !important; }
+
+.hero-scene-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* Eşikten geçiş dalışı kapıya odaklı büyür. */
+  transform-origin: 50% 64%;
+  /* İşaretçi parallax — sahne çok hafif kayar (≤4px). */
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 0.5),
+    calc(var(--par-y, 0px) * 0.5),
+    0
+  );
+  transition: transform 0.5s ease-out;
+}
+.hero-scene-bg picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hero-scene-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  /* Nefes alan evren — neredeyse fark edilmez yavaş zoom. */
+  transform: scale(1.06);
+  transform-origin: 50% 46%;
+  animation: heroSceneBreath 26s ease-in-out infinite alternate;
+}
+@keyframes heroSceneBreath {
+  0% { transform: scale(1.055); }
+  100% { transform: scale(1.105); }
+}
+
+/* Altın kozmik toz — yukarı süzülen ince doku. */
+.hero-scene-dust {
+  position: absolute;
+  inset: -10% 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 30%, rgba(255, 226, 170, 0.7), transparent 60%),
+    radial-gradient(1.2px 1.2px at 62% 18%, rgba(255, 216, 150, 0.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 82% 52%, rgba(255, 232, 190, 0.6), transparent 60%),
+    radial-gradient(1.1px 1.1px at 38% 72%, rgba(232, 200, 255, 0.5), transparent 60%),
+    radial-gradient(1.3px 1.3px at 72% 84%, rgba(255, 220, 160, 0.55), transparent 60%),
+    radial-gradient(1.1px 1.1px at 8% 60%, rgba(255, 226, 180, 0.5), transparent 60%);
+  background-size: 100% 100%;
+  animation: heroSceneDust 34s linear infinite;
+}
+@keyframes heroSceneDust {
+  0% { transform: translateY(0); opacity: 0.42; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-7%); opacity: 0.42; }
+}
+
+/* Kapının nefes alan ışığı — merkez-alt; hover'da görünmez çekim güçlenir. */
+.hero-scene-glow {
+  position: absolute;
+  left: 50%;
+  top: 65%;
+  width: min(46vw, 460px);
+  height: min(36vh, 380px);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 226, 170, 0.30) 0%,
+    rgba(190, 140, 255, 0.14) 44%,
+    transparent 70%
+  );
+  filter: blur(16px);
+  animation: heroGateGlow 6.5s ease-in-out infinite;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+@keyframes heroGateGlow {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.97); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.04); }
+}
+.scene--image:has(.tap:hover) .hero-scene-glow {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Vignette — kenarları koyulaştırır, üst menü ve alt CTA okunur kalır. */
+.hero-scene-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 122% 92% at 50% 44%, transparent 50%, rgba(4, 4, 12, 0.55) 100%),
+    linear-gradient(
+      to bottom,
+      rgba(4, 4, 12, 0.32) 0%,
+      transparent 20%,
+      transparent 58%,
+      rgba(4, 4, 12, 0.62) 100%
+    );
+}
+
+/* Erişilebilirlik — görünmez marka başlığı (mühür görsele gömülü). */
+.hero-scene-h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Görsel modunda metin yerleşimi — tagline ay üzerinde, davet+CTA kapı altında. */
+.scene--image .logo-wrap {
+  top: clamp(150px, 28vh, 300px);
+  z-index: 5;
+}
+.scene--image .subtitle {
+  top: auto;
+  bottom: clamp(118px, 17vh, 168px);
+}
+.scene--image .tap {
+  top: auto;
+  bottom: clamp(56px, 9vh, 96px);
+}
+
+/* Ay arkası — çok hafif nebula glow (mor + soft gold). Statik konum, yavaş
+   nefes; ucuz (tek blur'lu daire). */
+.scene::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  /* Ayla birlikte yukarı — nebula glow ayın arkasında kalır. */
+  top: 42%;
+  width: 96vmin;
+  height: 96vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(140, 109, 255, 0.30) 0%,
+      rgba(202, 164, 255, 0.16) 26%,
+      rgba(255, 217, 143, 0.08) 46%,
+      transparent 70%);
+  filter: blur(72px);
+  z-index: 0;
+  pointer-events: none;
+  animation: nebulaBreath 16s ease-in-out infinite;
+}
+
+/* Çok ince gold-dust — neredeyse görünmez doku, atmosfer için. */
+.scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: radial-gradient(rgba(232, 215, 163, 0.85) 0.6px, transparent 0.7px);
+  background-size: 7px 7px;
 }
 
 .stars-parallax {
@@ -31,6 +524,9 @@ main {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* Pointer-parallax: --par-x/y .scene'den miras (≤4px). Transform tabanlı. */
+  transform: translate3d(var(--par-x, 0px), var(--par-y, 0px), 0);
+  will-change: transform;
 }
 
 .stars-layer {
@@ -44,11 +540,12 @@ main {
 .star {
   position: absolute;
   border-radius: 50%;
-  background: white;
-  opacity: 0.82;
+  /* Çok hafif lila ton — yıldızlar bile Caelinus DNA'sını taşır. */
+  background: rgba(248, 240, 255, 0.92);
+  opacity: 0.68;
   box-shadow:
-    0 0 6px rgba(255, 255, 255, 0.9),
-    0 0 14px rgba(170, 210, 255, 0.28);
+    0 0 4px rgba(255, 255, 255, 0.6),
+    0 0 9px rgba(202, 164, 255, 0.18);
   animation: twinkle ease-in-out infinite;
 }
 
@@ -64,23 +561,39 @@ main {
   filter: blur(2px);
 }
 
+/* Arka plan katmanı sarmalayıcısı — yıldız + nebula + altın toz burada yaşar. */
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .nebula {
   position: absolute;
   border-radius: 999px;
   filter: blur(95px);
   pointer-events: none;
-  opacity: 0.34;
+  opacity: 0.24;
   z-index: 0;
   transition: opacity 1.2s ease;
+  /* Parallax: yıldızların tersine, daha az (derinlik hissi). */
+  transform: translate3d(
+    calc(var(--par-x, 0px) * -0.7),
+    calc(var(--par-y, 0px) * -0.7),
+    0
+  );
 }
 
+/* Nebulalar — Caelinus DNA: indigo (sol) + eflatun (sağ) + soluk lila (alt).
+   Lacivert geri çeker; mor-lila imza öne çıkar. */
 .nebula-left {
   width: 42vw;
   height: 42vw;
   left: -14vw;
   top: 6vh;
   background:
-    radial-gradient(circle, rgba(128, 70, 255, 0.46) 0%, rgba(128, 70, 255, 0.18) 34%, rgba(128, 70, 255, 0.04) 56%, transparent 74%);
+    radial-gradient(circle, rgba(140, 109, 255, 0.42) 0%, rgba(140, 109, 255, 0.16) 34%, rgba(140, 109, 255, 0.04) 56%, transparent 74%);
 }
 
 .nebula-right {
@@ -89,7 +602,7 @@ main {
   right: -12vw;
   top: 10vh;
   background:
-    radial-gradient(circle, rgba(195, 110, 255, 0.36) 0%, rgba(195, 110, 255, 0.16) 34%, rgba(195, 110, 255, 0.04) 58%, transparent 76%);
+    radial-gradient(circle, rgba(202, 164, 255, 0.34) 0%, rgba(202, 164, 255, 0.15) 34%, rgba(202, 164, 255, 0.04) 58%, transparent 76%);
 }
 
 .nebula-bottom {
@@ -98,15 +611,18 @@ main {
   left: 21vw;
   bottom: -8vw;
   background:
-    radial-gradient(circle, rgba(80, 145, 255, 0.28) 0%, rgba(80, 145, 255, 0.12) 36%, rgba(80, 145, 255, 0.03) 58%, transparent 76%);
+    radial-gradient(circle, rgba(140, 109, 255, 0.22) 0%, rgba(160, 130, 255, 0.10) 36%, rgba(140, 109, 255, 0.03) 58%, transparent 76%);
 }
 
 .logo-wrap {
   position: absolute;
-  top: 38px;
+  /* Daha çok nefes; aya mesafe. */
+  top: clamp(40px, 6vh, 76px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 5;
+  /* Aydan (z6) ÜSTTE — metin ayın üstüne taşsa bile okunur kalır. */
+  z-index: 8;
+  width: min(620px, 90vw);
   text-align: center;
   animation: logoBreath 7s ease-in-out infinite;
   transition: transform 0.9s ease, opacity 0.9s ease;
@@ -132,9 +648,8 @@ main {
     0 0 72px rgba(130, 185, 255, 0.10);
 }
 
-/* Altın kanatlı marka amblemi — vektörel logo. JPEG siyah zeminli; ekranda
-   mix-blend screen ile siyah düşer, sadece altın + parıltı kalır (koyu
-   sayfalarda mükemmel; siyah dolgu ayın üstünden geçse bile ay görünür). */
+/* Altın kanatlı marka mührü — transparan PNG (caelinus-mark.png). Siyah zemin
+   asset düzeyinde temizlendi; CSS blend hack'ine gerek yok. */
 .logo-emblem-wrap {
   margin: 0;
   line-height: 0;
@@ -142,32 +657,302 @@ main {
 
 .logo-emblem {
   display: block;
-  width: min(380px, 76vw);
+  /* Marka mührü — banner değil. Biraz küçük: aya nefes mesafesi. */
+  width: clamp(150px, 14vw, 210px);
   height: auto;
   margin: 0 auto;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 34px rgba(255, 200, 110, 0.16));
+  /* Transparan PNG (caelinus-mark.png) → blend hack'i yok. Hafif soft-gold
+     parıltı atmosferle bütünleştirir; abartısız. */
+  filter: drop-shadow(0 0 20px rgba(232, 215, 163, 0.20));
   user-select: none;
 }
 
-/* Bilgi kokusu — landing'de Caelinus'un ne olduğunu söyleyen tek satır.
-   Önceden marka önerisi sadece <head> metadata'sındaydı. */
-.logo-tagline {
-  margin: 14px auto 0;
+/* Ana slogan — şiirsel serif başlık. */
+.hero-headline {
+  margin: clamp(20px, 3.4vh, 34px) auto 0;
+  font-family: var(--cae-font-serif);
+  font-weight: 500;
+  font-size: clamp(22px, 2.6vw, 32px);
+  letter-spacing: 0.04em;
+  line-height: 1.16;
+  /* ivory ↔ soft-gold arası ton. */
+  color: color-mix(in srgb, var(--cae-ivory) 66%, var(--cae-soft-gold));
+  /* Ayın üstüne taşsa bile okunur — koyu halo + altın ışıma. */
+  text-shadow:
+    0 2px 18px rgba(3, 6, 15, 0.7),
+    0 1px 20px rgba(232, 215, 163, 0.14);
+}
+
+/* Alt açıklama — sakin Inter light. */
+.hero-subline {
+  margin: 12px auto 0;
   max-width: min(560px, 86vw);
-  color: rgba(232, 238, 250, 0.82);
-  font-size: clamp(12px, 1.5vw, 15px);
+  font-family: var(--cae-font-sans);
   font-weight: 300;
-  letter-spacing: 0.05em;
-  line-height: 1.55;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  font-size: clamp(12px, 1.4vw, 15px);
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  color: var(--cae-ivory);
+  opacity: 0.72;
+  text-shadow: 0 1px 14px rgba(3, 6, 15, 0.65);
+}
+
+/* ── Living Logo — logo yüklenmez, DOĞAR ─────────────────────────────────
+   Ayın enerjisinden yükselen partiküller birleşir → mühür yukarıdan aşağı
+   belirir (kanatlar → CAELINUS) → canlı metal + yıldız nabzı + nefes + parallax.
+   Tüm zamanlama animation-delay ile deklaratif; reduced-motion'da anında/dingin. */
+.living-logo {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+/* Tilt (parallax 1–2°) bu kutuda; kanat nefesi iç gruplarda → çakışmaz. */
+.ll-emblem-box {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+  transform:
+    perspective(700px)
+    rotateX(var(--ll-rx, 0deg))
+    rotateY(var(--ll-ry, 0deg));
+}
+
+/* Göksel mühür — portal enerjisinden DOĞAR (header logosu değil). */
+@keyframes llFadeIn { to { opacity: 1; } }
+
+/* Enerji aurası — mühür ayın mor-altın enerjisinden oluşuyormuş hissi. */
+.ll-aura {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  width: clamp(220px, 26vw, 360px);
+  height: clamp(220px, 26vw, 360px);
+  transform: translate(-50%, -50%) scale(0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 226, 160, 0.22) 0%,
+    rgba(216, 183, 255, 0.16) 34%,
+    rgba(143, 108, 255, 0.08) 56%,
+    transparent 72%
+  );
+  filter: blur(8px);
+  animation:
+    llAuraIgnite 1.6s ease 0.1s both,
+    llAuraBreath 9s ease-in-out 1.7s infinite;
+  z-index: -1;
+}
+@keyframes llAuraIgnite {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes llAuraBreath {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
+}
+
+/* SVG kanat mührü. */
+.ll-mark {
+  display: block;
+  width: clamp(190px, 22vw, 300px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 16px rgba(232, 215, 163, 0.24));
+}
+
+/* Kanat tüyleri — altın çizgiler stroke-draw ile oluşur (gecikme inline). */
+.ll-feather {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation:
+    llDraw 1.3s cubic-bezier(0.22, 1, 0.36, 1) both,
+    llFadeIn 0.5s ease both;
+}
+@keyframes llDraw { to { stroke-dashoffset: 0; } }
+
+/* Kanat nefesi — çırpmaz: 12s'de bir çok hafif açılır/kapanır. Aynalama dış
+   grupta, nefes iç grupta → çakışmaz. */
+.ll-wing {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: llWingBreath 12s ease-in-out 3s infinite;
+}
+@keyframes llWingBreath {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1.8deg); }
+}
+
+/* Merkez alev/yıldız — ÖNCE belirir; yavaş nabız + altın ışık yayıp söner. */
+.ll-spire {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: llDraw 1s ease 1s both;
+}
+.ll-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation:
+    llFadeIn 0.7s ease 0.4s both,
+    llStarPulse 4.2s ease-in-out 0.6s infinite;
+}
+.ll-star-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation:
+    llFadeIn 0.9s ease 0.4s both,
+    llStarGlow 4.2s ease-in-out 0.6s infinite;
+}
+@keyframes llStarPulse {
+  0%, 100% { transform: scale(0.84); filter: brightness(0.8); }
+  50% { transform: scale(1.2); filter: brightness(1.5); }
+}
+@keyframes llStarGlow {
+  0%, 100% { transform: scale(0.85); opacity: 0.45; }
+  50% { transform: scale(1.35); opacity: 0.95; }
+}
+
+/* Wordmark — harf harf soldan sağa doğar; her harf canlı metalik altın
+   (gold · rose-gold · moon-silver). Gecikme inline (kademeli). */
+.ll-word {
+  display: block;
+  margin-top: clamp(6px, 1vh, 12px);
+  font-family: var(--cae-font-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-indent: 0.14em;
+}
+.ll-letter {
+  display: inline-block;
+  background: linear-gradient(
+    100deg,
+    #e8d7a3 0%, #ffd98f 20%, #fff4d6 36%, #f4d9ff 50%,
+    #cfd6df 64%, #ffd98f 82%, #e8d7a3 100%
+  );
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation:
+    llLetterIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) both,
+    llWordMetal 7s linear infinite;
+}
+@keyframes llLetterIn {
+  0% {
+    opacity: 0;
+    transform: translateY(7px) scale(0.96);
+    filter: blur(5px) drop-shadow(0 0 12px rgba(255, 217, 143, 0.6));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0) drop-shadow(0 1px 8px rgba(3, 6, 15, 0.5));
+  }
+}
+@keyframes llWordMetal {
+  0% { background-position: 0 0; }
+  100% { background-position: 280% 0; }
+}
+
+.ll-kicker {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--cae-font-sans);
+  font-weight: 400;
+  font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--cae-soft-gold) 70%, var(--cae-ivory));
+  opacity: 0;
+  animation: llKickIn 1.2s ease 4.4s both;
+}
+@keyframes llKickIn {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 0.82; transform: translateY(0); }
+}
+
+/* Aydan yukarı süzülen enerji beslemesi — ay ile logo bağlı görünür. */
+.ll-feed {
+  position: absolute;
+  left: 50%;
+  bottom: -70px;
+  width: 3px;
+  height: 84px;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, transparent 0%, rgba(255, 217, 143, 0.30) 62%, rgba(202, 164, 255, 0.22) 100%);
+  background-size: 100% 200%;
+  filter: blur(2px);
+  pointer-events: none;
+  opacity: 0;
+  animation:
+    llFadeIn 1.4s ease 5.2s forwards,
+    llFeedFlow 4.5s linear 5.2s infinite;
+}
+@keyframes llFeedFlow {
+  0% { background-position: 0 100%; }
+  100% { background-position: 0 -100%; }
+}
+
+/* Aydan yükselen altın partiküller — birleşip mührü doğurur. */
+.ll-particles {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 0;
+  height: 0;
+}
+.ll-particle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 200, 1) 0%, rgba(255, 217, 143, 0.6) 50%, transparent 76%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  animation-name: llRise;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.3, 1);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+}
+@keyframes llRise {
+  0% { opacity: 0; transform: translate(calc(-50% + var(--x0)), 150px) scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--x1)), -8px) scale(1.1); }
+}
+
+/* Gecikmeli giriş — sembol doğduktan sonra metin belirir. */
+.hero-headline.ll-late { animation: llLateH 1.4s ease 5.6s both; }
+.hero-subline.ll-late { animation: llLateS 1.4s ease 5.8s both; }
+@keyframes llLateH {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes llLateS {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 0.72; transform: translateY(0); }
 }
 
 .moon-wrap {
   position: absolute;
   left: 50%;
-  top: 51%;
-  width: min(46vw, 470px);
+  /* Ay yukarıda, altında şehir için yer açılır (sky → city). */
+  top: 45%;
+  /* Büyük portal ama vh ile sınırlı: kısa ekranlarda üst metni/şehri ezmez. */
+  width: min(50vw, 500px, 58vh);
   aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
   background: transparent;
@@ -178,16 +963,23 @@ main {
   transition: transform 1s ease, opacity 1s ease, filter 1s ease;
 }
 
+/* Portal aura — gold + violet + ay ışığı pembesi; yavaş nefes. */
 .moon-backglow {
   position: absolute;
   inset: 50%;
-  width: 190%;
-  height: 190%;
+  width: 196%;
+  height: 196%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
+  /* Caelinus DNA aurası — lila → indigo → eflatun → altın (nefes gibi). */
   background:
-    radial-gradient(circle, rgba(255, 202, 226, 0.34) 0%, rgba(255, 152, 201, 0.24) 18%, rgba(236, 120, 188, 0.13) 34%, rgba(220, 110, 180, 0.05) 48%, transparent 68%);
-  filter: blur(36px);
+    radial-gradient(circle,
+      rgba(244, 217, 255, 0.18) 0%,
+      rgba(140, 109, 255, 0.26) 24%,
+      rgba(202, 164, 255, 0.16) 42%,
+      rgba(255, 217, 143, 0.10) 58%,
+      transparent 72%);
+  filter: blur(44px);
   animation: haloPulse 5s ease-in-out infinite;
 }
 
@@ -206,6 +998,132 @@ main {
   mix-blend-mode: screen;
   pointer-events: none;
   animation: moonBreath 6s ease-in-out infinite;
+}
+
+/* Yaşayan portal — WebGL enerji canvas'ı gerçek ayın ÜSTÜNDE, screen-blend ile
+   eklenir (ay opak kapanmaz, sadece nefes alan enerji bindirir). Kenar parıltısı
+   disk dışına biraz taşsın diye negatif inset. */
+.portal-moon-gl {
+  position: absolute;
+  inset: -7%;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.portal-moon-gl canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Yaşayan moddayken ay YÜZEYİ kısılır (Portal Core): parlaklık + detay ~%20
+   düşer, hafif violet'e bürünür → üstündeki WebGL enerji baskın gelir. */
+.moon-wrap.is-living .moon {
+  filter:
+    brightness(0.74) contrast(0.86) saturate(0.82) blur(0.5px)
+    drop-shadow(0 0 26px rgba(202, 164, 255, 0.30))
+    drop-shadow(0 0 84px rgba(140, 109, 255, 0.24));
+  opacity: 0.92;
+}
+.moon-wrap.is-living .moon-pink {
+  opacity: 0.26;
+}
+
+/* ── /vr — gelecekte açılacak kapı ───────────────────────────────────────── */
+.vr-gate {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--cae-black);
+}
+.vr-gate-canvas {
+  position: absolute;
+  inset: 0;
+}
+.vr-gate-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(48px, 12vh, 140px);
+  text-align: center;
+}
+.vr-gate-kicker {
+  margin: 0 0 14px;
+  font-family: var(--cae-font-sans);
+  font-size: 12px;
+  letter-spacing: 0.42em;
+  color: var(--cae-soft-gold);
+  opacity: 0.8;
+}
+.vr-gate-title {
+  margin: 0;
+  font-family: var(--cae-font-serif);
+  font-weight: 500;
+  font-size: clamp(26px, 4.4vw, 48px);
+  letter-spacing: 0.02em;
+  color: var(--cae-ivory);
+  text-shadow: 0 1px 24px rgba(232, 215, 163, 0.16);
+}
+.vr-gate-sub {
+  margin: 14px auto 0;
+  max-width: min(520px, 86vw);
+  font-family: var(--cae-font-sans);
+  font-weight: 300;
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.6;
+  color: var(--cae-ivory);
+  opacity: 0.66;
+}
+.vr-gate-actions {
+  pointer-events: auto;
+  margin-top: clamp(22px, 4vh, 36px);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.vr-gate-enter {
+  padding: 13px 30px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--cae-gold) 52%, transparent);
+  color: var(--cae-ivory);
+  background: rgba(7, 17, 31, 0.42);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  cursor: pointer;
+  font-family: var(--cae-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+}
+.vr-gate-enter:hover {
+  border-color: color-mix(in srgb, var(--cae-soft-gold) 78%, transparent);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(201, 164, 92, 0.26);
+}
+.vr-gate-note {
+  font-family: var(--cae-font-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--cae-moon-silver);
+  opacity: 0.62;
+}
+.vr-gate-back {
+  font-family: var(--cae-font-sans);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--cae-moon-silver);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.vr-gate-back:hover {
+  opacity: 1;
 }
 
 /* ── SHOWROOM · Caelinus Salonu (5D) ───────────────────── */
@@ -1092,25 +2010,34 @@ main {
   }
 }
 
+/* Sacred-circle halkaları — altın/mor, eş merkezli; "kutsal çember" kodu. */
 .moon-ring {
   position: absolute;
   inset: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 1px solid rgba(156, 194, 255, 0.18);
+  border: 1px solid rgba(232, 215, 163, 0.16);
+  box-shadow: 0 0 0 1px rgba(160, 110, 255, 0.05) inset;
   pointer-events: none;
 }
 
 .ring-1 {
-  width: 110%;
-  height: 110%;
-  opacity: 0.45;
+  width: 108%;
+  height: 108%;
+  opacity: 0.5;
 }
 
 .ring-2 {
-  width: 122%;
-  height: 122%;
-  opacity: 0.2;
+  width: 120%;
+  height: 120%;
+  opacity: 0.28;
+  border-color: rgba(160, 110, 255, 0.14);
+}
+
+.ring-3 {
+  width: 136%;
+  height: 136%;
+  opacity: 0.14;
 }
 
 .moon {
@@ -1121,9 +2048,10 @@ main {
   object-fit: contain;
   transform: translate(-50%, -50%);
   filter:
-    drop-shadow(0 0 24px rgba(255, 182, 216, 0.34))
-    drop-shadow(0 0 90px rgba(245, 140, 200, 0.20))
-    saturate(1.05);
+    drop-shadow(0 0 22px rgba(232, 215, 163, 0.22))
+    drop-shadow(0 0 64px var(--cae-violet-glow))
+    drop-shadow(0 0 96px rgba(245, 140, 200, 0.14))
+    saturate(1.04);
   animation: moonBreath 6s ease-in-out infinite;
   user-select: none;
   -webkit-user-drag: none;
@@ -1132,31 +2060,230 @@ main {
 .subtitle {
   position: absolute;
   left: 50%;
-  top: calc(51% + 255px);
+  top: calc(50% + 246px);
   transform: translateX(-50%);
-  color: rgba(230, 236, 248, 0.85);
-  font-size: 14px;
-  letter-spacing: 0.08em;
+  /* Davet — komut değil: şiirsel serif, yumuşak. */
+  font-family: var(--cae-font-serif);
+  font-style: italic;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--cae-ivory) 72%, var(--cae-soft-gold));
+  opacity: 0.82;
+  font-size: clamp(15px, 1.6vw, 19px);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
   z-index: 7;
   transition: opacity 0.8s ease;
 }
 
+/* CTA — lüks glassmorphism: ince gold border, koyu translucent zemin,
+   hover'da gold glow. */
 .tap {
   position: absolute;
   left: 50%;
-  top: calc(51% + 292px);
+  top: calc(50% + 300px);
   transform: translateX(-50%);
-  padding: 11px 20px;
+  padding: 13px 28px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: white;
-  background: rgba(10, 14, 24, 0.42);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--cae-gold) 52%, transparent);
+  color: var(--cae-ivory);
+  background: rgba(7, 17, 31, 0.42);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   cursor: pointer;
   z-index: 7;
-  box-shadow: 0 0 18px rgba(130, 180, 255, 0.08);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  font-family: var(--cae-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  box-shadow:
+    0 0 0 1px rgba(232, 215, 163, 0.06) inset,
+    0 8px 30px rgba(0, 0, 0, 0.4);
+  transition:
+    opacity 0.8s ease,
+    transform 0.4s var(--cae-ease),
+    box-shadow 0.45s ease,
+    border-color 0.45s ease,
+    color 0.45s ease;
+}
+
+.tap:hover {
+  border-color: color-mix(in srgb, var(--cae-soft-gold) 78%, transparent);
+  color: #fff;
+  box-shadow:
+    0 0 26px rgba(201, 164, 92, 0.26),
+    0 0 0 1px rgba(232, 215, 163, 0.14) inset,
+    0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tap:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* Eşikten geçiş — tıklamada merkeze toplanan altın partiküller. anime.js
+   left/top'u %50'ye çeker; normalde gizli (opacity:0). */
+.enter-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.enter-particle {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle,
+    rgba(255, 244, 210, 1) 0%,
+    rgba(255, 217, 143, 0.7) 50%,
+    transparent 76%
+  );
+  box-shadow: 0 0 8px rgba(255, 217, 143, 0.7);
+}
+
+/* Ay-arkası nebula'nın yavaş nefesi — neredeyse fark edilmez. */
+@keyframes nebulaBreath {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.82; transform: translate(-50%, -50%) scale(1.06); }
+}
+
+/* ── Landing · mobil ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .logo-wrap {
+    top: clamp(40px, 6vh, 56px);
+    width: 92vw;
+  }
+  .logo-emblem {
+    width: clamp(160px, 50vw, 190px);
+  }
+  .hero-headline {
+    font-size: clamp(22px, 6.6vw, 26px);
+    margin-top: clamp(18px, 3vh, 26px);
+  }
+  .hero-subline {
+    font-size: clamp(12px, 3.6vw, 14px);
+  }
+  .moon-wrap {
+    top: 38%;
+    width: 70vw;
+  }
+  .hero-horizon {
+    height: min(40vh, 380px);
+  }
+  .subtitle {
+    top: calc(38% + 38vw);
+    white-space: normal;
+    width: 84vw;
+    text-align: center;
+  }
+  .tap {
+    top: calc(38% + 47vw);
+    /* Dokunma alanı büyük. */
+    padding: 15px 32px;
+  }
+  /* Görsel sahne modu — mobil yerleşim. */
+  .scene--image .logo-wrap {
+    top: clamp(116px, 23vh, 230px);
+    width: 92vw;
+  }
+  .scene--image .subtitle {
+    top: auto;
+    bottom: clamp(100px, 15vh, 150px);
+    white-space: normal;
+    width: 84vw;
+    text-align: center;
+  }
+  .scene--image .tap {
+    top: auto;
+    bottom: clamp(46px, 8vh, 84px);
+    padding: 15px 32px;
+  }
+}
+
+/* Erişilebilirlik / sakinlik — hareket azaltma isteğinde landing dingin durur. */
+@media (prefers-reduced-motion: reduce) {
+  .stars-parallax,
+  .nebula {
+    transform: none !important;
+  }
+  .scene::before,
+  .star,
+  .moon,
+  .moon-pink,
+  .moon-backglow,
+  .logo-wrap,
+  .hero-video-img,
+  .hero-video,
+  .hme-violet,
+  .hme-gold,
+  .hh-bob,
+  .hh-light,
+  .hh-glow,
+  .hh-gate,
+  .hh-gate-beam {
+    animation: none !important;
+  }
+  .hh-far,
+  .hh-mid,
+  .hh-near {
+    transform: none !important;
+  }
+  /* Living Logo — doğuş atlanır: mühür anında, dingin görünür. */
+  .ll-aura,
+  .ll-feather,
+  .ll-wing,
+  .ll-spire,
+  .ll-star,
+  .ll-star-glow,
+  .ll-letter,
+  .ll-kicker,
+  .ll-feed,
+  .ll-particle,
+  .ll-emblem-box,
+  .hero-headline.ll-late,
+  .hero-subline.ll-late {
+    animation: none !important;
+  }
+  .ll-feather,
+  .ll-spire {
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+  .ll-aura,
+  .ll-star,
+  .ll-star-glow,
+  .ll-letter,
+  .ll-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ll-aura { transform: translate(-50%, -50%) !important; }
+  .ll-kicker { opacity: 0.82 !important; }
+  .ll-emblem-box {
+    transform: none !important;
+  }
+  .ll-particles {
+    display: none !important;
+  }
+  .hero-subline.ll-late {
+    opacity: 0.72;
+  }
+  /* Eşik partikülleri — dingin modda gizli. */
+  .enter-burst { display: none !important; }
+  /* Hero sahne görseli — dingin: nefes/toz/parıltı/parallax durur. */
+  .hero-scene-img,
+  .hero-scene-dust,
+  .hero-scene-glow {
+    animation: none !important;
+  }
+  .hero-scene-img {
+    transform: scale(1.04) !important;
+  }
+  .hero-scene-bg {
+    transform: none !important;
+  }
 }
 
 /* VORTEX */
@@ -8573,12 +9700,11 @@ main {
   color: #c8b888;
 }
 
-/* Navbar amblemi — siyah zemin mix-blend screen ile düşer. */
+/* Navbar amblemi — transparan PNG (caelinus-mark.png), blend hack'i yok. */
 .cae-topbar-logo {
   display: block;
-  height: 44px;
+  height: 40px;
   width: auto;
-  mix-blend-mode: screen;
   user-select: none;
 }
 

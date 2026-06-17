@@ -2,7 +2,10 @@
 
 > **Amaç:** Caelinus avatar sisteminin bugünkü tüm mimarisini tek yerde toplamak, ileri vizyonu çizmek ve avatar üretimini devralan **Şeyma Karaş**'a teslim edeceğimiz net talimat + kabul kriterlerini tanımlamak.
 >
-> **Sürüm:** v1 · Hazırlayan: AURA (Caelinus AI) · Tarih: 2026-06-15
+> **Sürüm:** v2 · Hazırlayan: AURA (Caelinus AI) · Tarih: 2026-06-17
+> **v2 ekleri:** BÖLÜM 4 — VR/XR hedefli üretim (avatarlar baştan VR gözlüğe uygun
+> üretilsin diye) + Faz A "Selin" bedeni teslim/kabul durumu. Bkz.
+> `docs/caelinus-bible.md §8 — Platformdan Bağımsızlık`.
 
 ---
 

@@ -1,7 +1,24 @@
 import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+
+// Caelinus tipografi (Bible §3): zarif serif başlık + temiz sans gövde.
+// Self-host edilir; CSS değişkenleriyle tokens.css'e bağlanır.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
 import TopBar from "@/components/layout/TopBar";
 import Footer from "@/components/layout/Footer";
 import JsonLd from "@/components/seo/JsonLd";
@@ -121,7 +138,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const orgNode = buildOrganization({ locale });
   return (
-    <html lang={htmlLang(locale)}>
+    <html lang={htmlLang(locale)} className={`${cormorant.variable} ${inter.variable}`}>
       <body>
         <JsonLd nodes={orgNode} />
         <MemberSyncBridge />

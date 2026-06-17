@@ -25,7 +25,7 @@ export default function TopBar() {
     <header className="cae-topbar" aria-label="Caelinus navigation">
       <Link href="/" className="cae-topbar-brand" aria-label="Caelinus — Frekansın Sanatı">
         <img
-          src="/logo/frekansin-sanati.jpeg"
+          src="/logo/caelinus-mark.png"
           alt="Caelinus — Frekansın Sanatı"
           className="cae-topbar-logo"
           draggable={false}

@@ -1,0 +1,190 @@
+/* ─────────────────────────────────────────────────────────────────────
+   WorldShell — Caelinus dünya iskeleti (Bible §9)
+   Tüm değerler tokens.css'ten. --world-accent / --world-glow her dünyanın
+   imza rengini taşır (inline style ile gelir).
+   ───────────────────────────────────────────────────────────────────── */
+
+.world-shell {
+  position: relative;
+  min-height: 100dvh;
+  background: var(--cae-black);
+  color: var(--cae-text);
+  font-family: var(--cae-font-sans);
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+/* ── Atmosfer ──────────────────────────────────────────────────────── */
+.world-shell-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cae-z-backdrop);
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--cae-midnight) 0%, transparent 60%),
+    var(--cae-black);
+}
+
+.world-shell-glow {
+  position: absolute;
+  border-radius: var(--cae-radius-pill);
+  filter: blur(90px);
+  background: radial-gradient(circle, var(--world-glow) 0%, transparent 70%);
+}
+
+.world-shell-glow-a {
+  width: 46vw;
+  height: 46vw;
+  left: -12vw;
+  top: 6vh;
+}
+
+.world-shell-glow-b {
+  width: 38vw;
+  height: 38vw;
+  right: -10vw;
+  top: 24vh;
+  opacity: 0.8;
+}
+
+/* İnce grain — lüks doku; çok düşük opaklık. */
+.world-shell-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+}
+
+/* ── Ribbon (eşik + dünya markası + aside) ─────────────────────────── */
+.world-shell-ribbon {
+  position: relative;
+  z-index: var(--cae-z-ribbon);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cae-space-4);
+  padding: var(--cae-space-5) var(--cae-space-6);
+}
+
+.world-shell-back {
+  color: var(--cae-text-soft);
+  text-decoration: none;
+  font-size: var(--cae-text-sm);
+  letter-spacing: var(--cae-tracking-wide);
+  transition: color var(--cae-dur-in) var(--cae-ease);
+}
+
+.world-shell-back:hover {
+  color: var(--world-accent);
+}
+
+.world-shell-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cae-space-2);
+  color: var(--world-accent);
+  letter-spacing: var(--cae-tracking-widest);
+  font-size: var(--cae-text-xs);
+  text-transform: uppercase;
+}
+
+.world-shell-mark-icon {
+  opacity: 0.9;
+}
+
+.world-shell-aside {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 64px;
+}
+
+/* ── İçerik kabı ───────────────────────────────────────────────────── */
+.world-shell-inner {
+  position: relative;
+  z-index: var(--cae-z-content);
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: var(--cae-space-6) 0 var(--cae-space-9);
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────── */
+.world-shell-hero {
+  text-align: center;
+  padding: var(--cae-space-7) 0 var(--cae-space-8);
+}
+
+.world-shell-emblem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: var(--cae-space-4);
+  border-radius: var(--cae-radius-pill);
+  color: var(--world-accent);
+  border: 1px solid color-mix(in srgb, var(--world-accent) 40%, transparent);
+  box-shadow: 0 0 36px var(--world-glow);
+  background: radial-gradient(circle, var(--world-glow) 0%, transparent 72%);
+}
+
+.world-shell-kicker {
+  color: var(--cae-text-soft);
+  font-size: var(--cae-text-xs);
+  letter-spacing: var(--cae-tracking-wider);
+  text-transform: uppercase;
+  margin-bottom: var(--cae-space-3);
+}
+
+.world-shell-title {
+  margin: 0;
+  font-family: var(--cae-font-serif);
+  font-weight: 500;
+  font-size: var(--cae-text-display);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--cae-ivory);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+
+.world-shell-subtitle {
+  max-width: 60ch;
+  margin: var(--cae-space-4) auto 0;
+  color: var(--cae-text-soft);
+  font-size: var(--cae-text-lg);
+  line-height: 1.6;
+}
+
+.world-shell-emotion {
+  margin-top: var(--cae-space-4);
+  display: inline-block;
+  color: var(--world-accent);
+  font-size: var(--cae-text-xs);
+  letter-spacing: var(--cae-tracking-wider);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ── Mobil ─────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .world-shell-ribbon {
+    padding: var(--cae-space-4);
+  }
+  .world-shell-mark-name {
+    display: none; /* dar ekranda yalnızca sembol kalır */
+  }
+  .world-shell-hero {
+    padding: var(--cae-space-5) 0 var(--cae-space-6);
+  }
+  .world-shell-emblem {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell-back {
+    transition: none;
+  }
+}
