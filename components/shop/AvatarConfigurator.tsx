@@ -9,7 +9,7 @@ import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import ModelAvatar from "./ModelAvatar";
 
-const DEFAULT_MODEL_PATH = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL_PATH = "/models/caelinus-body-base-fem.glb";
 
 type Props = {
   config: AvatarConfig;

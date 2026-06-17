@@ -20,7 +20,7 @@ import {
   getStageConfig,
 } from "./scene";
 
-const DEFAULT_MODEL_PATH = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL_PATH = "/models/caelinus-body-base-fem.glb";
 const FEET_Y = -0.03;
 
 /* ═══════════════════════════════════════════
@@ -38,7 +38,7 @@ export type AvatarSceneProps = {
   faceTextureUrl?: string | null;
   /** Parametric face shape deform */
   faceDeform?: AvatarFaceDeformConfig | null;
-  /** External animation GLB (e.g. "/models/catwalk.glb") */
+  /** External animation GLB (e.g. "/models/caelinus-catwalk.glb") */
   animationUrl?: string | null;
   /** Runtime-bound outfit GLB configs */
   outfitBindings?: OutfitBindingConfig[];

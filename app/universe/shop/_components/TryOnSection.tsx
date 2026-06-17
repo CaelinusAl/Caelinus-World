@@ -241,7 +241,7 @@ export default function TryOnSection() {
               faceTextureUrl={
                 selectedBody.supportsSkinToneOverride ? faceTextureUrl : null
               }
-              animationUrl={catwalkOn ? "/models/catwalk.glb" : null}
+              animationUrl={catwalkOn ? "/models/caelinus-catwalk.glb" : null}
               outfitBindings={outfitBindings}
               debugBindings={debugBindings}
               onOutfitStatus={setOutfitStatus}

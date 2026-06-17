@@ -1,13 +1,13 @@
 {
   "_comment": "Caelinus AI — Avatar manifest. This file declares the canonical avatar registry expected by the founder vision (public/avatars/). The actual GLB files live under public/models/ for historical reasons; this manifest is the source of truth for the runtime registry exposed via lib/avatar-bodies.ts.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "updatedAt": "2026-06-17",
   "convention": {
     "newAvatarsGoUnder": "public/models/",
     "thumbnailsGoUnder": "public/models/previews/ (S3+ — şu an yok, AvatarCarousel CSS fallback'i kullanıyor)",
     "registerInCode": "lib/avatar-bodies.ts → CAELINUS_BODY_LIBRARY",
     "futureMobileSelfieFlow": "QR endpoint will write user-generated GLBs here under public/avatars/users/<id>.glb",
-    "inProductionNote": "0.6.0: İlk gerçek beden 'Selin' (selin-v1) teslim edildi — feminen base body, Mixamo rig (52 bone), 52 ARKit blendshape, gömülü PBR deri (skins01/bobby). validate-avatar.js HIRES kapısından geçti (8.5MB, 26.7k tris, sıkıştırmasız, 2K texture). Kütüphane artık boş değil; AVATARS_IN_PRODUCTION=false. Sonraki bedenler aynı pipeline ile eklenecek."
+    "inProductionNote": "0.7.0: 'Selin' (selin-v1) VR-grade güçlendirildi (BÖLÜM 4.9/4.10). Göz: gerçek gözbebeği geometrisi + iris/sclera atlas + LeftEye/RightEye bone (rig 52→54). Saç: hair-long-wave.glb (tek mesh + tek atlas + Hair_01→02→03 spring-bone zinciri, Head-bind). Animasyon: caelinus-catwalk.glb (in-place, Hips drift yok). Base validate-avatar.js HIRES kapısından geçti (8.66MB, 28.2k tris, sıkıştırmasız, 2K+göz texture, göz bone PASS). AVATARS_IN_PRODUCTION=false."
   },
   "avatars": [
     {
@@ -18,8 +18,32 @@
       "url": "/models/caelinus-body-base-fem.glb",
       "baseHeightM": 1.69,
       "rig": "mixamo",
+      "rigBones": 54,
+      "eyeBones": ["mixamorig:LeftEye", "mixamorig:RightEye"],
       "blendshapes": "arkit-52",
       "isDefault": true,
+      "addedAt": "2026-06-17"
+    }
+  ],
+  "hair": [
+    {
+      "id": "hair-long-wave",
+      "label": "Uzun Dalga",
+      "url": "/models/hair/hair-long-wave.glb",
+      "bind": "head",
+      "springChain": ["Hair_Root", "Hair_01", "Hair_02", "Hair_03"],
+      "atlas": "single",
+      "alphaMode": "BLEND",
+      "addedAt": "2026-06-17"
+    }
+  ],
+  "animations": [
+    {
+      "id": "catwalk",
+      "label": "Catwalk",
+      "url": "/models/caelinus-catwalk.glb",
+      "inPlace": true,
+      "rig": "mixamo",
       "addedAt": "2026-06-17"
     }
   ]

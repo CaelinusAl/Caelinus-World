@@ -33,9 +33,18 @@
 | BAKE ($md- → basis) | ✅ | 10 `$md-` key basis'e gömüldü, ARKit delta birebir korundu (D-ekleme yöntemi); 53 key kaldı |
 | Helper geometri temizliği | ✅ | 19158 → 13380 vert (skirt/tights/teeth/eye helper grid silindi), MASK modifier kaldırıldı |
 | [5] Apply transforms | ✅ | zaten temiz (loc 0 / rot 0 / scale [1,1,1]) |
-| [6] glTF export | ✅ | `public/models/caelinus-body-base-fem.glb` — 8.5MB, 26.7k tris, sıkıştırmasız, 2K texture embed, +Y up |
-| [7] Validate | ✅ | `validate-avatar.js` → **KAPI AÇIK** (2 uyarı: mixamorig prefix=bilinçli/motor uyumlu, göz bone=ileri iş) |
-| [8] Repo entegrasyon | ✅ | `lib/avatar-bodies.ts` BodyEntry `selin-v1` (default) + `manifest.json` v0.6.0 → AVATARS_IN_PRODUCTION artık false |
+| [6] glTF export | ✅ | `public/models/caelinus-body-base-fem.glb` — 8.66MB, 28.2k tris, sıkıştırmasız, 2K+göz texture embed, +Y up |
+| [7] Validate | ✅ | `validate-avatar.js` → **KAPI AÇIK** (1 uyarı: mixamorig prefix=bilinçli/motor uyumlu; göz bone artık **PASS**) |
+| [8] Repo entegrasyon | ✅ | `lib/avatar-bodies.ts` BodyEntry `selin-v1` (default) + `manifest.json` → AVATARS_IN_PRODUCTION artık false |
+
+### 0.6) VR-GRADE GÜÇLENDİRME (2026-06-17 — BÖLÜM 4.9/4.10)
+
+| Adım | Durum | Not |
+|---|---|---|
+| Göz geometrisi + bone | ✅ | İki gözbebeği küresi (724 vert, iris/sclera atlas materyali `Caelinus.eye`) + `mixamorig:LeftEye/RightEye` bone'ları (Head altında). Deform izolasyon testi geçti (göz oynar, gövde sabit). Mesh 13380→14104 vert, rig 52→54 bone. |
+| Saç (`hair-long-wave.glb`) | ✅ | Ayrı GLB, `public/models/hair/`. Tek mesh (816 vert/984 tris) + tek atlas (1024²) + **spring-bone zinciri** `Hair_Root→Hair_01→02→03`, alphaMode BLEND, doubleSided. Kendi kapısından geçti. |
+| In-place catwalk (`caelinus-catwalk.glb`) | ✅ | `catwalk.glb`'den Hips translation kanalı çıkarıldı (programatik, gltf-transform tarzı) → drift yok, rig-uyumlu. Uygulamada `catwalk.glb` yerine bağlandı (5 referans). |
+| Canlı regresyon | ✅ | Deterministik Node testi: GLTFLoader 2 SkinnedMesh (`base`+`base_1`), SkeletonUtils.clone sonrası **ikisi de bound=true** — orphan YANLIŞ alarm (dev cache/Fast-Refresh churn). 52 morph, 14 bone slider deform çalışıyor. |
 
 > Export-ready snapshot: `_work/caelinus-body-base-fem-baked.blend` (baked, 13380 vert). Orijinal düzenlenebilir master: `_work/caelinus-body-base-fem.blend` (19158 vert, $md- key'li).
 

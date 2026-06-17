@@ -1,7 +1,7 @@
 /**
  * Caelinus Avatar Core — Animation Preset Library.
  *
- * Mevcut tek animasyon: `/models/catwalk.glb` (Mixamo retarget).
+ * Mevcut tek animasyon: `/models/caelinus-catwalk.glb` (Mixamo retarget).
  * "Idle" (statik) ve "Catwalk" preset'leri var; ileride başka GLB
  * animasyonları eklendiğinde aynı yapıyla genişler.
  */
@@ -20,7 +20,7 @@ export const ANIMATION_PRESETS: AnimationPreset[] = [
     id: "catwalk",
     label: "Catwalk",
     tagline: "Podyum yürüyüşü — Caelinus ritmiyle",
-    glbUrl: "/models/catwalk.glb",
+    glbUrl: "/models/caelinus-catwalk.glb",
     autoplay: true,
   },
 ];

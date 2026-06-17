@@ -315,14 +315,14 @@ yakında dağılmıyor mu, tris/draw-call bütçede mi.
 
 ### 4.10 VR kabul kriterleri (BÖLÜM 3.5'e ek)
 
-- [ ] `-hires` ≤ 60k tris (`-vr` ≤ 25k — dev türetir)
-- [ ] Göz kemikleri (`LeftEye` / `RightEye`) mevcut
-- [ ] Parmak kemikleri korunmuş (silinmemiş)
-- [ ] ARKit blendshape min 5, isimler harfiyen doğru
-- [ ] Saç tek mesh + tek atlas + spring-bone zinciri
-- [ ] Kafa ayrı material slot
-- [ ] Doku ≤ 1024²'ye ölçeklenebilir kaynak
-- [ ] Humanoid-mappable joint orientation
+- [x] `-hires` ≤ 60k tris (`-vr` ≤ 25k — dev türetir) — **28.2k tris** ✓
+- [x] Göz kemikleri (`LeftEye` / `RightEye`) mevcut — `mixamorig:LeftEye/RightEye`, gerçek gözbebeği geometrisiyle ✓
+- [x] Parmak kemikleri korunmuş (silinmemiş) — el/parmak bone'ları tam ✓
+- [x] ARKit blendshape min 5, isimler harfiyen doğru — 52 blendshape, min-5 birebir ✓
+- [x] Saç tek mesh + tek atlas + spring-bone zinciri — `hair-long-wave.glb` (1 mesh, 1024² atlas, `Hair_01→02→03`) ✓
+- [~] Kafa ayrı material slot — **göz** ayrı slot (`Caelinus.eye`); kafa/yüz hâlâ gövde materyalinde (Faz B: yüz ayrı slot)
+- [x] Doku ≤ 1024²'ye ölçeklenebilir kaynak — 2048² kaynak, 1024'e indirgenebilir ✓
+- [x] Humanoid-mappable joint orientation — Mixamo standart rig ✓
 
 ---
 
