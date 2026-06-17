@@ -53,5 +53,6 @@ public/universe/_raw/
 # hero background video optimization backups
 public/hero/_raw/
 
-# Blender otomatik yedekleri
+# Blender çalışma + yedek dosyaları (repoya girmez; render çıktıları ayrı)
+*.blend
 *.blend1

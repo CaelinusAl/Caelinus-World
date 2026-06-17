@@ -26,6 +26,37 @@ kesilince tarihiyle aşağı taşınır._
 
 ---
 
+## [0.5.0] — 2026-06-17 · 3D Evren Meydanı (/universe)
+
+### Eklendi
+- **`CaelinusUniverseScene` — tam Three.js evren sahnesi (`/universe`):**
+  `@react-three/fiber` + `drei` ile interaktif 3B meydan.
+  - **Yaşam Motoru (merkez):** 3 orbital halka (altın/mor/gümüş) + nabız atan
+    ikozahedron çekirdek + plazma sütunu; altın partiküller (`Sparkles`).
+  - **4 ışık yolu:** merkezden SANRI / GAIA / BAZAAR / ATELİER'e uzanan, nefes
+    alır gibi parlayan yollar + hover'da parlayıp tıklanınca o dünyaya giden bölge kapıları.
+  - **Ayna su zemini** (`MeshReflectorMaterial`) + 6 kutsal geometri halkası.
+  - **Kamera giriş yürüyüşü** (z:-34 → z:-9, ease-in-out) → ardından `OrbitControls`
+    ile kullanıcı serbest döner/zoom yapar.
+  - SSR kapalı (`next/dynamic` `ssr:false`) — Three.js yalnız tarayıcıda.
+
+### Değişti
+- **`/universe` artık 3B sahne:** eski 2D portal grid'i (v0.3.0 "Find Your
+  Frequency" yönlendirilmiş giriş dâhil) devre dışı bırakıldı; sayfa Three.js
+  sahnesine geçti. *Not: 3B sahnenin SEO/yönlendirilmiş-giriş etkisi 2D grid'den
+  farklı — lansman öncesi UX/erişilebilirlik gözden geçirilmeli.*
+
+### Düzeltildi
+- **Build hatası (`ssr:false` Server Component'te):** `app/universe/page.tsx`
+  Server Component iken `next/dynamic({ssr:false})` kullanıyordu → Turbopack build
+  hatası. Sayfaya `"use client"` eklenerek çözüldü (TS temiz olsa da build kırılıyordu).
+
+### Altyapı
+- **`.gitignore`:** `*.blend` eklendi — Blender çalışma dosyaları (örn.
+  `caelinus_universe_v*.blend`) repoya girmez; yalnız optimize render çıktıları commit'lenir.
+
+---
+
 ## [0.4.0] — 2026-06-17 · Tapınak Hero (videolu eşik)
 
 ### Eklendi
