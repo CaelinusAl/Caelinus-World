@@ -9,6 +9,25 @@
 
 ---
 
+## Kreatif yön (master — tüm kliplerde geçerli)
+
+**Yapma:**
+- Jenerik fantezi dünyası yaratma.
+- Sci-fi şehri yaratma.
+- Cyberpunk görsel yaratma.
+
+**Görsel dil şuna benzemeli:**
+Basilica Cistern (Yerebatan Sarnıcı) + Antik Tanrıça Tapınağı + Mor Ay Medeniyeti
++ Kutsal Su + Yaşayan Holografik Tanrıçalar.
+
+**Atmosfer (mood):** Mistik · Zarif · Feminen · Antik · İlahi.
+
+**Renk paleti:** Deep black · Moon silver · Amethyst purple · Soft lavender · Warm gold.
+
+**Hareket:** Her şey yavaş hareket eder — sanki tapınağın kendisi nefes alıyormuş gibi.
+
+---
+
 ## Stil çıpası (HER klibin sonuna ekle)
 
 ```
