@@ -49,3 +49,6 @@ public/products/_raw/
 
 # universe video optimization backups
 public/universe/_raw/
+
+# Blender otomatik yedekleri
+*.blend1

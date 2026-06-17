@@ -30,7 +30,14 @@
 | [4] ARKit blendshape (52 adet, **düz** isim) | ✅ | min-5 dahil hepsi birebir: `eyeBlinkLeft/Right`, `jawOpen`, `mouthSmileLeft/Right` |
 | [2] Skin material / texture | ✅ | `Human.body` — `bobby_03_young_female_hairless` (skins01 CC0 pack), 2048² diffuse, Principled BSDF (metallic 0 / roughness 0.7), texture `.blend`'e pack'li |
 | BAKE uyarısı | ⚠️ | 10 adet `$md-` modelleme key'i değeri ≠0 (feminen şekli taşıyor) → export'tan ÖNCE basis'e bake et, yoksa beden nötre döner |
-| [5] Apply transforms / [6] Export / [7] Validate / [8] Repo | ⏳ | sırada |
+| BAKE ($md- → basis) | ✅ | 10 `$md-` key basis'e gömüldü, ARKit delta birebir korundu (D-ekleme yöntemi); 53 key kaldı |
+| Helper geometri temizliği | ✅ | 19158 → 13380 vert (skirt/tights/teeth/eye helper grid silindi), MASK modifier kaldırıldı |
+| [5] Apply transforms | ✅ | zaten temiz (loc 0 / rot 0 / scale [1,1,1]) |
+| [6] glTF export | ✅ | `public/models/caelinus-body-base-fem.glb` — 8.5MB, 26.7k tris, sıkıştırmasız, 2K texture embed, +Y up |
+| [7] Validate | ✅ | `validate-avatar.js` → **KAPI AÇIK** (2 uyarı: mixamorig prefix=bilinçli/motor uyumlu, göz bone=ileri iş) |
+| [8] Repo entegrasyon | ✅ | `lib/avatar-bodies.ts` BodyEntry `selin-v1` (default) + `manifest.json` v0.6.0 → AVATARS_IN_PRODUCTION artık false |
+
+> Export-ready snapshot: `_work/caelinus-body-base-fem-baked.blend` (baked, 13380 vert). Orijinal düzenlenebilir master: `_work/caelinus-body-base-fem.blend` (19158 vert, $md- key'li).
 
 > Skin paketleri kuruldu: `skins01_cc0.zip` (99MB, 23 kadın deri) → MPFB `.user/...mpfb/data/skins/`.
 > Alpha notu: deri materyali alpha'yı diffuse PNG'nin alpha kanalından alıyor (HASHED) → glTF'de `MASK` modu olur; export sonrası gövdede istenmeyen saydamlık olup olmadığını validate et.
