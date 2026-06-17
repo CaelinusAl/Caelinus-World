@@ -92,7 +92,7 @@ class SceneErrorBoundary extends Component<
   }
 }
 
-const DEFAULT_MODEL = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL = "/models/caelinus-body-base-fem.glb";
 
 useGLTF.preload(DEFAULT_MODEL);
 

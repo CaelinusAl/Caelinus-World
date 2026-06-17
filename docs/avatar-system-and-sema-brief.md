@@ -172,7 +172,7 @@ Caelinus'un **3D avatar asset'lerini** üretmek: kanonik bedenler, saç, kıyafe
 ### 3.3 Üretim adımları (her base body için)
 
 1. **Modelle** (Blender): metre ölçekli, ayaklar zeminde (Y=0), T-poz veya A-poz, ortalanmış (X=0, Z=0). Temiz quad topoloji, ~15–40k tris hedef.
-2. **UV + PBR doku:** baseColor + roughness + normal. Caelinus paleti (siyah `#0a0806` / altın `#caa56a` / nude `#d4ad8a` / ivory `#f4e7d0`) ile uyumlu ten/atmosfer.
+2. **UV + PBR doku:** baseColor + roughness + normal. Caelinus paleti — **Bible §2 ile senkron** (siyah `#03060f` / gece yarısı `#0b1530` / altın `#d4b78a` / yumuşak altın `#ffe9b8` / fildişi `#f4ecd8` / ay gümüşü `#c9d4e6`) ile uyumlu ten/atmosfer.
 3. **Rig:** Mixamo'ya yükle → otomatik rig. İndirdiğinde Mixamo bone isimleri gelir (zorunlu).
 4. **Animasyon:** Mixamo'dan **in-place** (root motion KAPALI / "In Place" işaretli) catwalk + jestleri ayrı GLB olarak indir.
 5. **Blendshape (opsiyonel ama tercih edilir):** büst/kalça/yüz için morph target'lar ekle.
@@ -229,10 +229,107 @@ Bunları aldığımızda biz `lib/avatar-bodies.ts` + `manifest.json` kaydını 
 
 ---
 
+## BÖLÜM 4 — VR/XR HEDEFLİ ÜRETİM (yeni)
+
+> Caelinus web'de başlıyor ama mobil + VR'a taşınacak (Bible §8). Bu yüzden
+> avatarlar **baştan VR-grade** üretilir. BÖLÜM 3 kontratı (Mixamo rig · Y-up ·
+> metre · embedded PBR) **aynen geçerli**; bu bölüm üstüne VR/XR şartlarını ekler.
+> Çelişki olursa daha katı olan (VR) kazanır.
+
+### 4.1 İlke: Performans kraldır
+
+VR = mobil GPU + **90 Hz** + yakın mesafe. Masaüstü web'de affedilen şey VR'da
+kare düşürür / mide bulandırır. Her karar performans bütçesine tabidir.
+
+### 4.2 İki türev (her base için)
+
+| Türev | Tris | Doku | Boyut | Draw call | Hedef |
+|---|---|---|---|---|---|
+| `-vr` | ≤ **25k** | ≤ **1024²** | ≤ **5 MB** | ideal **1** | mobil / VR |
+| `-hires` | ≤ **60k** | — | ≤ ~30 MB | — | masaüstü |
+
+Saç/kaş **yüzlerce ufak mesh olmasın** → tek mesh + **tek atlas** dokuda topla.
+
+### 4.3 Format & sıkıştırma — ve scope sınırı
+
+- Hedef: doku **KTX2/Basis**, geometri **Draco / meshopt**.
+- **ÖNEMLİ scope notu:** Render motoru (`components/shop/ModelAvatar.tsx`) bugün
+  düz `GLTFLoader` kullanıyor — **`KTX2Loader` / `DRACOLoader` / `MeshoptDecoder`
+  yok**. Yani sıkıştırılmış GLB **render olmaz** (boş/siyah ekran). Bu yüzden:
+  - **Şeyma:** `-hires` **clean** kaynağı verir (gömülü PNG doku, sıkıştırmasız).
+  - **Dev ekip:** `-vr` türevini + KTX2/Draco sıkıştırmayı çıkarır (deterministik
+    tooling, kodda tekrarlanabilir).
+  - KTX2Loader + DRACOLoader motora eklenene kadar bu sınır geçerli.
+
+### 4.4 Sosyal varlık iskeleti
+
+- **Göz kemikleri** ekle: `LeftEye` / `RightEye`, Head altına parent. *Mixamo
+  bunları eklemez → Blender'da elle eklenir.*
+- **Parmak kemiklerini SİLME** (VR el-takibi). → BÖLÜM 1.3'teki "parmak serbest"
+  notu **VR için geçersiz**; burada parmak kemikleri zorunlu.
+- Simetrik, temiz **joint orientation** (IK / full-body için).
+- **Humanoid-mappable** kal (VRM / Unity humanoid eşlemesi bozulmasın).
+
+### 4.5 Yüz ifadeleri (ARKit blendshape)
+
+- Morph hedeflerini **ARKit 52 blendshape isimleriyle** ver.
+- **Faz A minimum 5:** `eyeBlinkLeft`, `eyeBlinkRight`, `jawOpen`,
+  `mouthSmileLeft`, `mouthSmileRight`.
+- İsimler **harfiyen** ARKit olmalı — lip-sync + cross-platform eşleşme buna bağlı.
+- *Not: bugünkü web motoru morph'ları yüz **sculpt slider**'ı için okuyor
+  (`lib/face/morph-targets.ts`); ARKit **ifade animasyonu** VR/lip-sync fazında
+  açılacak. Blendshape'leri yine de şimdi ver — geleceğe hazır.*
+
+### 4.6 Canlılık (spring-bone)
+
+- Saç/etek için **spring-bone zinciri** bırak (`Hair_01 → Hair_02 → Hair_03`).
+  VR'da statik saç ölü görünür.
+- GLB **yalnızca kemik zincirini** taşır; spring **fiziği** runtime/VRM'de
+  uygulanır — fiziği GLB'ye gömmeye çalışma.
+
+### 4.7 First-person
+
+- Ayaklar kesin **Y=0**, gerçek **metre** boy.
+- **Kafa ayrı material slot** — first-person'da gizlenebilsin.
+
+### 4.8 VRM 1.0 köprüsü
+
+Yukarıdakiler (göz/parmak kemiği, ARKit blendshape, humanoid joint, spring-bone)
+yapılırsa **VRM 1.0** (metaverse standardı) neredeyse bedava gelir. Şimdilik
+**GLB birincil**, VRM "yarına hazır" tutulur.
+
+### 4.9 Faz A teslim paketi (VR-grade — güncel)
+
+BÖLÜM 3.7'nin VR-grade güncel hâli (çelişki olursa bu kazanır):
+
+1. `caelinus-body-base-fem.glb` — kadın kanonik base: Mixamo rig + **göz +
+   parmak kemiği**, PBR, **ARKit blendshape-ready**, `-hires` ≤ 60k.
+2. `-vr` light türevi (≤ 25k) — **veya** clean kaynağı ver, dev çıkarır (bkz. 4.3).
+3. `caelinus-catwalk.glb` — rig uyumlu **In-Place** catwalk.
+4. 1 örnek `hair-*.glb` — Head-bind + **spring-bone zinciri**.
+5. Teslim notu: poly sayısı · araçlar · ARKit blendshape listesi · göz/parmak
+   kemiği durumu · bilinen sınırlar.
+
+**Doğrulama:** donmccurdy gltf-viewer, **yakın kamera** (VR mesafesi) — yüz/saç
+yakında dağılmıyor mu, tris/draw-call bütçede mi.
+
+### 4.10 VR kabul kriterleri (BÖLÜM 3.5'e ek)
+
+- [x] `-hires` ≤ 60k tris (`-vr` ≤ 25k — dev türetir) — **28.2k tris** ✓
+- [x] Göz kemikleri (`LeftEye` / `RightEye`) mevcut — `mixamorig:LeftEye/RightEye`, gerçek gözbebeği geometrisiyle ✓
+- [x] Parmak kemikleri korunmuş (silinmemiş) — el/parmak bone'ları tam ✓
+- [x] ARKit blendshape min 5, isimler harfiyen doğru — 52 blendshape, min-5 birebir ✓
+- [x] Saç tek mesh + tek atlas + spring-bone zinciri — `hair-long-wave.glb` (1 mesh, 1024² atlas, `Hair_01→02→03`) ✓
+- [~] Kafa ayrı material slot — **göz** ayrı slot (`Caelinus.eye`); kafa/yüz hâlâ gövde materyalinde (Faz B: yüz ayrı slot)
+- [x] Doku ≤ 1024²'ye ölçeklenebilir kaynak — 2048² kaynak, 1024'e indirgenebilir ✓
+- [x] Humanoid-mappable joint orientation — Mixamo standart rig ✓
+
+---
+
 ## EK — Hızlı referanslar (Şeyma için)
 
 - **Doğrulama viewer:** https://gltf-viewer.donmccurdy.com
 - **Mixamo:** https://www.mixamo.com (mesh yükle → auto-rig → animasyon indir, "In Place" işaretle)
 - **gltf-transform:** `npm i -g @gltf-transform/cli` → `gltf-transform inspect file.glb`
-- **Renk paleti:** siyah `#0a0806` · altın `#caa56a` · nude `#d4ad8a` · ivory `#f4e7d0` · bordo (deep burgundy)
+- **Renk paleti (Bible §2 ile senkron):** siyah `#03060f` · gece yarısı `#0b1530` · altın `#d4b78a` · yumuşak altın `#ffe9b8` · fildişi `#f4ecd8` · ay gümüşü `#c9d4e6`
 - **Estetik dili:** lüks-fütüristik, kutsal dişil + podyum + AI hologram havası

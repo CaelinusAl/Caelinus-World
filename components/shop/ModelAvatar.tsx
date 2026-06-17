@@ -270,7 +270,7 @@ function applyBodyDeformation(
 }
 
 export default function ModelAvatar({
-  url = "/models/caelinus-avatar.glb",
+  url = "/models/caelinus-body-base-fem.glb",
   auraColor = "#69d8ff",
   skinTone,
   avatarConfig,
@@ -443,14 +443,18 @@ export default function ModelAvatar({
     if (process.env.NODE_ENV === "development") {
       const bones: string[] = [];
       const skinnedMeshes: { name: string; boneCount: number; bound: boolean }[] = [];
+      // İki geçiş: önce TÜM bone'ları topla, SONRA bind kontrolü yap.
+      // glTF'de skinned-mesh node'u kendi bone node'larından ÖNCE gelebilir
+      // (yaygın). Tek geçişte kontrol edilirse, mesh işlenirken bone'lar
+      // henüz toplanmamış olur ve skeleton yanlışlıkla "orphan" görünür
+      // (false-positive). İki geçiş bu sıra bağımlılığını ortadan kaldırır.
       scene.traverse((obj) => {
         if (obj instanceof THREE.Bone) bones.push(obj.name);
+      });
+      const sceneBones = new Set(bones);
+      scene.traverse((obj) => {
         if (obj instanceof THREE.SkinnedMesh) {
-          // Skeleton'ın bone'ları scene graph'taki bone'larla eşleşiyor
-          // mu? Eğer SkeletonUtils.clone iyi yaptıysa eşleşir; standart
-          // clone yaptıysa eşleşmez (bound=false).
           const skelBoneNames = obj.skeleton.bones.map((b) => b.name);
-          const sceneBones = new Set(bones);
           const overlap = skelBoneNames.filter((n) => sceneBones.has(n)).length;
           skinnedMeshes.push({
             name: obj.name || "(unnamed)",
@@ -828,4 +832,4 @@ export default function ModelAvatar({
   );
 }
 
-useGLTF.preload("/models/caelinus-avatar.glb");
+useGLTF.preload("/models/caelinus-body-base-fem.glb");

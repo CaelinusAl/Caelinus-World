@@ -213,7 +213,7 @@ export default function CaelinusTryOnPage() {
             <Caelinus3DScene
               avatar={avatar}
               skinTone={avatar?.styleProfile.skinTone}
-              animationUrl="/models/catwalk.glb"
+              animationUrl="/models/caelinus-catwalk.glb"
               autoRotate
               tryOnAccent={accent}
               tryOnLabel={tryOnLabel}

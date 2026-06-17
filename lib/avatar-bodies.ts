@@ -66,7 +66,24 @@ export type BodyEntry = {
  * bir BodyEntry ekle, public/avatars/manifest.json'a yansıt — gerisi
  * otomatik açılır.
  */
-export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [];
+export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
+  {
+    id: "selin-v1",
+    label: "Selin",
+    tagline:
+      "Ayın ilk hâli — feminen base body, Mixamo rig ve ARKit yüz " +
+      "ifadeleriyle sıfırdan dokunan ilk Caelinus bedeni.",
+    url: "/models/caelinus-body-base-fem.glb",
+    isDefault: true,
+    isPersonal: true,
+    gender: "feminine",
+    vibe: "Ay",
+    baseHeightM: 1.69,
+    // Kendi PBR deri texture'ı (skins01/bobby) gömülü → tone override no-op.
+    supportsSkinToneOverride: false,
+    animationCompat: "mixamo",
+  },
+];
 
 /** Kütüphane boşken true — UI 3D yerine "yapımda" placeholder gösterir. */
 export const AVATARS_IN_PRODUCTION = CAELINUS_BODY_LIBRARY.length === 0;
