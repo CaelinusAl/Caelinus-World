@@ -11,13 +11,17 @@
  *   • CTA: cam eşik butonu; hover'da portal ışığı artar.
  *
  * Eşikten geçiş: tık → .is-entering (ay pulse + kapı açılır) → /universe.
- * Referans görsel yalnızca moodboard; arka plan olarak kullanılmaz.
+ *
+ * Arka plan (z:0): HeroBackgroundVideo — masaüstünde /hero/hero.mp4, mobil/
+ * reduced-motion'da tapınak still'i (temple-*.webp). Üstünde yıldızlar (z:1) +
+ * altın/mor toz (z:2); içerik katmanları z:3+.
  */
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
 import LivingLogo from "@/components/landing/LivingLogo";
+import HeroBackgroundVideo from "@/components/landing/HeroBackgroundVideo";
 import "@/app/styles/caelinus-entry.css";
 
 export default function CaelinusEntryScene() {
@@ -41,6 +45,13 @@ export default function CaelinusEntryScene() {
 
   return (
     <section className={`caelinus-entry${entering ? " is-entering" : ""}`}>
+      <HeroBackgroundVideo
+        videoSrc="/hero/hero.mp4"
+        posterSrc="/hero/temple-poster.webp"
+        mobileImageSrc="/hero/temple-mobile.webp"
+        fallbackImageSrc="/hero/temple-scene.webp"
+        overlayOpacity={0.55}
+      />
       <div className="caelinus-logo">
         {/* Sahneden doğan SVG sembol — ay-üstü PNG değil. */}
         <LivingLogo />

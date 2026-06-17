@@ -76,8 +76,8 @@ aşağıdakiler bloklayıcı değil ama profesyonel düzen için kapatılmalı.
 
 | Durum | Madde | Not |
 |------|-------|-----|
-| ⏳ | **Orphan bileşenler** | `components/landing/PortalMoon.tsx` ve `HeroBackgroundVideo.tsx` hiçbir yerden import edilmiyor (ölü kod). Aktif landing `CaelinusEntryScene` ay için düz `<img src="/assets/moon.webp">` kullanıyor. Karar: **bağla** (hero'yu PortalMoon/video ile zenginleştir) **veya sil**. |
-| ⏳ | **CHANGELOG ↔ kod sapması** | `[0.3.0]` "Eklendi" hero'yu **videolu** (`hero.mp4`, `HeroHorizon`, çift-ay, `HERO_VIDEO_ENABLED`) anlatıyor; aktif kod ise CSS/img ay + `LivingLogo`. Asset'ler (`public/hero/hero.mp4`) repoda ama render yoluna bağlı değil. CHANGELOG'u gerçeğe göre düzelt ya da videolu hero'yu bağla. |
+| ✅ | **~~Orphan: HeroBackgroundVideo~~** (v0.4.0) | `HeroBackgroundVideo` artık `CaelinusEntryScene`'e bağlı (tapınak videolu hero). `PortalMoon.tsx` hâlâ kullanılmıyor — karar gerek: bağla veya sil. |
+| ✅ | **~~CHANGELOG ↔ kod sapması~~** (v0.4.0) | Videolu hero artık gerçekten bağlı (`hero.mp4` + temple still'leri); changelog ile kod örtüşüyor. |
 | ⏳ | **`globals.css` dev (≈3k+ satır, +1380)** | Tek dosya büyüdü; lansman sonrası modülerleştirme (zaten §5'te planlı). |
 | ⏳ | **`next-env.d.ts` izleniyor** | `.gitignore`'da olmasına rağmen geçmişten tracked; `git rm --cached next-env.d.ts` ile temizlenebilir. |
 | ✅ | **ESLint config yavaş** | `npm run lint` (flat config) tüm projede çok yavaş/asılı kalıyor; `tsc --noEmit` + `next build` doğrulaması temiz. İleride lint kapsamını daralt. |

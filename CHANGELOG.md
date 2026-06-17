@@ -26,6 +26,27 @@ kesilince tarihiyle aşağı taşınır._
 
 ---
 
+## [0.4.0] — 2026-06-17 · Tapınak Hero (videolu eşik)
+
+### Eklendi
+- **Landing'e "Goddess Temple" arka plan katmanı (`HeroBackgroundVideo`):**
+  Eşik sahnesi artık canlı bir arka plan üzerinde nefes alıyor.
+  - **Masaüstü** → `/hero/hero.mp4` (autoplay/muted/loop, `preload=metadata`).
+  - **Mobil / coarse pointer** → `temple-mobile.webp` (640px optimize still).
+  - **Video hatası / reduced-motion** → `temple-scene.webp` (1280×720 tapınak).
+  - **Poster** → `temple-poster.webp`; SSR'da hafif still (LCP adayı) render edilir.
+  - `overlayOpacity={0.55}` — %55 koyu overlay; üstündeki yıldız/altın toz görünür kalır.
+- **Yeni asset'ler:** `public/hero/temple-scene.webp`, `temple-mobile.webp`,
+  `temple-poster.webp` (+ `temple-act3.webp` ileride 3. perde sahnesi için, henüz bağlı değil).
+
+### Değişti
+- **Katman z-index düzeni (`caelinus-entry.css`):** tapınak görseli/video `z:0`,
+  sürüklenen yıldızlar `z:1`, altın/mor kozmik toz `z:2`; içerik katmanları `z:3+`.
+- **`HeroBackgroundVideo` artık bağlı:** v0.3.0 denetiminde "orphan" işaretlenen
+  bileşen aktif render yoluna girdi; CHANGELOG ↔ kod sapması (videolu hero) kapandı.
+
+---
+
 ## [0.3.0] — 2026-06-17 · Yaşayan Evren Kapısı + Design System P1
 
 ### Eklendi
