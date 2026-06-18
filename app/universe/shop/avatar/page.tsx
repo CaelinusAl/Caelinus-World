@@ -17,6 +17,11 @@ import {
   AVATARS_IN_PRODUCTION,
   getBody,
 } from "@/lib/avatar-bodies";
+import {
+  productsExtended,
+  SHOP_CATEGORY_ORDER,
+  sortProductsForAvatar,
+} from "@/data/products";
 import AvatarSliders from "@/components/shop/AvatarSliders";
 import BodyPicker from "@/components/shop/BodyPicker";
 import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
@@ -29,6 +34,7 @@ import {
   clampFaceMetrics,
   mapMetricsToAvatarDeform,
 } from "@/lib/face";
+import type { ProductExtended } from "@/types/play";
 
 const AvatarConfigurator = lazy(
   () => import("@/components/shop/AvatarConfigurator")
@@ -40,6 +46,14 @@ type FaceState = "idle" | "detecting" | "applied" | "error";
 
 const FACE_KEY = "caelinus_face_texture";
 const METRICS_KEY = "caelinus_face_metrics";
+
+const CATEGORY_LABELS: Record<ProductExtended["category"], { label: string; short: string; icon: string }> = {
+  bikini: { label: "Look", short: "Look", icon: "sun" },
+  pareo: { label: "Pareo", short: "Wrap", icon: "wave" },
+  bag: { label: "Canta", short: "Bag", icon: "bag" },
+  heels: { label: "Ayakkabi", short: "Shoe", icon: "heel" },
+  jewelry: { label: "Mucevher", short: "Gem", icon: "gem" },
+};
 
 export default function AvatarPage() {
   const [config, setConfig] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -63,6 +77,31 @@ export default function AvatarPage() {
   // Caelinus body library — kullanıcının seçtiği base mesh
   const [bodyId, setBodyId] = useState<string>(DEFAULT_BODY_ID);
   const selectedBody = useMemo(() => getBody(bodyId), [bodyId]);
+  const [activeCategory, setActiveCategory] =
+    useState<ProductExtended["category"]>("bikini");
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [outfitStatus, setOutfitStatus] = useState<string>("idle");
+
+  const avatarProducts = useMemo(
+    () => sortProductsForAvatar(productsExtended),
+    [],
+  );
+  const visibleProducts = useMemo(
+    () => avatarProducts.filter((product) => product.category === activeCategory),
+    [activeCategory, avatarProducts],
+  );
+  const selectedProduct = useMemo(() => {
+    return (
+      avatarProducts.find((product) => product.id === selectedProductId) ??
+      visibleProducts[0] ??
+      avatarProducts[0] ??
+      null
+    );
+  }, [avatarProducts, selectedProductId, visibleProducts]);
+  const activeOutfitBindings = useMemo(
+    () => (selectedProduct?.outfitGlb ? [selectedProduct.outfitGlb] : []),
+    [selectedProduct],
+  );
 
   const handleCapabilities = useCallback((caps: ModelCapabilities) => {
     setModelCaps(caps);
@@ -75,6 +114,7 @@ export default function AvatarPage() {
   }, [faceMetrics, deformEnabled, deformStrength, comparing]);
 
   // Load saved state
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setConfig(loadAvatarConfig());
     setLoaded(true);
@@ -95,6 +135,7 @@ export default function AvatarPage() {
     const storedBodyId = loadAvatarBodyId();
     if (storedBodyId) setBodyId(storedBodyId);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleBodySelect = useCallback((newBodyId: string) => {
     setBodyId(newBodyId);
@@ -222,32 +263,193 @@ export default function AvatarPage() {
           </p>
         </section>
 
-        {/* ── Caelinus Body Library — kendi avaturn'ümüz ── */}
-        <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
+        <section className="avcfg-game-layout" aria-label="Avatar deneyimi">
+          <div className="avcfg-stage-panel">
+            <div className="avcfg-stage-hud" aria-hidden="true">
+              <span>Mirror Room</span>
+              <span>{faceApplied ? "Face synced" : "Face optional"}</span>
+              <span>
+                {selectedProduct?.outfitGlb
+                  ? outfitStatus === "ready"
+                    ? "Outfit active"
+                    : "Outfit loading"
+                  : "Preview only"}
+              </span>
+            </div>
 
-        <div className="avcfg-layout">
-          {/* LEFT: sliders + face */}
-          <div className="avcfg-left-col">
-            {loaded ? (
-              <AvatarSliders
+            <nav className="avcfg-radial-tools" aria-label="Avatar bolumleri">
+              {SHOP_CATEGORY_ORDER.map((category) => {
+                const item = CATEGORY_LABELS[category];
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    className={`avcfg-tool-orb ${activeCategory === category ? "is-active" : ""}`}
+                    onClick={() => setActiveCategory(category)}
+                    title={item.label}
+                    aria-label={item.label}
+                  >
+                    <span className={`avcfg-tool-icon avcfg-tool-icon--${item.icon}`} />
+                  </button>
+                );
+              })}
+            </nav>
+
+            <Suspense
+              fallback={
+                <div className="avcfg-canvas ux-canvas-loading">
+                  <div className="ux-loading-pulse" />
+                  <span className="ux-loading-label">
+                    Avatar yukleniyor...
+                  </span>
+                </div>
+              }
+            >
+              <AvatarConfigurator
                 config={config}
-                onChange={handleChange}
-                onReset={handleReset}
+                avatarUrl={selectedBody.url}
+                // Catwalk animasyonu — bu olmadan avatar donuk durur
+                // (gömülü selin klipleri ~0.04sn = tek kare). Retarget
+                // mantığı ModelAvatar'da bone-name eşleştirmesiyle çalışır.
+                animationUrl="/models/caelinus-catwalk.glb"
+                // External textured mesh ise face decal/deform'u atla
+                // (mesh kendi yüzüyle gelir; Caelinus default bald olduğunda
+                // selfie face decal anlamlı olur).
+                faceTextureUrl={
+                  selectedBody.supportsSkinToneOverride ? faceTextureUrl : null
+                }
+                faceDeform={
+                  selectedBody.supportsSkinToneOverride ? faceDeform : null
+                }
+                outfitBindings={activeOutfitBindings}
+                onCapabilities={handleCapabilities}
+                onOutfitStatus={(status) => setOutfitStatus(status.state)}
               />
-            ) : (
-              <div className="ux-skeleton-panel">
-                <div className="ux-skeleton-line w60" />
-                <div className="ux-skeleton-line w100" />
-                <div className="ux-skeleton-line w80" />
-                <div className="ux-skeleton-line w100" />
+            </Suspense>
+
+            <div className="avcfg-save-bar">
+              <button
+                className={`avcfg-save-btn ${saved ? "saved" : ""}`}
+                onClick={handleSave}
+              >
+                {saved ? "Kaydedildi" : "Avatarimi Kaydet"}
+              </button>
+              <Link href="/universe/shop" className="avcfg-back-btn">
+                Shop&apos;a Don
+              </Link>
+            </div>
+          </div>
+
+          <aside className="avcfg-inventory-panel" aria-label="Caelinus envanteri">
+            <div className="avcfg-inventory-head">
+              <div>
+                <span className="avcfg-inventory-kicker">Wardrobe</span>
+                <h2 className="avcfg-inventory-title">
+                  {CATEGORY_LABELS[activeCategory].label}
+                </h2>
+              </div>
+              <span className="avcfg-inventory-count">{visibleProducts.length}</span>
+            </div>
+
+            <div className="avcfg-category-tabs" role="tablist" aria-label="Urun kategorileri">
+              {SHOP_CATEGORY_ORDER.map((category) => {
+                const item = CATEGORY_LABELS[category];
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeCategory === category}
+                    className={`avcfg-category-tab ${activeCategory === category ? "is-active" : ""}`}
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    <span className={`avcfg-tool-icon avcfg-tool-icon--${item.icon}`} />
+                    <span>{item.short}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="avcfg-product-grid">
+              {visibleProducts.map((product) => (
+                <button
+                  type="button"
+                  key={product.id}
+                  className={`avcfg-product-card ${selectedProduct?.id === product.id ? "is-selected" : ""}`}
+                  onClick={() => setSelectedProductId(product.id)}
+                >
+                  <img src={product.image} alt={product.name} />
+                  <span className="avcfg-product-fav" aria-hidden="true">
+                    {product.outfitGlb ? "3D" : "V"}
+                  </span>
+                  <span className="avcfg-product-meta">
+                    <span>{product.zodiac ?? product.category}</span>
+                    <strong>{product.price}</strong>
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {selectedProduct && (
+              <div className="avcfg-selected-product">
+                <div>
+                  <span className="avcfg-selected-kicker">
+                    {selectedProduct.outfitGlb
+                      ? outfitStatus === "ready"
+                        ? "Avatarinda aktif"
+                        : "3D kiyafet hazirlaniyor"
+                      : "3D kiyafet henuz yok"}
+                  </span>
+                  <h3>{selectedProduct.name}</h3>
+                  <p>
+                    {selectedProduct.outfitGlb
+                      ? selectedProduct.story
+                      : "Bu parca katalogda gorunur; 3D giydirme dosyasi eklendiginde avatar sahnesinde de aktif olur."}
+                  </p>
+                </div>
+                <div className="avcfg-selected-actions">
+                  <Link
+                    href={`/universe/shop?dress=${encodeURIComponent(selectedProduct.id)}`}
+                    className="avcfg-wear-btn"
+                  >
+                    Avatarda Dene
+                  </Link>
+                  <Link
+                    href={`/universe/shop/urun/${encodeURIComponent(selectedProduct.id)}`}
+                    className="avcfg-details-btn"
+                  >
+                    Urune Git
+                  </Link>
+                </div>
               </div>
             )}
+          </aside>
+        </section>
 
-            {/* ── Face Section ── */}
-            <div className="face-section">
+        <section className="avcfg-studio-drawer" aria-label="Avatar stüdyo ayarları">
+          <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
+
+          <div className="avcfg-studio-grid">
+            <div className="avcfg-left-col">
+              {loaded ? (
+                <AvatarSliders
+                  config={config}
+                  onChange={handleChange}
+                  onReset={handleReset}
+                />
+              ) : (
+                <div className="ux-skeleton-panel">
+                  <div className="ux-skeleton-line w60" />
+                  <div className="ux-skeleton-line w100" />
+                  <div className="ux-skeleton-line w80" />
+                  <div className="ux-skeleton-line w100" />
+                </div>
+              )}
+            </div>
+
+            <div className="face-section avcfg-face-card">
               <FaceUpload onUploaded={handleFaceUploaded} />
 
-              {/* Apply / Remove */}
               {faceBlobUrl && !faceApplied && (
                 <div className="face-section-actions">
                   <button
@@ -289,7 +491,6 @@ export default function AvatarPage() {
                 </div>
               )}
 
-              {/* Detection info */}
               {det && (
                 <div className="face-det-info">
                   <div className="face-det-row">
@@ -307,7 +508,6 @@ export default function AvatarPage() {
                 </div>
               )}
 
-              {/* Preview */}
               {faceThumb && (
                 <div className="face-section-preview">
                   <img
@@ -328,10 +528,8 @@ export default function AvatarPage() {
                 </div>
               )}
 
-              {/* ── Deform Controls ── */}
               {faceMetrics && (
                 <div className="face-debug-panel">
-                  {/* Toggle on/off */}
                   <div className="face-deform-controls">
                     <label className="face-deform-switch">
                       <input
@@ -344,7 +542,6 @@ export default function AvatarPage() {
                       </span>
                     </label>
 
-                    {/* Strength slider */}
                     {deformEnabled && (
                       <div className="face-deform-slider-row">
                         <span className="face-deform-slider-label">Guc</span>
@@ -364,7 +561,6 @@ export default function AvatarPage() {
                       </div>
                     )}
 
-                    {/* Before / After compare */}
                     {deformEnabled && (
                       <button
                         type="button"
@@ -378,7 +574,6 @@ export default function AvatarPage() {
                     )}
                   </div>
 
-                  {/* Debug metrics */}
                   <button
                     type="button"
                     className="face-debug-toggle"
@@ -389,7 +584,6 @@ export default function AvatarPage() {
 
                   {showDebug && (
                     <div className="face-debug-grid">
-                      {/* Model capabilities */}
                       {modelCaps && (
                         <>
                           <h4 className="face-debug-heading">Model</h4>
@@ -411,17 +605,6 @@ export default function AvatarPage() {
                             <span className="face-debug-label">Morph Targets</span>
                             <span className="face-debug-value">{modelCaps.morphTargets.length}</span>
                           </div>
-                          {modelCaps.morphTargets.length > 0 && (
-                            <>
-                              <h4 className="face-debug-heading">Shape Keys</h4>
-                              {modelCaps.morphTargets.map((mt) => (
-                                <div className="face-debug-row" key={`${mt.meshName}-${mt.targetName}`}>
-                                  <span className="face-debug-label">{mt.targetName}</span>
-                                  <span className="face-debug-value">{mt.meshName}</span>
-                                </div>
-                              ))}
-                            </>
-                          )}
                         </>
                       )}
 
@@ -454,52 +637,7 @@ export default function AvatarPage() {
               )}
             </div>
           </div>
-
-          {/* RIGHT: 3D canvas */}
-          <div className="avcfg-right-col">
-            <Suspense
-              fallback={
-                <div className="avcfg-canvas ux-canvas-loading">
-                  <div className="ux-loading-pulse" />
-                  <span className="ux-loading-label">
-                    Avatar yukleniyor...
-                  </span>
-                </div>
-              }
-            >
-              <AvatarConfigurator
-                config={config}
-                avatarUrl={selectedBody.url}
-                // Catwalk animasyonu — bu olmadan avatar donuk durur
-                // (gömülü selin klipleri ~0.04sn = tek kare). Retarget
-                // mantığı ModelAvatar'da bone-name eşleştirmesiyle çalışır.
-                animationUrl="/models/caelinus-catwalk.glb"
-                // External textured mesh ise face decal/deform'u atla
-                // (mesh kendi yüzüyle gelir; Caelinus default bald olduğunda
-                // selfie face decal anlamlı olur).
-                faceTextureUrl={
-                  selectedBody.supportsSkinToneOverride ? faceTextureUrl : null
-                }
-                faceDeform={
-                  selectedBody.supportsSkinToneOverride ? faceDeform : null
-                }
-                onCapabilities={handleCapabilities}
-              />
-            </Suspense>
-
-            <div className="avcfg-save-bar">
-              <button
-                className={`avcfg-save-btn ${saved ? "saved" : ""}`}
-                onClick={handleSave}
-              >
-                {saved ? "Kaydedildi" : "Avatarimi Kaydet"}
-              </button>
-              <Link href="/universe/shop" className="avcfg-back-btn">
-                Shop&apos;a Don
-              </Link>
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
 
     </main>

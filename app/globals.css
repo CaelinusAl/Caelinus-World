@@ -30151,3 +30151,501 @@ div.stage-card {
   }
 }
 
+/* Avatar shop room: stage + wardrobe inventory */
+.avcfg-game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  gap: clamp(16px, 2vw, 28px);
+  align-items: stretch;
+  min-height: min(760px, calc(100svh - 170px));
+}
+
+.avcfg-stage-panel,
+.avcfg-inventory-panel,
+.avcfg-studio-drawer {
+  position: relative;
+  border: 1px solid rgba(232, 215, 163, 0.22);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035)),
+    radial-gradient(circle at 28% 12%, rgba(232, 215, 163, 0.14), transparent 34%),
+    rgba(8, 8, 18, 0.48);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.avcfg-stage-panel {
+  overflow: hidden;
+  min-height: 640px;
+}
+
+.avcfg-stage-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: radial-gradient(circle at 44% 44%, #000 0, transparent 72%);
+  opacity: 0.42;
+}
+
+.avcfg-stage-hud {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(247, 241, 232, 0.72);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.avcfg-stage-panel .avcfg-canvas {
+  width: 100%;
+  min-height: 640px;
+  height: min(760px, calc(100svh - 190px));
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 246, 226, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(245, 235, 220, 0.08), rgba(13, 12, 26, 0.84));
+  box-shadow: none;
+}
+
+.avcfg-stage-panel .avcfg-save-bar {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  z-index: 8;
+  justify-content: center;
+  margin: 0;
+}
+
+.avcfg-radial-tools {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  right: clamp(14px, 3vw, 34px);
+  transform: translateY(-50%);
+  display: grid;
+  gap: 12px;
+}
+
+.avcfg-tool-orb,
+.avcfg-category-tab {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(247, 241, 232, 0.9);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.avcfg-tool-orb {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+.avcfg-tool-orb:hover,
+.avcfg-category-tab:hover,
+.avcfg-tool-orb.is-active,
+.avcfg-category-tab.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(232, 215, 163, 0.72);
+  background: rgba(232, 215, 163, 0.22);
+}
+
+.avcfg-tool-icon {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.avcfg-tool-icon::before,
+.avcfg-tool-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: block;
+}
+
+.avcfg-tool-icon--sun::before {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #f1d58f;
+  box-shadow: 0 0 0 4px rgba(241, 213, 143, 0.2);
+}
+
+.avcfg-tool-icon--wave::before {
+  width: 20px;
+  height: 12px;
+  border: 2px solid #e9ddc4;
+  border-top: 0;
+  border-right: 0;
+  border-radius: 0 0 0 18px;
+  transform: rotate(-20deg);
+}
+
+.avcfg-tool-icon--bag::before {
+  width: 16px;
+  height: 14px;
+  top: 6px;
+  border: 2px solid #e9ddc4;
+  border-radius: 4px;
+}
+
+.avcfg-tool-icon--bag::after {
+  width: 9px;
+  height: 7px;
+  top: -7px;
+  border: 2px solid #e9ddc4;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.avcfg-tool-icon--heel::before {
+  width: 20px;
+  height: 8px;
+  border-bottom: 3px solid #e9ddc4;
+  border-left: 8px solid transparent;
+  transform: skewX(-22deg) translateY(3px);
+}
+
+.avcfg-tool-icon--heel::after {
+  width: 3px;
+  height: 12px;
+  right: 2px;
+  top: 9px;
+  background: #e9ddc4;
+  transform: rotate(10deg);
+}
+
+.avcfg-tool-icon--gem::before {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e9ddc4;
+  transform: rotate(45deg) scale(0.78);
+}
+
+.avcfg-inventory-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 640px;
+  overflow: hidden;
+}
+
+.avcfg-inventory-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 12px;
+}
+
+.avcfg-inventory-kicker,
+.avcfg-selected-kicker {
+  color: rgba(232, 215, 163, 0.78);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.avcfg-inventory-title {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-family: var(--cae-font-serif, serif);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 400;
+}
+
+.avcfg-inventory-count {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 215, 163, 0.32);
+  color: rgba(247, 241, 232, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.avcfg-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 18px 16px;
+}
+
+.avcfg-category-tab {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  min-height: 58px;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.avcfg-category-tab .avcfg-tool-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.avcfg-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 18px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.avcfg-product-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 0.78;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avcfg-product-card:hover,
+.avcfg-product-card.is-selected {
+  transform: translateY(-2px);
+  border-color: rgba(120, 218, 135, 0.88);
+  box-shadow: 0 0 0 2px rgba(120, 218, 135, 0.18);
+}
+
+.avcfg-product-card img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.avcfg-product-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 46%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.58), transparent);
+}
+
+.avcfg-product-fav {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+}
+
+.avcfg-product-meta {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.avcfg-selected-product {
+  margin-top: auto;
+  padding: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(6, 5, 14, 0.42);
+}
+
+.avcfg-selected-product h3 {
+  margin: 5px 0 6px;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: var(--cae-font-serif, serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.avcfg-selected-product p {
+  margin: 0;
+  color: rgba(247, 241, 232, 0.68);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.avcfg-selected-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.avcfg-wear-btn,
+.avcfg-details-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.avcfg-wear-btn {
+  color: #20180d;
+  background: linear-gradient(135deg, #f1d58f, #f7f1e8);
+}
+
+.avcfg-details-btn {
+  color: rgba(247, 241, 232, 0.9);
+  border: 1px solid rgba(232, 215, 163, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.avcfg-studio-drawer {
+  margin-top: 22px;
+  padding: clamp(16px, 2vw, 24px);
+}
+
+.avcfg-studio-drawer .body-picker {
+  margin: 0 0 18px;
+}
+
+.avcfg-studio-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+  gap: 18px;
+}
+
+.avcfg-face-card {
+  margin: 0;
+}
+
+@media (max-width: 1120px) {
+  .avcfg-game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .avcfg-stage-panel,
+  .avcfg-inventory-panel {
+    min-height: auto;
+  }
+
+  .avcfg-inventory-panel {
+    max-height: none;
+  }
+
+  .avcfg-product-grid {
+    grid-template-columns: repeat(6, minmax(118px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 20px;
+  }
+
+  .avcfg-product-card {
+    min-width: 118px;
+  }
+
+  .avcfg-studio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .avcfg-page-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .avcfg-page-hero {
+    text-align: left;
+  }
+
+  .avcfg-game-layout {
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .avcfg-stage-panel .avcfg-canvas {
+    min-height: 520px;
+    height: 68svh;
+  }
+
+  .avcfg-stage-hud {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    font-size: 9px;
+  }
+
+  .avcfg-radial-tools {
+    right: 10px;
+    gap: 8px;
+  }
+
+  .avcfg-tool-orb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avcfg-stage-panel .avcfg-save-bar {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .avcfg-category-tabs {
+    overflow-x: auto;
+    grid-template-columns: repeat(5, 74px);
+  }
+
+  .avcfg-product-grid {
+    grid-template-columns: repeat(6, minmax(104px, 1fr));
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .avcfg-selected-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
