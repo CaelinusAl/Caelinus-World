@@ -1,13 +1,31 @@
 {
   "_comment": "Caelinus AI — Avatar manifest. This file declares the canonical avatar registry expected by the founder vision (public/avatars/). The actual GLB files live under public/models/ for historical reasons; this manifest is the source of truth for the runtime registry exposed via lib/avatar-bodies.ts.",
-  "version": "0.5.0",
-  "updatedAt": "2026-06-15",
+  "version": "0.6.0",
+  "updatedAt": "2026-06-18",
   "convention": {
     "newAvatarsGoUnder": "public/models/",
     "thumbnailsGoUnder": "public/models/previews/ (S3+ — şu an yok, AvatarCarousel CSS fallback'i kullanıyor)",
     "registerInCode": "lib/avatar-bodies.ts → CAELINUS_BODY_LIBRARY",
     "futureMobileSelfieFlow": "QR endpoint will write user-generated GLBs here under public/avatars/users/<id>.glb",
-    "inProductionNote": "0.5.0: Tanrıça + Selin dahil tüm bedenler hatalı/eksik olduğu için kaldırıldı. Kütüphane boş; UI 'Avatarlar yapımda' (AVATARS_IN_PRODUCTION) gösterir. Yeni bedenler Şeyma Karaş ile sıfırdan dokunuyor (docs/avatar-system-and-sema-brief.md). Teslim edilen her GLB buraya + lib/avatar-bodies.ts'e eklenir."
+    "inProductionNote": "0.6.0: Faz A teslimi — ilk VR-grade beden 'Selin' (selin-v1) eklendi. Kütüphane dolu; AVATARS_IN_PRODUCTION false, UI canlı 3D konfigüratörü gösterir. Yeni teslim edilen her GLB buraya + lib/avatar-bodies.ts'e eklenir."
   },
-  "avatars": []
+  "avatars": [
+    {
+      "id": "selin-v1",
+      "label": "Selin",
+      "tagline": "Caelinus'un ilk bedeni — gece teni, dalgalı kumral saç, sahnede süzülen duruş.",
+      "url": "/models/caelinus-body-base-fem.glb",
+      "isDefault": true,
+      "gender": "feminine",
+      "vibe": "Selin",
+      "baseHeightM": 1.7,
+      "supportsSkinToneOverride": false,
+      "animationCompat": "mixamo",
+      "tris": 28000,
+      "rig": "mixamo",
+      "blendshapes": "arkit-52",
+      "upAxis": "Y",
+      "unit": "meter"
+    }
+  ]
 }

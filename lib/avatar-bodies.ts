@@ -54,19 +54,36 @@ export type BodyEntry = {
 };
 
 /**
- * Caelinus beden kütüphanesi — şu an BOŞ ("avatarlar yapımda").
+ * Caelinus beden kütüphanesi.
  *
- * Önceki tüm bedenler (Tanrıça + Selin + varyantlar) hatalı/eksik mesh
- * oldukları için kaldırıldı. Yeni bedenler Şeyma Karaş ile sıfırdan
- * dokunuyor (bkz. docs/avatar-system-and-sema-brief.md). Kütüphane boş
- * olduğu sürece tüm avatar yüzeyleri "Avatarlar yapımda" boş-durumunu
- * gösterir (AVATARS_IN_PRODUCTION).
+ * Faz A teslimi: ilk VR-grade beden "Selin" (selin-v1) eklendi —
+ * Mixamo-uyumlu rig, PBR doku, 52 ARKit blendshape, Y-up metre
+ * (bkz. docs/avatar-system-and-sema-brief.md). Kütüphane dolu olduğu
+ * için AVATARS_IN_PRODUCTION false; tüm avatar yüzeyleri canlı 3D
+ * konfigüratörü gösterir.
  *
  * Yeni GLB teslim edildiğinde: dosyayı /public/models/ altına koy, buraya
  * bir BodyEntry ekle, public/avatars/manifest.json'a yansıt — gerisi
  * otomatik açılır.
  */
-export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [];
+export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
+  {
+    id: "selin-v1",
+    label: "Selin",
+    tagline:
+      "Caelinus'un ilk bedeni — gece teni, dalgalı kumral saç, sahnede süzülen duruş.",
+    url: "/models/caelinus-body-base-fem.glb",
+    isDefault: true,
+    gender: "feminine",
+    vibe: "Selin",
+    baseHeightM: 1.7,
+    // Kendi PBR cilt/yüz dokusuyla gelen VR-grade mesh — skin tone
+    // slider'ı ve selfie face-decal/deform burada no-op (mesh kendi
+    // yüzünü taşır). Dış-textured-mesh konvansiyonu: false.
+    supportsSkinToneOverride: false,
+    animationCompat: "mixamo",
+  },
+];
 
 /** Kütüphane boşken true — UI 3D yerine "yapımda" placeholder gösterir. */
 export const AVATARS_IN_PRODUCTION = CAELINUS_BODY_LIBRARY.length === 0;
