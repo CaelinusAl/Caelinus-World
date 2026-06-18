@@ -61,9 +61,12 @@ type Props = {
   session: AvatarSession | null;
   loading?: boolean;
   onReset?: () => void;
+  /** Status banner'ı koru ama QR kodunu gizle — desktop "bu cihazın
+   *  kamerası" modunda QR anlamsız, sadece durum metni gösterilir. */
+  hideQr?: boolean;
 };
 
-export default function QRPanel({ session, loading, onReset }: Props) {
+export default function QRPanel({ session, loading, onReset, hideQr }: Props) {
   if (loading || !session) {
     return (
       <div className="cav-qr-panel">
@@ -77,6 +80,7 @@ export default function QRPanel({ session, loading, onReset }: Props) {
 
   const copy = STATUS_COPY[session.status] ?? STATUS_COPY.pending;
   const showQr =
+    !hideQr &&
     session.status !== "ready" &&
     session.status !== "error" &&
     session.status !== "expired";
