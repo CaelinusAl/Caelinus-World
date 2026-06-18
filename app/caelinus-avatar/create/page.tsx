@@ -22,6 +22,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import LuxButton from "@/components/caelinus-ai/LuxButton";
 import AvatarMatchGrid from "@/components/caelinus-ai/AvatarMatchGrid";
 import ReadingCard from "@/components/caelinus-ai/ReadingCard";
+import SelfieCapture from "@/components/caelinus-ai/SelfieCapture";
 import AnimationPicker from "@/components/caelinus-avatar/AnimationPicker";
 import OutfitPicker from "@/components/caelinus-avatar/OutfitPicker";
 import QRPanel from "@/components/caelinus-avatar/QRPanel";
@@ -42,6 +43,7 @@ import {
   type GeneratedAvatar,
   type OutfitPreset,
   type ProgressUpdate,
+  type SelfieInput,
   type SessionResponse,
 } from "@/lib/caelinus-avatar-core";
 
@@ -61,6 +63,12 @@ export default function CaelinusAvatarCreatePage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+
+  // Selfie giriş yolu: "qr" (telefonla tara) | "device" (bu cihazın
+  // kamerası / dosya). İki yol da aynı session'a selfie POST'lar;
+  // gerisini polling + runGeneration ortak akışı halleder.
+  const [captureMode, setCaptureMode] = useState<"qr" | "device">("qr");
+  const [deviceUploading, setDeviceUploading] = useState(false);
 
   const [local, setLocal] = useState<LocalState>({ phase: "idle" });
   const [progress, setProgress] = useState<ProgressUpdate | null>(null);
@@ -210,11 +218,79 @@ export default function CaelinusAvatarCreatePage() {
     [sessionId, session],
   );
 
+  /* Bu cihazın kamerası/dosyası ile selfie — telefon yerine doğrudan
+     desktop'tan gönder. Session zaten mount'ta yaratıldı; selfie'yi
+     aynı endpoint'e POST'larız, polling "selfie-received" görüp
+     runGeneration'ı tetikler (QR akışıyla birebir aynı downstream). */
+  const handleDeviceCapture = useCallback(
+    async (selfie: SelfieInput) => {
+      if (!sessionId) return;
+      setSessionError(null);
+      setDeviceUploading(true);
+      try {
+        const res = await fetch(`/api/avatar/session/${sessionId}/selfie`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            dataUrl: selfie.dataUrl,
+            source: selfie.source,
+            width: selfie.width,
+            height: selfie.height,
+          }),
+        });
+        if (res.status === 404) {
+          setSessionError("Session süresi doldu. Bağlantıyı sıfırla.");
+          return;
+        }
+        if (res.status === 413) {
+          setSessionError("Selfie çok büyük — daha küçük bir görsel dene.");
+          return;
+        }
+        if (!res.ok) {
+          const j = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(j?.error ?? `HTTP ${res.status}`);
+        }
+        // Başarılı — polling birazdan "selfie-received" görüp generation'ı
+        // başlatacak. Kullanıcıya beklenti ver.
+        setLocal({ phase: "awaiting-mobile" });
+      } catch (err) {
+        console.error("[avatar-core] device selfie upload failed:", err);
+        setSessionError("Selfie yüklenemedi. Bağlantını kontrol et.");
+      } finally {
+        setDeviceUploading(false);
+      }
+    },
+    [sessionId],
+  );
+
   const isWorking =
     local.phase === "creating-session" ||
     (local.phase === "awaiting-mobile" &&
       session?.status &&
       ["generating", "selfie-uploading"].includes(session.status));
+
+  // Selfie henüz toplanıyor mu? (matches/finalizing/ready'e geçmeden,
+  // session da işleme/üretime girmemişken giriş affordance'ı göster.)
+  const stillGathering =
+    local.phase !== "ready" &&
+    local.phase !== "matches" &&
+    local.phase !== "finalizing";
+
+  const showCapturePicker =
+    stillGathering &&
+    (!session ||
+      ["pending", "mobile-connected", "error", "expired"].includes(
+        session.status,
+      ));
+
+  // Device modunda SelfieCapture'ı yalnızca selfie gönderilmeden önce
+  // göster; gönderildikten sonra (selfie-received/generating) QRPanel
+  // status banner'ına düş.
+  const awaitingDeviceInput =
+    stillGathering &&
+    (!session ||
+      session.status === "pending" ||
+      session.status === "mobile-connected");
 
   return (
     <div className="cav-page cav-fade-in">
@@ -231,13 +307,65 @@ export default function CaelinusAvatarCreatePage() {
       </section>
 
       <div className="cav-create-grid">
-        {/* SOL — QR / status */}
+        {/* SOL — selfie giriş yolu (QR telefon | bu cihazın kamerası) */}
         <div>
-          <QRPanel
-            session={session}
-            loading={sessionLoading || (!session && !sessionError && !pollError)}
-            onReset={reset}
-          />
+          {showCapturePicker && (
+            <div className="cav-capture-modes" role="tablist" aria-label="Selfie yolu">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={captureMode === "qr"}
+                className={`cav-capture-tab ${captureMode === "qr" ? "is-active" : ""}`}
+                onClick={() => setCaptureMode("qr")}
+              >
+                <span className="cav-capture-tab-glyph" aria-hidden="true">▢</span>
+                <span className="cav-capture-tab-label">Telefonla — QR tara</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={captureMode === "device"}
+                className={`cav-capture-tab ${captureMode === "device" ? "is-active" : ""}`}
+                onClick={() => setCaptureMode("device")}
+              >
+                <span className="cav-capture-tab-glyph" aria-hidden="true">◉</span>
+                <span className="cav-capture-tab-label">Kameran var mı? — bu cihazdan</span>
+              </button>
+            </div>
+          )}
+
+          {captureMode === "device" && awaitingDeviceInput ? (
+            <div className="cav-device-panel">
+              <div className="cav-qr-panel-status">
+                <span className="cav-qr-panel-kicker">◉ Bu cihaz</span>
+                <h3 className="cav-qr-panel-title">Selfie&apos;ni burada çek</h3>
+                <p className="cav-qr-panel-body">
+                  Kameranı aç ve çek, ya da bir fotoğraf yükle. Yüzün
+                  tarayıcında işlenir — sahnen birazdan bedeninle dolacak.
+                </p>
+              </div>
+              <SelfieCapture onCapture={handleDeviceCapture} />
+              {deviceUploading && (
+                <div className="cav-qr-panel-meta" style={{ marginTop: 12 }}>
+                  <div className="cav-qr-panel-meta-row">
+                    <span>Durum</span>
+                    <span>Selfie aktarılıyor…</span>
+                  </div>
+                </div>
+              )}
+              <LuxButton variant="ghost" size="md" onClick={reset}>
+                ↻ Bağlantıyı Sıfırla
+              </LuxButton>
+            </div>
+          ) : (
+            <QRPanel
+              session={session}
+              loading={sessionLoading || (!session && !sessionError && !pollError)}
+              onReset={reset}
+              hideQr={captureMode === "device"}
+            />
+          )}
+
           {(sessionError || pollError) && (
             <div className="cav-mobile-error" style={{ marginTop: 12 }}>
               {sessionError ?? pollError}
