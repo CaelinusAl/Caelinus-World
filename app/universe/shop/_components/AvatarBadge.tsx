@@ -1,19 +1,15 @@
 "use client";
 
 /**
- * Shop AvatarBadge — kullanıcının kayıtlı AI avatarını gösteren,
- * sahnenin köşesine yerleşen sticky kart.
+ * MIRROR CONSOLE — eski "Avatar Studio" sticky kartının yeni hâli.
  *
- * İki durum:
- *   • Avatar var → thumbnail + "burç adı" + "değiştir" linki
- *   • Avatar yok → "Avatarını yarat" CTA'sı /avatar'a yönlendirir
+ * Sahnenin sağ üst köşesinde duran, aynanın kontrol paneli gibi
+ * çalışan cam yüzey. İki durum:
+ *   • Avatar yok → "AI Mirror aktif" + ritüel kısayolları + "Aynaya Gir"
+ *   • Avatar var → kullanıcının portresi + burç + "Yeniden Doğur" / "Kaldır"
  *
- * Bu badge sayesinde "her sayfada benim avatarım" hissi vurgulanır;
- * vizyonun "Avatarınla giydiğin" vaadinin görsel sürekliliği.
- *
- * Faz 3.2 (bu adım) — sadece görselleştirme + linkleme.
- * Faz 3.2b (sıradaki) — Stylist sonuçlarındaki kombinleri "AI ile
- *   avatarımda gör" butonuyla `/api/play/render` zincirine bağlama.
+ * Kanonik kimlikten (portrait + zodiac) okur; çözümleme mantığı
+ * değişmedi, yalnızca dil ve görsel "ayna konsolu"na çevrildi.
  */
 
 import Link from "next/link";
@@ -38,31 +34,39 @@ const ZODIAC_GLYPHS: Record<ZodiacId, string> = {
   pisces: "♓",
 };
 
+const CONSOLE_STEPS: string[] = ["Selfie yükle", "Stil seç", "Avatar üret"];
+
 export default function AvatarBadge() {
-  // Faz 1 — kanonik kimlikten oku. Portre URL'i buradan; burç ise
-  // portre meta YOKSA frekans profilinden çözülür (artık tek "doğru"
-  // zodiac, üç store arasında çelişki yok).
   const identity = useCaelinusIdentity();
   const router = useRouter();
 
   const portrait = identity.portrait;
 
-  // Portre yok / hidrasyon öncesi → "yarat" davetkar CTA.
+  // Portre yok / hidrasyon öncesi → ayna konsolu "boş" hâli.
   if (!portrait) {
     return (
-      <aside className="shop-avatar-badge shop-avatar-badge--empty" aria-label="Avatar Studio">
-        <div className="shop-avatar-badge-glyph" aria-hidden="true">
-          ◉
+      <aside
+        className="shop-avatar-badge shop-avatar-badge--console shop-avatar-badge--empty"
+        aria-label="Mirror Console"
+      >
+        <div className="mirror-console-head">
+          <span className="mirror-console-pulse" aria-hidden="true" />
+          <span className="mirror-console-status">AI Mirror aktif</span>
         </div>
-        <div className="shop-avatar-badge-body">
-          <p className="shop-avatar-badge-kicker">Avatar Studio</p>
-          <p className="shop-avatar-badge-text">
-            Selfie yükle, AI seni Caelinus tanrıçası olarak çizsin.
-          </p>
-          <Link href="/avatar" className="shop-avatar-badge-cta">
-            ✦ Avatarımı Yarat
-          </Link>
-        </div>
+        <p className="mirror-console-title">Mirror Console</p>
+        <ol className="mirror-console-steps">
+          {CONSOLE_STEPS.map((s, i) => (
+            <li key={s} className="mirror-console-step">
+              <span className="mirror-console-step-dot" aria-hidden="true">
+                {i + 1}
+              </span>
+              {s}
+            </li>
+          ))}
+        </ol>
+        <Link href="/universe/shop/avatar" className="mirror-console-cta">
+          ◍ Aynaya Gir
+        </Link>
       </aside>
     );
   }
@@ -75,12 +79,19 @@ export default function AvatarBadge() {
   const glyph = zodiac ? ZODIAC_GLYPHS[zodiac] : "◉";
 
   return (
-    <aside className="shop-avatar-badge" aria-label="Senin avatarın">
-      <Link href="/avatar" className="shop-avatar-badge-thumb-link" aria-label="Avatar Studio'ya git">
+    <aside
+      className="shop-avatar-badge shop-avatar-badge--console"
+      aria-label="Aynadaki bedenin"
+    >
+      <Link
+        href="/avatar"
+        className="shop-avatar-badge-thumb-link"
+        aria-label="Mirror Console'a git"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={portrait.url}
-          alt="Senin Caelinus avatarın"
+          alt="Aynadaki Caelinus bedenin"
           className="shop-avatar-badge-thumb"
           loading="lazy"
         />
@@ -89,13 +100,13 @@ export default function AvatarBadge() {
         </span>
       </Link>
       <div className="shop-avatar-badge-body">
-        <p className="shop-avatar-badge-kicker">Avatarın</p>
+        <p className="shop-avatar-badge-kicker">Aynadaki Beden</p>
         {zodiacLabel ? (
           <p className="shop-avatar-badge-zodiac">{zodiacLabel}</p>
         ) : null}
         <div className="shop-avatar-badge-actions">
-          <Link href="/avatar" className="shop-avatar-badge-link">
-            Yeniden Yarat
+          <Link href="/universe/shop/avatar" className="shop-avatar-badge-link">
+            Yeniden Doğur
           </Link>
           <button
             type="button"
@@ -104,7 +115,7 @@ export default function AvatarBadge() {
               router.refresh();
             }}
             className="shop-avatar-badge-link shop-avatar-badge-link--ghost"
-            aria-label="Kayıtlı avatarı kaldır"
+            aria-label="Aynadaki bedeni kaldır"
           >
             Kaldır
           </button>
