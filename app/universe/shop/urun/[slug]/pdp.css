@@ -15,7 +15,7 @@
     radial-gradient(circle at 18% 20%, rgba(150, 110, 230, 0.16) 0%, transparent 45%),
     radial-gradient(circle at 82% 75%, rgba(80, 140, 220, 0.14) 0%, transparent 50%),
     #04060f;
-  padding: 96px 24px 96px;
+  padding: calc(var(--cae-page-top) + 8px) 24px 96px;
   overflow: hidden;
 }
 

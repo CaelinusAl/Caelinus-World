@@ -30,7 +30,7 @@ export default function FrequencyBadge({ lang = "tr" }: { lang?: "tr" | "en" }) 
     return (
       <Link href="/onboarding" className="cae-freq-pill is-cta">
         <span className="cae-freq-pill-symbol" aria-hidden="true">✦</span>
-        <span>{lang === "tr" ? "Frekansını Bul" : "Find Your Frequency"}</span>
+        <span className="cae-freq-pill-label">{lang === "tr" ? "Frekansını Bul" : "Find Your Frequency"}</span>
       </Link>
     );
   }

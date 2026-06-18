@@ -26,6 +26,7 @@
 .mb-scene {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   width: 100%;
   color: #f1e8d3;
   font-family: var(--font-body, "Cormorant Garamond", "Times New Roman", serif);
@@ -84,7 +85,7 @@
 .mb-hero {
   max-width: 1080px;
   margin: 0 auto;
-  padding: clamp(48px, 9vh, 110px) 24px 28px;
+  padding: 24px 24px 28px;
   text-align: left;
   position: relative;
 }
@@ -583,7 +584,7 @@
 /* ── Mobile tweaks ────────────────────────────────────────── */
 
 @media (max-width: 720px) {
-  .mb-hero { padding-top: 60px; }
+  .mb-hero { padding-top: 24px; }
   .mb-input-bar {
     flex-direction: column;
     gap: 8px;

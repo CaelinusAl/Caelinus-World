@@ -21,7 +21,7 @@ export default function CosmosPage() {
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Arial, sans-serif",
-        padding: "32px",
+        padding: "calc(var(--cae-page-top) + 8px) 32px 32px",
         position: "relative",
         zIndex: 1,
       }}

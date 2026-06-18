@@ -2,7 +2,7 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  padding: 96px 24px 120px;
+  padding: calc(var(--cae-page-top) + 8px) 24px 120px;
   display: flex;
   justify-content: center;
   color: rgba(238, 234, 250, 0.92);

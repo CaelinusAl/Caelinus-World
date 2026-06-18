@@ -7,6 +7,7 @@
 .world-shell {
   position: relative;
   min-height: 100dvh;
+  padding-top: var(--cae-page-top);
   background: var(--cae-black);
   color: var(--cae-text);
   font-family: var(--cae-font-sans);

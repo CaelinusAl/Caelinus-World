@@ -726,9 +726,9 @@ main {
 .ll-aura {
   position: absolute;
   left: 50%;
-  top: 36%;
-  width: clamp(220px, 26vw, 360px);
-  height: clamp(220px, 26vw, 360px);
+  top: 30%;
+  width: clamp(170px, 18vw, 250px);
+  height: clamp(170px, 18vw, 250px);
   transform: translate(-50%, -50%) scale(0.6);
   border-radius: 50%;
   pointer-events: none;
@@ -882,28 +882,6 @@ main {
 @keyframes llKickIn {
   0% { opacity: 0; transform: translateY(4px); }
   100% { opacity: 0.82; transform: translateY(0); }
-}
-
-/* Aydan yukarı süzülen enerji beslemesi — ay ile logo bağlı görünür. */
-.ll-feed {
-  position: absolute;
-  left: 50%;
-  bottom: -70px;
-  width: 3px;
-  height: 84px;
-  transform: translateX(-50%);
-  background: linear-gradient(to top, transparent 0%, rgba(255, 217, 143, 0.30) 62%, rgba(202, 164, 255, 0.22) 100%);
-  background-size: 100% 200%;
-  filter: blur(2px);
-  pointer-events: none;
-  opacity: 0;
-  animation:
-    llFadeIn 1.4s ease 5.2s forwards,
-    llFeedFlow 4.5s linear 5.2s infinite;
-}
-@keyframes llFeedFlow {
-  0% { background-position: 0 100%; }
-  100% { background-position: 0 -100%; }
 }
 
 /* Aydan yükselen altın partiküller — birleşip mührü doğurur. */
@@ -1154,6 +1132,8 @@ main {
   flex-direction: column;
   justify-content: space-between;
   padding: clamp(18px, 4vw, 44px);
+  /* Üstteki kicker sabit topbar'ın altından başlasın (showroom + gaia/dunya). */
+  padding-top: calc(var(--cae-page-top) + 8px);
 }
 
 .sr-top {
@@ -1219,7 +1199,7 @@ main {
 .zc-page {
   position: relative;
   min-height: 100vh;
-  padding: 110px 24px 90px;
+  padding: calc(var(--cae-page-top) + 22px) 24px 90px;
   color: #eef2fb;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(70, 100, 190, 0.2), transparent 58%),
@@ -1592,7 +1572,7 @@ main {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 96px 24px 64px;
+  padding: calc(var(--cae-page-top) + 8px) 24px 64px;
   overflow: hidden;
   background:
     radial-gradient(ellipse at 50% 28%, rgba(60, 95, 190, 0.24), transparent 60%),
@@ -2239,7 +2219,6 @@ main {
   .ll-star-glow,
   .ll-letter,
   .ll-kicker,
-  .ll-feed,
   .ll-particle,
   .ll-emblem-box,
   .hero-headline.ll-late,
@@ -4309,6 +4288,7 @@ main {
 .plants-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   height: auto;
   overflow-x: hidden;
   overflow-y: visible;
@@ -4772,6 +4752,7 @@ main {
 .producers-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   overflow-y: auto;
   background: #060d18;
@@ -5139,6 +5120,7 @@ main {
 .shop-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   overflow-y: auto;
   background: #06091a;
@@ -7818,6 +7800,7 @@ main {
 .checkout-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   background: #060914;
   color: white;
@@ -9664,6 +9647,10 @@ main {
      başına +16px nefes payı bu en kötü durumu da net temizler. Mobilde
      (≤720px) topbar küçülür → 56px override. */
   --cae-topbar-h: 72px;
+  /* Sabit topbar'ı temizleyen standart sayfa üst boşluğu. Tüm sayfa
+     wrapper'ları bunu kullanır; topbar yüksekliği breakpoint'le değişince
+     (72→56) otomatik uyum sağlar. Tek kaynak = tutarlı hizalama. */
+  --cae-page-top: calc(var(--cae-topbar-h, 72px) + 16px);
 }
 
 .cae-topbar {
@@ -9824,6 +9811,18 @@ main {
   .cae-topbar-aside { margin-left: 8px; }
   .cae-freq-pill { padding: 6px 10px; font-size: 10px; letter-spacing: 0.2em; gap: 6px; }
   .cae-freq-pill-symbol { font-size: 12px; }
+}
+
+/* Dar telefonlarda topbar tek satıra sığsın — taşma/kırpılma olmasın.
+   "Frekansını Bul" CTA metni gizlenip yalnız ✦ simgesi kalır (akort olmuş
+   durumda "Hz" değeri zaten kısa, korunur); nav aralığı daha da sıkışır. */
+@media (max-width: 560px) {
+  .cae-topbar { padding: 10px 12px; }
+  .cae-topbar-nav { gap: 11px; }
+  .cae-topbar-link { font-size: 10px; letter-spacing: 0.1em; }
+  .cae-topbar-aside { margin-left: 6px; }
+  .cae-freq-pill-label { display: none; }
+  .cae-freq-pill.is-cta { padding: 6px 9px; }
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -12294,6 +12293,7 @@ main {
   color: #f4ecd8;
   font-family: "Inter", "Helvetica Neue", system-ui, sans-serif;
   isolation: isolate;
+  padding-top: var(--cae-page-top);
   padding-bottom: 60px;
 }
 
@@ -14240,7 +14240,7 @@ main {
   position: relative;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 56px 24px 120px;
+  padding: var(--cae-page-top) 24px 120px;
   color: #e9f8ee;
 }
 
@@ -14472,7 +14472,7 @@ body.atlas-host {
 }
 
 @media (max-width: 720px) {
-  .atlas-page { padding: 28px 16px 96px; }
+  .atlas-page { padding: var(--cae-page-top) 16px 96px; }
 }
 
 /* hero ─────────────────────────────────────── */
@@ -15639,7 +15639,7 @@ body.atlas-host {
 .ai-hero {
   position: relative;
   max-width: 760px;
-  margin: 80px auto 0;
+  margin: var(--cae-page-top) auto 0;
   text-align: center;
   z-index: 2;
 }
@@ -18124,6 +18124,7 @@ body.atlas-host {
 .atelier-shell {
   position: relative;
   min-height: 100dvh;
+  padding-top: var(--cae-page-top);
   background: var(--atelier-obsidian);
   /* Nebula stack:
      1) magenta bloom from the top — "the lamp"
@@ -18282,7 +18283,10 @@ button.atelier-ribbon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100dvh - 60px);
+  /* .atelier-shell artık üstte topbar payı bıraktığı için auth alanı
+     kalan görünür yüksekliği doldurur; kart dikeyde ortalı kalır,
+     taşma/scroll oluşmaz. */
+  min-height: calc(100dvh - var(--cae-page-top) - 60px);
   padding: 48px 20px;
 }
 
@@ -29496,3 +29500,5 @@ div.stage-card {
     display: none;
   }
 }
+
+/* topbar mobile compaction applied */
