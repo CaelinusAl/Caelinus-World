@@ -1,6 +1,6 @@
 # Faz B — Durum ve Kalan İşler
 
-> **Güncelleme:** 2026-06-18 · **Branch:** `main` · **Sahip:** Şeyma Karaş + Claude
+> **Güncelleme:** 2026-06-18 (akşam) · **Branch:** `main` · **Sahip:** Şeyma Karaş + Claude
 > **Önceki faz:** Faz A (VR-grade base) tamamlandı — bkz. `faz-a-devam-plani.md`
 > **Bu dosya:** Faz B'nin (Saç & Yüz) güncel durumu + sıradaki işler tek yerde.
 
@@ -12,6 +12,21 @@
 |---|---|---|
 | **C4 gövde baseline** — yeniden yoğruldu, yüz onarımı (0.000m), tam simetri (0.000mm), bacak kemiği ortalama (0.0003mm), boy 1.690m | [#4](https://github.com/CaelinusAl/Caelinus-World/pull/4) | `validate-avatar.js` KAPI AÇIK · 28.2k tris · ARKit-52 |
 | **Saç runtime-bind** — ayrı GLB, `mixamorigHead` kemiğine rigid attach, kafa/animasyon hareketini takip eder; binary-alpha → alpha-cutout material | [#5](https://github.com/CaelinusAl/Caelinus-World/pull/5) | Canlı: `✓ saç bind edildi → mixamorigHead`, görünür uzun saç |
+| **`-vr` light türevi** — `caelinus-body-base-fem-vr.glb` (4.57 MB, 23.1k tris, ARKit-52 + göz/parmak bone korundu) | 6fd0739 | Khronos validator 0 hata · three.js yükleme ✓ · bkz. `avatar-vr-derivative-teslim-notu.md` |
+| **Ten rengi (skin tone) artık çalışıyor** — Ivory→Caramel→Espresso gerçek zamanlı gövdeye uygulanıyor; saç/göz korunuyor | bu oturum | Canlı: `[ModelAvatar] skin tone applied (#…) to 1 mesh(es)` + görsel QA |
+| **Kıyafet giydirme çalışıyor** — ürün kartına tıkla → bedene bind; avatar açılışta giyinik (varsayılan ilk 3D kıyafet) | bu oturum | Canlı: `[OutfitBinding] ✅ loaded …glb` + "OUTFIT ACTIVE" |
+
+### Bu oturumda (2026-06-18 akşam) yapılan kod değişiklikleri
+- **`components/shop/ModelAvatar.tsx`** — Ten rengi (Codex başlattı) + benim temizliğim:
+  Kırılgan `skinnedMeshes >= 3` "external avatar" tahmini KALDIRILDI (saç 3. skinned
+  mesh olunca ten-tonu yolu yanlışlıkla atlanıyordu). Yerine kayıt-tabanlı kesin karar.
+- **`lib/avatar-bodies.ts`** — `BodyEntry.pipeline: "caelinus"|"external"` alanı +
+  `isCaelinusBodyUrl()` helper. Selin = `pipeline: "caelinus"`, `supportsSkinToneOverride: true`.
+  → Mesh sayma yerine açık işaret; saç/kıyafet/takı eklendikçe sınıflandırma BOZULMAZ.
+- **`app/universe/shop/avatar/page.tsx`** — açılışta avatar giyinik gelsin diye, seçili
+  ürün görünür kategoride 3D kıyafeti olan ilk ürüne düşer (hardcode yok).
+- **`data/products.ts`** — `aries.glb` BOZUK (zstd-blend, geçerli GLB değil) → b1 bağlaması
+  yorumlandı (önizleme-only). Düzgün GLB export edilince satır geri açılır.
 
 **Mimari kazanım:** Saç artık **değiştirilebilir aksesuar** — body GLB'ye gömülü değil.
 `lib/avatar-bodies.ts` içindeki `hairUrl` alanı + `getHairUrlForModelUrl` helper ile
@@ -45,10 +60,33 @@ tek kaynaktan çözülüyor; yeni saç eklemek = yeni `hair-*.glb` + registry sa
 - **Yapılacak:** Base'e gövde/yüz şekil morph'ları ekle (slider'lar bone-scale yerine gerçek morph hedeflerini sürsün — daha temiz deformasyon).
 - **Kapı:** Configurator slider'ları morph üzerinden, anatomik bozulma yok.
 
-### B6 — `-vr` light türevi (≤25k tris)
-- **Durum:** `-hires` (28.2k) var; mobil VR profili (`-light`/`-vr`, ≤25k) yok.
-- **Yapılacak:** Decimate + doku 1024² → `caelinus-body-base-fem-vr.glb`. (Brief 4.3: dev türetebilir.)
-- **Kapı:** ≤25k tris, ARKit korunur, donmccurdy viewer yakın kamerada temiz.
+### B6 — `-vr` light türevi (≤25k tris) ✅ TAMAMLANDI
+- `caelinus-body-base-fem-vr.glb` üretildi (4.57 MB, 23.1k tris, 1024² doku, ARKit-52 +
+  göz/parmak bone korundu). Khronos validator 0 hata, three.js yükleme ✓.
+- Üretim scriptli/deterministik: `_work/vr-build/build-vr.mjs`. Detay: `avatar-vr-derivative-teslim-notu.md`.
+- **Not:** Henüz UI'a bağlanmadı (ayrı varlık dosyası). Cihaz-bazlı LOD seçimi Faz E'de.
+
+---
+
+## 1.5) YARIN (2026-06-19) — ÖNCELİK: Kıyafet oturması (Faz C ön-iş)
+
+> **Bağlam:** Giydirme çalışıyor (7 burç kıyafeti bind oluyor) AMA **kıyafet tam oturmuyor.**
+
+- **Kök neden:** Meshy kıyafet GLB'leri **rijit (static) mesh** — bedenin iskeletine
+  skin'lenmemiş. `OutfitBindingLayer` onları tek kemiğe (Hips) yapıştırıp tek oranla
+  (~boyun %42'si) ölçekliyor, bbox merkezini kalçaya hizalıyor. Sonuç: pozu (catwalk)
+  takip edemiyor, üst/alt parça tek noktadan asılı → sarong bacakta uçuşuyor.
+- **Seçenekler (Şeyma karar verecek):**
+  - **A. Yeniden rig'le (doğru/kalıcı):** Her kıyafeti Blender'da aynı Mixamo iskeletine
+    skin'le → bedenle deforme olur, tam oturur. 3D iş, kıyafet başına emek.
+  - **B. Elle ince ayar (hızlı):** Her kıyafet için `OutfitTransformTuner` ile
+    position/rotation/scale/`targetFraction` offset'i tek tek ayarla. Daha iyi durur ama
+    rijit kalır, pozu takip etmez.
+  - **C. Pozu sabitle (en küçük):** Try-on sırasında catwalk yerine düz A-poz → rijit
+    kıyafet daha düzgün hizalanır.
+- **Ayrıca:** `public/models/Meshy_Al/aries.glb` BOZUK (zstd-sıkıştırılmış .blend, geçerli
+  GLB değil; kurtarılabilir kopya yok). Aries'in orijinal 3D kaynağından düzgün GLB
+  export edilmeli; sonra `data/products.ts`'te b1 satırı geri açılır.
 
 ---
 

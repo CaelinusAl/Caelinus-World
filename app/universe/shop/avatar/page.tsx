@@ -91,8 +91,16 @@ export default function AvatarPage() {
     [activeCategory, avatarProducts],
   );
   const selectedProduct = useMemo(() => {
+    // Kullanıcı bir ürün seçtiyse onu göster.
+    if (selectedProductId) {
+      const explicit = avatarProducts.find((p) => p.id === selectedProductId);
+      if (explicit) return explicit;
+    }
+    // İlk açılışta avatar GİYİNİK gelsin: görünür kategoride 3D kıyafeti olan
+    // ilk ürünü seç. Yoksa ilk ürüne düş. (Hardcode yok — kıyafet GLB'leri
+    // eklendikçe/düzeldikçe otomatik olarak ilgili ürün seçilir.)
     return (
-      avatarProducts.find((product) => product.id === selectedProductId) ??
+      visibleProducts.find((p) => p.outfitGlb) ??
       visibleProducts[0] ??
       avatarProducts[0] ??
       null
