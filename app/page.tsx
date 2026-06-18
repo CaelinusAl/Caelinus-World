@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createTimeline } from "animejs";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
@@ -62,7 +63,7 @@ export default function HomePage() {
 
     const tl = createTimeline();
     tl.add(
-      ".logo-wrap, .subtitle, .tap, .nebula",
+      ".logo-wrap, .subtitle, .tap, .avatar-cta, .nebula",
       { opacity: 0, duration: 550, ease: "out(2)" },
       0,
     )
@@ -142,6 +143,15 @@ export default function HomePage() {
       <button type="button" className="tap" onClick={enterUniverse}>
         DISCOVER CAELINUS
       </button>
+
+      {/* Avatar stüdyosuna doğrudan altın kapı — kullanıcı evrene
+          dalmadan da kendi 3D bedenini yaratmaya başlayabilsin. */}
+      <Link href="/caelinus-avatar/create" className="avatar-cta">
+        <span className="avatar-cta-glyph" aria-hidden="true">
+          ✦
+        </span>
+        AVATARINI YARAT
+      </Link>
 
       <div className={`screen-flash ${flash ? "active" : ""}`} />
     </main>

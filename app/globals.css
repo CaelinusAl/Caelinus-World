@@ -1128,6 +1128,43 @@ main {
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
+/* Avatar stüdyosu — altın kapı (splash). DISCOVER CAELINUS pill'inin
+   hemen altında durur; dark-lüks tona altın gradyan kontrast. */
+.avatar-cta {
+  position: absolute;
+  left: 50%;
+  top: calc(51% + 348px);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 212, 134, 0.55);
+  color: #1a1206;
+  background: linear-gradient(180deg, #f5d486 0%, #caa56a 100%);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 7;
+  box-shadow: 0 0 26px rgba(245, 212, 134, 0.28), 0 8px 22px rgba(0, 0, 0, 0.38);
+  transition: opacity 0.8s ease, transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.avatar-cta:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 0 38px rgba(245, 212, 134, 0.46), 0 12px 30px rgba(0, 0, 0, 0.44);
+}
+
+.avatar-cta-glyph {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
 /* VORTEX */
 .vortex-field {
   position: absolute;
@@ -1282,6 +1319,7 @@ main {
 
 .scene.warp .subtitle,
 .scene.warp .tap,
+.scene.warp .avatar-cta,
 .scene.warp .nebula {
   opacity: 0;
 }
