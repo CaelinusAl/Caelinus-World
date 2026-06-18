@@ -140,7 +140,7 @@ export default function AvatarPage() {
     try {
       const result = await cropFaceFromUrl(src);
       if (!result) {
-        setFaceErr("Yuz tespit edilemedi. Farkli fotograf deneyin.");
+        setFaceErr("Yüz tespit edilemedi. Farklı fotoğraf deneyin.");
         setFaceState("error");
         return;
       }
@@ -168,7 +168,7 @@ export default function AvatarPage() {
       setFaceThumb(result.dataUrl);
       setFaceState("applied");
     } catch {
-      setFaceErr("Islem basarisiz oldu.");
+      setFaceErr("İşlem başarısız oldu.");
       setFaceState("error");
     }
   }, [faceBlobUrl]);
@@ -199,7 +199,7 @@ export default function AvatarPage() {
         <div className="avcfg-page-shell">
           <section className="avcfg-page-hero">
             <div className="avcfg-page-kicker">CAELINUS AVATAR</div>
-            <h1 className="avcfg-page-title">AVATARINI OLUSTUR</h1>
+            <h1 className="avcfg-page-title">AVATARINI OLUŞTUR</h1>
           </section>
           <AvatarsInProduction />
         </div>
@@ -216,9 +216,9 @@ export default function AvatarPage() {
       <div className="avcfg-page-shell">
         <section className="avcfg-page-hero">
           <div className="avcfg-page-kicker">CAELINUS AVATAR</div>
-          <h1 className="avcfg-page-title">AVATARINI OLUSTUR</h1>
+          <h1 className="avcfg-page-title">AVATARINI OLUŞTUR</h1>
           <p className="avcfg-page-subtitle">
-            Bedenini tanimla, yuzunu yukle, kimligini olustur.
+            Bedenini tanımla, yüzünü yükle, kimliğini oluştur.
           </p>
         </section>
 
@@ -262,7 +262,7 @@ export default function AvatarPage() {
                         MediaPipe analiz ediyor...
                       </>
                     ) : (
-                      "Yuzu Avatara Uygula"
+                      "Yüzü Avatara Uygula"
                     )}
                   </button>
                 </div>
@@ -275,7 +275,7 @@ export default function AvatarPage() {
                     className="face-toggle-btn face-toggle-btn--remove"
                     onClick={removeFace}
                   >
-                    Yuzu Kaldir
+                    Yüzü Kaldır
                   </button>
                 </div>
               )}
@@ -312,16 +312,16 @@ export default function AvatarPage() {
                 <div className="face-section-preview">
                   <img
                     src={faceThumb}
-                    alt="Kirpilmis yuz"
+                    alt="Kırpılmış yüz"
                     className="face-section-thumb"
                   />
                   <div className="face-section-preview-meta">
                     <span className="face-section-preview-label">
-                      {faceApplied ? "Avatarinda aktif" : "Onizleme"}
+                      {faceApplied ? "Avatarında aktif" : "Önizleme"}
                     </span>
                     {faceApplied && (
                       <span className="face-section-preview-badge">
-                        Uygulandi
+                        Uygulandı
                       </span>
                     )}
                   </div>
@@ -340,14 +340,14 @@ export default function AvatarPage() {
                         onChange={(e) => setDeformEnabled(e.target.checked)}
                       />
                       <span className="face-deform-switch-label">
-                        Yuz Deform {deformEnabled ? "Aktif" : "Pasif"}
+                        Yüz Deform {deformEnabled ? "Aktif" : "Pasif"}
                       </span>
                     </label>
 
                     {/* Strength slider */}
                     {deformEnabled && (
                       <div className="face-deform-slider-row">
-                        <span className="face-deform-slider-label">Guc</span>
+                        <span className="face-deform-slider-label">Güç</span>
                         <input
                           type="range"
                           min={0}
@@ -373,7 +373,7 @@ export default function AvatarPage() {
                         onPointerUp={() => setComparing(false)}
                         onPointerLeave={() => setComparing(false)}
                       >
-                        {comparing ? "Orjinal Gosteriliyor..." : "Basili Tut: Once / Sonra"}
+                        {comparing ? "Orijinal Gösteriliyor..." : "Basılı Tut: Önce / Sonra"}
                       </button>
                     )}
                   </div>
@@ -384,7 +384,7 @@ export default function AvatarPage() {
                     className="face-debug-toggle"
                     onClick={() => setShowDebug((p) => !p)}
                   >
-                    {showDebug ? "Metrik Paneli Kapat" : "Metrik Paneli Ac"}
+                    {showDebug ? "Metrik Paneli Kapat" : "Metrik Paneli Aç"}
                   </button>
 
                   {showDebug && (
@@ -462,7 +462,7 @@ export default function AvatarPage() {
                 <div className="avcfg-canvas ux-canvas-loading">
                   <div className="ux-loading-pulse" />
                   <span className="ux-loading-label">
-                    Avatar yukleniyor...
+                    Avatar yükleniyor...
                   </span>
                 </div>
               }
@@ -492,10 +492,10 @@ export default function AvatarPage() {
                 className={`avcfg-save-btn ${saved ? "saved" : ""}`}
                 onClick={handleSave}
               >
-                {saved ? "Kaydedildi" : "Avatarimi Kaydet"}
+                {saved ? "Kaydedildi" : "Avatarımı Kaydet"}
               </button>
               <Link href="/universe/shop" className="avcfg-back-btn">
-                Shop&apos;a Don
+                Shop&apos;a Dön
               </Link>
             </div>
           </div>
