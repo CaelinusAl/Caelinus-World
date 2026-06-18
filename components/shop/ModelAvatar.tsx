@@ -12,7 +12,7 @@ import type { AvatarFaceDeformConfig, ModelCapabilities, MorphTargetMapping } fr
 import { IDENTITY_DEFORM, applyFaceDeform, clearFaceDeformBase } from "@/lib/face";
 import { inspectModel } from "@/lib/face/model-inspector";
 import { buildMorphTargetMapping } from "@/lib/face/morph-targets";
-import { getHairUrlForModelUrl } from "@/lib/avatar-bodies";
+import { getHairUrlForModelUrl, isCaelinusBodyUrl } from "@/lib/avatar-bodies";
 import { AvatarFaceTexture } from "./AvatarFaceTexture";
 
 type Props = {
@@ -36,8 +36,6 @@ type Props = {
 
 const BASE_HEIGHT = 2.8;
 const ROOT_Y = 0;
-
-const BUST_SCALE: Record<string, number> = { s: 0.92, m: 1.0, l: 1.1, xl: 1.22 };
 
 /**
  * Applies the user's BODY config (height/weight/bust/hip) to the GLB.
@@ -118,6 +116,67 @@ function measureVisibleMeshBox(root: THREE.Object3D): THREE.Box3 {
     }
   });
   return box;
+}
+
+function materialList(
+  material: THREE.Material | THREE.Material[] | undefined,
+): THREE.Material[] {
+  if (!material) return [];
+  return Array.isArray(material) ? material : [material];
+}
+
+function nameOf(value: unknown): string {
+  return typeof value === "string" ? value.toLowerCase() : "";
+}
+
+function isNonSkinSurface(obj: THREE.Mesh): boolean {
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+  const joined = [meshName, ...materialNames].join(" ");
+
+  return /hair|sac|saç|brow|lash|eyelash|eye|iris|pupil|teeth|tooth|tongue|mouth|nail|cloth|fabric|outfit|dress|skirt|shoe|heel|bag|jewel|gem|metal/i.test(
+    joined,
+  );
+}
+
+function isSkinSurface(obj: THREE.Mesh): boolean {
+  if (isNonSkinSurface(obj)) return false;
+
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+
+  if (materialNames.some((n) => /human\.body|skin|body|face|head/i.test(n))) {
+    return true;
+  }
+
+  return /^base$|body|skin|torso|head/i.test(meshName);
+}
+
+function makeSkinMaterial(
+  existing: THREE.Material | undefined,
+  skin: THREE.Color,
+  aura: THREE.Color,
+): THREE.MeshPhysicalMaterial {
+  const source =
+    existing instanceof THREE.MeshPhysicalMaterial ||
+    existing instanceof THREE.MeshStandardMaterial
+      ? existing
+      : null;
+  const mat = source
+    ? (source.clone() as THREE.MeshPhysicalMaterial)
+    : new THREE.MeshPhysicalMaterial();
+
+  mat.name = source?.name ? `${source.name}:skin-tone` : "caelinus-skin-tone";
+  mat.color = skin.clone();
+  mat.map = null;
+  mat.emissive = aura.clone();
+  mat.emissiveIntensity = 0.045;
+  mat.roughness = Math.max(0.48, mat.roughness ?? 0.5);
+  mat.metalness = 0;
+  mat.clearcoat = Math.max(0.12, mat.clearcoat ?? 0);
+  mat.clearcoatRoughness = Math.max(0.28, mat.clearcoatRoughness ?? 0.28);
+  mat.needsUpdate = true;
+  return mat;
 }
 
 function applyBodyDeformation(
@@ -640,28 +699,29 @@ export default function ModelAvatar({
   //   • Wolf3D_* / EyeLeft / EyeRight isimleri (RPM, MetaHuman vb.
   //     diğer foto-gerçek pipeline'larından da geliyor olabilir)
   useEffect(() => {
+    // Kendi Caelinus bedenimiz mi? Kayıt (registry) tek doğruluk kaynağıdır.
+    // Mesh SAYISINA bakan eski tahmin KALDIRILDI — saç/kıyafet/takı eklendikçe
+    // bozuluyordu (saç 3. skinned mesh olunca ten-tonu yolu yanlışlıkla
+    // atlanıyordu). Artık bizim bedenimiz daima kendi materyal akışını kullanır.
+    const isKnownCaelinusBody = isCaelinusBodyUrl(url);
+
+    // Gerçek dış / yüklenen avatarlar (Avaturn, Ready Player Me, foto-gerçek
+    // rig'ler) mesh isimleriyle tanınır. Bizim bedenimizse asla dış sayılmaz.
     let isExternalAvatar = false;
-    let skinnedMeshCount = 0;
-
-    scene.traverse((obj) => {
-      if (
-        obj instanceof THREE.Mesh &&
-        (obj.name.startsWith("Wolf3D_") ||
-          obj.name.startsWith("EyeLeft") ||
-          obj.name.startsWith("EyeRight") ||
-          /^avaturn[_-]/i.test(obj.name) ||
-          /^outfit[_-]/i.test(obj.name) ||
-          /^head[_-]?mesh/i.test(obj.name))
-      ) {
-        isExternalAvatar = true;
-      }
-      if (obj instanceof THREE.SkinnedMesh) skinnedMeshCount++;
-    });
-
-    // Birden fazla SkinnedMesh + Mixamo bone'lar → external avatar
-    // (Avaturn / Mixamo karakterleri / foto-gerçek pipelines)
-    if (skinnedMeshCount >= 3) {
-      isExternalAvatar = true;
+    if (!isKnownCaelinusBody) {
+      scene.traverse((obj) => {
+        if (
+          obj instanceof THREE.Mesh &&
+          (obj.name.startsWith("Wolf3D_") ||
+            obj.name.startsWith("EyeLeft") ||
+            obj.name.startsWith("EyeRight") ||
+            /^avaturn[_-]/i.test(obj.name) ||
+            /^outfit[_-]/i.test(obj.name) ||
+            /^head[_-]?mesh/i.test(obj.name))
+        ) {
+          isExternalAvatar = true;
+        }
+      });
     }
 
     if (isExternalAvatar) {
@@ -683,7 +743,7 @@ export default function ModelAvatar({
       });
       if (process.env.NODE_ENV === "development") {
         console.info(
-          `[ModelAvatar] external avatar detected (skinnedMeshes=${skinnedMeshCount}) — preserving original materials`,
+          "[ModelAvatar] external avatar detected (by mesh name) — preserving original materials",
         );
       }
       return;
@@ -692,6 +752,7 @@ export default function ModelAvatar({
     // Default Caelinus mesh yolu — eski davranış (full override)
     const aura = new THREE.Color(auraColor);
     const base = new THREE.Color(resolvedSkin);
+    let tintedSkinMeshes = 0;
 
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -701,17 +762,29 @@ export default function ModelAvatar({
       // the skin-tone material would paint the hair flesh-colored. Hair meshes
       // ship their own PBR material from Blender, so we leave them untouched.
       if (/hair|sac|saç|brow|lash|eye/i.test(obj.name)) return;
-      obj.material = new THREE.MeshPhysicalMaterial({
-        color: base,
-        emissive: aura,
-        emissiveIntensity: 0.12,
-        roughness: 0.42,
-        metalness: 0.08,
-        clearcoat: 0.35,
-        clearcoatRoughness: 0.3,
-      });
+      if (!isSkinSurface(obj)) return;
+
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((mat) =>
+          makeSkinMaterial(mat, base, aura),
+        );
+      } else {
+        obj.material = makeSkinMaterial(obj.material, base, aura);
+      }
+      tintedSkinMeshes++;
     });
-  }, [scene, auraColor, resolvedSkin]);
+
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `[ModelAvatar] skin tone applied (${resolvedSkin}) to ${tintedSkinMeshes} mesh(es)`,
+      );
+      if (tintedSkinMeshes === 0) {
+        console.warn(
+          "[ModelAvatar] skin tone had no matching skin surface. Check body/material names.",
+        );
+      }
+    }
+  }, [scene, auraColor, resolvedSkin, url]);
 
   // 3b) Disable frustum culling on all meshes.
   //

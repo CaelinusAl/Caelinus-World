@@ -19,7 +19,9 @@ import { mergeOutfitBinding } from "@/lib/config/outfit-binding-config";
    ═══════════════════════════════════════════════════════════════ */
 
 const OUTFIT_GLB_MAP: Record<string, OutfitBindingConfig> = {
-  b1:  mergeOutfitBinding("bikini", "/models/Meshy_Al/aries.glb"),
+  // b1: aries — GLB bozuk (zstd-blend, geçerli GLB değil). Düzgün GLB
+  //     export edilene kadar önizleme-only. Dosya düzelince bu satırı geri aç:
+  //     b1:  mergeOutfitBinding("bikini", "/models/Meshy_Al/aries.glb"),
   // b2: taurus — GLB henuz yok
   b3:  mergeOutfitBinding("bikini", "/models/Meshy_Al/gemini.glb"),
   b4:  mergeOutfitBinding("bikini", "/models/Meshy_Al/cancer.glb"),

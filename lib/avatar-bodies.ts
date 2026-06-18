@@ -56,6 +56,16 @@ export type BodyEntry = {
   supportsSkinToneOverride?: boolean;
   /** Avatar'ın hangi animation pipeline ile retarget olabileceği. */
   animationCompat: "mixamo" | "custom" | "static";
+  /**
+   * Hangi materyal/render pipeline'ına ait:
+   *   • "caelinus" — kendi bedenimiz; runtime ten-tonu + kendi materyal
+   *     akışımız uygulanır (varsayılan, alan boşsa bu kabul edilir).
+   *   • "external" — dışarıdan gelen/yüklenen avatar (Avaturn, Ready Player
+   *     Me, foto-gerçek rig); orijinal materyalleri korunur.
+   * Bu ALAN, "kaç mesh var" gibi kırılgan tahminlerin YERİNE geçer — parça
+   * (saç / kıyafet / takı) eklendikçe sınıflandırma bozulmaz.
+   */
+  pipeline?: "caelinus" | "external";
 };
 
 /**
@@ -85,9 +95,10 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
     gender: "feminine",
     vibe: "Ay",
     baseHeightM: 1.69,
-    // Kendi PBR deri texture'ı (skins01/bobby) gömülü → tone override no-op.
-    supportsSkinToneOverride: false,
+    // Canonical Caelinus body: runtime skin material tint is supported.
+    supportsSkinToneOverride: true,
     animationCompat: "mixamo",
+    pipeline: "caelinus",
   },
 ];
 
@@ -123,6 +134,20 @@ export function getHairUrlForModelUrl(
   if (!url) return null;
   const match = CAELINUS_BODY_LIBRARY.find((b) => b.url === url);
   return match?.hairUrl ?? null;
+}
+
+/**
+ * Bu GLB URL'i bizim kendi Caelinus bedenimiz mi? Kayıt (registry) tek
+ * doğruluk kaynağıdır — ModelAvatar bu sayede "kaç skinned mesh var" gibi
+ * kırılgan tahminler yerine kesin bilgiyle karar verir. Saç / kıyafet / takı
+ * eklendikçe bu sonuç değişmez. Yalnızca `pipeline: "external"` olarak
+ * işaretlenmiş kayıtlar dış avatar sayılır (alan boşsa "caelinus" kabul).
+ */
+export function isCaelinusBodyUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const match = CAELINUS_BODY_LIBRARY.find((b) => b.url === url);
+  if (!match) return false;
+  return (match.pipeline ?? "caelinus") === "caelinus";
 }
 
 export function getBody(id: string | null | undefined): BodyEntry {

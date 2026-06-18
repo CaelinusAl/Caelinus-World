@@ -1,7 +1,19 @@
 # Caelinus-World — Cursor / AI Agent Kuralları
 
 > Bu dosya Cursor (ve diğer AI ajanların) projeyi sıfır karışıklıkla devralması için.
-> Son güncelleme: 2026-06-17 · Faz A VR-grade tamamlandı.
+> Son güncelleme: 2026-06-18 (akşam) · Faz B ilerliyor: ten rengi + giydirme çalışıyor.
+
+## 📣 Cursor'a not — devralırken oku (2026-06-18 akşam)
+Bugün tamamlandı (detay: `docs/faz-b-durumu-ve-kalan-isler.md`):
+- **Ten rengi çalışıyor** — gövdeye gerçek zamanlı uygulanıyor, saç/göz korunuyor.
+- **Kıyafet giydirme çalışıyor** — kart tıkla → bind; avatar açılışta giyinik (ilk 3D kıyafet).
+- **`-vr` türev üretildi** — `caelinus-body-base-fem-vr.glb` (UI'a henüz bağlı değil).
+- **Mimari temizlik:** mesh-sayısı tahmini kaldırıldı → `BodyEntry.pipeline` + `isCaelinusBodyUrl()`.
+
+**YARIN ÖNCELİK — kıyafet oturması:** Meshy GLB'leri rijit (skin'siz), tek kemiğe
+yapışık → poz takip etmiyor, sarong uçuşuyor. Çözüm seçenekleri A/B/C için
+`docs/faz-b-durumu-ve-kalan-isler.md` §1.5'e bak. **Şeyma karar verecek, sorma-yapma yok.**
+`aries.glb` bozuk (zstd-blend) — geçerli GLB export edilene kadar önizleme-only.
 
 ## Dil & davranış
 - **Türkçe konuş**, teknik terimleri İngilizce bırak. Kısa ve doğrudan cevap ver.
@@ -37,9 +49,11 @@ Kaynak: `docs/avatar-system-and-sema-brief.md` BÖLÜM 4. Kapı: `_tools/validat
 - Blender çalışma dosyası: `_work/caelinus-body-base-fem.blend` (Blender 4.5.9 + MPFB 2.0.16).
 
 ## Faz B — yapılacaklar
+- [x] Saç **runtime Head-bind** wiring — PR #5 (canlı: `✓ saç bind edildi → mixamorigHead`).
+- [x] `-vr` ≤ 25k türev — `caelinus-body-base-fem-vr.glb` (UI'a bağlanması Faz E).
+- [x] **Ten rengi (skin tone)** gövdeye uygulanıyor — `ModelAvatar.tsx` + `avatar-bodies.ts`.
+- [ ] **Kıyafet oturması** (YARIN öncelik) — Meshy GLB'leri rijit; rig/tune/poz. §1.5.
 - [ ] Yüz **ayrı material slot** (skin-tone'dan bağımsız yüz; şu an yüz gövde materyalinde).
-- [ ] Saç **runtime Head-bind** wiring (GLB hazır; `lib/config/outfit-binding-config.ts` "hair" layer var, avatar sayfasına bağlanmadı).
-- [ ] `-vr` ≤ 25k türev (veya clean kaynak → dev türetir).
 - [ ] VRM 1.0 köprüsü (göz/parmak bone + ARKit + spring zaten hazır → ucuz gelir).
 
 ## Komutlar
