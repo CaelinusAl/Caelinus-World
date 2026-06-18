@@ -4,7 +4,9 @@
 > validate KAPI AÇIK · [2] `hair-long-wave.glb` (tek atlas + spring zinciri) · [3]
 > `caelinus-catwalk.glb` in-place · [4] canlı regresyon (clone bound=true, orphan yok)
 > + commit/push/PR · [5] MD'ler (URETIM-BASLANGIC, manifest v0.7.0, brief 4.10).
-> Kalan iş Faz B'ye devredildi (yüz ayrı material slot, saç runtime-bind, -vr türev).
+> Kalan iş Faz B'ye devredildi. **Güncelleme (2026-06-18):** C4 gövde baseline
+> (PR #4) + **saç runtime-bind** (PR #5) tamamlandı. Faz B'nin güncel durumu ve
+> kalan işler için → `docs/faz-b-durumu-ve-kalan-isler.md`.
 
 > **Amaç:** Bu dosya bir context-compact'ten sonra Claude'un sıfır kafa karışıklığıyla
 > kaldığı yerden devam etmesi için yazıldı. Tüm durumlar **canlı doğrulandı** (2026-06-17).
