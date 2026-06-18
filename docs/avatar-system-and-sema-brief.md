@@ -86,6 +86,7 @@ Prefix `mixamorig:` veya `mixamorig_` olabilir — motor otomatik soyar.
 4. **Animasyon:** `animationUrl` verilirse harici GLB yüklenir, track isimleri avatar kemiklerine retarget edilir, **tüm `.scale` track'leri** ve **Hips `.position`** atılır (scale-100 + root-motion koruması), skor en yüksek klip oynatılır.
 5. **Materyal:** Harici avatar (Wolf3D/avaturn/ReadyPlayerMe imzaları veya ≥3 skinned mesh) ise PBR korunur; yerli Caelinus avatarı ise `MeshPhysicalMaterial` ten tonu + aura emissive uygulanır (saç/kaş/göz hariç).
 6. **Frustum culling kapatılır** (`frustumCulled = false`) — animasyonda bind-pose bounding sphere bayatlayıp mesh kaybolmasın diye.
+7. **Saç runtime-bind** (`hairUrl` / `getHairUrlForModelUrl`): saç ayrı GLB olarak yüklenir ve body'nin `mixamorigHead` kemiğine **rigid attach** edilir — `hairLocal = head.matrixWorld⁻¹ · scene.matrixWorld`. Sabit local matrix uniform sahne ölçeği/grounding'den bağımsızdır; kafa kemiği animasyonla döndükçe saç rijit takip eder. Binary-alpha hair-card atlası için material **alpha-cutout**'a (`alphaTest`) normalize edilir.
 
 ### 1.5 Kimlik & üretim akışları (bugün)
 
@@ -150,7 +151,7 @@ Frekans Kimliği (burç + element + Hz + niyet)
 | Faz | Hedef | Çıktı |
 |---|---|---|
 | **Faz A — Temel** | Kanonik kadın + erkek base body | `caelinus-body-base-fem.glb`, `-masc.glb` (Mixamo rig, temiz topoloji, blendshape-ready) |
-| **Faz B — Saç & Yüz** | Modüler saç seti + yüz morph hedefleri | `hair/*.glb` (Head-bind), base'te `morphTargets` (büst/kalça/yüz) |
+| **Faz B — Saç & Yüz** | Modüler saç seti + yüz morph hedefleri | `hair/*.glb` (Head-bind ✅ runtime-bind çalışıyor), base'te `morphTargets` (büst/kalça/yüz — ⏳ kalan) |
 | **Faz C — Kıyafet** | 12 burç kıyafeti + ortak bağlama iskeleti | `outfits/<zodiac>.glb` aynı rig'e bind |
 | **Faz D — Animasyon** | Catwalk + 4–6 jest (idle, dönüş, poz, selam) | `anim/*.glb` in-place Mixamo klipleri |
 | **Faz E — Fotorealizm** | PBR doku kalitesi yükseltme + LOD (mobil/masaüstü) | Her base için `-hires/-light` türevleri |
@@ -323,6 +324,7 @@ yakında dağılmıyor mu, tris/draw-call bütçede mi.
 - [x] Parmak kemikleri korunmuş (silinmemiş) — el/parmak bone'ları tam ✓
 - [x] ARKit blendshape min 5, isimler harfiyen doğru — 52 blendshape, min-5 birebir ✓
 - [x] Saç tek mesh + tek atlas + spring-bone zinciri — `hair-long-wave.glb` (1 mesh, 1024² atlas, `Hair_01→02→03`) ✓
+- [x] **Saç runtime-bind** — `mixamorigHead` kemiğine rigid attach, kafa/animasyon hareketini takip eder; binary-alpha → alpha-cutout (PR #5) ✓
 - [~] Kafa ayrı material slot — **göz** ayrı slot (`Caelinus.eye`); kafa/yüz hâlâ gövde materyalinde (Faz B: yüz ayrı slot)
 - [x] Doku ≤ 1024²'ye ölçeklenebilir kaynak — 2048² kaynak, 1024'e indirgenebilir ✓
 - [x] Humanoid-mappable joint orientation — Mixamo standart rig ✓
