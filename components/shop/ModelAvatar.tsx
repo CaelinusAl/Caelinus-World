@@ -12,6 +12,7 @@ import type { AvatarFaceDeformConfig, ModelCapabilities, MorphTargetMapping } fr
 import { IDENTITY_DEFORM, applyFaceDeform, clearFaceDeformBase } from "@/lib/face";
 import { inspectModel } from "@/lib/face/model-inspector";
 import { buildMorphTargetMapping } from "@/lib/face/morph-targets";
+import { getHairUrlForModelUrl } from "@/lib/avatar-bodies";
 import { AvatarFaceTexture } from "./AvatarFaceTexture";
 
 type Props = {
@@ -23,6 +24,10 @@ type Props = {
   faceDeform?: AvatarFaceDeformConfig | null;
   /** External animation GLB (e.g. catwalk.glb) — merged into the mixer */
   animationUrl?: string | null;
+  /** Saç GLB — verilmezse body URL'inden (registry) çözülür. `null`
+   *  geçilirse saç hiç yüklenmez. Saç runtime'da Head bone'una rigid
+   *  bind edilir (kafa/animasyon hareketini takip eder). */
+  hairUrl?: string | null;
   /** Exposes model capabilities to parent for debug display */
   onCapabilities?: (caps: ModelCapabilities) => void;
   /** Exposes the avatar root Object3D for outfit binding */
@@ -277,6 +282,7 @@ export default function ModelAvatar({
   faceTextureUrl = null,
   faceDeform = null,
   animationUrl = null,
+  hairUrl,
   onCapabilities,
   onSceneReady,
 }: Props) {
@@ -302,6 +308,13 @@ export default function ModelAvatar({
   // — "ten rengi haricinde hiçbir şey çalışmıyor" semptomunun
   // kaynağı kelimenin tam anlamıyla budur.
   const scene = useMemo(() => cloneSkinned(gltf.scene), [gltf.scene]);
+
+  // Efektif saç URL'i: explicit prop > registry (body url'inden). prop
+  // `null` ise saç kapalı. `undefined` (default) ise registry'den çöz.
+  const resolvedHairUrl = useMemo(
+    () => (hairUrl === undefined ? getHairUrlForModelUrl(url) : hairUrl),
+    [hairUrl, url],
+  );
 
   // ── Imperatively load external animation GLB + retarget tracks ──
   const [extClips, setExtClips] = useState<THREE.AnimationClip[]>([]);
@@ -712,6 +725,137 @@ export default function ModelAvatar({
       if (obj instanceof THREE.Mesh) obj.frustumCulled = false;
     });
   }, [scene]);
+
+  // 3c) Hair — ayrı GLB'yi yükle ve Head bone'una RIGID bind et.
+  //
+  // Neden ayrı dosya + runtime attach: saç değiştirilebilir bir aksesuar
+  // (farklı stiller); body GLB'ye gömmek yerine kendi dosyasında tutup
+  // çalışma anında kafaya takıyoruz. Böylece saç kafa/animasyon
+  // hareketini takip eder ama mesh'ler ayrı kalır.
+  //
+  // Hizalama matematiği: saç, body ile AYNI Blender koordinatlarında
+  // modellendi (ikisi de aynı sahneden ayrı export edildi). Yani saç
+  // vertex'leri body'nin GLB-uzayıyla birebir aynı çerçevededir.
+  //   • body verts → world : scene.matrixWorld
+  //   • headBone-local → world : headBone.matrixWorld
+  // Saç container'ını headBone'a child yapıp local matrix'i
+  //   hairLocal = headBone.matrixWorld⁻¹ · scene.matrixWorld
+  // verirsek, container.matrixWorld = scene.matrixWorld olur → saç tam
+  // body ile çakışır. hairLocal SABİT (matrixAutoUpdate=false); kafa
+  // bone'u animasyonla döndükçe container rijit takip eder. Bu bağıl
+  // dönüşüm, sahne köküne uygulanan uniform ölçek/grounding'den
+  // bağımsızdır (her ikisi de aynı oranda ölçeklenir).
+  const hairRootRef = useRef<THREE.Object3D | null>(null);
+  useEffect(() => {
+    // Önce eski saçı temizle (url/scene değişimi).
+    const prev = hairRootRef.current;
+    if (prev) {
+      prev.parent?.remove(prev);
+      prev.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh) {
+          m.geometry?.dispose?.();
+          const mat = m.material as THREE.Material | THREE.Material[];
+          if (Array.isArray(mat)) mat.forEach((x) => x.dispose?.());
+          else mat?.dispose?.();
+        }
+      });
+      hairRootRef.current = null;
+    }
+
+    if (!resolvedHairUrl) return;
+
+    // Head bone'u bul ("mixamorig:Head" → prefix soyularak "Head").
+    let headBone: THREE.Bone | null = null;
+    const strip = (s: string) => s.replace(/^mixamorig[:_]?/i, "");
+    scene.traverse((o) => {
+      if (headBone) return;
+      if (o instanceof THREE.Bone && /^head$/i.test(strip(o.name))) headBone = o;
+    });
+    if (!headBone) {
+      scene.traverse((o) => {
+        if (headBone) return;
+        if (o instanceof THREE.Bone && /head/i.test(o.name)) headBone = o;
+      });
+    }
+    if (!headBone) {
+      console.warn("[ModelAvatar] saç bind atlandı — Head bone bulunamadı");
+      return;
+    }
+    const head: THREE.Bone = headBone;
+
+    let cancelled = false;
+    const loader = new GLTFLoader();
+    const safeHairUrl = /%[0-9a-f]{2}/i.test(resolvedHairUrl)
+      ? resolvedHairUrl
+      : encodeURI(resolvedHairUrl);
+
+    loader.load(
+      safeHairUrl,
+      (hairGltf) => {
+        if (cancelled) return;
+        // Skinned-aware clone → saç kendi Hair.rig'ine bağlı kalır.
+        const hairRoot = cloneSkinned(hairGltf.scene);
+
+        // Hizalama: hairLocal = head.matrixWorld⁻¹ · scene.matrixWorld
+        scene.updateMatrixWorld(true);
+        head.updateWorldMatrix(true, false);
+        const hairLocal = new THREE.Matrix4()
+          .copy(head.matrixWorld)
+          .invert()
+          .multiply(scene.matrixWorld);
+
+        hairRoot.matrixAutoUpdate = false;
+        hairRoot.matrix.copy(hairLocal);
+
+        // Saç da kalıcı görünür kalsın (skinned bbox frustum culling) +
+        // material normalizasyonu.
+        //
+        // Saç texture'ı bir hair-card atlası: ~%10 tam-opak saç teli,
+        // ~%90 tam-şeffaf arka plan (binary alpha mask). Blender'dan
+        // alphaMode=BLEND geliyor; bu modda teller depth-sorting yüzünden
+        // soluk/yarı-saydam ("ölü kep") görünüyor. Binary maske için
+        // doğru mod alpha-CUTOUT: alphaTest eşiğiyle teller solid render
+        // edilir, şeffaf arka plan tamamen kesilir → net saç, haze yok.
+        hairRoot.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.frustumCulled = false;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          const mats = Array.isArray(mesh.material)
+            ? mesh.material
+            : [mesh.material];
+          mats.forEach((m) => {
+            const mat = m as THREE.MeshStandardMaterial;
+            if (!mat) return;
+            // BLEND → CUTOUT: tellerin alfası ~1, arka plan ~0.
+            mat.alphaTest = 0.5;
+            mat.transparent = false;
+            mat.depthWrite = true;
+            mat.side = THREE.DoubleSide;
+            mat.needsUpdate = true;
+          });
+        });
+
+        head.add(hairRoot);
+        hairRoot.updateMatrixWorld(true);
+        hairRootRef.current = hairRoot;
+
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            `[ModelAvatar] ✓ saç bind edildi → "${head.name}" (${safeHairUrl})`,
+          );
+        }
+      },
+      undefined,
+      (err) => console.warn("[ModelAvatar] saç yükleme hatası:", err),
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [scene, resolvedHairUrl]);
 
   // 4) Animations — prefer external clip, then idle, then first available
   const activeClipRef = useRef<string | null>(null);

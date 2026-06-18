@@ -33,6 +33,11 @@ export type BodyEntry = {
   tagline: string;
   /** GLB URL — `/public/models/...` */
   url: string;
+  /** Opsiyonel saç GLB — runtime'da body'nin Head bone'una rigid
+   *  attach edilir (kafa/animasyon hareketini takip eder). Ayrı dosya
+   *  olması saçı değiştirilebilir kılar; spring-bone zinciri ileride
+   *  physics için GLB'de korunur. Yoksa saç render edilmez. */
+  hairUrl?: string;
   /** Önizleme görseli — yoksa CSS gradient fallback. */
   preview?: string;
   /** Default kimlik — UI'da öne çıkacak. */
@@ -74,6 +79,7 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
       "Ayın ilk hâli — feminen base body, Mixamo rig ve ARKit yüz " +
       "ifadeleriyle sıfırdan dokunan ilk Caelinus bedeni.",
     url: "/models/caelinus-body-base-fem.glb",
+    hairUrl: "/models/hair/hair-long-wave.glb",
     isDefault: true,
     isPersonal: true,
     gender: "feminine",
@@ -103,6 +109,21 @@ const IN_PRODUCTION_BODY: BodyEntry = {
   gender: "neutral",
   animationCompat: "static",
 };
+
+/**
+ * Bir body GLB URL'inden eşleşen saç GLB URL'ini döndürür (yoksa null).
+ * ModelAvatar saçı runtime'da Head bone'una bağlamak için kullanır —
+ * böylece üç farklı sahne sarmalayıcısı (Configurator / AvatarScene /
+ * Caelinus3DScene) ayrı ayrı saç prop'u geçmek zorunda kalmaz; tek
+ * kaynak burası.
+ */
+export function getHairUrlForModelUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!url) return null;
+  const match = CAELINUS_BODY_LIBRARY.find((b) => b.url === url);
+  return match?.hairUrl ?? null;
+}
 
 export function getBody(id: string | null | undefined): BodyEntry {
   if (CAELINUS_BODY_LIBRARY.length === 0) return IN_PRODUCTION_BODY;
