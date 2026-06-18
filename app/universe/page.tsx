@@ -10,7 +10,7 @@
 import dynamic from "next/dynamic";
 
 const CaelinusUniverseScene = dynamic(
-  () => import("@/components/universe/CaelinusUniverseScene"),
+  () => import("@/components/caelinus/CaelinusUniverseScene"),
   {
     ssr: false,
     loading: () => (

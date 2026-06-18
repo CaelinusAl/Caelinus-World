@@ -18,7 +18,11 @@ import { Stars, Float } from "@react-three/drei";
 import { XR, createXRStore } from "@react-three/xr";
 import * as THREE from "three";
 
-const store = createXRStore();
+// emulate:false → dev'de IWER WebXR emülatörünü KURMA. (iwer@2.x'in onDeviceFrame'i
+// her frame null[0] okuyup çöküyor; emülatör global kurulduğu için /vr bir kez
+// açılınca /universe dâhil tüm rotalarda konsolu dolduruyordu.) Gerçek WebXR
+// cihazlarında (Quest tarayıcısı vb.) "Enter VR" yine çalışır.
+const store = createXRStore({ emulate: false });
 
 function PortalRing() {
   const ring = useRef<THREE.Mesh>(null);

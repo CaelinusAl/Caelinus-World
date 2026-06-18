@@ -46,49 +46,54 @@ export default function CaelinusEntryScene() {
   return (
     <section className={`caelinus-entry${entering ? " is-entering" : ""}`}>
       <HeroBackgroundVideo
-        videoSrc="/hero/hero.mp4"
-        posterSrc="/hero/temple-poster.webp"
+        videoSrc="/hero/caelinus-evren.mp4"
+        posterSrc="/hero/caelinus-evren-poster.jpg"
         mobileImageSrc="/hero/temple-mobile.webp"
         fallbackImageSrc="/hero/temple-scene.webp"
         overlayOpacity={0.55}
       />
-      <div className="caelinus-logo">
-        {/* Sahneden doğan SVG sembol — ay-üstü PNG değil. */}
-        <LivingLogo />
-      </div>
 
-      <h1 className="caelinus-title">Wear Your Frequency</h1>
-      <p className="caelinus-subtitle">
-        A living universe of fashion, ritual and earth.
-      </p>
+      {/* Ön plan içerik — tek ortalanmış sütun (video üzerinde derli toplu durur,
+          sayfa kaymaz, logo "düşmez"). */}
+      <div className="caelinus-foreground">
+        <div className="caelinus-logo">
+          {/* Sahneden doğan SVG sembol — ay-üstü PNG değil. */}
+          <LivingLogo />
+        </div>
 
-      <div
-        className="portal-moon"
-        role="button"
-        tabIndex={0}
-        aria-label="Caelinus evrenine gir"
-        onClick={enterUniverse}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            enterUniverse();
-          }
-        }}
-        style={{ cursor: "pointer" }}
-      >
-        <img src="/assets/moon.webp" alt="Caelinus living portal" />
+        <h1 className="caelinus-title">Wear Your Frequency</h1>
+        <p className="caelinus-subtitle">
+          A living universe of fashion, ritual and earth.
+        </p>
+
+        <div
+          className="portal-moon"
+          role="button"
+          tabIndex={0}
+          aria-label="Caelinus evrenine gir"
+          onClick={enterUniverse}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              enterUniverse();
+            }
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          <img src="/assets/moon.webp" alt="Caelinus living portal" />
+        </div>
+
+        <p className="gate-copy">The gate is open.</p>
+
+        <div className="caelinus-cta">
+          <button type="button" onClick={enterUniverse}>
+            Enter When Ready
+          </button>
+        </div>
       </div>
 
       <div className="caelinus-horizon" aria-hidden="true">
         <div className="caelinus-gate" />
-      </div>
-
-      <p className="gate-copy">The gate is open.</p>
-
-      <div className="caelinus-cta">
-        <button type="button" onClick={enterUniverse}>
-          Enter When Ready
-        </button>
       </div>
     </section>
   );

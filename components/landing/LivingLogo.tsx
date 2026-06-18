@@ -207,9 +207,6 @@ export default function LivingLogo() {
 
         <span className="ll-kicker">Frekansın Sanatı</span>
       </span>
-
-      {/* Aydan yukarı süzülen enerji beslemesi — ay ile mühür bağlı görünür. */}
-      <span className="ll-feed" aria-hidden="true" />
     </span>
   );
 }

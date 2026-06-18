@@ -13,6 +13,7 @@
 /* MAIN SCENE */
 .caelinus-entry {
   min-height: 100svh;
+  height: 100svh;
   overflow: hidden;
   position: relative;
   background:
@@ -64,12 +65,29 @@
   50% { transform: scale(1.035); opacity:.9; }
 }
 
+/* FOREGROUND — tüm içerik tek ortalanmış sütun; video üzerinde derli toplu,
+   sayfa kaymaz (height:100svh + overflow:hidden sahnede). */
+.caelinus-foreground {
+  position: relative;
+  z-index: 5;
+  min-height: 100svh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.6vh, 16px);
+  padding: clamp(64px, 11vh, 110px) 16px clamp(56px, 11vh, 104px);
+  box-sizing: border-box;
+  text-align: center;
+}
+
 /* LOGO AS LIVING SEAL */
 .caelinus-logo {
   position: relative;
   z-index: 5;
   text-align: center;
-  margin: clamp(32px, 5vh, 56px) auto 0;
+  margin: 0 auto;
   max-width: 320px;
   color: var(--cae-soft-gold);
   text-shadow: 0 0 22px rgba(201,164,92,.35);
@@ -97,7 +115,7 @@
   text-align: center;
   color: var(--cae-ivory);
   text-shadow: 0 0 18px rgba(216,183,255,.35);
-  margin: clamp(24px, 4vh, 44px) 0 8px;
+  margin: clamp(10px, 2vh, 20px) 0 4px;
 }
 
 .caelinus-subtitle {
@@ -114,9 +132,9 @@
 .portal-moon {
   position: relative;
   z-index: 3;
-  width: min(44vw, 520px);
+  width: min(30vw, 300px);
   aspect-ratio: 1;
-  margin: clamp(22px, 4vh, 40px) auto 0;
+  margin: clamp(8px, 1.6vh, 18px) auto 0;
   border-radius: 50%;
   overflow: visible;
   filter:
