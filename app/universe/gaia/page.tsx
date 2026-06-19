@@ -208,6 +208,14 @@ export default function GaiaGardenPage() {
             Gaia’s Garden artık estetik bir alan değil, yaşayan bir ekosistem.
           </p>
 
+          <JourneyLink
+            href="/universe/gaia/sahne"
+            color="#79e6a0"
+            className="gaia-pill gaia-enter-scene"
+          >
+            ✦ Sahneye in — Gaia’yı 3B gez
+          </JourneyLink>
+
           <div className="gaia-top-pills">
             <a href="#gaia-portals" className="gaia-pill">
               Konuşan Bitkiler

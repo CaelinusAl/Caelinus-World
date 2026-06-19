@@ -3344,6 +3344,27 @@ main {
   box-shadow: 0 0 16px rgba(150, 190, 255, 0.06);
 }
 
+/* "Sahneye in" — 3B district girişi (vurgulu CTA) */
+.gaia-enter-scene {
+  display: inline-block;
+  margin: 6px auto 22px;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  color: #eafff1;
+  border-color: rgba(121, 230, 160, 0.55);
+  background: rgba(121, 230, 160, 0.12);
+  box-shadow: 0 0 26px rgba(121, 230, 160, 0.22);
+  animation: gaia-enter-glow 2.6s ease-in-out infinite;
+}
+.gaia-enter-scene:hover {
+  border-color: #79e6a0;
+  background: rgba(121, 230, 160, 0.2);
+}
+@keyframes gaia-enter-glow {
+  0%, 100% { box-shadow: 0 0 22px rgba(121, 230, 160, 0.18); }
+  50% { box-shadow: 0 0 34px rgba(121, 230, 160, 0.34); }
+}
+
 /* cards */
 
 .gaia-portals {
