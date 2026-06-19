@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import "./deneyim.css";
+import LivingVeins from "./_components/LivingVeins";
 import { createJourneyAudio, type JourneyAudio } from "./_components/journeyAudio";
 
 const GaiaExperience = dynamic(() => import("./_components/GaiaExperience"), {
@@ -42,6 +43,17 @@ export default function GaiaDeneyimPage() {
         dur: `${9 + (i % 5) * 2.5}s`,
         delay: `${(i % 6) * 1.7}s`,
         scale: 0.7 + (i % 4) * 0.25,
+      })),
+    [],
+  );
+
+  const glints = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        left: `${10 + ((i * 13 + (i % 4) * 5) % 80)}%`,
+        top: `${42 + ((i * 7) % 26)}%`,
+        dur: `${6 + (i % 5) * 2}s`,
+        delay: `${(i % 7) * 1.3}s`,
       })),
     [],
   );
@@ -142,11 +154,22 @@ export default function GaiaDeneyimPage() {
     >
       <div className="gx-bg" aria-hidden />
       <div className="gx-veins" aria-hidden />
+      <LivingVeins />
+      <div className="gx-field" aria-hidden />
       <div className="gx-pulse" aria-hidden />
 
       <div className="gx-canvas">
         <GaiaExperience />
       </div>
+
+      {glints.map((g, i) => (
+        <span
+          key={`gl${i}`}
+          className="gx-glint"
+          aria-hidden
+          style={{ left: g.left, top: g.top, animationDuration: g.dur, animationDelay: g.delay }}
+        />
+      ))}
 
       {leaves.map((l, i) => (
         <span
