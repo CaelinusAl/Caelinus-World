@@ -46,6 +46,10 @@ export default function ShopHeader() {
           <span className="mirror-cta-glyph" aria-hidden="true">◍</span>
           Aynaya Gir
         </Link>
+        <Link href="/universe/shop/ai" className="mirror-cta-secondary">
+          <span className="mirror-cta-glyph" aria-hidden="true">✦</span>
+          Frekans Stilisti
+        </Link>
         {items.length > 0 && (
           <Link href="/universe/shop/checkout" className="shop-pill mirror-cart-pill">
             🛒 Sepet ({items.length}) — ${total.toFixed(0)}

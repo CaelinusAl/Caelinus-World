@@ -1,0 +1,41 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BAZAAR District — İlk Yaşayan 3B District (Faz 6)
+   Stage katmanı: GLB sahnesi + yüklenirken preview posteri + orbit ipucu.
+   DistrictShell `.district-shell-stage` (z-index 0) içine yerleşir.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bazaar-stage {
+  position: absolute;
+  inset: 0;
+}
+
+/* GLB yüklenene dek görünen poster — canvas hazır olunca üstü kapanır. */
+.bazaar-stage-poster {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.45;
+  filter: blur(2px) saturate(1.05);
+}
+
+.bazaar-stage-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Orbit ipucu — içeriğin de üstünde, etkileşimi engellemez. */
+.bazaar-stage-hint {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(243, 238, 252, 0.6);
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}

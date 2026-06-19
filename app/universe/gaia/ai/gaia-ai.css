@@ -1,0 +1,493 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CAELINUS GAIA AI — "Toprak Hafızası" / Plant Oracle
+   Karanlık su zemini · yeşil-altın glow · kök çizgileri · canlı toprak.
+   Sayfa-scoped (yalnızca /universe/gaia/ai).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.gaia-ai-page {
+  --ga-green: #79e6a0;
+  --ga-green-deep: #2f7d57;
+  --ga-gold: #e8d7a3;
+  --ga-soft-gold: #f5d486;
+  --ga-ink: #04130d;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: rgba(238, 248, 240, 0.92);
+  background: radial-gradient(140% 120% at 50% -10%, #0c2419 0%, #07150f 48%, #030b07 100%);
+  font-family: var(--cae-font-sans, "Inter", system-ui, sans-serif);
+}
+
+/* ── Atmosfer ─────────────────────────────────────────────────────── */
+.gaia-ai-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.gaia-ai-glow {
+  position: absolute;
+  top: -20vh;
+  left: 50%;
+  width: 70vw;
+  max-width: 820px;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(121, 230, 160, 0.16) 0%,
+    rgba(121, 230, 160, 0.06) 40%,
+    transparent 68%);
+  filter: blur(10px);
+  animation: gaGlow 11s ease-in-out infinite;
+}
+
+@keyframes gaGlow {
+  0%, 100% { opacity: 0.75; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Karanlık yansıtıcı su zemini */
+.gaia-ai-water {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 36vh;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(40, 110, 80, 0.10) 36%,
+    rgba(8, 28, 20, 0.6) 74%,
+    rgba(3, 11, 7, 0.9) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 40%);
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+}
+
+.gaia-ai-water::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(160, 240, 190, 0.05) 0,
+    rgba(160, 240, 190, 0.05) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  opacity: 0.4;
+  animation: gaShimmer 9s ease-in-out infinite;
+}
+
+@keyframes gaShimmer {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 0.5; transform: translateY(3px); }
+}
+
+/* Canlı kök çizgileri — alt köşelerden tırmanan ağ */
+.gaia-ai-roots {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(60% 50% at 12% 100%, rgba(121, 230, 160, 0.10), transparent 60%),
+    radial-gradient(60% 50% at 88% 100%, rgba(121, 230, 160, 0.08), transparent 60%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 60%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 60%);
+  opacity: 0.7;
+}
+
+/* ── Kabuk + hero ─────────────────────────────────────────────────── */
+.gaia-ai-shell {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 94vw);
+  margin: 0 auto;
+  padding: clamp(64px, 9vh, 110px) 0 72px;
+}
+
+.gaia-ai-hero { text-align: center; max-width: 720px; margin: 0 auto 30px; }
+
+.gaia-ai-kicker {
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(121, 230, 160, 0.82);
+  margin: 0 0 12px;
+}
+
+.gaia-ai-title {
+  margin: 0;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  font-size: clamp(40px, 6.5vw, 78px);
+  line-height: 1;
+  background: linear-gradient(180deg, #fff 0%, var(--ga-green) 75%, var(--ga-green-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(121, 230, 160, 0.2);
+}
+
+.gaia-ai-lede {
+  margin: 14px auto 0;
+  max-width: 560px;
+  font-size: clamp(14px, 1.3vw, 16px);
+  line-height: 1.6;
+  color: rgba(220, 240, 228, 0.74);
+}
+
+/* ── Grid: sohbet + yan araçlar ───────────────────────────────────── */
+.gaia-ai-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .gaia-ai-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Sohbet kutusu ────────────────────────────────────────────────── */
+.gaia-ai-chat {
+  display: flex;
+  flex-direction: column;
+  height: clamp(440px, 62vh, 620px);
+  border-radius: 22px;
+  border: 1px solid rgba(121, 230, 160, 0.2);
+  background: linear-gradient(150deg, rgba(16, 44, 32, 0.5), rgba(8, 22, 16, 0.42));
+  box-shadow: 0 0 36px rgba(121, 230, 160, 0.1), inset 0 0 28px rgba(121, 230, 160, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.gaia-ai-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gaia-ai-welcome { margin: auto; text-align: center; max-width: 360px; }
+.gaia-ai-welcome-glyph {
+  font-size: 34px;
+  color: var(--ga-soft-gold);
+  filter: drop-shadow(0 0 12px rgba(245, 212, 134, 0.5));
+}
+.gaia-ai-welcome-title {
+  margin: 12px 0 6px;
+  font-family: var(--cae-font-serif, serif);
+  font-size: 20px;
+  color: #fff;
+}
+.gaia-ai-welcome-sub { margin: 0; font-size: 13.5px; line-height: 1.6; color: rgba(220, 240, 228, 0.66); }
+
+/* Mesaj balonları */
+.gaia-msg { display: flex; gap: 10px; max-width: 86%; }
+.gaia-msg--user { margin-left: auto; flex-direction: row-reverse; }
+.gaia-msg--oracle { margin-right: auto; }
+
+.gaia-msg-avatar {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--ga-soft-gold);
+  background: rgba(121, 230, 160, 0.12);
+  border: 1px solid rgba(245, 212, 134, 0.3);
+}
+
+.gaia-msg-bubble {
+  padding: 11px 15px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.gaia-msg--user .gaia-msg-bubble {
+  background: linear-gradient(135deg, rgba(121, 230, 160, 0.22), rgba(47, 125, 87, 0.18));
+  border: 1px solid rgba(121, 230, 160, 0.32);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+
+.gaia-msg--oracle .gaia-msg-bubble {
+  background: rgba(10, 28, 20, 0.7);
+  border: 1px solid rgba(160, 200, 175, 0.16);
+  color: rgba(232, 245, 237, 0.92);
+  border-bottom-left-radius: 5px;
+}
+
+/* Yazıyor noktaları */
+.gaia-msg-typing { display: inline-flex; gap: 4px; align-items: center; }
+.gaia-msg-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(121, 230, 160, 0.8);
+  animation: gaTyping 1.2s infinite ease-in-out;
+}
+.gaia-msg-typing span:nth-child(2) { animation-delay: 0.2s; }
+.gaia-msg-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes gaTyping {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.gaia-ai-error {
+  align-self: center;
+  font-size: 12.5px;
+  color: rgba(255, 200, 160, 0.9);
+  background: rgba(120, 60, 30, 0.2);
+  border: 1px solid rgba(255, 180, 120, 0.25);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+/* Öneri çipleri */
+.gaia-ai-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px 0;
+}
+
+.gaia-ai-chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 230, 160, 0.28);
+  background: rgba(121, 230, 160, 0.08);
+  color: rgba(232, 245, 237, 0.9);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.gaia-ai-chip:hover:not(:disabled) {
+  background: rgba(121, 230, 160, 0.16);
+  border-color: rgba(245, 212, 134, 0.4);
+  transform: translateY(-1px);
+}
+.gaia-ai-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Giriş */
+.gaia-ai-form { display: flex; gap: 10px; padding: 14px 16px 16px; }
+.gaia-ai-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(121, 230, 160, 0.24);
+  background: rgba(6, 18, 13, 0.7);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.gaia-ai-input:focus {
+  border-color: rgba(121, 230, 160, 0.5);
+  box-shadow: 0 0 18px rgba(121, 230, 160, 0.18);
+}
+.gaia-ai-input::placeholder { color: rgba(200, 224, 210, 0.42); }
+
+.gaia-ai-send {
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 212, 134, 0.42);
+  background: linear-gradient(135deg, rgba(121, 230, 160, 0.3), rgba(245, 212, 134, 0.2));
+  color: #06160f;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+.gaia-ai-send:hover:not(:disabled) { box-shadow: 0 0 22px rgba(121, 230, 160, 0.4); transform: translateY(-1px); }
+.gaia-ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Yan araç kartları (ortak çerçeve) ────────────────────────────── */
+.gaia-ai-aside { display: flex; flex-direction: column; gap: 16px; }
+
+.moon-cal-card,
+.plant-dx-card {
+  border-radius: 18px;
+  border: 1px solid rgba(121, 230, 160, 0.2);
+  background: linear-gradient(150deg, rgba(16, 44, 32, 0.46), rgba(8, 22, 16, 0.4));
+  padding: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.moon-cal-kicker,
+.plant-dx-kicker {
+  margin: 0 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(121, 230, 160, 0.78);
+}
+
+/* Ay takvimi */
+.moon-cal-head { display: flex; align-items: center; gap: 14px; }
+.moon-cal-glyph { font-size: 38px; line-height: 1; filter: drop-shadow(0 0 10px rgba(245, 212, 134, 0.4)); }
+.moon-cal-phase { margin: 0; font-size: 17px; color: #fff; font-family: var(--cae-font-serif, serif); }
+.moon-cal-mode { margin: 2px 0 0; font-size: 12px; color: rgba(121, 230, 160, 0.85); letter-spacing: 0.06em; }
+.moon-cal-guide { margin: 12px 0 14px; font-size: 13px; line-height: 1.55; color: rgba(224, 240, 230, 0.78); }
+
+.moon-cal-cta,
+.plant-dx-submit,
+.plant-dx-pick {
+  appearance: none;
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 13px;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.moon-cal-cta {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(121, 230, 160, 0.3);
+  background: rgba(121, 230, 160, 0.1);
+  color: rgba(232, 245, 237, 0.92);
+}
+.moon-cal-cta:hover { background: rgba(121, 230, 160, 0.18); transform: translateY(-1px); }
+
+/* Teşhis kartı */
+.plant-dx-sub { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: rgba(224, 240, 230, 0.76); }
+.plant-dx-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.plant-dx-pick {
+  padding: 9px 14px;
+  border: 1px dashed rgba(121, 230, 160, 0.4);
+  background: rgba(121, 230, 160, 0.06);
+  color: rgba(232, 245, 237, 0.9);
+  flex-shrink: 0;
+}
+.plant-dx-pick:hover { background: rgba(121, 230, 160, 0.14); }
+.plant-dx-preview {
+  width: 56px; height: 56px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(121, 230, 160, 0.3);
+}
+
+.plant-dx-symptoms {
+  width: 100%;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(121, 230, 160, 0.22);
+  background: rgba(6, 18, 13, 0.7);
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 12px;
+}
+.plant-dx-symptoms:focus { border-color: rgba(121, 230, 160, 0.5); }
+.plant-dx-symptoms::placeholder { color: rgba(200, 224, 210, 0.4); }
+
+.plant-dx-consent {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(214, 232, 222, 0.74);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.plant-dx-consent input { margin-top: 2px; accent-color: var(--ga-green); }
+
+.plant-dx-submit {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(245, 212, 134, 0.42);
+  background: linear-gradient(135deg, rgba(121, 230, 160, 0.3), rgba(245, 212, 134, 0.2));
+  color: #06160f;
+  font-weight: 700;
+}
+.plant-dx-submit:hover:not(:disabled) { box-shadow: 0 0 20px rgba(121, 230, 160, 0.36); transform: translateY(-1px); }
+.plant-dx-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.plant-dx-privacy {
+  margin: 10px 0 0;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: rgba(180, 210, 192, 0.6);
+}
+
+/* ── Bitki oracle kartları ────────────────────────────────────────── */
+.gaia-ai-oracle-section { margin-top: 44px; }
+.gaia-ai-section-title {
+  margin: 0 0 18px;
+  text-align: center;
+  font-family: var(--cae-font-serif, serif);
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 30px);
+  color: rgba(238, 248, 240, 0.94);
+}
+
+.gaia-ai-oracle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.plant-oracle-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(121, 230, 160, 0.18);
+  background: rgba(10, 26, 19, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.plant-oracle-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(245, 212, 134, 0.4);
+  box-shadow: 0 0 28px rgba(121, 230, 160, 0.16);
+}
+
+.plant-oracle-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+.plant-oracle-freq {
+  position: absolute; top: 8px; right: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: rgba(190, 255, 220, 0.92);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(121, 230, 160, 0.3);
+}
+.plant-oracle-body { padding: 12px 13px 6px; }
+.plant-oracle-name { margin: 0; font-size: 15px; font-weight: 600; color: #fff; }
+.plant-oracle-sci { margin: 2px 0 0; font-size: 11.5px; font-style: italic; color: rgba(200, 224, 210, 0.6); }
+.plant-oracle-moods { margin: 7px 0 0; font-size: 11px; color: rgba(121, 230, 160, 0.85); }
+.plant-oracle-cta {
+  padding: 8px 13px 13px;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: rgba(245, 212, 134, 0.9);
+}
+
+/* ── Alt ──────────────────────────────────────────────────────────── */
+.gaia-ai-foot {
+  margin-top: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.gaia-ai-back {
+  text-decoration: none;
+  color: rgba(121, 230, 160, 0.9);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.gaia-ai-back:hover { color: #fff; }
+.gaia-ai-whisper { font-size: 12.5px; font-style: italic; color: rgba(200, 224, 210, 0.55); }
+
+@media (max-width: 560px) {
+  .gaia-ai-form { flex-direction: column; }
+  .gaia-ai-send { padding: 12px; }
+}

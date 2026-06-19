@@ -65,6 +65,14 @@ const ServerEnvSchema = z.object({
   ELEVEN_API_KEY: z.string().optional(),
   ELEVEN_VOICE_ID: z.string().optional(),
   ELEVEN_MODEL_ID: z.string().optional().default("eleven_multilingual_v2"),
+  /* Caelinus conversational AI (Gaia + Fashion). The Vercel AI SDK
+     `@ai-sdk/openai` provider reads `OPENAI_API_KEY` from the process
+     env automatically; we surface it here for validation + a friendly
+     503 when missing. `AI_CHAT_MODEL` lets us bump the chat model
+     without code changes (defaults to the cost-light gpt-4o-mini that
+     the moodboard route already uses). */
+  OPENAI_API_KEY: z.string().optional(),
+  AI_CHAT_MODEL: z.string().optional().default("gpt-4o-mini"),
   /* /play AI image generation. Provider switch + secret. When the
      provider is "stub" (or unset), the render route returns a styled
      placeholder image instead of calling out — useful in dev. */
@@ -139,6 +147,15 @@ const ServerEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_CURRENCY_DEFAULT: z.string().length(3).optional().default("TRY"),
+  /* SANRI bilinç servisi (FastAPI · Railway). District Engine'in `sanri`
+     sağlayıcısı tüm çağrıları Next.js proxy'si (/api/sanri/*) üzerinden
+     buraya iletir. Kimlik Supabase'tir; Sanri'ya kullanıcının Supabase UUID'si
+     `X-User-Id` (Sanri external_id) olarak geçirilir — JWT/secret paylaşımı yok. */
+  SANRI_API_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://sanri-api-production-4a7b.up.railway.app"),
 });
 
 /* ─── Friendly error formatting ────────────────────── */
@@ -191,6 +208,8 @@ function parseServerEnv() {
     ELEVEN_API_KEY: process.env.ELEVEN_API_KEY,
     ELEVEN_VOICE_ID: process.env.ELEVEN_VOICE_ID,
     ELEVEN_MODEL_ID: process.env.ELEVEN_MODEL_ID,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    AI_CHAT_MODEL: process.env.AI_CHAT_MODEL,
     PLAY_AI_PROVIDER: process.env.PLAY_AI_PROVIDER,
     PLAY_AI_API_KEY: process.env.PLAY_AI_API_KEY,
     PLAY_AI_REPLICATE_MODEL: process.env.PLAY_AI_REPLICATE_MODEL,
@@ -208,6 +227,7 @@ function parseServerEnv() {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_CURRENCY_DEFAULT: process.env.STRIPE_CURRENCY_DEFAULT,
+    SANRI_API_URL: process.env.SANRI_API_URL,
   });
   if (!parsed.success) {
     throw new Error(

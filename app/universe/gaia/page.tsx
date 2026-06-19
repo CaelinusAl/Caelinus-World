@@ -68,11 +68,11 @@ const portals = [
     cls: "violet",
   },
   {
-    title: "Ask Caelinus",
-    subtitle: "Canlı tarım ve bitki danışmanına soru sor",
-    href: "/ai",
+    title: "Bitkini Sor",
+    subtitle: "Gaia AI — Plant Oracle: bitki, toprak, ay döngüsü ve ekim rehberi",
+    href: "/universe/gaia/ai",
     icon: "✨",
-    cls: "blue",
+    cls: "green",
   },
 ];
 
@@ -222,7 +222,7 @@ export default function GaiaGardenPage() {
               Sanctum
             </a>
             <a href="#gaia-portals" className="gaia-pill">
-              Ask Caelinus
+              Bitkini Sor
             </a>
           </div>
         </div>

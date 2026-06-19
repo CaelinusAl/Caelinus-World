@@ -36,41 +36,33 @@ import SourceCore from "./SourceCore";
 import PortalGate from "./PortalGate";
 import DistrictGate, { type District } from "./DistrictGate";
 import CameraRig from "./CameraRig";
+import { DISTRICTS as DISTRICT_REGISTRY, DISTRICT_ORDER } from "@/lib/district/registry";
+import type { DistrictKey } from "@/lib/district/types";
 
-const DISTRICTS: District[] = [
-  {
-    name: "SANRI",
-    subtitle: "Temple of Consciousness",
-    position: [0, 0, -13],
-    color: "#d8b7ff",
-    stone: "#2b2540",
-    route: "/universe/sanri",
-  },
-  {
-    name: "GAIA",
-    subtitle: "Garden of Earth",
-    position: [-13, 0, 0],
-    color: "#7cffb2",
-    stone: "#26342c",
-    route: "/universe/gaia",
-  },
-  {
-    name: "BAZAAR",
-    subtitle: "Treasures of Expression",
-    position: [0, 0, 13],
-    color: "#ffd98f",
-    stone: "#3a2f1c",
-    route: "/universe/bazaar",
-  },
-  {
-    name: "ATELIER",
-    subtitle: "Create Your Frequency",
-    position: [13, 0, 0],
-    color: "#9fc7ff",
-    stone: "#222d3e",
-    route: "/universe/atelier",
-  },
-];
+/**
+ * 3B plaza yerleşimi — kimlik (ad, renk, alt başlık, rota) District Engine
+ * kayıt defterinden gelir; konum + taş tonu sahneye özgü mekânsal veridir.
+ */
+const GATE_LAYOUT: Record<DistrictKey, { position: [number, number, number]; stone: string }> = {
+  sanri: { position: [0, 0, -13], stone: "#2b2540" },
+  gaia: { position: [-13, 0, 0], stone: "#26342c" },
+  fashion: { position: [0, 0, 13], stone: "#3a2f1c" },
+  avatar: { position: [13, 0, 0], stone: "#222d3e" },
+};
+
+const DISTRICTS: District[] = DISTRICT_ORDER.map((key) => {
+  const d = DISTRICT_REGISTRY[key];
+  const layout = GATE_LAYOUT[key];
+  return {
+    name: d.name.en.toUpperCase(),
+    subtitle: d.lore.kicker,
+    position: layout.position,
+    color: d.hero.accent,
+    stone: layout.stone,
+    route: d.route,
+    model: d.blender.glb,
+  };
+});
 
 /** Arkada yükselen mor ay — meydana "kadim gökyüzü" hissi katar. */
 function Moon() {

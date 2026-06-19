@@ -1,0 +1,85 @@
+/* Caelinus Bilinç Testi — kapsayıcı stil (mor-siyah + altın) */
+
+.ct-root {
+  min-height: 100vh;
+  background: radial-gradient(120% 90% at 50% 30%, #160f24 0%, #0c0913 60%, #080610 100%);
+  color: #ece6f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* ── Quiz ── */
+.ct-quiz { width: 100%; max-width: 560px; }
+.ct-head { display: flex; justify-content: space-between; align-items: center; color: #b9a06a; font-size: 13px; letter-spacing: 2px; }
+.ct-mark { color: #f1e7cf; letter-spacing: 4px; }
+.ct-count { color: #8a8197; }
+.ct-progress { height: 3px; background: #221a33; border-radius: 3px; margin: 14px 0 30px; overflow: hidden; }
+.ct-progress-fill { height: 100%; background: linear-gradient(90deg, #d9b25a, #e9c878); transition: width .35s ease; }
+.ct-axis { color: #8a8197; font-style: italic; font-size: 14px; margin: 0 0 8px; }
+.ct-q { font-size: 26px; line-height: 1.3; font-weight: 400; margin: 0 0 26px; color: #f4eee0; }
+.ct-options { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.ct-option {
+  width: 100%; text-align: left; cursor: pointer;
+  background: #150f24; color: #e3dcee;
+  border: 1px solid #2c2340; border-radius: 14px;
+  padding: 16px 18px; font-size: 16px; font-family: inherit;
+  transition: border-color .2s, background .2s, transform .1s;
+}
+.ct-option:hover { border-color: #e9c878; background: #1c1430; transform: translateY(-1px); }
+.ct-back { margin-top: 22px; background: none; border: none; color: #6f6780; cursor: pointer; font-size: 14px; font-family: inherit; }
+.ct-back:hover { color: #b9a06a; }
+
+/* ── Result ── */
+.ct-result { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 22px; }
+
+.ct-card {
+  background: #0c0913;
+  border: 1px solid rgba(217, 178, 90, 0.4);
+  border-radius: 26px;
+  padding: 30px 28px 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.ct-card-top { text-align: center; margin-bottom: 18px; }
+.ct-card-mark { display: block; color: #f1e7cf; letter-spacing: 7px; font-size: 20px; }
+.ct-card-sub { display: block; color: #b9a06a; letter-spacing: 5px; font-size: 10px; margin-top: 4px; }
+
+.ct-rows { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(217,178,90,.18); padding-top: 14px; }
+.ct-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; }
+.ct-row-label { color: #8a8197; font-size: 12.5px; letter-spacing: 1.5px; }
+.ct-row-value { font-size: 20px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 8px; }
+.ct-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+.ct-calling {
+  margin: 12px 0; padding: 14px 16px;
+  background: #1a1430; border: 1px solid rgba(233,200,120,.6); border-radius: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ct-calling-label { color: #b9a06a; font-size: 12.5px; letter-spacing: 2px; }
+.ct-calling-value { color: #f4d58a; font-size: 22px; letter-spacing: 2px; }
+
+.ct-block { margin-top: 14px; }
+.ct-block-label { color: #b9a06a; font-size: 12px; letter-spacing: 3px; }
+.ct-reading { color: #ccc3d6; font-style: italic; font-size: 17px; line-height: 1.5; margin: 8px 0 0; }
+.ct-next { margin-top: 18px; padding: 16px; background: #16122a; border: 1px solid rgba(233,200,120,.5); border-radius: 14px; }
+.ct-nextstep { color: #f4d58a; font-size: 17px; line-height: 1.5; margin: 8px 0 0; }
+.ct-motto { text-align: center; color: #6f6780; font-style: italic; font-size: 13px; margin: 22px 0 0; }
+
+/* ── Accuracy ── */
+.ct-accuracy { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ct-acc-q { color: #ece6f2; font-size: 18px; }
+.ct-acc-val { color: #e9c878; font-size: 34px; letter-spacing: 1px; }
+.ct-slider { width: 100%; max-width: 420px; accent-color: #e9c878; }
+.ct-submit, .ct-restart {
+  margin-top: 8px; cursor: pointer; font-family: inherit;
+  background: linear-gradient(90deg, #d9b25a, #e9c878); color: #1a1206;
+  border: none; border-radius: 12px; padding: 13px 40px; font-size: 16px; letter-spacing: 1px;
+}
+.ct-submit:hover, .ct-restart:hover { filter: brightness(1.08); }
+
+.ct-thanks { text-align: center; color: #d8d0e4; }
+.ct-thanks-sub { color: #8a8197; font-style: italic; margin-top: 4px; }
+.ct-restart { margin-top: 18px; background: none; border: 1px solid #2c2340; color: #b9a06a; }
+.ct-restart:hover { border-color: #e9c878; filter: none; }

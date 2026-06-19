@@ -31,6 +31,8 @@
     "shop:vids:dry": "node scripts/optimize-product-videos.mjs --dry-run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.73",
+    "@ai-sdk/react": "^3.0.210",
     "@mediapipe/tasks-vision": "^0.10.34",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
@@ -40,6 +42,7 @@
     "@supabase/supabase-js": "^2.104.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "ai": "^6.0.208",
     "animejs": "^4.4.1",
     "gsap": "^3.15.0",
     "jszip": "^3.10.1",

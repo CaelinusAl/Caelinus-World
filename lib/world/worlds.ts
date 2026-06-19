@@ -2,13 +2,19 @@
  * CAELINUS · Dünya Kaydı (Bible §5 → kod aynası)
  *
  * Altı dünyanın kimliği: isim, duygu, imza renk, sembol, kanonik rota.
- * WorldShell ve gelecekteki navigasyon bu kayıttan beslenir. Bir dünyanın
- * kimliği değişirse önce Bible güncellenir, sonra burası (governance §9).
+ * WorldShell ve gelecekteki navigasyon bu kayıttan beslenir.
+ *
+ * TEK DOĞRU KAYNAK: District Engine kayıt defteri (lib/district/registry.ts).
+ * District'le örtüşen dünyalar (sanri, gaia, bazaar→fashion, avatar) kimliklerini
+ * doğrudan registry'den türetir → renk/isim/duygu DRIFT'i imkânsız. Yalnızca
+ * district olmayan dünyalar (atelier, play) burada yerel olarak tanımlıdır.
  *
  * NOT: Bu kimlik katmanıdır; WebGL sahne eşlemesi ayrı dosyadadır
  * (lib/world/config.ts → sceneForPath).
  */
 import type { IconName } from "@/components/icons";
+import { DISTRICTS } from "@/lib/district/registry";
+import type { District, DistrictKey } from "@/lib/district/types";
 
 export type WorldKey = "sanri" | "avatar" | "atelier" | "bazaar" | "gaia" | "play";
 
@@ -30,25 +36,28 @@ export type WorldDef = {
   route: string;
 };
 
+/** Bir district kaydını dünya kimliğine dönüştürür (tek doğru kaynak köprüsü). */
+function fromDistrict(worldKey: WorldKey, districtKey: DistrictKey): WorldDef {
+  const d: District = DISTRICTS[districtKey];
+  return {
+    key: worldKey,
+    name: d.name,
+    emotion: d.emotion,
+    accent: d.hero.accent,
+    glow: d.hero.glow,
+    symbol: d.hero.symbol,
+    route: d.route,
+  };
+}
+
 export const WORLDS: Record<WorldKey, WorldDef> = {
-  sanri: {
-    key: "sanri",
-    name: { tr: "SANRI", en: "SANRI" },
-    emotion: { tr: "Ay ışığı · gizem · sessizlik", en: "Moonlight · mystery · silence" },
-    accent: "#c9d4e6",
-    glow: "rgba(201, 212, 230, 0.16)",
-    symbol: "mirror",
-    route: "/universe/sanctum",
-  },
-  avatar: {
-    key: "avatar",
-    name: { tr: "Avatar Studio", en: "Avatar Studio" },
-    emotion: { tr: "Dönüşüm", en: "Transformation" },
-    accent: "#b69cff",
-    glow: "rgba(182, 156, 255, 0.16)",
-    symbol: "flame",
-    route: "/avatar",
-  },
+  // ── District Engine ile örtüşen dünyalar — kimlik registry'den türetilir ──
+  sanri: fromDistrict("sanri", "sanri"),
+  gaia: fromDistrict("gaia", "gaia"),
+  bazaar: fromDistrict("bazaar", "fashion"),
+  avatar: fromDistrict("avatar", "avatar"),
+
+  // ── District olmayan yerel dünyalar ──
   atelier: {
     key: "atelier",
     name: { tr: "Atelier", en: "Atelier" },
@@ -57,24 +66,6 @@ export const WORLDS: Record<WorldKey, WorldDef> = {
     glow: "rgba(212, 183, 138, 0.16)",
     symbol: "wing",
     route: "/atelier",
-  },
-  bazaar: {
-    key: "bazaar",
-    name: { tr: "Bazaar", en: "Bazaar" },
-    emotion: { tr: "Lüks · güzellik · arzu", en: "Luxury · beauty · desire" },
-    accent: "#ffe9b8",
-    glow: "rgba(255, 233, 184, 0.14)",
-    symbol: "star",
-    route: "/universe/shop",
-  },
-  gaia: {
-    key: "gaia",
-    name: { tr: "Gaia", en: "Gaia" },
-    emotion: { tr: "Köklülük", en: "Rootedness" },
-    accent: "#79e6a0",
-    glow: "rgba(121, 230, 160, 0.14)",
-    symbol: "sacred-circle",
-    route: "/universe/gaia",
   },
   play: {
     key: "play",

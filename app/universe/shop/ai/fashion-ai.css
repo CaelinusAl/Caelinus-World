@@ -1,0 +1,500 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CAELINUS MODA AI — "Frekans Stilisti" / Mirror Stylist
+   Ayna · mor-altın frekans · pus · Mirror Gate ile uyumlu.
+   Sayfa-scoped (yalnızca /universe/shop/ai).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.moda-ai-page {
+  --md-violet: #b9a3ff;
+  --md-violet-deep: #5b3fb0;
+  --md-gold: #e8d7a3;
+  --md-soft-gold: #f5d486;
+  --md-ink: #0a0712;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: rgba(243, 238, 252, 0.92);
+  background: radial-gradient(140% 120% at 50% -10%, #1a1230 0%, #110a22 48%, #070414 100%);
+  font-family: var(--cae-font-sans, "Inter", system-ui, sans-serif);
+}
+
+/* ── Atmosfer ─────────────────────────────────────────────────────── */
+.moda-ai-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.moda-ai-glow {
+  position: absolute;
+  top: -22vh;
+  left: 50%;
+  width: 72vw;
+  max-width: 860px;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(185, 163, 255, 0.18) 0%,
+    rgba(185, 163, 255, 0.06) 42%,
+    transparent 68%);
+  filter: blur(12px);
+  animation: mdGlow 12s ease-in-out infinite;
+}
+
+@keyframes mdGlow {
+  0%, 100% { opacity: 0.75; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Ayna yüzeyi — alt yarıda yansıma */
+.moda-ai-mirror {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40vh;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(120, 95, 200, 0.10) 34%,
+    rgba(30, 18, 56, 0.6) 72%,
+    rgba(7, 4, 20, 0.9) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 38%);
+  mask-image: linear-gradient(to bottom, transparent, #000 38%);
+}
+
+.moda-ai-mirror::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(210, 195, 255, 0.05) 0,
+    rgba(210, 195, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 11px
+  );
+  opacity: 0.4;
+  animation: mdShimmer 10s ease-in-out infinite;
+}
+
+@keyframes mdShimmer {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 0.5; transform: translateY(3px); }
+}
+
+/* Pus */
+.moda-ai-mist {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(60% 50% at 14% 8%, rgba(185, 163, 255, 0.10), transparent 60%),
+    radial-gradient(60% 50% at 86% 4%, rgba(245, 212, 134, 0.07), transparent 60%);
+  opacity: 0.8;
+}
+
+/* ── Kabuk + hero ─────────────────────────────────────────────────── */
+.moda-ai-shell {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 94vw);
+  margin: 0 auto;
+  padding: clamp(64px, 9vh, 110px) 0 72px;
+}
+
+.moda-ai-hero { text-align: center; max-width: 720px; margin: 0 auto 30px; }
+
+.moda-ai-kicker {
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(185, 163, 255, 0.82);
+  margin: 0 0 12px;
+}
+
+.moda-ai-title {
+  margin: 0;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  font-size: clamp(40px, 6.5vw, 78px);
+  line-height: 1;
+  background: linear-gradient(180deg, #fff 0%, var(--md-violet) 72%, var(--md-violet-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(185, 163, 255, 0.22);
+}
+
+.moda-ai-lede {
+  margin: 14px auto 0;
+  max-width: 580px;
+  font-size: clamp(14px, 1.3vw, 16px);
+  line-height: 1.6;
+  color: rgba(232, 225, 248, 0.74);
+}
+
+/* ── Grid: sohbet + yan araçlar ───────────────────────────────────── */
+.moda-ai-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .moda-ai-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Sohbet kutusu ────────────────────────────────────────────────── */
+.moda-ai-chat {
+  display: flex;
+  flex-direction: column;
+  height: clamp(440px, 62vh, 620px);
+  border-radius: 22px;
+  border: 1px solid rgba(185, 163, 255, 0.2);
+  background: linear-gradient(150deg, rgba(40, 28, 72, 0.5), rgba(20, 12, 40, 0.42));
+  box-shadow: 0 0 36px rgba(185, 163, 255, 0.1), inset 0 0 28px rgba(185, 163, 255, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.moda-ai-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.moda-ai-welcome { margin: auto; text-align: center; max-width: 380px; }
+.moda-ai-welcome-glyph {
+  font-size: 34px;
+  color: var(--md-soft-gold);
+  filter: drop-shadow(0 0 12px rgba(245, 212, 134, 0.5));
+}
+.moda-ai-welcome-title {
+  margin: 12px 0 6px;
+  font-family: var(--cae-font-serif, serif);
+  font-size: 20px;
+  color: #fff;
+}
+.moda-ai-welcome-sub { margin: 0; font-size: 13.5px; line-height: 1.6; color: rgba(232, 225, 248, 0.66); }
+
+/* Mesaj balonları */
+.moda-msg { display: flex; gap: 10px; max-width: 86%; }
+.moda-msg--user { margin-left: auto; flex-direction: row-reverse; }
+.moda-msg--stylist { margin-right: auto; }
+
+.moda-msg-avatar {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--md-soft-gold);
+  background: rgba(185, 163, 255, 0.12);
+  border: 1px solid rgba(245, 212, 134, 0.3);
+}
+
+.moda-msg-bubble {
+  padding: 11px 15px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.moda-msg--user .moda-msg-bubble {
+  background: linear-gradient(135deg, rgba(185, 163, 255, 0.22), rgba(91, 63, 176, 0.2));
+  border: 1px solid rgba(185, 163, 255, 0.32);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+
+.moda-msg--stylist .moda-msg-bubble {
+  background: rgba(24, 14, 46, 0.7);
+  border: 1px solid rgba(200, 188, 230, 0.16);
+  color: rgba(240, 234, 250, 0.92);
+  border-bottom-left-radius: 5px;
+}
+
+/* Yazıyor noktaları */
+.moda-msg-typing { display: inline-flex; gap: 4px; align-items: center; }
+.moda-msg-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(185, 163, 255, 0.8);
+  animation: mdTyping 1.2s infinite ease-in-out;
+}
+.moda-msg-typing span:nth-child(2) { animation-delay: 0.2s; }
+.moda-msg-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes mdTyping {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.moda-ai-error {
+  align-self: center;
+  font-size: 12.5px;
+  color: rgba(255, 200, 160, 0.9);
+  background: rgba(120, 60, 30, 0.2);
+  border: 1px solid rgba(255, 180, 120, 0.25);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+/* Öneri çipleri */
+.moda-ai-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px 0;
+}
+
+.moda-ai-chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(185, 163, 255, 0.28);
+  background: rgba(185, 163, 255, 0.08);
+  color: rgba(240, 234, 250, 0.9);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.moda-ai-chip:hover:not(:disabled) {
+  background: rgba(185, 163, 255, 0.16);
+  border-color: rgba(245, 212, 134, 0.4);
+  transform: translateY(-1px);
+}
+.moda-ai-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Giriş */
+.moda-ai-form { display: flex; gap: 10px; padding: 14px 16px 16px; }
+.moda-ai-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(185, 163, 255, 0.24);
+  background: rgba(14, 8, 28, 0.7);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.moda-ai-input:focus {
+  border-color: rgba(185, 163, 255, 0.5);
+  box-shadow: 0 0 18px rgba(185, 163, 255, 0.18);
+}
+.moda-ai-input::placeholder { color: rgba(214, 206, 238, 0.42); }
+
+.moda-ai-send {
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 212, 134, 0.42);
+  background: linear-gradient(135deg, rgba(185, 163, 255, 0.32), rgba(245, 212, 134, 0.22));
+  color: #120a26;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+.moda-ai-send:hover:not(:disabled) { box-shadow: 0 0 22px rgba(185, 163, 255, 0.4); transform: translateY(-1px); }
+.moda-ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Yan araç kartları (ortak çerçeve) ────────────────────────────── */
+.moda-ai-aside { display: flex; flex-direction: column; gap: 16px; }
+
+.moda-card {
+  border-radius: 18px;
+  border: 1px solid rgba(185, 163, 255, 0.2);
+  background: linear-gradient(150deg, rgba(40, 28, 72, 0.46), rgba(20, 12, 40, 0.4));
+  padding: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.moda-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.moda-card-glyph {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--md-soft-gold);
+  filter: drop-shadow(0 0 10px rgba(245, 212, 134, 0.4));
+}
+.moda-card-kicker {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(185, 163, 255, 0.78);
+}
+.moda-card-title { margin: 2px 0 0; font-size: 17px; color: #fff; font-family: var(--cae-font-serif, serif); }
+
+.moda-card-cta {
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  border: 1px solid rgba(245, 212, 134, 0.42);
+  background: linear-gradient(135deg, rgba(185, 163, 255, 0.3), rgba(245, 212, 134, 0.2));
+  color: #120a26;
+  font-weight: 700;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+.moda-card-cta:hover { box-shadow: 0 0 20px rgba(185, 163, 255, 0.36); transform: translateY(-1px); }
+
+/* Burç danışmanı */
+.moda-zodiac-wheel {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.moda-zodiac-glyph {
+  appearance: none;
+  cursor: pointer;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(185, 163, 255, 0.2);
+  background: rgba(20, 12, 40, 0.5);
+  color: rgba(240, 234, 250, 0.7);
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.moda-zodiac-glyph:hover { transform: translateY(-1px); color: #fff; }
+.moda-zodiac-glyph.is-active {
+  color: #fff;
+  border-color: var(--z-color, var(--md-violet));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--z-color, #b9a3ff) 55%, transparent);
+}
+.moda-zodiac-detail { text-align: left; }
+.moda-zodiac-name { margin: 0; font-size: 16px; color: #fff; font-family: var(--cae-font-serif, serif); }
+.moda-zodiac-freq { margin: 4px 0 0; font-size: 12px; color: rgba(185, 163, 255, 0.85); letter-spacing: 0.04em; }
+.moda-zodiac-arch { margin: 6px 0 12px; font-size: 12.5px; color: rgba(232, 225, 248, 0.78); }
+.moda-zodiac-arch strong { color: var(--md-soft-gold); font-weight: 600; }
+
+/* Sanal deneme */
+.moda-tryon-text { margin: 0 0 14px; font-size: 13px; line-height: 1.55; color: rgba(232, 225, 248, 0.78); }
+.moda-tryon-actions { display: flex; align-items: center; gap: 10px; }
+.moda-tryon-actions .moda-card-cta { width: auto; flex: 1; }
+.moda-tryon-link {
+  flex-shrink: 0;
+  text-decoration: none;
+  font-size: 13px;
+  color: rgba(185, 163, 255, 0.9);
+  letter-spacing: 0.03em;
+  padding: 10px 4px;
+}
+.moda-tryon-link:hover { color: #fff; }
+
+/* Tanrıça seçici */
+.moda-ai-goddess-section { margin-top: 22px; }
+.moda-goddess-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.moda-goddess-chip {
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(185, 163, 255, 0.2);
+  background: rgba(24, 14, 46, 0.5);
+  text-align: left;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.moda-goddess-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 212, 134, 0.4);
+  box-shadow: 0 0 22px rgba(185, 163, 255, 0.16);
+}
+.moda-goddess-energy { font-size: 16px; color: var(--md-violet); }
+.moda-goddess-label { font-size: 14px; font-weight: 600; color: #fff; }
+.moda-goddess-sub { font-size: 10px; letter-spacing: 0.14em; color: rgba(200, 188, 230, 0.6); }
+.moda-goddess-freq { font-size: 11.5px; color: rgba(245, 212, 134, 0.85); margin-top: 2px; }
+
+/* ── Frekans (ürün) kartları ──────────────────────────────────────── */
+.moda-ai-style-section { margin-top: 44px; }
+.moda-ai-section-title {
+  margin: 0 0 18px;
+  text-align: center;
+  font-family: var(--cae-font-serif, serif);
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 30px);
+  color: rgba(243, 238, 252, 0.94);
+}
+
+.moda-ai-style-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.moda-style-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(185, 163, 255, 0.18);
+  background: rgba(24, 14, 46, 0.5);
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.moda-style-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(245, 212, 134, 0.4);
+  box-shadow: 0 0 28px rgba(185, 163, 255, 0.16);
+}
+
+.moda-style-img { width: 100%; height: 150px; object-fit: cover; display: block; }
+.moda-style-freq {
+  position: absolute; top: 8px; right: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: rgba(220, 210, 255, 0.92);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(185, 163, 255, 0.3);
+}
+.moda-style-body { padding: 12px 13px 6px; }
+.moda-style-name { margin: 0; font-size: 14px; font-weight: 600; color: #fff; }
+.moda-style-price { margin: 3px 0 0; font-size: 12px; color: rgba(245, 212, 134, 0.85); }
+.moda-style-story { margin: 7px 0 0; font-size: 11px; line-height: 1.45; color: rgba(210, 200, 235, 0.62); }
+.moda-style-cta {
+  padding: 8px 13px 13px;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: rgba(245, 212, 134, 0.9);
+}
+
+/* ── Alt ──────────────────────────────────────────────────────────── */
+.moda-ai-foot {
+  margin-top: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.moda-ai-back {
+  text-decoration: none;
+  color: rgba(185, 163, 255, 0.9);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.moda-ai-back:hover { color: #fff; }
+.moda-ai-whisper { font-size: 12.5px; font-style: italic; color: rgba(210, 200, 235, 0.55); }
+
+@media (max-width: 560px) {
+  .moda-ai-form { flex-direction: column; }
+  .moda-ai-send { padding: 12px; }
+  .moda-zodiac-wheel { grid-template-columns: repeat(6, 1fr); }
+}
