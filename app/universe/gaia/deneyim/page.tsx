@@ -46,11 +46,19 @@ export default function GaiaDeneyimPage() {
     [],
   );
 
-  const apply = useCallback((p: number) => {
+  const pxRef = useRef(0);
+  const pyRef = useRef(0);
+
+  const paint = useCallback(() => {
     const el = rootRef.current;
     if (!el) return;
-    el.style.setProperty("--gx-zoom", p.toFixed(3));
-    el.style.setProperty("--gx-progress", p.toFixed(3));
+    const p = progressRef.current;
+    const bg = el.querySelector<HTMLDivElement>(".gx-bg");
+    const veins = el.querySelector<HTMLDivElement>(".gx-veins");
+    if (bg) {
+      bg.style.transform = `scale(${(1 + p * 0.55).toFixed(3)}) translate(${(pxRef.current * 0.6).toFixed(2)}%, ${(pyRef.current * 0.5).toFixed(2)}%)`;
+    }
+    if (veins) veins.style.opacity = (0.15 + p * 0.85).toFixed(3);
     audioRef.current?.setIntensity(p);
   }, []);
 
@@ -67,7 +75,7 @@ export default function GaiaDeneyimPage() {
       if (!moved) setMoved(true);
       const next = Math.max(0, Math.min(1, progressRef.current + delta));
       progressRef.current = next;
-      apply(next);
+      paint();
       const s = stageFor(next);
       setStage((prev) => {
         if (prev !== s) {
@@ -77,7 +85,7 @@ export default function GaiaDeneyimPage() {
         return s;
       });
     },
-    [apply, beginAudio, moved],
+    [paint, beginAudio, moved],
   );
 
   const onWheel = useCallback(
@@ -93,9 +101,10 @@ export default function GaiaDeneyimPage() {
     const r = el.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
     const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    el.style.setProperty("--gx-px", (-x * 1.6).toFixed(2));
-    el.style.setProperty("--gx-py", (-y * 1.2).toFixed(2));
-  }, []);
+    pxRef.current = -x * 1.6;
+    pyRef.current = -y * 1.2;
+    paint();
+  }, [paint]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchRef.current = e.touches[0]?.clientY ?? 0;
@@ -117,9 +126,9 @@ export default function GaiaDeneyimPage() {
   }, []);
 
   useEffect(() => {
-    apply(0);
+    paint();
     return () => audioRef.current?.stop();
-  }, [apply]);
+  }, [paint]);
 
   return (
     <div
