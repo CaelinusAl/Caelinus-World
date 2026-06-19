@@ -85,8 +85,8 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
     gender: "feminine",
     vibe: "Ay",
     baseHeightM: 1.69,
-    // Kendi PBR deri texture'ı (skins01/bobby) gömülü → tone override no-op.
-    supportsSkinToneOverride: false,
+    // Canonical Caelinus body: runtime skin material tint is supported.
+    supportsSkinToneOverride: true,
     animationCompat: "mixamo",
   },
 ];

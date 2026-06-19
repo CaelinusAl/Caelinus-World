@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { productsExtended } from "@/data/products";
+import { productsExtended, sortProductsForAvatar } from "@/data/products";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -38,6 +38,8 @@ export async function GET(req: NextRequest) {
         (p.zodiac && p.zodiac.toLowerCase().includes(q))
     );
   }
+
+  results = sortProductsForAvatar(results);
 
   return NextResponse.json({ products: results, total: results.length });
 }

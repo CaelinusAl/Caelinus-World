@@ -96,3 +96,47 @@ export const productsExtended: ProductExtended[] = products.map((p) => ({
   numericPrice: parsePrice(p.price),
   outfitGlb: OUTFIT_GLB_MAP[p.id],
 }));
+
+export const SHOP_CATEGORY_ORDER: Product["category"][] = [
+  "bikini",
+  "pareo",
+  "bag",
+  "heels",
+  "jewelry",
+];
+
+export const ZODIAC_PRODUCT_ORDER = [
+  "aries",
+  "taurus",
+  "gemini",
+  "cancer",
+  "leo",
+  "virgo",
+  "libra",
+  "scorpio",
+  "sagittarius",
+  "capricorn",
+  "aquarius",
+  "pisces",
+] as const;
+
+export function getProductSortRank(product: Product): number {
+  const categoryRank = SHOP_CATEGORY_ORDER.indexOf(product.category);
+  const safeCategoryRank =
+    categoryRank === -1 ? SHOP_CATEGORY_ORDER.length : categoryRank;
+  const zodiacRank = product.zodiac
+    ? ZODIAC_PRODUCT_ORDER.indexOf(
+        product.zodiac as (typeof ZODIAC_PRODUCT_ORDER)[number],
+      )
+    : -1;
+
+  return safeCategoryRank * 100 + (zodiacRank === -1 ? 50 : zodiacRank);
+}
+
+export function sortProductsForAvatar<T extends Product>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const rank = getProductSortRank(a) - getProductSortRank(b);
+    if (rank !== 0) return rank;
+    return a.id.localeCompare(b.id);
+  });
+}

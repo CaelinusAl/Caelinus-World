@@ -37,8 +37,6 @@ type Props = {
 const BASE_HEIGHT = 2.8;
 const ROOT_Y = 0;
 
-const BUST_SCALE: Record<string, number> = { s: 0.92, m: 1.0, l: 1.1, xl: 1.22 };
-
 /**
  * Applies the user's BODY config (height/weight/bust/hip) to the GLB.
  *
@@ -118,6 +116,71 @@ function measureVisibleMeshBox(root: THREE.Object3D): THREE.Box3 {
     }
   });
   return box;
+}
+
+function materialList(
+  material: THREE.Material | THREE.Material[] | undefined,
+): THREE.Material[] {
+  if (!material) return [];
+  return Array.isArray(material) ? material : [material];
+}
+
+function nameOf(value: unknown): string {
+  return typeof value === "string" ? value.toLowerCase() : "";
+}
+
+function isNonSkinSurface(obj: THREE.Mesh): boolean {
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+  const joined = [meshName, ...materialNames].join(" ");
+
+  return /hair|sac|saç|brow|lash|eyelash|eye|iris|pupil|teeth|tooth|tongue|mouth|nail|cloth|fabric|outfit|dress|skirt|shoe|heel|bag|jewel|gem|metal/i.test(
+    joined,
+  );
+}
+
+function isSkinSurface(obj: THREE.Mesh): boolean {
+  if (isNonSkinSurface(obj)) return false;
+
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+
+  if (materialNames.some((n) => /human\.body|skin|body|face|head/i.test(n))) {
+    return true;
+  }
+
+  // Current canonical GLB uses "base" for the body mesh and "base_1" for eyes.
+  // Material-name exclusion above keeps the eye mesh safe.
+  return /^base$|body|skin|torso|head/i.test(meshName);
+}
+
+function makeSkinMaterial(
+  existing: THREE.Material | undefined,
+  skin: THREE.Color,
+  aura: THREE.Color,
+): THREE.MeshPhysicalMaterial {
+  const source =
+    existing instanceof THREE.MeshPhysicalMaterial ||
+    existing instanceof THREE.MeshStandardMaterial
+      ? existing
+      : null;
+  const mat = source
+    ? (source.clone() as THREE.MeshPhysicalMaterial)
+    : new THREE.MeshPhysicalMaterial();
+
+  mat.name = source?.name ? `${source.name}:skin-tone` : "caelinus-skin-tone";
+  mat.color = skin.clone();
+  // Embedded skin albedo textures can overpower dark tones. Keep PBR detail
+  // maps, but replace the base-color map so Espresso/Cocoa visibly become dark.
+  mat.map = null;
+  mat.emissive = aura.clone();
+  mat.emissiveIntensity = 0.045;
+  mat.roughness = Math.max(0.48, mat.roughness ?? 0.5);
+  mat.metalness = 0;
+  mat.clearcoat = Math.max(0.12, mat.clearcoat ?? 0);
+  mat.clearcoatRoughness = Math.max(0.28, mat.clearcoatRoughness ?? 0.28);
+  mat.needsUpdate = true;
+  return mat;
 }
 
 function applyBodyDeformation(
@@ -692,6 +755,7 @@ export default function ModelAvatar({
     // Default Caelinus mesh yolu — eski davranış (full override)
     const aura = new THREE.Color(auraColor);
     const base = new THREE.Color(resolvedSkin);
+    let tintedSkinMeshes = 0;
 
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
@@ -701,16 +765,28 @@ export default function ModelAvatar({
       // the skin-tone material would paint the hair flesh-colored. Hair meshes
       // ship their own PBR material from Blender, so we leave them untouched.
       if (/hair|sac|saç|brow|lash|eye/i.test(obj.name)) return;
-      obj.material = new THREE.MeshPhysicalMaterial({
-        color: base,
-        emissive: aura,
-        emissiveIntensity: 0.12,
-        roughness: 0.42,
-        metalness: 0.08,
-        clearcoat: 0.35,
-        clearcoatRoughness: 0.3,
-      });
+      if (!isSkinSurface(obj)) return;
+
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((mat) =>
+          makeSkinMaterial(mat, base, aura),
+        );
+      } else {
+        obj.material = makeSkinMaterial(obj.material, base, aura);
+      }
+      tintedSkinMeshes++;
     });
+
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `[ModelAvatar] skin tone applied (${resolvedSkin}) to ${tintedSkinMeshes} mesh(es)`,
+      );
+      if (tintedSkinMeshes === 0) {
+        console.warn(
+          "[ModelAvatar] skin tone had no matching skin surface. Check body/material names.",
+        );
+      }
+    }
   }, [scene, auraColor, resolvedSkin]);
 
   // 3b) Disable frustum culling on all meshes.
