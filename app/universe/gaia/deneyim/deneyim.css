@@ -2,45 +2,66 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #050f0a;
   overflow: hidden;
+  background-color: #060d0c;
+  background-image: url("/universe/gaia-heart.jpg");
+  background-size: cover;
+  background-position: calc(50% + var(--gx-px, 0) * 1%) calc(50% + var(--gx-py, 0) * 1%);
+  transition: background-position 0.5s ease-out;
   font-family: var(--font-sans, system-ui, sans-serif);
 }
 
-.gx-root canvas {
+.gx-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.gx-canvas canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  touch-action: none;
 }
 
-.gx-loading {
+/* ── Atan gövde — Kalp Ağacı'nın üstünde nabız glow (B'de ağaç sağ-üst) ── */
+.gx-pulse {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #ffd9a0;
-  letter-spacing: 0.3em;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  background: radial-gradient(circle at 50% 40%, #0e2418, #050f0a 70%);
+  z-index: 1;
+  top: 14%;
+  right: 18%;
+  width: 20vw;
+  height: 20vw;
+  max-width: 360px;
+  max-height: 360px;
+  transform: translate(45%, -8%) scale(1);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 116, 0.45) 0%, rgba(255, 170, 90, 0.16) 42%, rgba(255, 170, 90, 0) 70%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: gx-beat 3.6s ease-in-out infinite;
+}
+@keyframes gx-beat {
+  0%, 100% { opacity: 0.45; transform: translate(45%, -8%) scale(1); }
+  42% { opacity: 0.85; transform: translate(45%, -8%) scale(1.13); }
+  54% { opacity: 0.66; transform: translate(45%, -8%) scale(1.05); }
 }
 
 .gx-head {
   position: absolute;
-  top: clamp(14px, 3vw, 28px);
-  left: clamp(16px, 3vw, 34px);
+  top: clamp(14px, 3vw, 26px);
+  left: clamp(16px, 3vw, 32px);
+  z-index: 4;
   display: flex;
-  align-items: baseline;
   gap: 12px;
-  z-index: 3;
+  align-items: baseline;
   pointer-events: none;
 }
 .gx-title {
   color: #fff;
   font-weight: 600;
-  letter-spacing: 0.42em;
+  letter-spacing: 0.4em;
   font-size: clamp(1rem, 2.4vw, 1.5rem);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
 }
 .gx-sub {
   color: #ffce8a;
@@ -54,7 +75,7 @@
   right: 0;
   bottom: clamp(20px, 4vh, 44px);
   text-align: center;
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
   padding: 0 16px;
 }
@@ -62,7 +83,7 @@
   color: #f3ead8;
   font-style: italic;
   font-size: clamp(0.95rem, 2.2vw, 1.35rem);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75);
   margin: 0 0 8px;
 }
 .gx-meta {
@@ -76,28 +97,23 @@
   font-weight: 600;
 }
 .gx-hint {
-  color: #8fae93;
+  color: #9fbfb0;
   letter-spacing: 0.14em;
   font-size: clamp(0.6rem, 1.3vw, 0.72rem);
   margin: 0;
 }
 
-.gx-veil {
+.gx-loading {
   position: absolute;
   inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  background: radial-gradient(circle at 22% 42%, rgba(182, 156, 255, 0.95), rgba(60, 30, 90, 0.92) 55%, rgba(5, 15, 10, 0.98));
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-.gx-veil.on {
-  opacity: 1;
-  pointer-events: all;
+  display: grid;
+  place-items: center;
+  color: #ffd9a0;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
 }
 
 @media (max-width: 720px) {
-  .gx-mantra {
-    font-size: 1rem;
-  }
+  .gx-pulse { right: 12%; top: 12%; }
 }
