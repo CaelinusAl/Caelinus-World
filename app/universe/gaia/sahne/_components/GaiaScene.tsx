@@ -79,19 +79,19 @@ function HeartTree() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    // yavaş "büyüme" + nefes — başlangıçta yükselir, sonra nefes alır
-    const grow = THREE.MathUtils.lerp(2.6, 3.6, Math.min(1, t / 6));
+    // KÜÇÜK + uzak: sahnenin parçası, ana obje değil — "keşfedilen sır"
+    const grow = THREE.MathUtils.lerp(1.05, 1.4, Math.min(1, t / 6));
     const breathe = 1 + Math.sin(t * 0.95) * 0.06;
     if (canopy.current) {
       canopy.current.scale.setScalar(grow * breathe);
       canopy.current.rotation.y = Math.sin(t * 0.22) * 0.1;
       canopy.current.position.y = 4.6 + Math.sin(t * 0.95) * 0.12;
     }
-    if (glow.current) glow.current.intensity = 7 + Math.sin(t * 0.95) * 3;
+    if (glow.current) glow.current.intensity = 3.5 + Math.sin(t * 0.95) * 1.5;
   });
 
   return (
-    <group position={[0, 0, 0]}>
+    <group position={[3, 0, -16]}>{/* DERİNE gömülü, uzakta parlayan */}
       {/* gövde */}
       <mesh position={[0, 1.6, 0]} castShadow>
         <cylinderGeometry args={[0.22, 0.46, 3.2, 14]} />
@@ -103,14 +103,14 @@ function HeartTree() {
           <meshStandardMaterial
             color={GAIA_GREEN}
             emissive={GAIA_GREEN}
-            emissiveIntensity={1.1}
-            roughness={0.4}
+            emissiveIntensity={0.65}
+            roughness={0.45}
             metalness={0.1}
           />
         </mesh>
       </group>
-      <pointLight ref={glow} position={[0, 4.8, 0.5]} color={GAIA_GREEN} distance={22} intensity={8} />
-      <pointLight position={[0, 4.8, 0]} color={GAIA_GOLD} distance={6} intensity={3} />
+      <pointLight ref={glow} position={[0, 4.8, 0.5]} color={GAIA_GREEN} distance={15} intensity={3.5} />
+      <pointLight position={[0, 4.8, 0]} color={GAIA_GOLD} distance={5} intensity={2} />
     </group>
   );
 }
@@ -354,7 +354,7 @@ function SceneContents({ onEnter }: { onEnter: () => void }) {
       />
 
       <EffectComposer>
-        <Bloom intensity={0.9} luminanceThreshold={0.2} luminanceSmoothing={0.5} mipmapBlur />
+        <Bloom intensity={0.6} luminanceThreshold={0.28} luminanceSmoothing={0.55} mipmapBlur />
         <Vignette eskil={false} offset={0.25} darkness={0.7} />
       </EffectComposer>
     </>
