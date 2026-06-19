@@ -220,6 +220,109 @@
 
 .gx-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #ffd9a0; letter-spacing: 0.3em; font-size: 0.8rem; text-transform: uppercase; z-index: 3; }
 
+/* ── Ağaç gövdesinde ışık yükselip alçalsın (içeriden nefes) ── */
+.gx-trunk {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 25%;
+  width: 48px;
+  height: 22%;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, rgba(255, 200, 120, 0) 0%, rgba(255, 206, 132, 0.55) 50%, rgba(255, 226, 172, 0) 100%);
+  mix-blend-mode: screen;
+  filter: blur(7px);
+  pointer-events: none;
+  animation: gx-trunklight 7s ease-in-out infinite;
+}
+@keyframes gx-trunklight {
+  0%, 100% { opacity: 0.28; transform: translateX(-50%) translateY(7%); }
+  50% { opacity: 0.7; transform: translateX(-50%) translateY(-7%); }
+}
+
+/* ── Yakın Plan Hayat (reveal: opacity paint() ile progress'e bağlı) ── */
+.gx-near {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s ease-out;
+}
+.gx-near > * { position: absolute; }
+
+/* ışık mantarları */
+.gx-mushroom {
+  width: 11px;
+  height: 11px;
+  border-radius: 50% 50% 45% 45%;
+  mix-blend-mode: screen;
+  animation: gx-mush ease-in-out infinite;
+}
+.gx-mush-teal { background: radial-gradient(circle at 50% 35%, rgba(150, 255, 230, 0.95), rgba(80, 210, 190, 0.15) 70%, transparent 80%); box-shadow: 0 0 13px 3px rgba(120, 240, 210, 0.5); }
+.gx-mush-amber { background: radial-gradient(circle at 50% 35%, rgba(255, 230, 160, 0.95), rgba(255, 190, 110, 0.15) 70%, transparent 80%); box-shadow: 0 0 13px 3px rgba(255, 200, 120, 0.5); }
+@keyframes gx-mush { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+/* taş semboller */
+.gx-glyph { width: 34px; height: 34px; color: rgba(255, 225, 175, 0.5); animation: gx-glyphpulse 8s ease-in-out infinite; }
+@keyframes gx-glyphpulse { 0%, 100% { opacity: 0.18; } 50% { opacity: 0.5; } }
+
+/* su birikintisi */
+.gx-puddle {
+  width: 140px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(170, 220, 255, 0.3), rgba(120, 180, 230, 0.05) 60%, transparent 75%);
+  mix-blend-mode: screen;
+  animation: gx-puddle 6s ease-in-out infinite;
+}
+@keyframes gx-puddle { 0%, 100% { opacity: 0.4; filter: brightness(1); } 50% { opacity: 0.78; filter: brightness(1.4); } }
+
+/* kelebek kümesi */
+.gx-bfly-cluster { width: 64px; height: 44px; }
+.gx-bfly {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(185, 240, 255, 0.95), rgba(140, 220, 255, 0) 70%);
+  animation: gx-flutter 3.2s ease-in-out infinite;
+}
+@keyframes gx-flutter {
+  0%, 100% { transform: translate(0, 0); opacity: 0.35; }
+  25% { transform: translate(7px, -9px); opacity: 0.9; }
+  50% { transform: translate(-5px, -15px); opacity: 0.55; }
+  75% { transform: translate(9px, -7px); opacity: 0.9; }
+}
+
+/* ışığa tepki veren ön-plan ayçiçek bloom'ları */
+.gx-bloom {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 130, 0.5), rgba(255, 190, 90, 0) 70%);
+  mix-blend-mode: screen;
+  animation: gx-bloomp ease-in-out infinite;
+}
+@keyframes gx-bloomp { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.7; } }
+
+/* yükselen polen */
+.gx-pollen {
+  bottom: 6%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 235, 170, 0.9), rgba(255, 210, 120, 0) 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: gx-pollenrise linear infinite;
+}
+@keyframes gx-pollenrise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.45; }
+  100% { transform: translateY(-48vh) translateX(20px); opacity: 0; }
+}
+
 @media (max-width: 720px) {
   .gx-pulse { top: 8%; }
   .gx-bg { transform-origin: 50% 32%; }
