@@ -25,15 +25,7 @@ import {
   Sparkles,
   useTexture,
 } from "@react-three/drei";
-import {
-  Bloom,
-  DepthOfField,
-  EffectComposer,
-  Noise,
-  ToneMapping,
-  Vignette,
-} from "@react-three/postprocessing";
-import { ToneMappingMode } from "postprocessing";
+import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 import { detectQuality, type QualitySettings } from "./quality";
@@ -396,15 +388,8 @@ function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
       />
 
       <EffectComposer>
-        <Bloom intensity={0.85} luminanceThreshold={0.22} luminanceSmoothing={0.5} mipmapBlur />
-        {q.postDoF ? (
-          <DepthOfField focusDistance={0.018} focalLength={0.05} bokehScale={2.6} />
-        ) : (
-          <></>
-        )}
+        <Bloom intensity={0.9} luminanceThreshold={0.2} luminanceSmoothing={0.5} mipmapBlur />
         <Vignette eskil={false} offset={0.2} darkness={0.78} />
-        {q.postGrain ? <Noise opacity={0.028} /> : <></>}
-        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </EffectComposer>
     </>
   );
