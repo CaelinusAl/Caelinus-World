@@ -1,0 +1,56 @@
+/**
+ * GAIA NPC'leri — Root Grove / yaşam. Order: Rootwardens (D1: patron Demetra).
+ */
+import type { DistrictNPCs } from "@/lib/npc/types";
+
+export const GAIA_NPCS: DistrictNPCs = [
+  {
+    id: "gaia.root-grove-host",
+    district: "gaia",
+    name: "Root Grove Host",
+    archetype: "guide",
+    title: "Kök Koru Ev Sahibi",
+    appearance: "Kabuk dokulu cüppe, saçında filizler; toprak ve yağmur kokar.",
+    personality: "Sıcak, topraklayıcı bir rehber; aceleyi yavaşlatır.",
+    greeting: "Köklerin sesini duyabiliyor musun?",
+    firstQuestion: "Burada neyi büyütmek istiyorsun?",
+    interactionStyle: "practical",
+    aiEnabled: true,
+    order: "Rootwardens",
+    location: "heart-tree.path",
+    tags: ["guide", "life"],
+  },
+  {
+    id: "gaia.plant-whisperer",
+    district: "gaia",
+    name: "Plant Whisperer",
+    archetype: "oracle",
+    title: "Bitki Fısıldayıcı",
+    appearance: "Avucundan biolüminesan filizler açar; gözleri amber.",
+    personality: "Şefkatli ama dürüst; gölgeyi nazikçe söyler.",
+    greeting: "Bitkiler senden korkmuyor. Sen kendinden korkuyorsun.",
+    firstQuestion: "Hangi yaranı toprağa verirsin?",
+    interactionStyle: "poetic",
+    aiEnabled: true,
+    order: "Rootwardens",
+    location: "heart-tree.roots",
+    tags: ["oracle", "life"],
+  },
+  {
+    id: "gaia.seed-keeper",
+    district: "gaia",
+    name: "Seed Keeper",
+    archetype: "memory",
+    title: "Tohum Bekçisi",
+    appearance: "Boynunda sayısız küçük tohum kesesi; her biri bir hafıza.",
+    personality: "Başlangıçların kaydını tutar; sessiz bir arşivci.",
+    greeting: "Her tohum bir hafızadır.",
+    firstQuestion: "Hangi başlangıcı sakladın?",
+    interactionStyle: "symbolic",
+    aiEnabled: false,
+    order: "Rootwardens",
+    location: "heart-tree.seed-vault",
+    dialogueId: "gaia.seed",
+    tags: ["memory", "life"],
+  },
+] as const;
