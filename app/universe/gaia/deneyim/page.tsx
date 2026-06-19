@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import "./deneyim.css";
 import LivingVeins from "./_components/LivingVeins";
+import NearLife from "./_components/NearLife";
 import { createJourneyAudio, type JourneyAudio } from "./_components/journeyAudio";
 
 const GaiaExperience = dynamic(() => import("./_components/GaiaExperience"), {
@@ -71,6 +72,8 @@ export default function GaiaDeneyimPage() {
       bg.style.transform = `scale(${(1 + p * 0.55).toFixed(3)}) translate(${(pxRef.current * 0.6).toFixed(2)}%, ${(pyRef.current * 0.5).toFixed(2)}%)`;
     }
     if (veins) veins.style.opacity = (0.15 + p * 0.85).toFixed(3);
+    const near = el.querySelector<HTMLDivElement>(".gx-near");
+    if (near) near.style.opacity = Math.max(0, Math.min(1, (p - 0.1) / 0.5)).toFixed(3);
     audioRef.current?.setIntensity(p);
   }, []);
 
@@ -157,6 +160,7 @@ export default function GaiaDeneyimPage() {
       <LivingVeins />
       <div className="gx-field" aria-hidden />
       <div className="gx-pulse" aria-hidden />
+      <div className="gx-trunk" aria-hidden />
 
       <div className="gx-canvas">
         <GaiaExperience />
@@ -170,6 +174,8 @@ export default function GaiaDeneyimPage() {
           style={{ left: g.left, top: g.top, animationDuration: g.dur, animationDelay: g.delay }}
         />
       ))}
+
+      <NearLife />
 
       {leaves.map((l, i) => (
         <span
