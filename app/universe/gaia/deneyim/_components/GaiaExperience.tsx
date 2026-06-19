@@ -18,13 +18,7 @@
 
 import { Suspense, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  Environment,
-  Lightformer,
-  OrbitControls,
-  Sparkles,
-  useTexture,
-} from "@react-three/drei";
+import { OrbitControls, Sparkles, useTexture } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 
@@ -36,22 +30,6 @@ const GOLD = "#f3cf8a";
 const CANOPY = "#cfe89a"; // sıcak yeşil yaprak
 const PORTAL_VIOLET = "#b69cff";
 const FOG = "#0b1a12";
-
-/* ── Procedural IBL — asset'siz gerçekçi ışık/yansıma ── */
-function StudioEnv({ q }: { q: QualitySettings }) {
-  return (
-    <Environment resolution={q.envResolution} frames={1}>
-      {/* sıcak tepe key ışığı (ağaç üstünden inen altın) */}
-      <Lightformer form="rect" intensity={2.6} color="#ffd8a0" position={[0, 45, -12]} scale={[70, 45, 1]} rotation={[-Math.PI / 2.2, 0, 0]} />
-      {/* soğuk arka rim (derinlik/ayrışma) */}
-      <Lightformer form="rect" intensity={1.1} color="#9fb6ff" position={[-26, 22, 34]} scale={[44, 30, 1]} rotation={[0, Math.PI / 4, 0]} />
-      {/* amber yan dolgu */}
-      <Lightformer form="ring" intensity={1.6} color="#ffb070" position={[28, 26, -18]} scale={[22, 22, 1]} />
-      {/* alttan yumuşak biolum yansıması */}
-      <Lightformer form="circle" intensity={0.6} color="#7fe6a8" position={[0, 1, 0]} scale={[40, 40, 1]} rotation={[Math.PI / 2, 0, 0]} />
-    </Environment>
-  );
-}
 
 /* ── Uzak sinematik vista (mevcut render, sis içine gömülü) ── */
 function Backdrop() {
@@ -327,13 +305,13 @@ function SceneBreath({ breath }: { breath: React.MutableRefObject<number> }) {
   const hemi = useRef<THREE.HemisphereLight>(null);
   useFrame(() => {
     const b = breath.current;
-    if (amb.current) amb.current.intensity = 0.32 + b * 0.06;
-    if (hemi.current) hemi.current.intensity = 0.55 + b * 0.1;
+    if (amb.current) amb.current.intensity = 0.55 + b * 0.08;
+    if (hemi.current) hemi.current.intensity = 0.85 + b * 0.12;
   });
   return (
     <>
-      <ambientLight ref={amb} intensity={0.32} />
-      <hemisphereLight ref={hemi} args={["#ffe7c0", "#08180f", 0.55]} />
+      <ambientLight ref={amb} intensity={0.55} />
+      <hemisphereLight ref={hemi} args={["#ffe7c0", "#08180f", 0.85]} />
     </>
   );
 }
@@ -352,11 +330,11 @@ function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
   return (
     <>
       <color attach="background" args={[FOG]} />
-      <fogExp2 attach="fog" args={[FOG, 0.0072]} />
+      <fog attach="fog" args={[FOG, 30, 210]} />
 
-      <StudioEnv q={q} />
       <SceneBreath breath={breath} />
-      <directionalLight position={[24, 64, 28]} intensity={1.1} color="#ffe9c4" />
+      <directionalLight position={[24, 64, 28]} intensity={1.4} color="#ffe9c4" />
+      <directionalLight position={[-30, 42, -22]} intensity={0.55} color="#9fb6ff" />
 
       <SkyDome />
       <Suspense fallback={null}>
