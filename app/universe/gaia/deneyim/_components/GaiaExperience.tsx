@@ -123,32 +123,32 @@ function HeartTree({ breath }: { breath: React.MutableRefObject<number> }) {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    const grow = THREE.MathUtils.lerp(17, 23, Math.min(1, t / 8));
+    const grow = THREE.MathUtils.lerp(5, 6.5, Math.min(1, t / 8)); // ~%70 küçük — sahnenin parçası, ana obje değil
     const b = Math.sin(t * 0.6);
     breath.current = b;
     const breathe = 1 + b * 0.04;
     if (canopy.current) {
       canopy.current.scale.setScalar(grow * breathe);
       canopy.current.rotation.y = Math.sin(t * 0.14) * 0.06;
-      canopy.current.position.y = 36 + b * 0.6;
+      canopy.current.position.y = 16 + b * 0.3;
     }
-    if (glow.current) glow.current.intensity = 30 + b * 12;
+    if (glow.current) glow.current.intensity = 7 + b * 2.5; // soluk uzak glow — "keşfedilen sır"
   });
 
   return (
-    <group>
-      <mesh position={[0, 14, 0]} castShadow>
-        <cylinderGeometry args={[1.0, 2.2, 28, 18]} />
+    <group position={[6, 0, -46]}>{/* DERİNE gömülü, uzakta parlayan — sahnenin içinde */}
+      <mesh position={[0, 6.5, 0]} castShadow>
+        <cylinderGeometry args={[0.5, 1.1, 13, 14]} />
         <meshStandardMaterial color="#5b3d22" roughness={0.85} metalness={0.05} envMapIntensity={0.9} />
       </mesh>
-      <group ref={canopy} position={[0, 36, 0]} rotation={[0, 0, Math.PI]}>
+      <group ref={canopy} position={[0, 16, 0]} rotation={[0, 0, Math.PI]}>
         <mesh geometry={geo}>
-          {/* sıcak yaprak + iç amber biolum; IBL ile gerçek gölgelenme */}
-          <meshStandardMaterial color={CANOPY} emissive={AMBER} emissiveIntensity={0.9} roughness={0.55} metalness={0.05} envMapIntensity={1.1} />
+          {/* sıcak yaprak + iç amber biolum */}
+          <meshStandardMaterial color={CANOPY} emissive={AMBER} emissiveIntensity={0.5} roughness={0.62} metalness={0.05} envMapIntensity={1.1} />
         </mesh>
       </group>
-      <pointLight ref={glow} position={[0, 36, 5]} color={AMBER} distance={140} intensity={30} />
-      <pointLight position={[0, 31, 0]} color={GOLD} distance={34} intensity={9} />
+      <pointLight ref={glow} position={[0, 16, 2]} color={AMBER} distance={60} intensity={7} />
+      <pointLight position={[0, 13, 0]} color={GOLD} distance={16} intensity={3} />
     </group>
   );
 }
@@ -325,16 +325,40 @@ function CameraDrift() {
   return null;
 }
 
+/* ── Kök ağları — ağaç dibinden yayılan biolüminesan altın lekeler ── */
+function Roots() {
+  const nodes = useMemo(
+    () =>
+      Array.from({ length: 24 }, () => {
+        const a = Math.random() * Math.PI * 2;
+        const r = 2 + Math.random() * 22;
+        return { x: Math.cos(a) * r, z: Math.sin(a) * r, s: 0.6 + Math.random() * 2.4 };
+      }),
+    [],
+  );
+  return (
+    <group position={[6, 0.06, -46]}>
+      {nodes.map((n, i) => (
+        <mesh key={i} position={[n.x, 0, n.z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[n.s, 16]} />
+          <meshBasicMaterial color={AMBER} transparent opacity={0.09} depthWrite={false} blending={THREE.AdditiveBlending} fog />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
   const breath = useRef(0);
   return (
     <>
       <color attach="background" args={[FOG]} />
-      <fog attach="fog" args={[FOG, 30, 210]} />
+      {/* yoğun-ama-yumuşak sis = atmosferik derinlik; kalp sise gömülür */}
+      <fog attach="fog" args={[FOG, 16, 130]} />
 
       <SceneBreath breath={breath} />
-      <directionalLight position={[24, 64, 28]} intensity={1.4} color="#ffe9c4" />
-      <directionalLight position={[-30, 42, -22]} intensity={0.55} color="#9fb6ff" />
+      <directionalLight position={[24, 64, 28]} intensity={1.25} color="#ffe9c4" />
+      <directionalLight position={[-30, 42, -22]} intensity={0.5} color="#9fb6ff" />
 
       <SkyDome />
       <Suspense fallback={null}>
@@ -345,15 +369,18 @@ function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
       <DistantForest count={q.forest} />
       <LightShafts count={q.shafts} />
       <HeartTree breath={breath} />
+      <Roots />
       <Portal onEnter={onEnter} />
-      <Flowers count={q.flowers} />
+      <Flowers count={Math.round(q.flowers * 1.4)} />
 
-      <Sparkles count={q.pollen} scale={[170, 56, 170]} position={[0, 26, 0]} size={3.2} speed={0.22} color={GOLD} opacity={0.7} />
-      <Sparkles count={Math.round(q.pollen * 0.45)} scale={[150, 6, 150]} position={[0, 2.6, 0]} size={4.5} speed={0.4} color={AMBER_DEEP} opacity={0.85} />
+      {/* ATMOSFER ÖNCE: yoğun polen + alçak spor katmanı + ışık zerreleri (önce hisset, sonra kalbi fark et) */}
+      <Sparkles count={Math.round(q.pollen * 1.5)} scale={[150, 42, 150]} position={[0, 14, 12]} size={2.6} speed={0.16} color={GOLD} opacity={0.8} />
+      <Sparkles count={Math.round(q.pollen)} scale={[120, 5, 120]} position={[0, 1.8, 14]} size={3.4} speed={0.32} color="#bfe89a" opacity={0.85} />
+      <Sparkles count={Math.round(q.pollen * 0.5)} scale={[90, 3, 90]} position={[0, 0.7, 18]} size={4.2} speed={0.45} color={AMBER_DEEP} opacity={0.7} />
 
       <CameraDrift />
       <OrbitControls
-        target={[0, 16, 0]}
+        target={[3, 8, -22]}
         enablePan={false}
         minDistance={14}
         maxDistance={110}
@@ -366,7 +393,7 @@ function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
       />
 
       <EffectComposer>
-        <Bloom intensity={0.9} luminanceThreshold={0.2} luminanceSmoothing={0.5} mipmapBlur />
+        <Bloom intensity={0.5} luminanceThreshold={0.34} luminanceSmoothing={0.55} mipmapBlur />
         <Vignette eskil={false} offset={0.2} darkness={0.78} />
       </EffectComposer>
     </>
@@ -379,7 +406,7 @@ export default function GaiaExperience({ onEnter }: { onEnter: () => void }) {
     <Canvas
       shadows={false}
       dpr={q.dpr}
-      camera={{ position: [0, 11, 74], fov: 52 }}
+      camera={{ position: [0, 7, 50], fov: 56 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <Scene q={q} onEnter={onEnter} />
