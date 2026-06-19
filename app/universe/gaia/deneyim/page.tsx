@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import "./deneyim.css";
 
@@ -11,22 +11,29 @@ const GaiaExperience = dynamic(() => import("./_components/GaiaExperience"), {
 });
 
 export default function GaiaDeneyimPage() {
-  const [veil, setVeil] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const onEnter = useCallback(() => {
-    setVeil(true);
-    window.setTimeout(() => {
-      window.location.href = "/universe/gaia";
-    }, 1100);
+  // pointer-parallax: matte arka plan + glow hafifçe kayar (2.5B derinlik)
+  const onMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const el = rootRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
+    const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    el.style.setProperty("--gx-px", (-x * 1.6).toFixed(2));
+    el.style.setProperty("--gx-py", (-y * 1.2).toFixed(2));
   }, []);
 
   return (
-    <div className="gx-root">
-      <GaiaExperience onEnter={onEnter} />
+    <div ref={rootRef} className="gx-root" onPointerMove={onMove}>
+      <div className="gx-pulse" aria-hidden />
+      <div className="gx-canvas">
+        <GaiaExperience />
+      </div>
 
       <header className="gx-head">
         <span className="gx-title">GAIA</span>
-        <span className="gx-sub">DENEYİM · ULTRA</span>
+        <span className="gx-sub">KÖKLÜLÜK</span>
       </header>
 
       <div className="gx-overlay">
@@ -34,10 +41,8 @@ export default function GaiaDeneyimPage() {
         <p className="gx-meta">
           <b>Çağrı</b> · Şifacı &nbsp;·&nbsp; <b>Kapı</b> · Mirror
         </p>
-        <p className="gx-hint">sürükle · döndür · yakınlaştır — portala dokun</p>
+        <p className="gx-hint">izle · hisset — Gaia&rsquo;nın kalbi atıyor</p>
       </div>
-
-      <div className={`gx-veil ${veil ? "on" : ""}`} aria-hidden />
     </div>
   );
 }

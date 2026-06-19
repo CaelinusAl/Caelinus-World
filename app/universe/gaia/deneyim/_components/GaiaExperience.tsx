@@ -1,415 +1,44 @@
 "use client";
 
 /**
- * GaiaExperience — Gaia Experience Slice (Ultra) · baked-hibrit sinematik
+ * GaiaExperience — Gaia'nın Kalbi (V2: matte-hero canlı katman)
  *
- * Hedef: fotoreal sinematik "Unreal hissi" / yaşayan dijital mekân (teknik demo değil).
- * Mevcut /sahne'ye DOKUNULMAZ — bu paralel, ayrı bir sahnedir.
+ * Matte-painting (AI 4K) bir CSS background olarak gösterilir (page/deneyim.css).
+ * Bu Canvas ŞEFFAFtır — yalnız CANLI katmanı render eder: sürüklenen
+ * ateşböcekleri, ışık kelebekleri, altın polen. "Site değil, bir yer" hissi
+ * matte'nin sinematik kalitesi + bu canlı parçacıklar + CSS nabız + parallax ile gelir.
  *
- * Fotoreal kaldıraçları:
- *   • Procedural IBL (Environment + Lightformer) → gerçekçi materyal/yansıma, ASSET'siz
- *   • ACES filmic tone mapping + sinematik exposure (post-chain)
- *   • Derin exponential sis (fogExp2) → atmosferik perspektif / derinlik
- *   • Devasa altın-amber Kalp Ağacı (canon palet), monumental ölçek
- *   • Volumetrik ışık sütunları + içlerinde uçuşan toz zerreleri
- *   • Post: Bloom + DepthOfField + Vignette + (Ultra) film grain
- *   • Adaptif kalite (quality.ts): Desktop Ultra / Mobil optimize
+ * NOT: arka plan rengi YOK (şeffaf) → arkadaki matte görünür. Post-FX yok
+ * (alpha'yı bozmasın). Düşük-poli 3B yok (matte hero).
  */
 
-import { Suspense, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Sparkles, useTexture } from "@react-three/drei";
-import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
-import * as THREE from "three";
+import { Canvas } from "@react-three/fiber";
+import { Sparkles } from "@react-three/drei";
 
-import { detectQuality, type QualitySettings } from "./quality";
-
-const AMBER = "#ffc679";
-const AMBER_DEEP = "#e69a45";
-const GOLD = "#f3cf8a";
-const CANOPY = "#cfe89a"; // sıcak yeşil yaprak
-const PORTAL_VIOLET = "#b69cff";
-const FOG = "#0b1a12";
-
-/* ── Uzak sinematik vista (mevcut render, sis içine gömülü) ── */
-function Backdrop() {
-  const tex = useTexture("/universe/gaia-garden.png");
-  return (
-    <mesh position={[0, 36, -160]} scale={[330, 185, 1]}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={tex} color="#7c8a72" toneMapped={false} depthWrite={false} fog />
-    </mesh>
-  );
-}
-
-function SkyDome() {
-  return (
-    <mesh>
-      <sphereGeometry args={[340, 32, 16]} />
-      <meshBasicMaterial color="#050f0a" side={THREE.BackSide} fog={false} />
-    </mesh>
-  );
-}
-
-function Ground() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <circleGeometry args={[260, 96]} />
-      {/* hafif nemli zemin → IBL'i yansıtır (gerçekçilik) */}
-      <meshStandardMaterial color="#0c1f15" roughness={0.62} metalness={0.18} envMapIntensity={0.8} />
-    </mesh>
-  );
-}
-
-function DistantForest({ count }: { count: number }) {
-  const ref = useRef<THREE.InstancedMesh>(null);
-  const seeds = useMemo(
-    () =>
-      Array.from({ length: count }, () => {
-        const a = Math.random() * Math.PI * 2;
-        const r = 80 + Math.random() * 60;
-        return { x: Math.cos(a) * r, z: Math.sin(a) * r, h: 10 + Math.random() * 26, w: 3 + Math.random() * 4 };
-      }),
-    [count],
-  );
-  useFrame(() => {
-    const m = ref.current;
-    if (!m || (m.userData.placed as boolean)) return;
-    const d = new THREE.Object3D();
-    seeds.forEach((s, i) => {
-      d.position.set(s.x, s.h / 2, s.z);
-      d.scale.set(s.w, s.h, s.w);
-      d.updateMatrix();
-      m.setMatrixAt(i, d.matrix);
-    });
-    m.instanceMatrix.needsUpdate = true;
-    m.userData.placed = true;
-  });
-  return (
-    <instancedMesh ref={ref} args={[undefined, undefined, count]}>
-      <coneGeometry args={[1, 1, 7]} />
-      <meshStandardMaterial color="#08180f" roughness={1} envMapIntensity={0.3} />
-    </instancedMesh>
-  );
-}
-
-function heartShape() {
-  const s = new THREE.Shape();
-  s.moveTo(0.25, 0.25);
-  s.bezierCurveTo(0.25, 0.25, 0.2, 0, 0, 0);
-  s.bezierCurveTo(-0.3, 0, -0.3, 0.35, -0.3, 0.35);
-  s.bezierCurveTo(-0.3, 0.55, -0.1, 0.77, 0.25, 0.95);
-  s.bezierCurveTo(0.6, 0.77, 0.8, 0.55, 0.8, 0.35);
-  s.bezierCurveTo(0.8, 0.35, 0.8, 0, 0.5, 0);
-  s.bezierCurveTo(0.35, 0, 0.25, 0.25, 0.25, 0.25);
-  return s;
-}
-
-function HeartTree({ breath }: { breath: React.MutableRefObject<number> }) {
-  const canopy = useRef<THREE.Group>(null);
-  const glow = useRef<THREE.PointLight>(null);
-  const geo = useMemo(() => {
-    const g = new THREE.ExtrudeGeometry(heartShape(), {
-      depth: 2.6,
-      bevelEnabled: true,
-      bevelThickness: 1.0,
-      bevelSize: 1.0,
-      bevelSegments: 6,
-      curveSegments: 40,
-    });
-    g.center();
-    return g;
-  }, []);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const grow = THREE.MathUtils.lerp(5, 6.5, Math.min(1, t / 8)); // ~%70 küçük — sahnenin parçası, ana obje değil
-    const b = Math.sin(t * 0.6);
-    breath.current = b;
-    const breathe = 1 + b * 0.04;
-    if (canopy.current) {
-      canopy.current.scale.setScalar(grow * breathe);
-      canopy.current.rotation.y = Math.sin(t * 0.14) * 0.06;
-      canopy.current.position.y = 16 + b * 0.3;
-    }
-    if (glow.current) glow.current.intensity = 7 + b * 2.5; // soluk uzak glow — "keşfedilen sır"
-  });
-
-  return (
-    <group position={[6, 0, -46]}>{/* DERİNE gömülü, uzakta parlayan — sahnenin içinde */}
-      <mesh position={[0, 6.5, 0]} castShadow>
-        <cylinderGeometry args={[0.5, 1.1, 13, 14]} />
-        <meshStandardMaterial color="#5b3d22" roughness={0.85} metalness={0.05} envMapIntensity={0.9} />
-      </mesh>
-      <group ref={canopy} position={[0, 16, 0]} rotation={[0, 0, Math.PI]}>
-        <mesh geometry={geo}>
-          {/* sıcak yaprak + iç amber biolum */}
-          <meshStandardMaterial color={CANOPY} emissive={AMBER} emissiveIntensity={0.5} roughness={0.62} metalness={0.05} envMapIntensity={1.1} />
-        </mesh>
-      </group>
-      <pointLight ref={glow} position={[0, 16, 2]} color={AMBER} distance={60} intensity={7} />
-      <pointLight position={[0, 13, 0]} color={GOLD} distance={16} intensity={3} />
-    </group>
-  );
-}
-
-function Portal({ onEnter }: { onEnter: () => void }) {
-  const ring = useRef<THREE.Mesh>(null);
-  const inner = useRef<THREE.Mesh>(null);
-  const mat = useRef<THREE.MeshStandardMaterial>(null);
-  const hovered = useRef(false);
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (ring.current) {
-      ring.current.rotation.z = t * 0.15;
-      ring.current.scale.setScalar(1 + Math.sin(t) * 0.014 + (hovered.current ? 0.04 : 0));
-    }
-    if (mat.current) mat.current.emissiveIntensity = THREE.MathUtils.lerp(mat.current.emissiveIntensity, hovered.current ? 3 : 1.8, 0.08);
-    if (inner.current) (inner.current.material as THREE.MeshBasicMaterial).opacity = 0.26 + Math.sin(t * 1.4) * 0.12 + (hovered.current ? 0.12 : 0);
-  });
-  return (
-    <group
-      position={[-36, 12, -18]}
-      onClick={(e) => {
-        e.stopPropagation();
-        onEnter();
-      }}
-      onPointerOver={() => {
-        hovered.current = true;
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={() => {
-        hovered.current = false;
-        document.body.style.cursor = "default";
-      }}
-    >
-      <mesh ref={ring}>
-        <torusGeometry args={[10.5, 0.85, 22, 110]} />
-        <meshStandardMaterial ref={mat} color={PORTAL_VIOLET} emissive={PORTAL_VIOLET} emissiveIntensity={1.8} roughness={0.25} metalness={0.3} envMapIntensity={1.2} />
-      </mesh>
-      <mesh ref={inner}>
-        <circleGeometry args={[9.8, 72]} />
-        <meshBasicMaterial color={PORTAL_VIOLET} transparent opacity={0.28} side={THREE.DoubleSide} depthWrite={false} />
-      </mesh>
-      <Sparkles count={130} scale={[22, 22, 3]} size={4} speed={0.45} color={PORTAL_VIOLET} />
-      <pointLight color={PORTAL_VIOLET} distance={64} intensity={18} />
-    </group>
-  );
-}
-
-function Flowers({ count }: { count: number }) {
-  const heads = useRef<THREE.InstancedMesh>(null);
-  const stems = useRef<THREE.InstancedMesh>(null);
-  const palette = useMemo(
-    () => [new THREE.Color("#ffb3d1"), new THREE.Color(GOLD), new THREE.Color("#c9a8ff"), new THREE.Color(CANOPY), new THREE.Color("#fff3df")],
-    [],
-  );
-  const seeds = useMemo(
-    () =>
-      Array.from({ length: count }, () => {
-        const a = Math.random() * Math.PI * 2;
-        const r = 6 + Math.random() * 120;
-        return {
-          x: Math.cos(a) * r,
-          z: Math.sin(a) * r,
-          head: 0.4 + Math.random() * 0.7,
-          stem: 1.4 + Math.random() * 3,
-          phase: Math.random() * Math.PI * 2,
-          color: palette[Math.floor(Math.random() * palette.length)],
-          open: 0,
-        };
-      }),
-    [count, palette],
-  );
-  useFrame((state) => {
-    const h = heads.current;
-    const s = stems.current;
-    if (!h || !s) return;
-    const t = state.clock.elapsedTime;
-    const cam = state.camera.position;
-    const d = new THREE.Object3D();
-    seeds.forEach((f, i) => {
-      const dist = Math.hypot(f.x - cam.x, f.z - cam.z);
-      const target = THREE.MathUtils.clamp((28 - dist) / 28, 0, 1);
-      f.open += (target - f.open) * 0.08;
-      const sway = Math.sin(t * 1.05 + f.phase) * 0.12;
-      d.position.set(f.x, f.stem / 2, f.z);
-      d.rotation.set(sway * 0.4, 0, sway * 0.4);
-      d.scale.set(0.06, f.stem, 0.06);
-      d.updateMatrix();
-      s.setMatrixAt(i, d.matrix);
-      const headScale = f.head * (0.45 + f.open * 1.35);
-      d.position.set(f.x + sway * 0.25, f.stem + 0.15, f.z + sway * 0.25);
-      d.rotation.set(0, t * 0.22 + f.phase, 0);
-      d.scale.setScalar(headScale);
-      d.updateMatrix();
-      h.setMatrixAt(i, d.matrix);
-      if (t < 0.1) h.setColorAt(i, f.color);
-    });
-    h.instanceMatrix.needsUpdate = true;
-    s.instanceMatrix.needsUpdate = true;
-    if (h.instanceColor) h.instanceColor.needsUpdate = true;
-  });
-  return (
-    <group>
-      <instancedMesh ref={stems} args={[undefined, undefined, count]}>
-        <cylinderGeometry args={[1, 1, 1, 5]} />
-        <meshStandardMaterial color="#356b46" roughness={0.8} envMapIntensity={0.6} />
-      </instancedMesh>
-      <instancedMesh ref={heads} args={[undefined, undefined, count]}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial vertexColors emissive={AMBER} emissiveIntensity={0.3} roughness={0.5} envMapIntensity={0.9} />
-      </instancedMesh>
-    </group>
-  );
-}
-
-/* ── Volumetrik ışık sütunları + içinde toz ── */
-function LightShafts({ count }: { count: number }) {
-  const grp = useRef<THREE.Group>(null);
-  const shafts = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => ({
-        x: -52 + (i * 104) / count + (Math.random() - 0.5) * 10,
-        z: -34 + Math.random() * 48,
-        tilt: (Math.random() - 0.5) * 0.22,
-        phase: Math.random() * Math.PI * 2,
-        w: 2.6 + Math.random() * 3.2,
-      })),
-    [count],
-  );
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    grp.current?.children.forEach((c, i) => {
-      const mesh = c.children?.[0] as THREE.Mesh | undefined;
-      if (mesh) (mesh.material as THREE.MeshBasicMaterial).opacity = 0.05 + (Math.sin(t * 0.32 + shafts[i].phase) + 1) * 0.035;
-    });
-  });
-  return (
-    <group ref={grp}>
-      {shafts.map((s, i) => (
-        <group key={i} position={[s.x, 32, s.z]} rotation={[0, 0, s.tilt]}>
-          <mesh>
-            <cylinderGeometry args={[s.w * 0.28, s.w, 62, 14, 1, true]} />
-            <meshBasicMaterial color={AMBER} transparent opacity={0.07} side={THREE.DoubleSide} depthWrite={false} blending={THREE.AdditiveBlending} fog={false} />
-          </mesh>
-          <Sparkles count={18} scale={[s.w * 1.6, 50, s.w * 1.6]} size={2.2} speed={0.18} color={GOLD} opacity={0.7} />
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function SceneBreath({ breath }: { breath: React.MutableRefObject<number> }) {
-  const amb = useRef<THREE.AmbientLight>(null);
-  const hemi = useRef<THREE.HemisphereLight>(null);
-  useFrame(() => {
-    const b = breath.current;
-    if (amb.current) amb.current.intensity = 0.55 + b * 0.08;
-    if (hemi.current) hemi.current.intensity = 0.85 + b * 0.12;
-  });
+function LiveLayer() {
   return (
     <>
-      <ambientLight ref={amb} intensity={0.55} />
-      <hemisphereLight ref={hemi} args={["#ffe7c0", "#08180f", 0.85]} />
+      <ambientLight intensity={0.9} />
+      {/* altın ateşböcekleri — yakın, parlak */}
+      <Sparkles count={70} scale={[16, 9, 4]} position={[0, 0.5, 1]} size={3} speed={0.25} color="#ffd98a" opacity={0.9} />
+      {/* turkuaz ışık kelebekleri / spor — orta katman */}
+      <Sparkles count={46} scale={[18, 10, 5]} position={[2, -0.5, 2]} size={5} speed={0.45} color="#8fe6d8" opacity={0.85} />
+      {/* ince altın polen — geniş, yavaş, derin */}
+      <Sparkles count={130} scale={[22, 12, 3]} position={[0, 0, -1]} size={1.8} speed={0.1} color="#ffe6c0" opacity={0.65} />
+      {/* havada asılı su zerreleri — yavaş, soğuk */}
+      <Sparkles count={60} scale={[20, 11, 4]} position={[-2, 0.5, 0.5]} size={2.4} speed={0.06} color="#bfeede" opacity={0.55} />
     </>
   );
 }
 
-function CameraDrift() {
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    // çok hafif sinematik kayma (OrbitControls damping ile uyumlu)
-    state.camera.position.y += Math.sin(t * 0.18) * 0.004;
-  });
-  return null;
-}
-
-/* ── Kök ağları — ağaç dibinden yayılan biolüminesan altın lekeler ── */
-function Roots() {
-  const nodes = useMemo(
-    () =>
-      Array.from({ length: 24 }, () => {
-        const a = Math.random() * Math.PI * 2;
-        const r = 2 + Math.random() * 22;
-        return { x: Math.cos(a) * r, z: Math.sin(a) * r, s: 0.6 + Math.random() * 2.4 };
-      }),
-    [],
-  );
-  return (
-    <group position={[6, 0.06, -46]}>
-      {nodes.map((n, i) => (
-        <mesh key={i} position={[n.x, 0, n.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[n.s, 16]} />
-          <meshBasicMaterial color={AMBER} transparent opacity={0.09} depthWrite={false} blending={THREE.AdditiveBlending} fog />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Scene({ q, onEnter }: { q: QualitySettings; onEnter: () => void }) {
-  const breath = useRef(0);
-  return (
-    <>
-      <color attach="background" args={[FOG]} />
-      {/* yoğun-ama-yumuşak sis = atmosferik derinlik; kalp sise gömülür */}
-      <fog attach="fog" args={[FOG, 16, 130]} />
-
-      <SceneBreath breath={breath} />
-      <directionalLight position={[24, 64, 28]} intensity={1.25} color="#ffe9c4" />
-      <directionalLight position={[-30, 42, -22]} intensity={0.5} color="#9fb6ff" />
-
-      <SkyDome />
-      <Suspense fallback={null}>
-        <Backdrop />
-      </Suspense>
-
-      <Ground />
-      <DistantForest count={q.forest} />
-      <LightShafts count={q.shafts} />
-      <HeartTree breath={breath} />
-      <Roots />
-      <Portal onEnter={onEnter} />
-      <Flowers count={Math.round(q.flowers * 1.4)} />
-
-      {/* ATMOSFER ÖNCE: yoğun polen + alçak spor katmanı + ışık zerreleri (önce hisset, sonra kalbi fark et) */}
-      <Sparkles count={Math.round(q.pollen * 1.5)} scale={[150, 42, 150]} position={[0, 14, 12]} size={2.6} speed={0.16} color={GOLD} opacity={0.8} />
-      <Sparkles count={Math.round(q.pollen)} scale={[120, 5, 120]} position={[0, 1.8, 14]} size={3.4} speed={0.32} color="#bfe89a" opacity={0.85} />
-      <Sparkles count={Math.round(q.pollen * 0.5)} scale={[90, 3, 90]} position={[0, 0.7, 18]} size={4.2} speed={0.45} color={AMBER_DEEP} opacity={0.7} />
-
-      <CameraDrift />
-      <OrbitControls
-        target={[3, 8, -22]}
-        enablePan={false}
-        minDistance={14}
-        maxDistance={110}
-        minPolarAngle={Math.PI * 0.06}
-        maxPolarAngle={Math.PI * 0.49}
-        enableDamping
-        dampingFactor={0.07}
-        rotateSpeed={0.55}
-        zoomSpeed={0.9}
-      />
-
-      <EffectComposer>
-        <Bloom intensity={0.5} luminanceThreshold={0.34} luminanceSmoothing={0.55} mipmapBlur />
-        <Vignette eskil={false} offset={0.2} darkness={0.78} />
-      </EffectComposer>
-    </>
-  );
-}
-
-export default function GaiaExperience({ onEnter }: { onEnter: () => void }) {
-  const q = useMemo(() => detectQuality(), []);
+export default function GaiaExperience() {
   return (
     <Canvas
-      shadows={false}
-      dpr={q.dpr}
-      camera={{ position: [0, 7, 50], fov: 56 }}
-      gl={{ antialias: true, powerPreference: "high-performance" }}
+      gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+      dpr={[1, 2]}
+      camera={{ position: [0, 0, 12], fov: 50 }}
     >
-      <Scene q={q} onEnter={onEnter} />
+      <LiveLayer />
     </Canvas>
   );
 }
