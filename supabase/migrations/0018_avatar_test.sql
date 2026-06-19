@@ -1,47 +1,37 @@
 -- ============================================================================
--- CAELINUS · Avatar Test — Sonuç + "% kaç anlattı" verisi
+-- CAELINUS · Avatar/Bilinç Testi — Sonuç + "% kaç anlattı" verisi
 -- Migration: 0018_avatar_test.sql
 -- ----------------------------------------------------------------------------
--- "/test" akışının çıktısını ve asıl altın veriyi (accuracy %) saklar.
+-- Veri İZOLE pilot tablosunda toplanır: public.pilot_responses (Gaia projesi).
+-- ÜRETİM TABLOLARINA DOKUNULMAZ. Bu migration yalnızca eksik kolonları EKLER
+-- (ADD COLUMN IF NOT EXISTS) — mevcut kolonlar (shadow_key, percent, note,
+-- scores, ts, created_at) korunur.
+--
 -- Hedef: 50-100 kişide "İnsanlar kendilerini Caelinus içinde buluyor mu?"
 -- sorusunu ölçmek. Anonim doldurulabilir (Gate33 trafiği); yazma yalnız
 -- API route üzerinden service-role ile yapılır.
 --
--- Çıktı 5 değer + skorlar + accuracy:
---   primary/secondary/shadow/gate district + calling + light/shadow scores
---   accuracy: kullanıcının "bu kart beni % kaç anlattı" cevabı (0-100)
+-- Kolon eşlemesi (API: app/api/avatar-test/route.ts):
+--   primary_key   ← Ana Bilinç (district)
+--   secondary_key ← İkincil Bilinç (district)
+--   shadow_key    ← Düştüğün Gölge (district)             [mevcut kolon]
+--   gate_key      ← Kapın (gölgenin panzehiri, district)
+--   calling       ← Çağrı (Şifacı/Oracle/…)
+--   percent       ← "Bu kart seni yüzde kaç anlattı?" 0-100 [mevcut kolon]
+--   scores        ← { light: {...}, shadow: {...} } jsonb    [mevcut kolon]
+--   session_key   ← anonim oturum anahtarı (crypto.randomUUID)
 -- ============================================================================
 
-create table if not exists public.avatar_test_results (
-  id                 uuid primary key default gen_random_uuid(),
-  /* Giriş yapmışsa kullanıcı; çoğu anonim. */
-  user_id            uuid references auth.users(id) on delete set null,
-  /* Anonim oturum anahtarı (client crypto.randomUUID) — dedupe/telemetri. */
-  session_key        text,
-  /* Sonuç — 8 district'ten biri. */
-  primary_district   text not null,
-  secondary_district text,
-  shadow_district    text not null,
-  gate_district      text not null,
-  calling            text,
-  /* Ham skorlar — sonradan analiz için (jsonb). */
-  light_scores       jsonb,
-  shadow_scores      jsonb,
-  /* ASIL VERİ: "bu kart beni % kaç anlattı" (0-100). */
-  accuracy           smallint check (accuracy is null or (accuracy >= 0 and accuracy <= 100)),
-  created_at         timestamptz not null default now()
-);
+alter table public.pilot_responses
+  add column if not exists primary_key   text,
+  add column if not exists secondary_key text,
+  add column if not exists gate_key      text,
+  add column if not exists calling       text,
+  add column if not exists session_key   text;
 
-create index if not exists idx_avatar_test_results_created   on public.avatar_test_results(created_at desc);
-create index if not exists idx_avatar_test_results_primary    on public.avatar_test_results(primary_district);
-create index if not exists idx_avatar_test_results_shadow     on public.avatar_test_results(shadow_district);
+create index if not exists pilot_responses_created_at_idx on public.pilot_responses (created_at desc);
+create index if not exists pilot_responses_primary_idx    on public.pilot_responses (primary_key);
+create index if not exists pilot_responses_session_idx    on public.pilot_responses (session_key);
 
--- RLS: yalnız service role yazar/okur; tüm I/O API route üzerinden (admin client).
-alter table public.avatar_test_results enable row level security;
-
-drop policy if exists "avatar_test_service_all" on public.avatar_test_results;
-create policy "avatar_test_service_all" on public.avatar_test_results
-  for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
-
-comment on table public.avatar_test_results is
-  'Caelinus Avatar Test sonuçları + accuracy (% kaç anlattı) — MVP veri toplama';
+-- RLS: tablo zaten row level security açık. Yazma service-role admin client
+-- ile yapıldığı için (service-role RLS'i bypass eder) ek policy gerekmez.

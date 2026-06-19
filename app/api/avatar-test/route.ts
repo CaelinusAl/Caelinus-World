@@ -1,9 +1,10 @@
 /**
  * POST /api/avatar-test
  *
- * Avatar Testi sonucunu + "% kaç anlattı" verisini kaydeder
- * (avatar_test_results, migration 0018). Anonim doldurulabilir; yazma
- * service-role admin client ile yapılır.
+ * Avatar Testi sonucunu + "% kaç anlattı" verisini kaydeder.
+ * İZOLE PİLOT TABLOSU: public.pilot_responses (Gaia projesi). Üretim
+ * tablolarına dokunulmaz. Anonim doldurulabilir; yazma service-role
+ * admin client ile yapılır.
  *
  * Best-effort: Supabase env yoksa veya yazım başarısızsa akış KIRILMAZ —
  * { ok:false } döner, kullanıcı yine sonucunu görür (kart client'ta hesaplanır).
@@ -49,16 +50,15 @@ export async function POST(req: Request) {
   try {
     const admin = createSupabaseAdminClient();
     const { data, error } = await admin
-      .from("avatar_test_results")
+      .from("pilot_responses")
       .insert({
-        primary_district: d.primary,
-        secondary_district: d.secondary ?? null,
-        shadow_district: d.shadow,
-        gate_district: d.gate,
+        primary_key: d.primary,
+        secondary_key: d.secondary ?? null,
+        shadow_key: d.shadow,
+        gate_key: d.gate,
         calling: d.calling ?? null,
-        light_scores: d.lightScores ?? null,
-        shadow_scores: d.shadowScores ?? null,
-        accuracy: d.accuracy ?? null,
+        percent: d.accuracy ?? null,
+        scores: { light: d.lightScores ?? null, shadow: d.shadowScores ?? null },
         session_key: d.sessionKey ?? null,
       } as never)
       .select("id")
