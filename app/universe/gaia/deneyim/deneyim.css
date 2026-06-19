@@ -4,26 +4,42 @@
   z-index: 1000;
   overflow: hidden;
   background-color: #060d0c;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  cursor: default;
+}
+
+/* ── Matte (Ken-Burns: kaydırdıkça ağaca doğru süzülür) ── */
+.gx-bg {
+  position: absolute;
+  inset: -5%;
+  z-index: 0;
   background-image: url("/universe/gaia-heart.jpg");
   background-size: cover;
-  background-position: calc(50% + var(--gx-px, 0) * 1%) calc(50% + var(--gx-py, 0) * 1%);
-  transition: background-position 0.5s ease-out;
-  font-family: var(--font-sans, system-ui, sans-serif);
+  background-position: center;
+  transform-origin: 72% 30%;
+  transform:
+    scale(calc(1 + var(--gx-zoom, 0) * 0.55))
+    translate(calc(var(--gx-px, 0) * 0.6%), calc(var(--gx-py, 0) * 0.5%));
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
 }
 
-.gx-canvas {
+/* ── Kök damarları parıltısı (yaklaştıkça yoğunlaşır) ── */
+.gx-veins {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  z-index: 1;
+  bottom: 4%;
+  right: 14%;
+  width: 60vw;
+  height: 38vh;
+  background: radial-gradient(ellipse at 60% 20%, rgba(255, 196, 116, 0.28) 0%, rgba(120, 230, 200, 0.12) 35%, rgba(0, 0, 0, 0) 70%);
+  mix-blend-mode: screen;
   pointer-events: none;
-}
-.gx-canvas canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
+  opacity: calc(0.15 + var(--gx-progress, 0) * 0.85);
+  transition: opacity 0.6s ease-out;
 }
 
-/* ── Atan gövde — Kalp Ağacı'nın üstünde nabız glow (B'de ağaç sağ-üst) ── */
+/* ── Atan gövde — Kalp Ağacı nabzı ── */
 .gx-pulse {
   position: absolute;
   z-index: 1;
@@ -33,7 +49,6 @@
   height: 20vw;
   max-width: 360px;
   max-height: 360px;
-  transform: translate(45%, -8%) scale(1);
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 196, 116, 0.45) 0%, rgba(255, 170, 90, 0.16) 42%, rgba(255, 170, 90, 0) 70%);
   pointer-events: none;
@@ -41,9 +56,47 @@
   animation: gx-beat 3.6s ease-in-out infinite;
 }
 @keyframes gx-beat {
-  0%, 100% { opacity: 0.45; transform: translate(45%, -8%) scale(1); }
+  0%, 100% { opacity: 0.42; transform: translate(45%, -8%) scale(1); }
   42% { opacity: 0.85; transform: translate(45%, -8%) scale(1.13); }
-  54% { opacity: 0.66; transform: translate(45%, -8%) scale(1.05); }
+  54% { opacity: 0.64; transform: translate(45%, -8%) scale(1.05); }
+}
+
+/* ── Canlı parçacık katmanı (kademeli uyanış: ilk ~4sn sakin) ── */
+.gx-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  animation: gx-awaken 5s ease-out 1.2s forwards;
+}
+.gx-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+@keyframes gx-awaken {
+  to { opacity: 1; }
+}
+
+/* ── Düşen yapraklar ── */
+.gx-leaf {
+  position: absolute;
+  z-index: 2;
+  top: -6%;
+  width: 12px;
+  height: 12px;
+  border-radius: 60% 0 60% 0;
+  background: rgba(214, 196, 140, 0.55);
+  pointer-events: none;
+  opacity: 0;
+  animation: gx-fall linear infinite;
+}
+@keyframes gx-fall {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(112vh) translateX(40px) rotate(220deg); opacity: 0; }
 }
 
 .gx-head {
@@ -56,64 +109,60 @@
   align-items: baseline;
   pointer-events: none;
 }
-.gx-title {
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.4em;
-  font-size: clamp(1rem, 2.4vw, 1.5rem);
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
-}
-.gx-sub {
-  color: #ffce8a;
-  letter-spacing: 0.34em;
-  font-size: clamp(0.55rem, 1.3vw, 0.7rem);
-}
+.gx-title { color: #fff; font-weight: 600; letter-spacing: 0.4em; font-size: clamp(1rem, 2.4vw, 1.5rem); text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6); }
+.gx-sub { color: #ffce8a; letter-spacing: 0.34em; font-size: clamp(0.55rem, 1.3vw, 0.7rem); }
 
-.gx-overlay {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: clamp(20px, 4vh, 44px);
-  text-align: center;
-  z-index: 4;
-  pointer-events: none;
-  padding: 0 16px;
-}
+/* ── Mantra (arc: cross-fade) ── */
+.gx-overlay { position: absolute; left: 0; right: 0; bottom: clamp(28px, 7vh, 70px); text-align: center; z-index: 4; pointer-events: none; padding: 0 24px; }
 .gx-mantra {
   color: #f3ead8;
   font-style: italic;
-  font-size: clamp(0.95rem, 2.2vw, 1.35rem);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75);
-  margin: 0 0 8px;
-}
-.gx-meta {
-  color: #d9c9a8;
-  letter-spacing: 0.14em;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  margin: 0 0 6px;
-}
-.gx-meta b {
-  color: #ffce8a;
-  font-weight: 600;
-}
-.gx-hint {
-  color: #9fbfb0;
-  letter-spacing: 0.14em;
-  font-size: clamp(0.6rem, 1.3vw, 0.72rem);
+  font-size: clamp(1.05rem, 2.5vw, 1.6rem);
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.85);
   margin: 0;
+  transition: opacity 1s ease;
+  min-height: 1.6em;
 }
+.gx-mantra.fading { opacity: 0; }
+.gx-hint { color: #9fbfb0; letter-spacing: 0.16em; font-size: clamp(0.62rem, 1.3vw, 0.74rem); margin: 14px 0 0; opacity: 0.85; transition: opacity 0.6s ease; }
+.gx-hint.gone { opacity: 0; }
 
-.gx-loading {
+/* ── Çıkış ── */
+.gx-exit {
+  position: absolute;
+  right: clamp(16px, 3vw, 30px);
+  top: clamp(14px, 3vw, 26px);
+  z-index: 5;
+  background: rgba(8, 18, 14, 0.5);
+  border: 1px solid rgba(159, 191, 176, 0.4);
+  color: #d9e8df;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s, border-color 0.2s;
+}
+.gx-exit:hover { background: rgba(20, 40, 30, 0.7); border-color: #9fbfb0; }
+
+.gx-veil {
   position: absolute;
   inset: 0;
+  z-index: 9;
   display: grid;
   place-items: center;
-  color: #ffd9a0;
-  letter-spacing: 0.3em;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+  background: radial-gradient(circle at 60% 35%, rgba(20, 40, 30, 0.6), rgba(4, 10, 8, 0.98) 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.1s ease;
 }
+.gx-veil.on { opacity: 1; pointer-events: all; }
+.gx-veil p { color: #f3ead8; font-style: italic; font-size: clamp(1.1rem, 3vw, 1.8rem); text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8); }
+
+.gx-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #ffd9a0; letter-spacing: 0.3em; font-size: 0.8rem; text-transform: uppercase; z-index: 3; }
 
 @media (max-width: 720px) {
   .gx-pulse { right: 12%; top: 12%; }
+  .gx-bg { transform-origin: 70% 32%; }
 }
