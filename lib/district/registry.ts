@@ -216,8 +216,11 @@ export const DISTRICTS: Record<DistrictKey, District> = {
     blender: {
       sceneId: "DISTRICT_04_BAZAAR",
       // Faz 6 — ilk canlı 3B district sahnesi (DISTRICT_04_BAZAAR.blend → GLB).
-      glb: "/models/districts/bazaar/bazaar.glb",
-      previewImage: "/models/districts/bazaar/preview.jpg",
+      // NOT: GLB/preview asset'leri henüz public/'a eklenmedi. Dosya yokken
+      // useGLTF 404 atıp /universe sahnesini çökertiyordu → asset üretilene
+      // kadar yorumda (Sanri gibi). Eklenince bu iki satırı geri aç.
+      // glb: "/models/districts/bazaar/bazaar.glb",
+      // previewImage: "/models/districts/bazaar/preview.jpg",
       env: "mirror-gate",
       camera: {
         position: [0, 1.6, 7],
