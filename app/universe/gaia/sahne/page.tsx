@@ -4,13 +4,14 @@
  * /universe/gaia/sahne — Universe 2.0 · Gaia (gezilebilir district sahnesi)
  *
  * Hibrit: mevcut render arka plan + yürünebilir 3B objeler. R3F yalnız
- * tarayıcıda çalışır → sahne dynamic(ssr:false). DOM overlay bilinç katmanını
- * (mantra / Çağrı / Kapı) ve ambient ses toggle'ını taşır.
+ * tarayıcıda → sahne dynamic(ssr:false). DOM overlay bilinç katmanını
+ * (mantra / Çağrı / Kapı), ambient ses ve portal geçiş veil'ini taşır.
  */
 
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { setAmbienceMuted, startAmbience, stopAmbience } from "./_components/ambience";
 import "./sahne.css";
 
 const GaiaScene = dynamic(() => import("./_components/GaiaScene"), {
@@ -25,29 +26,50 @@ const GaiaScene = dynamic(() => import("./_components/GaiaScene"), {
 
 export default function GaiaSahnePage() {
   const router = useRouter();
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [sound, setSound] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [soundStarted, setSoundStarted] = useState(false);
+  const [entering, setEntering] = useState(false);
+  const enteringRef = useRef(false);
+
+  // Ambient ses — ilk kullanıcı jestinde otomatik başlar (autoplay politikası).
+  useEffect(() => {
+    const onFirstGesture = () => {
+      if (startAmbience()) setSoundStarted(true);
+      window.removeEventListener("pointerdown", onFirstGesture);
+    };
+    window.addEventListener("pointerdown", onFirstGesture, { once: false });
+    return () => {
+      window.removeEventListener("pointerdown", onFirstGesture);
+      stopAmbience();
+    };
+  }, []);
 
   function toggleSound() {
-    const a = audioRef.current;
-    if (!a) return;
-    if (sound) {
-      a.pause();
-      setSound(false);
-    } else {
-      // best-effort: dosya yoksa/oynatılamıyorsa sessizce yut
-      a.play().then(() => setSound(true)).catch(() => setSound(false));
+    if (!soundStarted) {
+      if (startAmbience()) {
+        setSoundStarted(true);
+        setMuted(false);
+      }
+      return;
     }
+    const next = !muted;
+    setMuted(next);
+    setAmbienceMuted(next);
   }
+
+  // Portala dokununca geçiş hissi: veil dolar → bahçeye in.
+  const enterPortal = useCallback(() => {
+    if (enteringRef.current) return;
+    enteringRef.current = true;
+    setEntering(true);
+    setTimeout(() => router.push("/universe/gaia"), 1100);
+  }, [router]);
 
   return (
     <main className="gsahne-root">
       <div className="gsahne-canvas">
-        <GaiaScene onEnter={() => router.push("/universe/gaia")} />
+        <GaiaScene onEnter={enterPortal} />
       </div>
-
-      {/* Ambient ses — opsiyonel asset: public/universe/gaia-ambient.mp3 */}
-      <audio ref={audioRef} src="/universe/gaia-ambient.mp3" loop preload="none" />
 
       {/* ── Bilinç katmanı (overlay) ── */}
       <header className="gsahne-top">
@@ -56,7 +78,7 @@ export default function GaiaSahnePage() {
       </header>
 
       <button className="gsahne-sound" onClick={toggleSound} aria-label="Ortam sesi">
-        {sound ? "🔊" : "🔇"}
+        {soundStarted && !muted ? "🔊" : "🔇"}
       </button>
 
       <div className="gsahne-card">
@@ -76,6 +98,11 @@ export default function GaiaSahnePage() {
           Gaia’s Garden’a gir →
         </button>
       </nav>
+
+      {/* Portal geçiş veil'i */}
+      <div className={`gsahne-veil${entering ? " is-entering" : ""}`} aria-hidden="true">
+        <span className="gsahne-veil-glyph">🌀</span>
+      </div>
     </main>
   );
 }

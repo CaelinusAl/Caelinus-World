@@ -143,6 +143,44 @@
 }
 .gsahne-link-go:hover { border-color: #b69cff; background: rgba(182, 156, 255, 0.12); }
 
+/* ── Portal geçiş veil'i ── */
+.gsahne-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(182, 156, 255, 0.0) 0%, rgba(182, 156, 255, 0.0) 40%, #06140d 100%);
+  transition: none;
+}
+.gsahne-veil-glyph {
+  font-size: 56px;
+  opacity: 0;
+  transform: scale(0.3) rotate(0deg);
+}
+.gsahne-veil.is-entering {
+  opacity: 1;
+  pointer-events: all;
+  background: radial-gradient(circle at center, rgba(182, 156, 255, 0.85) 0%, rgba(122, 96, 200, 0.9) 45%, #06140d 100%);
+  animation: gsahne-veil-in 1.1s ease-in forwards;
+}
+.gsahne-veil.is-entering .gsahne-veil-glyph {
+  animation: gsahne-veil-glyph 1.1s ease-in forwards;
+}
+@keyframes gsahne-veil-in {
+  0% { opacity: 0; }
+  35% { opacity: 0.55; }
+  100% { opacity: 1; }
+}
+@keyframes gsahne-veil-glyph {
+  0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: scale(2.6) rotate(220deg); }
+}
+
 @media (max-width: 600px) {
   .gsahne-top { top: 16px; left: 16px; }
   .gsahne-card { bottom: 104px; }
