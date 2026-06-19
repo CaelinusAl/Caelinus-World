@@ -26,8 +26,8 @@ const BodySchema = z.object({
   shadow: z.enum(DISTRICTS),
   gate: z.enum(DISTRICTS),
   calling: z.string().max(80).optional(),
-  lightScores: z.record(z.number()).optional(),
-  shadowScores: z.record(z.number()).optional(),
+  lightScores: z.record(z.string(), z.number()).optional(),
+  shadowScores: z.record(z.string(), z.number()).optional(),
   accuracy: z.number().int().min(0).max(100).optional(),
   sessionKey: z.string().max(64).optional(),
 });
