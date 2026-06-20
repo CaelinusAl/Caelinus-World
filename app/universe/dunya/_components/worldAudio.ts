@@ -194,7 +194,7 @@ export function createWorldAudio(): WorldAudio {
     g.gain.linearRampToValueAtTime(0.0001, now + 2.1);
     src.connect(bp);
     bp.connect(g);
-    g.connect(master);
+    if (master) g.connect(master);
     src.start(now);
     src.stop(now + 2.2);
   };
@@ -219,7 +219,7 @@ export function createWorldAudio(): WorldAudio {
     lg.connect(bp.frequency);
     src.connect(bp);
     bp.connect(g);
-    g.connect(master);
+    if (master) g.connect(master);
     src.start();
     lfo.start();
     water = {
