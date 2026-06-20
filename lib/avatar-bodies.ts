@@ -39,6 +39,13 @@ export type BodyEntry = {
   isDefault?: boolean;
   /** Kullanıcının kendisinin önerdiği body — "yeni / seninki" rozeti. */
   isPersonal?: boolean;
+  /**
+   * Beden hazır giyinik geliyor (örn. muse — saçlı + bikinili catwalk
+   * avatarı). Bu bedenlerde try-on garment binding'i ATLANIR; yoksa
+   * mesh'in kendi bikinisinin üstüne ikinci bir bikini bind edilir
+   * (çift kıyafet çakışması). Işık/aura illüzyon try-on'u yine çalışır.
+   */
+  preDressed?: boolean;
   /** Kabaca cinsiyet — UI'da grouping için (gerçek seçim kullanıcıda). */
   gender: BodyGender;
   /** "Selin", "Ay", "Ateş" gibi şiirsel tema — Caelinus brand. */
@@ -186,6 +193,9 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
     baseHeightM: 1.687,
     // Kendi PBR body texture'ı var; ten rengi mesh'in materyalinden gelir.
     supportsSkinToneOverride: false,
+    // Zaten bikinili geliyor — shop try-on'da garment binding'i atla
+    // (çift bikini çakışmasını önler).
+    preDressed: true,
     animationCompat: "mixamo",
   },
   ...SELIN_VARIANTS,
