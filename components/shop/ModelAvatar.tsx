@@ -170,9 +170,15 @@ function makeSkinMaterial(
 
   mat.name = source?.name ? `${source.name}:skin-tone` : "caelinus-skin-tone";
   mat.color = skin.clone();
-  // Embedded skin albedo textures can overpower dark tones. Keep PBR detail
-  // maps, but replace the base-color map so Espresso/Cocoa visibly become dark.
-  mat.map = null;
+  // Gerçekçi cilt: gömülü deri albedo texture'ını KORU (mat.map = source.map,
+  // clone'dan zaten geliyor). Ten rengi bu texture'ın üstüne three.js'in
+  // color × map çarpımıyla biniyor — açık tonlar dokuyu doğal gösterir, koyu
+  // tonlar gerçekçi koyulaştırır. (Eskiden `mat.map = null` cildi tek düz renge
+  // indirip plastik manken görünümü veriyordu — kök sebep buydu.)
+  if (!source?.map) {
+    // Kaynakta texture yoksa düz renk fallback (dış/standart-dışı materyaller).
+    mat.map = null;
+  }
   mat.emissive = aura.clone();
   mat.emissiveIntensity = 0.045;
   mat.roughness = Math.max(0.48, mat.roughness ?? 0.5);
