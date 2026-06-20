@@ -56,3 +56,10 @@ public/hero/_raw/
 # Blender çalışma + yedek dosyaları (repoya girmez; render çıktıları ayrı)
 *.blend
 *.blend1
+
+# Avatar deney klasörü (lokal + OneDrive'da tutulur, repoya/remote'a girmez — 4.6 GB)
+Avatar-Calisma/
+
+# Avatar çalışma + arşiv scratch (ağır GLB/PNG/bak — OneDrive'da yedekli, git'e girmez)
+_work/
+_archive/
