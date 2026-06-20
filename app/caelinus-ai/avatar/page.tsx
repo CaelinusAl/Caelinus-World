@@ -31,6 +31,7 @@ import LuxButton from "@/components/caelinus-ai/LuxButton";
 import ReadingCard from "@/components/caelinus-ai/ReadingCard";
 import SelfieCapture from "@/components/caelinus-ai/SelfieCapture";
 import StyleCustomizer from "@/components/caelinus-ai/StyleCustomizer";
+import { warmUpFace } from "@/lib/mediapipe-face";
 import {
   DEFAULT_STYLE_PROFILE,
   getActiveProvider,
@@ -91,6 +92,10 @@ export default function CaelinusAvatarPage() {
   const handleSelfie = useCallback((s: SelfieInput) => {
     setSelfieState(s);
     void saveSelfie(s);
+    // MediaPipe landmarker init'ini (GPU→CPU, ilk sefer yavaş) şimdiden
+    // arka planda başlat — kullanıcı stil seçerken bitsin, "Oluştur"
+    // anında detect hazır olsun. Donma yerine akıcı deneyim.
+    warmUpFace();
   }, []);
 
   const handleClearSelfie = useCallback(() => {
