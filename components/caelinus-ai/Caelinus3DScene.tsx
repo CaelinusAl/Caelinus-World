@@ -20,6 +20,7 @@
 import {
   Component,
   Suspense,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -61,7 +62,13 @@ function SceneLoading({ label = "Sahne örülüyor" }: { label?: string }) {
  * okunabilir bir mesaj gösteriyoruz ki teşhis kolay olsun.
  */
 class SceneErrorBoundary extends Component<
-  { children: ReactNode; onError?: (e: Error) => void },
+  {
+    children: ReactNode;
+    onError?: (e: Error) => void;
+    onRetry?: () => void;
+    /** Bu değer değişince hata sıfırlanır (parent retry tetikler). */
+    resetKey?: number;
+  },
   { error: Error | null }
 > {
   state = { error: null as Error | null };
@@ -75,19 +82,51 @@ class SceneErrorBoundary extends Component<
     this.props.onError?.(error);
   }
 
+  componentDidUpdate(prev: { resetKey?: number }) {
+    // Parent "tekrar dene" dedi → hata state'ini temizle ki children
+    // yeniden mount olsun ve GLB tekrar fetch edilsin.
+    if (prev.resetKey !== this.props.resetKey && this.state.error) {
+      this.setState({ error: null });
+    }
+  }
+
   render() {
     if (this.state.error) {
       return (
         <Html center transform={false} zIndexRange={[10, 0]}>
           <div className="cai-scene-inline-error" role="alert">
             <span className="cai-scene-inline-glyph">⚠</span>
-            <span>Sahne yüklenemedi — sayfayı yenile</span>
+            <span>Bedenin yüklenemedi — bağlantını kontrol et.</span>
+            <button
+              type="button"
+              className="cai-scene-retry-btn"
+              onClick={() => this.props.onRetry?.()}
+            >
+              Tekrar dene
+            </button>
           </div>
         </Html>
       );
     }
     return this.props.children;
   }
+}
+
+/**
+ * Kullanıcının işletim sisteminde "hareketi azalt" tercihi açıksa
+ * otomatik döndürmeyi kapatırız (erişilebilirlik + pil tasarrufu).
+ */
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return reduced;
 }
 
 const DEFAULT_MODEL = "/models/caelinus-avatar.glb";
@@ -125,6 +164,20 @@ export default function Caelinus3DScene({
   avatarUrlOverride = null,
 }: Props) {
   const url = avatarUrlOverride || avatar?.glbUrl || DEFAULT_MODEL;
+
+  // Erişilebilirlik: hareket hassasiyeti olan kullanıcıda otomatik dönüş kapalı
+  const reducedMotion = usePrefersReducedMotion();
+  // Kullanıcının döndür-durdur tercihini tutar (varsayılan: prop + reduced-motion)
+  const [rotating, setRotating] = useState(autoRotate);
+  useEffect(() => {
+    setRotating(autoRotate && !reducedMotion);
+  }, [autoRotate, reducedMotion]);
+  const effectiveAutoRotate = rotating && !reducedMotion;
+
+  // Hata sınırını "tekrar dene" ile sıfırlamak için artan anahtar
+  const [retryKey, setRetryKey] = useState(0);
+  const handleRetry = useCallback(() => setRetryKey((k) => k + 1), []);
+
   const tone =
     avatar?.outfitBindingHints?.supportsSkinToneOverride
       ? skinTone || avatar?.styleProfile.skinTone || "#d4ad8a"
@@ -164,8 +217,30 @@ export default function Caelinus3DScene({
         swapping ? "is-swapping" : ""
       } ${className}`}
       style={{ ["--accent" as string]: accent } as React.CSSProperties}
+      role="img"
+      aria-label={
+        tryOnLabel
+          ? `3D avatar — ${tryOnLabel} deneniyor. Sürükleyerek döndür.`
+          : "3D avatarın — fareyle sürükleyerek ya da parmağınla döndür."
+      }
     >
       <div className="cai-canvas-rim" aria-hidden="true" />
+
+      {/* Döndürmeyi durdur/oynat — kullanıcı kontrolü + pil tasarrufu */}
+      {!reducedMotion && (
+        <button
+          type="button"
+          className="cai-canvas-rotate-toggle"
+          onClick={() => setRotating((r) => !r)}
+          aria-pressed={rotating}
+          aria-label={
+            rotating ? "Döndürmeyi durdur" : "Döndürmeyi başlat"
+          }
+          title={rotating ? "Döndürmeyi durdur" : "Döndürmeyi başlat"}
+        >
+          {rotating ? "❚❚" : "▶"}
+        </button>
+      )}
       <div className="cai-canvas-swap-veil" aria-hidden="true">
         <div className="cai-canvas-swap-shimmer" />
         <div className="cai-canvas-swap-text">
@@ -209,10 +284,10 @@ export default function Caelinus3DScene({
           />
         )}
 
-        <SceneErrorBoundary>
+        <SceneErrorBoundary resetKey={retryKey} onRetry={handleRetry}>
           <Suspense fallback={<SceneLoading label="Bedenin geliyor…" />}>
             <ModelAvatar
-              key={url}
+              key={`${url}-${retryKey}`}
               url={url}
               skinTone={tone}
               auraColor={accent}
@@ -238,7 +313,7 @@ export default function Caelinus3DScene({
           enablePan={false}
           enableDamping
           dampingFactor={0.18}
-          autoRotate={autoRotate}
+          autoRotate={effectiveAutoRotate}
           autoRotateSpeed={0.6}
           minDistance={4}
           maxDistance={14}
