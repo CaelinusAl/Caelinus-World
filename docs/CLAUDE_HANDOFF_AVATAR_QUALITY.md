@@ -67,8 +67,11 @@ texture bake" adımlarını atladığı için statik/ağır/texture'sız → cli
 - `.claude/launch.json` (proje) — eski silinmiş `caelinus-src-local` path'i düzeltildi → `npm run dev`.
 - `C:\.claude\launch.json` — Claude Preview için oluşturuldu (next.cmd → OneDrive proje path'i).
 
-> ⚠️ **Bu değişiklikler henüz COMMIT EDİLMEDİ** (diskte duruyorlar, context temizlense de
-> kaybolmazlar). Devam edince ilk iş: feat branch'e commit + push önerilir (GitHub yedeği).
+> ✅ **COMMIT + PUSH EDİLDİ** (2026-06-20 oturum-2): `16ace08` (cilt+göz) + `b25e2de`
+> (gitignore hijyeni) → `origin/feat/avatar-shop-game-experience`'e push'landı. GitHub'da yedekli.
+> Ayrıca temizlendi: `combined.txt` (MPFB log), `_work/_eye-texture-dump.png`, `package-lock.json`
+> gürültüsü geri alındı, `next-env.d.ts` temizlendi; `.gitignore`'a `.claude/settings.local.json`
+> + `.claude/launch.json` + `combined.txt` eklendi.
 
 ---
 
@@ -80,28 +83,34 @@ Blender'da gemini.glb (286k→**15k decimate** + deniz-yeşili materyal verildi)
 
 ---
 
-## 6) AÇIK KARAR (devam edince İLK netleştirilecek) ⏳
-### A) Kıyafet (bikini) yöntemi — pilotlanacak:
-- **B — AI ile temiz 3D üret** (Rodin `generate_hyper3d_*` / Hunyuan `generate_hunyuan3d_*` /
-  Higgsfield `generate_3d` — hepsi bağlı) → Blender'da otomatik rig. **ÖNERİLEN pilot.**
-- **C — Blender'da sıfırdan modelle** (2-3 hero parça). En kaliteli, en emek. B yetersizse fallback.
-- **D — Sketchfab'den hazır riglenmiş** model (`download_sketchfab_model`). Lisans + uyum riski.
-- **A — Mevcut Meshy'leri kurtar** (conform+skin+retopo). Orta kalite tavanı, kırılgan.
-### B) Manken yönü:
-- Mevcut MakeHuman avatarı geliştirmeye devam (önerilen) / Foto-gerçek (Avaturn,RPM — kod destekliyor) / dokunma.
+## 6) KARARLAR — durum (oturum-2'de güncellendi)
+| Konu | Karar | Durum |
+|---|---|---|
+| **Avatar sırası** | Önce göz, sonra saç | Göz **ertelendi** (kullanıcı), **saça geçildi** |
+| **Saç yöntemi** | **Sketchfab'den kaliteli hazır model** (kalite sıçraması) | ⏸ Sketchfab entegrasyonu kapalı — kullanıcının API key girmesi bekleniyor |
+| **Selfie ↔ avatar derinliği** | Şimdilik **beklesin** (yüzeysel decal kalsın) | ⏸ Beklemede |
+| **İki mağaza** | **Tek mağazada birleştir** (`/universe/shop` kanonik) | ⏸ Karar verildi, uygulama sonraya |
+| **Kıyafet/bikini** | Yöntem seçimi (B AI-üret / C native / D Sketchfab / A Meshy) | ⏸ Beklemede (avatar bitince) |
+| **Manken yönü** | Mevcut MakeHuman avatarı geliştir (foto-gerçek Avaturn/RPM **YAZILMAMIŞ** — §10) | ✅ Sabit |
 
-**Senior öneri:** Önce **B pilotu** (tek temiz bikini AI-üret + rig) → işe yararsa hızlı,
-yaramazsa **C**. Manken: mevcut avatarı geliştirmeye devam.
+> Kıyafet için eski senior öneri (B AI-üret pilotu) hâlâ geçerli; ama önce avatar (saç+göz) bitecek.
 
 ---
 
-## 7) Kalan iş (öncelik sırası)
-1. (Karar) Kıyafet yöntemi seç (§6) → tek bikinide pilot → web catwalk testi.
-2. Göz kapağı/iri göz geometrisi (ikincil, mesh işi).
-3. Saç kalitesi (`hair-cards-NEW` bitir: texture + normal-map).
-4. `aries.glb` yeniden export (bozuk). `model/catwalk.glb` ölü duplike sil (raporlu).
-5. Runtime deform ince ayarı gerekiyorsa (`ModelAvatar.tsx` bacak çarpanları 0.8/0.85/0.9; DEFAULT_AVATAR height170/weight58).
-6. Tüm bikinileri seçilen yöntemle çoğalt + normalize. Export + web QA.
+## 7) Kalan iş (öncelik sırası — oturum-2 güncel)
+1. **SAÇ** (kalite sıçraması): Kullanıcı Sketchfab API key girince → MCP `search_sketchfab_models`
+   ile CC-BY/CC0 (ticari!) kadın uzun saç ara → `get_sketchfab_model_preview` → beğenileni
+   `download_sketchfab_model(target_size~0.6)` → kafaya oturt (tepe z≈1.69) → gövde iskeletine
+   bind / head-bone attach → export → web QA. **(§11 detay)**
+2. **GÖZ geometrisi** (ertelendi): fırlaklık DEĞİL — gerçek sorun **kapak aralığı fazla geniş**
+   (çok sclera → şaşkın bakış). Güvenli teknik §11'de.
+3. **KVKK** (🔴 launch blocker): selfie rıza onayı + silme endpoint'i + retention (§10-A). Satış öncesi şart.
+4. **Kıyafet/bikini** yöntemi (§6) → pilot → web catwalk testi.
+5. **Mağaza birleştirme**: `/caelinus-ai/shop` → `/universe/shop` (tek evren, §10-C).
+6. **Bakım/temizlik:** `/api/upload-face` 404 bug; `aries.glb` re-export (zstd bozuk);
+   saç GLB'sindeki 2m junk `Icosphere` export'ta sil; outfit 8/12 burç (taurus/leo/aquarius/sagittarius eksik);
+   `public/models/catwalk.glb` ölü duplike (kullanıcı "şimdilik dursun" dedi — SİLME).
+7. Runtime deform ince ayarı gerekiyorsa (`ModelAvatar.tsx` bacak çarpanları 0.8/0.85/0.9).
 
 ---
 
@@ -124,4 +133,94 @@ yaramazsa **C**. Manken: mevcut avatarı geliştirmeye devam.
 - Body library: `lib/avatar-bodies.ts` (`selin-v1`, hairUrl)
 - Ürün→GLB: `data/products.ts` (`OUTFIT_GLB_MAP`), `lib/config/outfit-binding-config.ts`
 - Default config: `types/avatar.ts` (`DEFAULT_AVATAR`)
-- VR: `app/vr/page.tsx` (XR kurulu ama içi placeholder; avatar entegre değil)
+- VR: `app/vr/page.tsx` (gerçek WebXR iskelesi — `createXRStore` + Enter VR; bilinçli "sessiz kapı")
+
+---
+
+## 10) FORENSİK — Selfie ↔ 3D Avatar ilişkisi + sayfa/vizyon (2026-06-20, 3 subagent)
+
+### A) Selfie kayıt/persist + arka plan
+- **3 AYRI selfie yükleme yolu** var (parçalanma):
+  1. `/universe/shop/avatar` → `components/shop/FaceUpload.tsx` (3D'ye bağlanan TEK yol).
+  2. `/play` → `app/play/_components/SelfieUploader.tsx` → Replicate `cdingram/face-swap` / FASHN (2D faceswap, 3D yok). Store: *"No persistence on purpose"* (`stores/play-store.ts:8`) → RAM, kalıcı değil.
+  3. `/caelinus-ai/*` → `components/caelinus-ai/SelfieCapture.tsx` → `/api/caelinus/jobs` → **fire-and-forget worker** (`startJobInBackground`) → **RunPod GPU** (`lib/caelinus-ai/jobs/runner.ts:146`). + IndexedDB (`storage.ts:110`).
+- **PERSIST? → env'e bağlı.** Default in-memory = geçici. `CAELINUS_AI_STUDIO_STORE=supabase` ise selfie base64 **Postgres `caelinus_ai_jobs.input`'a kalıcı** yazılır (`supabase-store.ts:149`). Avatar session aynı şekilde (`session-store.supabase.ts:76`).
+- **Arka plan? → EVET** (yol 3, RunPod worker + SSE stream). Yol 2 senkron, arka plan yok.
+- **`public/uploads/faces`** → hiçbir kod yazmıyor (ölü gitignore girdisi).
+- ⚠️ **KVKK RİSKİ:** `app/gizlilik/page.tsx` selfie'yi biyometrik özel-nitelikli veri sayıp *"açık rıza"* + *"işlem bitince silinir"* vaat ediyor AMA kodda **consent gate YOK, silme endpoint'i YOK, retention cron YOK**. Selfie Replicate/FASHN/RunPod'a (muhtemelen AB dışı) gidiyor. UI "selfie depolanmaz" diyor — yol 2 için doğru, yol 3 (Supabase açıksa DB'ye yazıyor) için **yanıltıcı**. Launch öncesi çözülmeli.
+- ⚠️ **BUG:** `FaceUpload.tsx:41` → `POST /api/upload-face` ama bu route **YOK** (404). Doğrulanmalı: ölü kod mu, kırık yol mu (shop avatar sayfası client-side MediaPipe `cropFaceFromUrl` kullanıyor olabilir — `applyFace`).
+
+### B) Selfie ↔ 3D Avatar buluşması → **YARIM-BAĞLI**
+- **Tek gerçek köprü:** `/universe/shop/avatar` → selfie → MediaPipe yüz kırpım → (1) GLB kafasına **2D decal** (`AvatarFaceTexture.tsx:115 DecalGeometry`) + (2) landmark → **mesh deform** (`mapMetricsToAvatarDeform`). localStorage `caelinus_face_texture` ile `/universe/shop` TryOnSection'a da taşınıyor.
+- **Gate:** sadece `supportsSkinToneOverride===true` (selin-v1=true) ise aktif.
+- **Foto-gerçek (Avaturn/RPM) = DORMANT:** çalışan kod YOK. Sadece `globals.css` boş `.avaturn-*` stilleri + `ModelAvatar.tsx:711` defansif heuristik + yorumlar. Handoff §6'daki *"Avaturn/RPM kod destekliyor"* ifadesi **yanıltıcı** — selfie→foto-gerçek-avatar zinciri yok. Bugün foto-gerçeklik = sadece 2D decal/faceswap.
+- `/play` ve `/caelinus-ai job` → 3D'ye veri geçirmiyor (ayrı). `Caelinus3DScene.tsx:222` ModelAvatar'ı `faceTextureUrl` olmadan çağırıyor.
+
+### C) Sayfa düzeni vs vizyon (kaynak: `docs/caelinus-bible.md`)
+- Vizyon: *"frekans evreni, izole sayfa yok, districts"*, *"Bazaar = sıradan e-ticaret değil"*, *"Wear your frequency"*, web→VR fazlama.
+- ✅ Güçlü: entry→universe→districts metaforu kodda gerçek; Bazaar ürün kartları hikâye/frekans taşıyor; avatar gerçekten 3D (placeholder değil); VR bilinçli "sessiz kapı" (gerçek WebXR iskelesi).
+- 🔴 **En kritik boşluk — İKİ AYRI MAĞAZA:** `/universe/shop` (Bible'a göre kanonik) vs `/caelinus-ai/shop` (ayrı sahne `Caelinus3DScene`, ayrı sepet `caelinus_ai_cart`, ayrı avatar). Sepet bile devredilmiyor → "tek evren" ilkesine aykırı. Birleştirme birincil aday.
+- ⚠️ 3+ paralel avatar üretim akışı; `/caelinus-ai/*` nav'dan kopuk (orphan); `/experience` `/` ile rakip prototip; outfit 8/12 burç (taurus, leo, aquarius, sagittarius eksik).
+
+---
+
+## 11) OTURUM-2 TEKNİK DETAY — göz denemesi + saç tanısı (2026-06-20)
+
+### GÖZ geometrisi — denendi, ERTELENDİ (kullanıcı isteğiyle geri alındı)
+- **Ölçüm (Blender, `Human` mesh, metre):** Göz materyali `Caelinus.eye` = 846 vert, 2 küre.
+  Göz küresi yarıçap ~1.1 cm (çap 2.2 cm) = **anatomik normal**. Ön nokta Y=−0.140, merkez −0.128.
+  Çevre cilt medyanı −0.128, kaş/burun −0.150 → **göz küresi DEPTH olarak fırlak DEĞİL**.
+- **Gerçek sorun:** **palpebral aperture (kapak aralığı) fazla geniş** → iris üstü/altı çok sclera
+  (beyaz) → "şaşkın/dik bakan" ifade. Texture değil, kapak geometrisi.
+- **Güvenli düzeltme tekniği (KANITLANDI, ama uygulanmadı):** Mesh'te **53 shape key** var
+  (52 ARKit + Basis). Bir vert'i TÜM shape key'lere AYNI delta ile kaydırmak, key'ler arası
+  **relative delta'yı korur** → blink/expression bozulmaz. Yani: (a) göz küresini +Y geri oturt,
+  (b) üst kapak kenarını aşağı / alt kapağı yukarı (falloff'lu) — hepsi tüm key'lere uniform.
+- **Güvenlik ağı:** İşlemden önce `Human` mesh'in gizli kopyası (`Human_EYEBACKUP`) alınır;
+  beğenilmezse birebir restore. Bu oturumda yapıldı, sonra kullanıcı "geri al" dedi → **tam revert
+  edildi, yedek silindi, custom prop temizlendi. Diske/GLB/git'e HİÇ dokunulmadı** (sadece canlı Blender).
+- ⚠️ Uyarı: `me.vertices[i].co` shape key'li mesh'te güvenilmez; **`me.shape_keys.key_blocks[*].data[i].co`**
+  üzerinden oku/yaz.
+
+### SAÇ — tanı kondu, Sketchfab yoluna girildi
+- **Üretim saçı** `public/models/hair/hair-long-wave.glb` (1.59 MB): Mesh `Hair` = **984 tri**,
+  816 vert, materyal `Caelinus.hair` (1024² renk texture `caelinus-hair.png`), **normal-map YOK**.
+  **Ayrı `Hair.rig` = 4 bone** (Hair_Root, Hair_01-03) — gövde iskeletini paylaşmıyor.
+- 🔴 **GLB içinde junk:** 2 metrelik başıboş `Icosphere` (80 tri, materyalsiz) gömülü — yanlışlıkla
+  export'a karışmış; web sahnesine de gidiyor olabilir. **Sonraki export'ta SİL.**
+- **Kalite sorunu:** Düz kartlar + BLEND alpha → "hayalet/şeffaf"; sert saç çizgisi; hacim yok.
+  Kök sebep materyal `blend_method = BLEND`. Bu oturumda **BLEND → HASHED** yapıldı (GLB export'ta
+  `alphaMode: MASK`/cutout = three.js'te opak; **sadece canlı Blender, export edilmedi**).
+- **Karar:** materyal tweak yetmez → **Sketchfab'den kaliteli hazır model** (kullanıcı seçti).
+- `_work/` varyantları: `hair-cards-NEW.glb` (61 KB, yarım kart-saç), `-C4`, `-NEW`.
+
+### Sketchfab durumu (RESUME engeli)
+- Entegrasyon **KAPALI**. Açmak için kullanıcı (Şeyma): Blender N-paneli → "Use assets from Sketchfab"
+  işaretle → **Sketchfab API key** gir (sketchfab.com → Settings → Password & API → API Token) →
+  "Disconnect" sonra reconnect. (Reconnect sırasında MCP bağlantısı bir an düşebilir.)
+- Açılınca: `mcp__blender__search_sketchfab_models` → `get_sketchfab_model_preview` →
+  `download_sketchfab_model(uid, target_size≈0.6)`. **Lisans: sadece CC-BY veya CC0 (ticari ürün!).**
+
+### Canlı Blender sahnesi (oturum-2 sonu — geçici)
+- `Human` (cilt+göz düzeltildi, **göz reverted=orijinal**), `Human.rig`, `gemini_bikini` (gizli).
+- **Geçici importlar:** `Hair` + `Hair.rig` + junk `Icosphere` (hair GLB'den geldi). `Caelinus.hair`
+  materyali HASHED'e çevrildi. Viewport MATERIAL preview, üst gövdeye çerçeveli. **Bunlar diske
+  yazılmadı** — yeni oturumda sahne bu importları içeriyor olabilir (yoksa hair GLB'yi tekrar import et).
+
+---
+
+## 12) 🚀 BİR SONRAKİ OTURUM — BURADAN BAŞLA
+**Ana bağlam (ASLA kaçırma):** VR gözlük için hatasız, oyun gibi 3D avatar = dijital manken;
+üstünde gerçek satılan bikiniler sergilenir. Beden/cilt/göz-texture BİTTİ + commit'li (`b25e2de`,
+GitHub'da). MakeHuman'a dönülmez, ürün değişmez, deploy/main-merge yok. Branch: `feat/avatar-shop-game-experience`.
+
+**Sıradaki iş = SAÇ (§7/1, §11).** İlk soru kullanıcıya: *"Sketchfab API key'ini girdin mi?"*
+- **Evet** → `get_sketchfab_status` doğrula → CC-BY/CC0 kadın uzun saç ara → önizle → indir
+  (target_size≈0.6) → kafaya oturt → bind → export `public/models/hair/hair-long-wave.glb`
+  (junk Icosphere'siz!) → web QA (`/universe/shop/avatar`).
+- **Hayır/vazgeç** → güvenli yol: mevcut saça normal-map + daha iyi texture + cutout (HASHED) +
+  junk temizle + export.
+
+**Sonra:** göz geometrisi (§11 güvenli teknik) → KVKK (launch blocker) → kıyafet → mağaza birleştirme.
+Ortam/araç notları: §8 (Blender port 9876 `mcp__blender__*` küçük b; web `localhost:3000` route
+`/universe/shop/avatar`). Bu doküman = tek doğruluk kaynağı; her oturum sonunda güncelle.
