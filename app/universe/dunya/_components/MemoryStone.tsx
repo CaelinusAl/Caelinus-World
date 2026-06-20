@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
 export type StoneData = {
@@ -74,19 +73,8 @@ export default function MemoryStone({
           <sphereGeometry args={[0.088, 24, 24]} />
           <meshStandardMaterial ref={pointMat} color="#2c2008" emissive="#e8b25a" emissiveIntensity={0.6} roughness={0.4} />
         </mesh>
+        <pointLight position={[0, 0, 0.6]} distance={4} intensity={hovered || active ? 2.2 : 0.6} color="#e8c98a" />
       </group>
-
-      <Text
-        position={[0, 2.45, 0]}
-        fontSize={0.24}
-        color={active ? "#ecdcb6" : hovered ? "#b9c8d6" : "#74879a"}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.004}
-        outlineColor="#05080c"
-      >
-        {data.name}
-      </Text>
     </group>
   );
 }
