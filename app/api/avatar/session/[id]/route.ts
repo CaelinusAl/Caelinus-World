@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { deleteSession, getSession } from "@/lib/caelinus-avatar-core/session-store";
+import { sessionStoreAsync } from "@/lib/caelinus-avatar-core/session-store";
 import type { SessionResponse } from "@/lib/caelinus-avatar-core";
 
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ export async function GET(
   { params }: Ctx,
 ): Promise<NextResponse<SessionResponse | { error: string }>> {
   const { id } = await params;
-  const session = getSession(id);
+  const session = await sessionStoreAsync.get(id);
   if (!session) {
     return NextResponse.json(
       { error: "Session bulunamadı veya süresi doldu." },
@@ -45,7 +45,7 @@ export async function DELETE(
   { params }: Ctx,
 ): Promise<NextResponse<{ ok: boolean }>> {
   const { id } = await params;
-  const ok = deleteSession(id);
+  const ok = await sessionStoreAsync.delete(id);
   return NextResponse.json(
     { ok },
     { headers: { "Cache-Control": "no-store" } },

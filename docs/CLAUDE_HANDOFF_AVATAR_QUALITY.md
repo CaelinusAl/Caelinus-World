@@ -88,6 +88,23 @@ yüzeyinden üret** → kusursuz fit GARANTİ.
 
 ---
 
+## S4. BACKEND PRODUCTION (2026-06-20)
+
+- **QR session route'ları async'e taşındı:** `app/api/avatar/session/**` artık
+  `sessionStoreAsync` namespace kullanıyor (sync in-memory yerine). Env yoksa
+  otomatik in-memory'ye düşer → dev'de regresyon YOK; `CAELINUS_AVATAR_SESSION_STORE=
+  supabase` + key set'liyse Supabase'e yazar → **Vercel multi-instance QR kopması çözülür**.
+- **Env şeması:** `lib/env.ts`'ye `CAELINUS_AI_STUDIO_STORE` + `CAELINUS_AVATAR_SESSION_STORE`
+  eklendi (enum memory/supabase, default memory).
+- AI Studio job tarafı (jobs/store + supabase-store + finalize endpoint) zaten async +
+  production-ready'di — dokunulmadı.
+- Migration'lar mevcut: `0012_caelinus_ai_studio.sql`, `0014_caelinus_avatar_session.sql`.
+
+**⏳ KALAN OPS (sadece Şeyma'nın Supabase erişimiyle yapılır — kod hazır):**
+1. Supabase'de migration 0012 + 0014'ü çalıştır.
+2. Vercel env: `SUPABASE_SERVICE_ROLE_KEY`, `CAELINUS_AVATAR_SESSION_STORE=supabase`,
+   `CAELINUS_AI_STUDIO_STORE=supabase`.
+
 ## 2. Blender sahnesi — DOĞRULANMIŞ durum (2026-06-20)
 
 Aktif `Scene` (8 obje):
