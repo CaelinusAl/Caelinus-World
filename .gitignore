@@ -44,3 +44,4 @@ __pycache__/
 # kaynak assets/models-src/ altında tutulur, web'e sadece .glb gider.
 public/**/*.blend
 public/**/*.fbx
+.vercel
