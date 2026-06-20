@@ -11,6 +11,13 @@ tsconfig.tsbuildinfo
 .env.local
 .env.*.local
 
+# lokal Claude Code config (makineye özel — repoya girmez)
+.claude/settings.local.json
+.claude/launch.json
+
+# MakeHuman/MPFB log dump'ları (scratch)
+combined.txt
+
 # user uploads (KVKK / GDPR — never commit personal data)
 public/uploads/faces
 !public/uploads/faces/.gitkeep
