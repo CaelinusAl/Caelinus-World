@@ -137,6 +137,8 @@ type Props = {
   avatar?: GeneratedAvatar | null;
   /** Skin tone override — sadece supportsSkinToneOverride body'lerde etkili. */
   skinTone?: string;
+  /** Saç rengi override — saç materyalli avatarlarda (muse) canlı uygulanır. */
+  hairColor?: string;
   /** Catwalk animasyonu — try-on sayfasında otomatik açabiliriz. */
   animationUrl?: string | null;
   className?: string;
@@ -156,6 +158,7 @@ type Props = {
 export default function Caelinus3DScene({
   avatar,
   skinTone,
+  hairColor,
   animationUrl = null,
   className = "",
   autoRotate = true,
@@ -290,6 +293,7 @@ export default function Caelinus3DScene({
               key={`${url}-${retryKey}`}
               url={url}
               skinTone={tone}
+              hairColor={hairColor ?? avatar?.styleProfile?.hair?.color}
               auraColor={accent}
               animationUrl={animationUrl}
             />

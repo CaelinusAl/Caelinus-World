@@ -18,6 +18,8 @@ type Props = {
   url?: string;
   auraColor?: string;
   skinTone?: string;
+  /** Saç rengi override — saç materyalli (örn. "...Hair...") mesh'lere uygulanır. */
+  hairColor?: string;
   avatarConfig?: AvatarConfig;
   faceTextureUrl?: string | null;
   faceDeform?: AvatarFaceDeformConfig | null;
@@ -255,6 +257,7 @@ export default function ModelAvatar({
   url = "/models/caelinus-avatar.glb",
   auraColor = "#69d8ff",
   skinTone,
+  hairColor,
   avatarConfig,
   faceTextureUrl = null,
   faceDeform = null,
@@ -592,18 +595,37 @@ export default function ModelAvatar({
       isExternalAvatar = true;
     }
 
-    if (isExternalAvatar) {
+    // Kendi PBR texture'ı (baseColor map) olan modeller — örn. Caelinus muse
+    // (saçlı + bikinili, body texture'lı). Bunların material'larını override
+    // edersek texture/saç/bikini renkleri kaybolur → düz manken olur. Bu
+    // yüzden texture varsa da "koru" yoluna sokuyoruz.
+    let hasOwnTextures = false;
+    scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        const m = obj.material as THREE.MeshStandardMaterial | undefined;
+        if (m && "map" in m && m.map) hasOwnTextures = true;
+      }
+    });
+
+    const preserveMaterials = isExternalAvatar || hasOwnTextures;
+
+    if (preserveMaterials) {
       const aura = new THREE.Color(auraColor);
+      const hair = hairColor ? new THREE.Color(hairColor) : null;
       scene.traverse((obj) => {
         if (!(obj instanceof THREE.Mesh)) return;
         obj.castShadow = true;
         obj.receiveShadow = true;
         const mat = obj.material as THREE.MeshStandardMaterial | undefined;
-        if (
-          mat &&
-          mat instanceof THREE.MeshStandardMaterial &&
-          /body|skin/i.test(obj.name)
-        ) {
+        if (!mat || !(mat instanceof THREE.MeshStandardMaterial)) return;
+        // Saç materyali — seçilen renge boya (StyleCustomizer swatch bağlama)
+        if (hair && (/hair|saç/i.test(mat.name) || /hair|saç/i.test(obj.name))) {
+          mat.color = hair;
+          mat.needsUpdate = true;
+          return;
+        }
+        // Body/ten mesh'inde hafif kozmik aura
+        if (/body|skin/i.test(obj.name)) {
           mat.emissive = aura;
           mat.emissiveIntensity = 0.08;
           mat.needsUpdate = true;
@@ -611,7 +633,7 @@ export default function ModelAvatar({
       });
       if (process.env.NODE_ENV === "development") {
         console.info(
-          `[ModelAvatar] external avatar detected (skinnedMeshes=${skinnedMeshCount}) — preserving original materials`,
+          `[ModelAvatar] rich avatar (skinnedMeshes=${skinnedMeshCount}, textures=${hasOwnTextures}) — materyaller korunuyor${hair ? " + saç boyandı" : ""}`,
         );
       }
       return;
@@ -635,7 +657,7 @@ export default function ModelAvatar({
         clearcoatRoughness: 0.3,
       });
     });
-  }, [scene, auraColor, resolvedSkin]);
+  }, [scene, auraColor, resolvedSkin, hairColor]);
 
   // 4) Animations — prefer external clip, then idle, then first available
   const activeClipRef = useRef<string | null>(null);
