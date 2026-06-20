@@ -1,9 +1,26 @@
 # CAELINUS — Master Seal
 
 **Geçit** — Eşik + Işık Nehri. Tam simetrik `│○│`, merkezde tek altın nokta.
-Anlam: *Caelinus bir varış noktası değil, bir eşikten geçme deneyimi.*
 
-> "Bu Caelinus logosu" değil → "Bu işareti görünce Caelinus aklıma geliyor."
+## Anlam (final canon — değişmez)
+- **Çember = Evren**
+- **Dikey Hat = Frekans**
+- **Altın Nokta = Hatırlayan Öz**
+
+> *Frekansın içindeki özün kendini hatırlaması.*
+> Caelinus bir varış noktası değil — bir eşikten geçme deneyimi.
+
+## Manifesto (bu üçlü değişmez)
+```
+CAELINUS
+Frekansın Sanatı
+Hatırla Kim Olduğunu
+```
+Kutsal kısa form: **Hatırla.** (Öz: arama değil, bulma değil, öğrenme değil → hatırlama.)
+İngilizce (*The Art of Frequency*) ikinci planda.
+
+## Evren hiyerarşisi (hepsi aynı çekirdekten türer)
+`Master Seal (Caelinus) → Geçit → Medusa → Gaia → Temple → Hatıralar → Atelier`
 
 ## Dosyalar
 | Dosya | Kullanım |
@@ -19,14 +36,15 @@ Anlam: *Caelinus bir varış noktası değil, bir eşikten geçme deneyimi.*
 - **TEK sıcak altın vurgu** `#C9A24B` — yalnız merkez nokta. Başka yerde altın yok.
 
 ## Tipografi
-- Wordmark geçici: serif (Georgia). **Production'da outline'a çevrilecek** (öneri: Cormorant / Trajan benzeri taşa-oyulmuş serif). İngilizce (*The Art of Frequency*) ikinci planda.
+- Wordmark geçici: serif (Georgia). **Production'da outline'a çevrilecek** (öneri: Cormorant / Trajan benzeri taşa-oyulmuş serif).
 
-## Kullanım (ortak mühür)
-Universe · Manifesto · Atelier · Shop · Temple · Gaia · Sanrı · Mirror · Gate 33 — ve tüm hafıza kayıtlarının sonunda. Video sonunda ~2 sn.
+## KULLANIM = KITLIK (Apple kuralı)
+Mührü her yere koyma. **Az görünsün, göründüğü yerde kutsal görünsün.** Yalnız:
+- Sayfa açılışı · video kapanışı (~2 sn) · Medusa kapısı · taş rölikler · takılar · Temple of Silence girişi · hafıza kayıtlarının sonu.
 
 ## Kaçınılacaklar
-Kanat · melek · lotus · mandala · yıldız · sonsuzluk · klişe spiritüel sembol · birden fazla altın · simetriyi bozmak.
+Kanat · melek · lotus · mandala · yıldız · sonsuzluk · klişe spiritüel sembol · birden fazla altın · simetriyi bozmak · **mührü sıradanlaştırmak.**
 
-## İlişkili
-- **İniş** (`○ • │`) = alt-evren sembolü (Gaia / Temple / Founder Journey) — ana mark DEĞİL.
+## İlişkili semboller (ana mark DEĞİL)
+- **İniş** (`○ • │`) = alt-evren sembolü (Gaia / Temple / Founder Journey).
 - **Taş Rölik Sistemi** (evren-içi eser): Hatırlama / Nehir / Geçit / Sessizlik Taşı.
