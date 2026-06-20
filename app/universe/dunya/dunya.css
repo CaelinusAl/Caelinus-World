@@ -1,0 +1,69 @@
+.dw-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background-color: #070b11;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.dw-root canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.dw-head {
+  position: absolute;
+  top: clamp(14px, 3vw, 26px);
+  left: clamp(16px, 3vw, 32px);
+  z-index: 4;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  pointer-events: none;
+}
+.dw-title { color: #e6ecf2; font-family: Georgia, "Times New Roman", serif; letter-spacing: 0.34em; font-size: clamp(1rem, 2.2vw, 1.4rem); }
+.dw-sub { color: #93b6cf; letter-spacing: 0.3em; font-size: clamp(0.55rem, 1.2vw, 0.68rem); }
+
+.dw-memory {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(54px, 12vh, 120px);
+  text-align: center;
+  z-index: 4;
+  pointer-events: none;
+  padding: 0 24px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.dw-memory.on { opacity: 1; transform: translateY(0); }
+.dw-mname { color: #c9a24b; letter-spacing: 0.26em; font-size: clamp(0.62rem, 1.3vw, 0.76rem); margin: 0 0 10px; text-transform: uppercase; }
+.dw-mfrag { color: #ede3cf; font-style: italic; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.1rem, 2.6vw, 1.7rem); text-shadow: 0 2px 22px rgba(0, 0, 0, 0.85); margin: 0; }
+
+.dw-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(20px, 4vh, 36px);
+  text-align: center;
+  z-index: 4;
+  pointer-events: none;
+  color: #6b8294;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.6rem, 1.2vw, 0.72rem);
+}
+
+.dw-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #93b6cf;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  z-index: 3;
+}
