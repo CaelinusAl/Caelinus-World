@@ -173,6 +173,21 @@ const SELIN_VARIANTS: BodyEntry[] = [
 ];
 
 export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
+  {
+    id: "caelinus-muse",
+    label: "Caelinus · İlham",
+    tagline:
+      "Kumral dalgalı saç + oturmuş bikini — catwalk'a hazır tam donanımlı beden",
+    url: "/models/caelinus_avatar_hair.glb",
+    preview: "/models/previews/caelinus-muse.png",
+    isPersonal: true,
+    gender: "feminine",
+    vibe: "İlham — saçı rüzgârda, duruşu hikâyede",
+    baseHeightM: 1.687,
+    // Kendi PBR body texture'ı var; ten rengi mesh'in materyalinden gelir.
+    supportsSkinToneOverride: false,
+    animationCompat: "mixamo",
+  },
   ...SELIN_VARIANTS,
   {
     id: "caelinus-default",

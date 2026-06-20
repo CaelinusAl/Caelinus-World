@@ -26,7 +26,7 @@ Yüz analizi artık tamamen **tarayıcıda** (MediaPipe), selfie cihazdan çıkm
 |---|---|---|
 | Saç yolu | **Higgsfield image→3D** (Sketchfab/prosedürel/hair-card denendi, bırakıldı) | ✅ **BİTTİ + onaylandı + kaydedildi** (bkz §S) |
 | Göz | **Ertelendi** | Gözler "boş/bakan" — saçtan sonraki faz. |
-| Kıyafet | Bikini (`gemini_bikini`) | ✅ **cloth sim ile oturtuldu + kaydedildi** — kalan açıklık tasarım sınırı (bkz §B) |
+| Kıyafet | Bikini | ✅ **konformal bikini gövde yüzeyinden üretildi** — kusursuz oturuyor + skinli (bkz §B) |
 | Mağaza | **Birleştir** | "İki ayrı mağaza" vizyon ihlali — sonraki faz. |
 | Selfie→avatar | **Yarım-bağlı** | Köprü tamamlanmadı, ayrı madde. |
 
@@ -58,18 +58,33 @@ ve hair-card-from-scratch denendi ama kötüydü/dağınıktı, bırakıldı).
 
 ---
 
-## B. BİKİNİ — cloth sim ile oturtuldu (2026-06-20)
+## B. BİKİNİ — konformal (gövde yüzeyinden üretildi) (2026-06-20)
 
-- `gemini_bikini`: 7492 vert, Meshy genel ölçü kabuk.
-- **Çözüm:** cloth simülasyon. Bikini göğse doğru içeri alındı (loc 0,-0.065,1.05),
-  kupa bölgesi (y<-0.02, 1.14<z<1.34, |x|<0.12) pin-DIŞI bırakıldı, gerisi pinlendi,
-  gövde Collision (thickness 0.004), 30 frame sim → kupalar göğüs yüzeyine oturdu.
-  Evaluated mesh bake edildi (modifier apply yerine new_from_object), modifierlar temiz.
-- **Kalan:** kupalar bu göğüs için küçük/açık kesim → uç kapatma eksik. Bu *fit* değil
-  **tasarım** sınırı. Tam kapatma istenirse: kupayı büyüt (mesh edit) ya da farklı bikini.
-- ❌ **Shrinkwrap NEAREST_SURFACEPOINT DENENMESİN** — garment topolojisini parçalıyor.
-- ❌ Global Y kaydırma fit'i çözmez (ileri=boşluk, geri=göğüs taşar) — kanıtlandı.
-- Kaydedildi: `caelinus_avatar_hair.blend` + `.glb` (avatar+saç+oturmuş bikini).
+**KARAR DEĞİŞTİ:** `gemini_bikini` (Meshy 7492 vert) bu busty gövdeye HİÇBİR teknikle
+profesyonel oturmadı (2 oturum denendi). Kalıcı çözüm: **bikiniyi gövdenin kendi
+yüzeyinden üret** → kusursuz fit GARANTİ.
+
+- **Yöntem:** `Human` mesh'i kopyala → sadece (a) iki göğüs kupası (meme ucu
+  ±0.082,-0.167,1.302 çevresi r<0.092, ön) + (b) yüksek-kesim alt panel (kasık
+  0,-0.057,0.862; z>0.90, |x|<0.058) yüzeyleri tut, gerisini sil → **Solidify 12mm**
+  dışa → teal materyal (`Caelinus.bikini.muse`, base 0.03,0.34,0.36, coat 0.3).
+- Gövde kopyası olduğu için **vertex grupları + Armature modifier miras** → catwalk'ta
+  gövdeyle birlikte hareket eder. Obje: `Caelinus_Bikini` (~1700 poly).
+- Eski `gemini_bikini` sahnede gizli/saklı duruyor (silinmedi, referans).
+- ❌ Shrinkwrap NEAREST_SURFACEPOINT, global Y kaydırma, elle vertex itme → hepsi
+  başarısız (kanıtlandı, tekrar deneme).
+- **Önizleme:** `public/models/previews/caelinus-muse.png` (EEVEE front render).
+- Kaydedildi: `caelinus_avatar_hair.blend` (konformal bikini) + `.glb` (470KB, skinli).
+
+## S2. GLB OPTIMIZASYONU (2026-06-20)
+
+- Ham rigli export 6.6MB → `@gltf-transform/cli optimize` → **470KB** (%93 küçülme).
+- Pipeline: `--compress meshopt --texture-compress webp --texture-size 1024
+  --simplify false --join false`. (simplify KAPALI: saç/bikini topolojisi bozulmasın.)
+- drei `useGLTF` meshopt + webp + KHR_mesh_quantization'ı VARSAYILAN destekler
+  (MeshoptDecoder otomatik bağlı, CDN gerekmez). Test edildi: build geçiyor.
+- ⚠️ **glTF export gotcha:** gizli (hide) objeler `use_selection` ile bile export'a
+  GİRMEZ. Armature + bikini bu yüzden ilk export'ta düşmüştü → `hide_set(False)` şart.
 
 ---
 
