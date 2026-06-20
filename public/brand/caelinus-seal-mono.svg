@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Caelinus" fill="none">
+  <title>Caelinus — Geçit (tek renk / currentColor)</title>
+  <line x1="50" y1="6" x2="50" y2="94" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="50" cy="50" r="27" stroke="currentColor" stroke-width="3"/>
+  <circle cx="50" cy="50" r="5.2" fill="currentColor"/>
+</svg>

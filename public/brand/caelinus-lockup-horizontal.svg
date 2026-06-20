@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 140" role="img" aria-label="Caelinus — Frekansın Sanatı">
+  <title>Caelinus lockup — yatay</title>
+  <line x1="70" y1="24" x2="70" y2="116" stroke="#D6DEE6" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="70" cy="70" r="27" fill="none" stroke="#D6DEE6" stroke-width="2.6"/>
+  <circle cx="70" cy="70" r="5.2" fill="#C9A24B"/>
+  <line x1="118" y1="38" x2="118" y2="102" stroke="#2A3340" stroke-width="1"/>
+  <text x="140" y="66" fill="#D6DEE6" font-family="Georgia, 'Times New Roman', serif" font-size="30" letter-spacing="10" text-anchor="start">CAELINUS</text>
+  <text x="142" y="92" fill="#93B6CF" font-family="Helvetica, Arial, sans-serif" font-size="12" letter-spacing="5" text-anchor="start">FREKANSIN SANATI</text>
+  <text x="142" y="114" fill="#8C99A8" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-style="italic" text-anchor="start">Hatırla kim olduğunu</text>
+</svg>
