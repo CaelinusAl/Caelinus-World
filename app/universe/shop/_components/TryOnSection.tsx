@@ -166,6 +166,11 @@ export default function TryOnSection() {
   /* Body seçimi yapılmışsa "avatarı var" sayılır — gate aç. */
   const effectiveHasAvatar = hasAvatar;
 
+  /* Hazır-giyinik bedenlerde (muse) garment binding'i atla — mesh kendi
+     bikinisini taşıyor, üstüne ikinci bikini bind etmek çift kıyafet
+     çakışması üretir. Işık/aura + "Bedeninde" tag illüzyonu yine aktif. */
+  const effectiveBindings = selectedBody.preDressed ? [] : outfitBindings;
+
   /* ── Empty state — kullanıcı henüz bedenini şekillendirmedi ─── */
   if (mounted && !effectiveHasAvatar) {
     return (
@@ -178,7 +183,7 @@ export default function TryOnSection() {
               Önce bedenini şekillendir
             </h2>
             <p className="tryon-empty-sub">
-              Caelinus Shop'taki ürünleri 3D bedeninde dene. Vücut
+              Caelinus Shop’taki ürünleri 3D bedeninde dene. Vücut
               tipini, boyunu, ten rengini seç — istersen yüzünü de
               yükle. Kıyafet seçimi otomatik olarak senin bedenine
               giyecek.
@@ -194,7 +199,7 @@ export default function TryOnSection() {
               </li>
               <li>
                 <span className="tryon-empty-step-num">3</span>
-                Shop'ta ürünleri 3D bedeninde dene
+                Shop’ta ürünleri 3D bedeninde dene
               </li>
             </ol>
             <Link
@@ -205,7 +210,7 @@ export default function TryOnSection() {
             </Link>
             <p className="tryon-empty-fineprint">
               Veriler sadece tarayıcında kalır (localStorage).
-              Değiştirmek istediğinde geri dönüp sliders'ı yeniden
+              Değiştirmek istediğinde geri dönüp sliders’ı yeniden
               ayarlayabilirsin.
             </p>
           </div>
@@ -242,7 +247,7 @@ export default function TryOnSection() {
                 selectedBody.supportsSkinToneOverride ? faceTextureUrl : null
               }
               animationUrl={catwalkOn ? "/models/caelinus-catwalk.glb" : null}
-              outfitBindings={outfitBindings}
+              outfitBindings={effectiveBindings}
               debugBindings={debugBindings}
               onOutfitStatus={setOutfitStatus}
               // Illüzyon try-on: ürün seçildiğinde sahnenin aura halkası
@@ -276,6 +281,15 @@ export default function TryOnSection() {
           {!tryOnProduct && (
             <div className="tryon-sidebar-empty">
               <p>Bir ürün seç — 3D bedeninde otomatik giyecek.</p>
+            </div>
+          )}
+          {tryOnProduct && selectedBody.preDressed && (
+            <div className="tryon-sidebar-empty">
+              <p>
+                Bu beden zaten stillenmiş geliyor — ürünü ışık ve aura
+                ile deniyorsun. Kıyafeti bedenine giydirmek için “Avatarımı
+                Düzenle”den çıplak bir beden seç.
+              </p>
             </div>
           )}
         </div>

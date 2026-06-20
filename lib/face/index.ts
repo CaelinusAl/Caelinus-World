@@ -10,6 +10,16 @@ export type {
 export { IDENTITY_DEFORM } from "./types";
 export { LM, dist2d, mid } from "./landmarks";
 export { extractFaceMetrics, clampFaceMetrics } from "./extract-metrics";
+export {
+  extractShapeMetrics,
+  classifyFaceShape,
+  type FaceShapeMetrics,
+} from "./shape";
+export {
+  sampleSkinTone,
+  sampleHairColor,
+  type NormBBox,
+} from "./color-sample";
 export { mapMetricsToAvatarDeform, safeMapDeform } from "./map-deform";
 export { applyFaceDeform, clearFaceDeformBase } from "./apply-deform";
 export { inspectModel } from "./model-inspector";

@@ -18,9 +18,9 @@
  *   • SUPABASE_SERVICE_ROLE_KEY (admin write erişimi şart)
  *   • Migration 0014 uygulanmış olmalı
  *
- * S2 — sadece scaffold. Route handler'lar henüz `sessionStoreAsync`
- * namespace'ine taşınmadı; production deploy gate açılınca o refactor
- * yapılır (5-7 dosyada `await` ekleme).
+ * Route handler'lar `sessionStoreAsync` namespace'i üzerinden await'li
+ * çağırır (app/api/avatar/session/**). Env supabase'e çekilince bu store
+ * devreye girer; aksi halde in-memory'ye düşülür.
  *
  * KRİTİK: bu modül `server-only` (admin client kullanıyor).
  */

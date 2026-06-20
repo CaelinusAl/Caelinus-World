@@ -56,3 +56,13 @@ public/hero/_raw/
 # Blender çalışma + yedek dosyaları (repoya girmez; render çıktıları ayrı)
 *.blend
 *.blend1
+# Blender/FBX kaynakları web'e (public/) deploy edilmez — düzenlenebilir
+# kaynak assets/models-src/ altında tutulur, web'e sadece .glb gider.
+public/**/*.blend
+public/**/*.fbx
+
+# Caelinus avatar geçici render/kaynak
+.hair_tmp/
+
+# local Vercel project link dir
+.vercel

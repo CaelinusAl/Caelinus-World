@@ -23,7 +23,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession, setStatus } from "@/lib/caelinus-avatar-core/session-store";
+import { sessionStoreAsync } from "@/lib/caelinus-avatar-core/session-store";
 import type {
   SelfieUploadRequest,
   SelfieUploadResponse,
@@ -54,7 +54,7 @@ export async function POST(
 ): Promise<NextResponse<SelfieUploadResponse | { error: string }>> {
   const { id } = await params;
 
-  const session = getSession(id);
+  const session = await sessionStoreAsync.get(id);
   if (!session) {
     return NextResponse.json(
       { error: "Session bulunamadı veya süresi doldu." },
@@ -84,7 +84,7 @@ export async function POST(
     );
   }
 
-  const updated = setStatus(id, "selfie-received", {
+  const updated = await sessionStoreAsync.setStatus(id, "selfie-received", {
     selfie: {
       dataUrl: parsed.data.dataUrl,
       source: parsed.data.source ?? "upload",

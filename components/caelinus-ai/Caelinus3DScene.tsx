@@ -20,10 +20,11 @@
 import {
   Component,
   Suspense,
+  useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -63,7 +64,13 @@ function SceneLoading({ label = "Sahne örülüyor" }: { label?: string }) {
  * okunabilir bir mesaj gösteriyoruz ki teşhis kolay olsun.
  */
 class SceneErrorBoundary extends Component<
-  { children: ReactNode; onError?: (e: Error) => void },
+  {
+    children: ReactNode;
+    onError?: (e: Error) => void;
+    onRetry?: () => void;
+    /** Bu değer değişince hata sıfırlanır (parent retry tetikler). */
+    resetKey?: number;
+  },
   { error: Error | null }
 > {
   state = { error: null as Error | null };
@@ -77,19 +84,56 @@ class SceneErrorBoundary extends Component<
     this.props.onError?.(error);
   }
 
+  componentDidUpdate(prev: { resetKey?: number }) {
+    // Parent "tekrar dene" dedi → hata state'ini temizle ki children
+    // yeniden mount olsun ve GLB tekrar fetch edilsin.
+    if (prev.resetKey !== this.props.resetKey && this.state.error) {
+      this.setState({ error: null });
+    }
+  }
+
   render() {
     if (this.state.error) {
       return (
         <Html center transform={false} zIndexRange={[10, 0]}>
           <div className="cai-scene-inline-error" role="alert">
             <span className="cai-scene-inline-glyph">⚠</span>
-            <span>Sahne yüklenemedi — sayfayı yenile</span>
+            <span>Bedenin yüklenemedi — bağlantını kontrol et.</span>
+            <button
+              type="button"
+              className="cai-scene-retry-btn"
+              onClick={() => this.props.onRetry?.()}
+            >
+              Tekrar dene
+            </button>
           </div>
         </Html>
       );
     }
     return this.props.children;
   }
+}
+
+/**
+ * Kullanıcının işletim sisteminde "hareketi azalt" tercihi açıksa
+ * otomatik döndürmeyi kapatırız (erişilebilirlik + pil tasarrufu).
+ */
+function usePrefersReducedMotion(): boolean {
+  // External browser preference → useSyncExternalStore (React-önerilen
+  // pattern). Effect içinde setState yok; SSR snapshot her zaman false.
+  return useSyncExternalStore(
+    (onChange) => {
+      if (typeof window === "undefined" || !window.matchMedia) return () => {};
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () =>
+      typeof window !== "undefined" && window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        : false,
+    () => false,
+  );
 }
 
 const DEFAULT_MODEL = "/models/caelinus-body-base-fem.glb";
@@ -100,6 +144,8 @@ type Props = {
   avatar?: GeneratedAvatar | null;
   /** Skin tone override — sadece supportsSkinToneOverride body'lerde etkili. */
   skinTone?: string;
+  /** Saç rengi override — saç materyalli avatarlarda (muse) canlı uygulanır. */
+  hairColor?: string;
   /** Catwalk animasyonu — try-on sayfasında otomatik açabiliriz. */
   animationUrl?: string | null;
   className?: string;
@@ -119,6 +165,7 @@ type Props = {
 export default function Caelinus3DScene({
   avatar,
   skinTone,
+  hairColor,
   animationUrl = null,
   className = "",
   autoRotate = true,
@@ -127,6 +174,27 @@ export default function Caelinus3DScene({
   avatarUrlOverride = null,
 }: Props) {
   const url = avatarUrlOverride || avatar?.glbUrl || DEFAULT_MODEL;
+
+  // Erişilebilirlik: hareket hassasiyeti olan kullanıcıda otomatik dönüş kapalı
+  const reducedMotion = usePrefersReducedMotion();
+  // Kullanıcının döndür-durdur tercihini tutar (varsayılan: prop + reduced-motion).
+  // autoRotate/reducedMotion değişince default'a resetlenir — bunu effect yerine
+  // render-fazı "önceki prop" pattern'iyle yapıyoruz (set-state-in-effect kaçınma).
+  const [rotating, setRotating] = useState(autoRotate && !reducedMotion);
+  const [motionPrefs, setMotionPrefs] = useState({ autoRotate, reducedMotion });
+  if (
+    motionPrefs.autoRotate !== autoRotate ||
+    motionPrefs.reducedMotion !== reducedMotion
+  ) {
+    setMotionPrefs({ autoRotate, reducedMotion });
+    setRotating(autoRotate && !reducedMotion);
+  }
+  const effectiveAutoRotate = rotating && !reducedMotion;
+
+  // Hata sınırını "tekrar dene" ile sıfırlamak için artan anahtar
+  const [retryKey, setRetryKey] = useState(0);
+  const handleRetry = useCallback(() => setRetryKey((k) => k + 1), []);
+
   const tone =
     avatar?.outfitBindingHints?.supportsSkinToneOverride
       ? skinTone || avatar?.styleProfile.skinTone || "#d4ad8a"
@@ -138,27 +206,25 @@ export default function Caelinus3DScene({
   // Three.js'in ışık rengini her render'da hex string'le tetikle
   const lightTint = useMemo(() => accent, [accent]);
 
-  // GLB değiştiğinde kısa swap shimmer overlay'ini tetikle —
-  // mesh yeniden yükleniyor süresince kullanıcıya "değişim" hissi verir.
+  // GLB değiştiğinde kısa swap shimmer overlay'ini tetikle — mesh yeniden
+  // yükleniyor süresince kullanıcıya "değişim" hissi verir.
   //
-  // ÖNEMLİ — StrictMode safety:
-  // React 19 + StrictMode dev modda effect'i mount/unmount/mount
-  // sırasıyla iki kez çalıştırır. Önceki sürümde "lastUrlRef === url
-  // → return" guard'ı, ikinci mount'ta `setSwapping(false)` adımını
-  // hiç çağırmıyordu ve veil sonsuza takılıyordu. Cleanup'ta state'i
-  // her durumda kapatarak sorunu sıfırladık.
+  // url değişimini render-fazı "önceki değer" pattern'iyle yakalıyoruz
+  // (set-state-in-effect kaçınma). 700ms'lik kapanma timer'ı effect'te;
+  // setSwapping(false) bir callback içinde olduğu için effect-body kuralı
+  // tetiklenmez. lastUrl dep'i sayesinde swap sırasında url tekrar
+  // değişirse veil süresi yeniden uzar.
   const [swapping, setSwapping] = useState(false);
-  const lastUrlRef = useRef<string>(url);
-  useEffect(() => {
-    if (lastUrlRef.current === url) return;
-    lastUrlRef.current = url;
+  const [lastUrl, setLastUrl] = useState(url);
+  if (lastUrl !== url) {
+    setLastUrl(url);
     setSwapping(true);
+  }
+  useEffect(() => {
+    if (!swapping) return;
     const timer = window.setTimeout(() => setSwapping(false), 700);
-    return () => {
-      window.clearTimeout(timer);
-      setSwapping(false);
-    };
-  }, [url]);
+    return () => window.clearTimeout(timer);
+  }, [swapping, lastUrl]);
 
   // Avatarlar yapımda — kütüphane boşken 3D yerine placeholder.
   // (Hook'lardan SONRA: rules-of-hooks için erken return en sonda.)
@@ -172,8 +238,30 @@ export default function Caelinus3DScene({
         swapping ? "is-swapping" : ""
       } ${className}`}
       style={{ ["--accent" as string]: accent } as React.CSSProperties}
+      role="img"
+      aria-label={
+        tryOnLabel
+          ? `3D avatar — ${tryOnLabel} deneniyor. Sürükleyerek döndür.`
+          : "3D avatarın — fareyle sürükleyerek ya da parmağınla döndür."
+      }
     >
       <div className="cai-canvas-rim" aria-hidden="true" />
+
+      {/* Döndürmeyi durdur/oynat — kullanıcı kontrolü + pil tasarrufu */}
+      {!reducedMotion && (
+        <button
+          type="button"
+          className="cai-canvas-rotate-toggle"
+          onClick={() => setRotating((r) => !r)}
+          aria-pressed={rotating}
+          aria-label={
+            rotating ? "Döndürmeyi durdur" : "Döndürmeyi başlat"
+          }
+          title={rotating ? "Döndürmeyi durdur" : "Döndürmeyi başlat"}
+        >
+          {rotating ? "❚❚" : "▶"}
+        </button>
+      )}
       <div className="cai-canvas-swap-veil" aria-hidden="true">
         <div className="cai-canvas-swap-shimmer" />
         <div className="cai-canvas-swap-text">
@@ -217,12 +305,13 @@ export default function Caelinus3DScene({
           />
         )}
 
-        <SceneErrorBoundary>
+        <SceneErrorBoundary resetKey={retryKey} onRetry={handleRetry}>
           <Suspense fallback={<SceneLoading label="Bedenin geliyor…" />}>
             <ModelAvatar
-              key={url}
+              key={`${url}-${retryKey}`}
               url={url}
               skinTone={tone}
+              hairColor={hairColor ?? avatar?.styleProfile?.hair?.color}
               auraColor={accent}
               animationUrl={animationUrl}
             />
@@ -246,7 +335,7 @@ export default function Caelinus3DScene({
           enablePan={false}
           enableDamping
           dampingFactor={0.18}
-          autoRotate={autoRotate}
+          autoRotate={effectiveAutoRotate}
           autoRotateSpeed={0.6}
           minDistance={4}
           maxDistance={14}

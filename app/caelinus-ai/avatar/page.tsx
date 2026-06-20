@@ -414,7 +414,8 @@ export default function CaelinusAvatarPage() {
               >
                 <Caelinus3DScene
                   avatar={avatar}
-                  skinTone={avatar.styleProfile.skinTone}
+                  skinTone={style.skinTone}
+                  hairColor={style.hair.color}
                 />
               </Suspense>
             </div>

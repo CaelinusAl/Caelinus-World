@@ -53,6 +53,7 @@ export type {
   OutfitMood,
   SelfieAnalysis,
   SelfieInput,
+  SelfieMeta,
   StyleIdentity,
   TryOnState,
 } from "./types";

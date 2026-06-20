@@ -15,7 +15,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
-import { createSession } from "@/lib/caelinus-avatar-core/session-store";
+import { sessionStoreAsync } from "@/lib/caelinus-avatar-core/session-store";
 import type { CreateSessionResponse } from "@/lib/caelinus-avatar-core";
 
 export const runtime = "nodejs";
@@ -38,7 +38,9 @@ export async function POST(): Promise<NextResponse<CreateSessionResponse | { err
     // Mobile sayfa: /caelinus-avatar/m/[id]
     // {id} placeholder'ı session-store içinde gerçek id ile değiştirilir.
     const mobileUrlTemplate = `${baseUrl}/caelinus-avatar/m/{id}`;
-    const session = createSession({ mobileUrl: mobileUrlTemplate });
+    const session = await sessionStoreAsync.create({
+      mobileUrl: mobileUrlTemplate,
+    });
 
     return NextResponse.json(
       { session },

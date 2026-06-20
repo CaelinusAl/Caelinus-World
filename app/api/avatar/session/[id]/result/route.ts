@@ -22,7 +22,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession, setStatus } from "@/lib/caelinus-avatar-core/session-store";
+import { sessionStoreAsync } from "@/lib/caelinus-avatar-core/session-store";
 import type {
   PublishResultRequest,
   PublishResultResponse,
@@ -65,7 +65,7 @@ export async function POST(
 ): Promise<NextResponse<PublishResultResponse | { error: string }>> {
   const { id } = await params;
 
-  const session = getSession(id);
+  const session = await sessionStoreAsync.get(id);
   if (!session) {
     return NextResponse.json(
       { error: "Session bulunamadı veya süresi doldu." },
@@ -88,7 +88,7 @@ export async function POST(
     );
   }
 
-  const updated = setStatus(id, "ready", {
+  const updated = await sessionStoreAsync.setStatus(id, "ready", {
     avatar: parsed.data.avatar as PublishResultRequest["avatar"],
     publisherId: parsed.data.publisherId,
     errorMessage: undefined,
@@ -113,7 +113,7 @@ export async function PATCH(
 ): Promise<NextResponse<PublishResultResponse | { error: string }>> {
   const { id } = await params;
 
-  const session = getSession(id);
+  const session = await sessionStoreAsync.get(id);
   if (!session) {
     return NextResponse.json(
       { error: "Session bulunamadı veya süresi doldu." },
@@ -136,7 +136,7 @@ export async function PATCH(
     );
   }
 
-  const updated = setStatus(id, parsed.data.status, {
+  const updated = await sessionStoreAsync.setStatus(id, parsed.data.status, {
     errorMessage: parsed.data.errorMessage,
   });
 

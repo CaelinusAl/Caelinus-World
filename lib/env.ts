@@ -139,6 +139,22 @@ const ServerEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_CURRENCY_DEFAULT: z.string().length(3).optional().default("TRY"),
+  /* Caelinus AI Studio job storage. "memory" (default) tek Node
+     process'te in-memory Map — dev için yeterli. "supabase" job
+     state'ini Postgres'e yazar (migration 0012 + SERVICE_ROLE_KEY
+     gerekir). Vercel multi-instance prod'da "supabase" şarttır. */
+  CAELINUS_AI_STUDIO_STORE: z
+    .enum(["memory", "supabase"])
+    .optional()
+    .default("memory"),
+  /* QR avatar session storage. "memory" (default) globalThis singleton
+     Map — dev OK ama Vercel multi-instance'da QR koparır (instance A
+     QR yaratır, instance B selfie alır). "supabase" `caelinus_avatar_session`
+     tablosunu kullanır (migration 0014 + SERVICE_ROLE_KEY gerekir). */
+  CAELINUS_AVATAR_SESSION_STORE: z
+    .enum(["memory", "supabase"])
+    .optional()
+    .default("memory"),
 });
 
 /* ─── Friendly error formatting ────────────────────── */
@@ -208,6 +224,8 @@ function parseServerEnv() {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_CURRENCY_DEFAULT: process.env.STRIPE_CURRENCY_DEFAULT,
+    CAELINUS_AI_STUDIO_STORE: process.env.CAELINUS_AI_STUDIO_STORE,
+    CAELINUS_AVATAR_SESSION_STORE: process.env.CAELINUS_AVATAR_SESSION_STORE,
   });
   if (!parsed.success) {
     throw new Error(
