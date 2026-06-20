@@ -34,8 +34,6 @@ type Props = {
 const BASE_HEIGHT = 2.8;
 const ROOT_Y = 0;
 
-const BUST_SCALE: Record<string, number> = { s: 0.92, m: 1.0, l: 1.1, xl: 1.22 };
-
 /**
  * Applies the user's BODY config (height/weight/bust/hip) to the GLB.
  *

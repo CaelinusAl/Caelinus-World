@@ -23,8 +23,8 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -117,16 +117,21 @@ class SceneErrorBoundary extends Component<
  * otomatik döndürmeyi kapatırız (erişilebilirlik + pil tasarrufu).
  */
 function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return reduced;
+  // External browser preference → useSyncExternalStore (React-önerilen
+  // pattern). Effect içinde setState yok; SSR snapshot her zaman false.
+  return useSyncExternalStore(
+    (onChange) => {
+      if (typeof window === "undefined" || !window.matchMedia) return () => {};
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () =>
+      typeof window !== "undefined" && window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        : false,
+    () => false,
+  );
 }
 
 const DEFAULT_MODEL = "/models/caelinus-avatar.glb";
@@ -170,11 +175,18 @@ export default function Caelinus3DScene({
 
   // Erişilebilirlik: hareket hassasiyeti olan kullanıcıda otomatik dönüş kapalı
   const reducedMotion = usePrefersReducedMotion();
-  // Kullanıcının döndür-durdur tercihini tutar (varsayılan: prop + reduced-motion)
-  const [rotating, setRotating] = useState(autoRotate);
-  useEffect(() => {
+  // Kullanıcının döndür-durdur tercihini tutar (varsayılan: prop + reduced-motion).
+  // autoRotate/reducedMotion değişince default'a resetlenir — bunu effect yerine
+  // render-fazı "önceki prop" pattern'iyle yapıyoruz (set-state-in-effect kaçınma).
+  const [rotating, setRotating] = useState(autoRotate && !reducedMotion);
+  const [motionPrefs, setMotionPrefs] = useState({ autoRotate, reducedMotion });
+  if (
+    motionPrefs.autoRotate !== autoRotate ||
+    motionPrefs.reducedMotion !== reducedMotion
+  ) {
+    setMotionPrefs({ autoRotate, reducedMotion });
     setRotating(autoRotate && !reducedMotion);
-  }, [autoRotate, reducedMotion]);
+  }
   const effectiveAutoRotate = rotating && !reducedMotion;
 
   // Hata sınırını "tekrar dene" ile sıfırlamak için artan anahtar
@@ -192,27 +204,25 @@ export default function Caelinus3DScene({
   // Three.js'in ışık rengini her render'da hex string'le tetikle
   const lightTint = useMemo(() => accent, [accent]);
 
-  // GLB değiştiğinde kısa swap shimmer overlay'ini tetikle —
-  // mesh yeniden yükleniyor süresince kullanıcıya "değişim" hissi verir.
+  // GLB değiştiğinde kısa swap shimmer overlay'ini tetikle — mesh yeniden
+  // yükleniyor süresince kullanıcıya "değişim" hissi verir.
   //
-  // ÖNEMLİ — StrictMode safety:
-  // React 19 + StrictMode dev modda effect'i mount/unmount/mount
-  // sırasıyla iki kez çalıştırır. Önceki sürümde "lastUrlRef === url
-  // → return" guard'ı, ikinci mount'ta `setSwapping(false)` adımını
-  // hiç çağırmıyordu ve veil sonsuza takılıyordu. Cleanup'ta state'i
-  // her durumda kapatarak sorunu sıfırladık.
+  // url değişimini render-fazı "önceki değer" pattern'iyle yakalıyoruz
+  // (set-state-in-effect kaçınma). 700ms'lik kapanma timer'ı effect'te;
+  // setSwapping(false) bir callback içinde olduğu için effect-body kuralı
+  // tetiklenmez. lastUrl dep'i sayesinde swap sırasında url tekrar
+  // değişirse veil süresi yeniden uzar.
   const [swapping, setSwapping] = useState(false);
-  const lastUrlRef = useRef<string>(url);
-  useEffect(() => {
-    if (lastUrlRef.current === url) return;
-    lastUrlRef.current = url;
+  const [lastUrl, setLastUrl] = useState(url);
+  if (lastUrl !== url) {
+    setLastUrl(url);
     setSwapping(true);
+  }
+  useEffect(() => {
+    if (!swapping) return;
     const timer = window.setTimeout(() => setSwapping(false), 700);
-    return () => {
-      window.clearTimeout(timer);
-      setSwapping(false);
-    };
-  }, [url]);
+    return () => window.clearTimeout(timer);
+  }, [swapping, lastUrl]);
 
   return (
     <div
