@@ -37,6 +37,8 @@ import {
 } from "@react-three/drei";
 
 import ModelAvatar from "@/components/shop/ModelAvatar";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import type { GeneratedAvatar } from "@/lib/caelinus-ai";
 
 /**
@@ -134,7 +136,7 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
-const DEFAULT_MODEL = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL = "/models/caelinus-body-base-fem.glb";
 
 useGLTF.preload(DEFAULT_MODEL);
 
@@ -223,6 +225,12 @@ export default function Caelinus3DScene({
     const timer = window.setTimeout(() => setSwapping(false), 700);
     return () => window.clearTimeout(timer);
   }, [swapping, lastUrl]);
+
+  // Avatarlar yapımda — kütüphane boşken 3D yerine placeholder.
+  // (Hook'lardan SONRA: rules-of-hooks için erken return en sonda.)
+  if (AVATARS_IN_PRODUCTION) {
+    return <AvatarsInProduction className={`cai-canvas ${className}`.trim()} />;
+  }
 
   return (
     <div

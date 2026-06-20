@@ -12,6 +12,7 @@ import type { AvatarFaceDeformConfig, ModelCapabilities, MorphTargetMapping } fr
 import { IDENTITY_DEFORM, applyFaceDeform, clearFaceDeformBase } from "@/lib/face";
 import { inspectModel } from "@/lib/face/model-inspector";
 import { buildMorphTargetMapping } from "@/lib/face/morph-targets";
+import { getHairUrlForModelUrl, isCaelinusBodyUrl } from "@/lib/avatar-bodies";
 import { AvatarFaceTexture } from "./AvatarFaceTexture";
 
 type Props = {
@@ -25,6 +26,10 @@ type Props = {
   faceDeform?: AvatarFaceDeformConfig | null;
   /** External animation GLB (e.g. catwalk.glb) — merged into the mixer */
   animationUrl?: string | null;
+  /** Saç GLB — verilmezse body URL'inden (registry) çözülür. `null`
+   *  geçilirse saç hiç yüklenmez. Saç runtime'da Head bone'una rigid
+   *  bind edilir (kafa/animasyon hareketini takip eder). */
+  hairUrl?: string | null;
   /** Exposes model capabilities to parent for debug display */
   onCapabilities?: (caps: ModelCapabilities) => void;
   /** Exposes the avatar root Object3D for outfit binding */
@@ -96,6 +101,85 @@ type BodyDeformResult = {
   };
   matchedBoneNames: string[];
 };
+
+/**
+ * Sadece görünür mesh'lerin (Mesh/SkinnedMesh) birleşik bounding box'ı.
+ * armature/bone/helper node'ları yok sayar — `Box3.setFromObject(scene)`
+ * iskelet uzantıları yüzünden yanlış yükseklik verip ölçek hesabını
+ * bozmasın diye. (bkz. lib/3d/useFitToView.ts)
+ */
+function measureVisibleMeshBox(root: THREE.Object3D): THREE.Box3 {
+  const box = new THREE.Box3();
+  root.traverse((o) => {
+    const obj = o as THREE.Object3D & { isMesh?: boolean };
+    if (obj.isMesh && obj.visible !== false) {
+      const meshBox = new THREE.Box3().setFromObject(o);
+      if (!meshBox.isEmpty()) box.union(meshBox);
+    }
+  });
+  return box;
+}
+
+function materialList(
+  material: THREE.Material | THREE.Material[] | undefined,
+): THREE.Material[] {
+  if (!material) return [];
+  return Array.isArray(material) ? material : [material];
+}
+
+function nameOf(value: unknown): string {
+  return typeof value === "string" ? value.toLowerCase() : "";
+}
+
+function isNonSkinSurface(obj: THREE.Mesh): boolean {
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+  const joined = [meshName, ...materialNames].join(" ");
+
+  return /hair|sac|saç|brow|lash|eyelash|eye|iris|pupil|teeth|tooth|tongue|mouth|nail|cloth|fabric|outfit|dress|skirt|shoe|heel|bag|jewel|gem|metal/i.test(
+    joined,
+  );
+}
+
+function isSkinSurface(obj: THREE.Mesh): boolean {
+  if (isNonSkinSurface(obj)) return false;
+
+  const meshName = nameOf(obj.name);
+  const materialNames = materialList(obj.material).map((m) => nameOf(m.name));
+
+  if (materialNames.some((n) => /human\.body|skin|body|face|head/i.test(n))) {
+    return true;
+  }
+
+  return /^base$|body|skin|torso|head/i.test(meshName);
+}
+
+function makeSkinMaterial(
+  existing: THREE.Material | undefined,
+  skin: THREE.Color,
+  aura: THREE.Color,
+): THREE.MeshPhysicalMaterial {
+  const source =
+    existing instanceof THREE.MeshPhysicalMaterial ||
+    existing instanceof THREE.MeshStandardMaterial
+      ? existing
+      : null;
+  const mat = source
+    ? (source.clone() as THREE.MeshPhysicalMaterial)
+    : new THREE.MeshPhysicalMaterial();
+
+  mat.name = source?.name ? `${source.name}:skin-tone` : "caelinus-skin-tone";
+  mat.color = skin.clone();
+  mat.map = null;
+  mat.emissive = aura.clone();
+  mat.emissiveIntensity = 0.045;
+  mat.roughness = Math.max(0.48, mat.roughness ?? 0.5);
+  mat.metalness = 0;
+  mat.clearcoat = Math.max(0.12, mat.clearcoat ?? 0);
+  mat.clearcoatRoughness = Math.max(0.28, mat.clearcoatRoughness ?? 0.28);
+  mat.needsUpdate = true;
+  return mat;
+}
 
 function applyBodyDeformation(
   scene: THREE.Object3D,
@@ -252,7 +336,7 @@ function applyBodyDeformation(
 }
 
 export default function ModelAvatar({
-  url = "/models/caelinus-avatar.glb",
+  url = "/models/caelinus-body-base-fem.glb",
   auraColor = "#69d8ff",
   skinTone,
   hairColor,
@@ -260,6 +344,7 @@ export default function ModelAvatar({
   faceTextureUrl = null,
   faceDeform = null,
   animationUrl = null,
+  hairUrl,
   onCapabilities,
   onSceneReady,
 }: Props) {
@@ -285,6 +370,13 @@ export default function ModelAvatar({
   // — "ten rengi haricinde hiçbir şey çalışmıyor" semptomunun
   // kaynağı kelimenin tam anlamıyla budur.
   const scene = useMemo(() => cloneSkinned(gltf.scene), [gltf.scene]);
+
+  // Efektif saç URL'i: explicit prop > registry (body url'inden). prop
+  // `null` ise saç kapalı. `undefined` (default) ise registry'den çöz.
+  const resolvedHairUrl = useMemo(
+    () => (hairUrl === undefined ? getHairUrlForModelUrl(url) : hairUrl),
+    [hairUrl, url],
+  );
 
   // ── Imperatively load external animation GLB + retarget tracks ──
   const [extClips, setExtClips] = useState<THREE.AnimationClip[]>([]);
@@ -335,13 +427,18 @@ export default function ModelAvatar({
             // If avatar already has this bone, keep as-is
             if (avatarBones.has(boneName)) return track;
 
-            // Try to find a matching avatar bone (case-insensitive, stripped prefix)
+            // Try to find a matching avatar bone (case-insensitive, stripped prefix).
+            // Normalize the "mixamorig" prefix AND a trailing ":" or "_" — Blender's
+            // FBX→GLB round-trip keeps Mixamo's colon ("mixamorig:Hips"), while the
+            // catwalk clip may use the colon-less form ("mixamorigHips"). Strip both
+            // so either convention retargets cleanly.
+            const stripMixamo = (s: string) => s.replace(/^mixamorig[:_]?/i, "");
             const boneLC = boneName.toLowerCase();
-            const stripped = boneLC.replace(/^mixamorig/i, "");
+            const stripped = stripMixamo(boneLC);
             let match: string | null = null;
             for (const ab of avatarBones) {
               const abLC = ab.toLowerCase();
-              if (abLC === boneLC || abLC === stripped || abLC.replace(/^mixamorig/i, "") === stripped) {
+              if (abLC === boneLC || abLC === stripped || stripMixamo(abLC) === stripped) {
                 match = ab;
                 break;
               }
@@ -352,6 +449,26 @@ export default function ModelAvatar({
               return newTrack;
             }
             return track;
+          })
+          // Strip ROOT MOTION: drop the hips/root POSITION track so the avatar
+          // animates IN PLACE on the stage instead of traveling off-camera.
+          // Mixamo "walk/dance" clips bake forward locomotion into Hips.position;
+          // without this the character walks straight out of the frame and the
+          // mesh appears to "vanish". Rotation tracks are kept, so the full pose
+          // still plays. (Hips.quaternion etc. are untouched.)
+          // Keep rotation (the pose) + bone positions, but drop:
+          //   • ALL scale tracks — a Mixamo FBX→GLB round-trip can bake a
+          //     non-identity (100x) scale that would blow the avatar up.
+          //   • the Hips/root POSITION track — removes forward locomotion so the
+          //     avatar walks IN PLACE on the stage instead of off-camera.
+          // This works ONLY when the catwalk skeleton shares the avatar's scale
+          // space (transforms applied at export). Bone positions must match the
+          // avatar's bind lengths or the mesh stretches into "tubes".
+          .filter((track) => {
+            if (/\.scale$/i.test(track.name)) return false;
+            const isPosition = /\.position$/i.test(track.name);
+            const isRoot = /hips$/i.test(track.name.split(".")[0]);
+            return !(isPosition && isRoot);
           });
 
           return new THREE.AnimationClip(clip.name || "ext_anim", clip.duration, newTracks, clip.blendMode);
@@ -370,10 +487,16 @@ export default function ModelAvatar({
     return () => { cancelled = true; };
   }, [animationUrl, scene]);
 
-  const allClips = useMemo(
-    () => [...gltf.animations, ...extClips],
-    [gltf.animations, extClips]
-  );
+  const allClips = useMemo(() => {
+    // When an external animation (catwalk) is requested, play ONLY the external
+    // clips. The model's own embedded clips can otherwise collide by name (the
+    // Mixamo→Blender export bakes a residual "Armature|mixamo.com|Layer0" action
+    // into the avatar GLB with the SAME name as the catwalk clip) and the static
+    // pose ends up winning — the avatar freezes in T-pose. Ignoring embedded
+    // clips while an external one is active removes that ambiguity.
+    if (animationUrl) return extClips;
+    return [...gltf.animations];
+  }, [animationUrl, gltf.animations, extClips]);
 
   const { actions, names } = useAnimations(allClips, rootRef);
 
@@ -395,14 +518,18 @@ export default function ModelAvatar({
     if (process.env.NODE_ENV === "development") {
       const bones: string[] = [];
       const skinnedMeshes: { name: string; boneCount: number; bound: boolean }[] = [];
+      // İki geçiş: önce TÜM bone'ları topla, SONRA bind kontrolü yap.
+      // glTF'de skinned-mesh node'u kendi bone node'larından ÖNCE gelebilir
+      // (yaygın). Tek geçişte kontrol edilirse, mesh işlenirken bone'lar
+      // henüz toplanmamış olur ve skeleton yanlışlıkla "orphan" görünür
+      // (false-positive). İki geçiş bu sıra bağımlılığını ortadan kaldırır.
       scene.traverse((obj) => {
         if (obj instanceof THREE.Bone) bones.push(obj.name);
+      });
+      const sceneBones = new Set(bones);
+      scene.traverse((obj) => {
         if (obj instanceof THREE.SkinnedMesh) {
-          // Skeleton'ın bone'ları scene graph'taki bone'larla eşleşiyor
-          // mu? Eğer SkeletonUtils.clone iyi yaptıysa eşleşir; standart
-          // clone yaptıysa eşleşmez (bound=false).
           const skelBoneNames = obj.skeleton.bones.map((b) => b.name);
-          const sceneBones = new Set(bones);
           const overlap = skelBoneNames.filter((n) => sceneBones.has(n)).length;
           skinnedMeshes.push({
             name: obj.name || "(unnamed)",
@@ -450,10 +577,16 @@ export default function ModelAvatar({
         scene.scale.setScalar(1);
         scene.position.set(0, 0, 0);
         scene.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(scene);
+        // SADECE görünür mesh'leri ölç — armature/bone/helper node'ları
+        // dahil edersek (Box3.setFromObject(scene)) iskelet uzantıları
+        // yanlış (çoğu zaman küçük) bir yükseklik verir; scale = targetH /
+        // naturalH patlar ve model devasa/kırpık görünür. (bkz. useFitToView)
+        const meshBox = measureVisibleMeshBox(scene);
+        if (meshBox.isEmpty()) return; // GLB hâlâ yükleniyor — sonra yeniden ölç
         const size = new THREE.Vector3();
-        box.getSize(size);
+        meshBox.getSize(size);
         naturalH = size.y;
+        if (!naturalH || naturalH < 0.001) return;
         scene.userData._naturalHeight = naturalH;
         if (process.env.NODE_ENV === "development") {
           console.info(
@@ -468,7 +601,7 @@ export default function ModelAvatar({
       scene.scale.setScalar(scale);
 
       scene.updateMatrixWorld(true);
-      const scaled = new THREE.Box3().setFromObject(scene);
+      const scaled = measureVisibleMeshBox(scene);
       const sMin = scaled.min;
       const sCenter = new THREE.Vector3();
       scaled.getCenter(sCenter);
@@ -569,28 +702,29 @@ export default function ModelAvatar({
   //   • Wolf3D_* / EyeLeft / EyeRight isimleri (RPM, MetaHuman vb.
   //     diğer foto-gerçek pipeline'larından da geliyor olabilir)
   useEffect(() => {
+    // Kendi Caelinus bedenimiz mi? Kayıt (registry) tek doğruluk kaynağıdır.
+    // Mesh SAYISINA bakan eski tahmin KALDIRILDI — saç/kıyafet/takı eklendikçe
+    // bozuluyordu (saç 3. skinned mesh olunca ten-tonu yolu yanlışlıkla
+    // atlanıyordu). Artık bizim bedenimiz daima kendi materyal akışını kullanır.
+    const isKnownCaelinusBody = isCaelinusBodyUrl(url);
+
+    // Gerçek dış / yüklenen avatarlar (Avaturn, Ready Player Me, foto-gerçek
+    // rig'ler) mesh isimleriyle tanınır. Bizim bedenimizse asla dış sayılmaz.
     let isExternalAvatar = false;
-    let skinnedMeshCount = 0;
-
-    scene.traverse((obj) => {
-      if (
-        obj instanceof THREE.Mesh &&
-        (obj.name.startsWith("Wolf3D_") ||
-          obj.name.startsWith("EyeLeft") ||
-          obj.name.startsWith("EyeRight") ||
-          /^avaturn[_-]/i.test(obj.name) ||
-          /^outfit[_-]/i.test(obj.name) ||
-          /^head[_-]?mesh/i.test(obj.name))
-      ) {
-        isExternalAvatar = true;
-      }
-      if (obj instanceof THREE.SkinnedMesh) skinnedMeshCount++;
-    });
-
-    // Birden fazla SkinnedMesh + Mixamo bone'lar → external avatar
-    // (Avaturn / Mixamo karakterleri / foto-gerçek pipelines)
-    if (skinnedMeshCount >= 3) {
-      isExternalAvatar = true;
+    if (!isKnownCaelinusBody) {
+      scene.traverse((obj) => {
+        if (
+          obj instanceof THREE.Mesh &&
+          (obj.name.startsWith("Wolf3D_") ||
+            obj.name.startsWith("EyeLeft") ||
+            obj.name.startsWith("EyeRight") ||
+            /^avaturn[_-]/i.test(obj.name) ||
+            /^outfit[_-]/i.test(obj.name) ||
+            /^head[_-]?mesh/i.test(obj.name))
+        ) {
+          isExternalAvatar = true;
+        }
+      });
     }
 
     // Kendi PBR texture'ı (baseColor map) olan modeller — örn. Caelinus muse
@@ -631,7 +765,7 @@ export default function ModelAvatar({
       });
       if (process.env.NODE_ENV === "development") {
         console.info(
-          `[ModelAvatar] rich avatar (skinnedMeshes=${skinnedMeshCount}, textures=${hasOwnTextures}) — materyaller korunuyor${hair ? " + saç boyandı" : ""}`,
+          `[ModelAvatar] rich/external avatar (textures=${hasOwnTextures}) — materyaller korunuyor${hair ? " + saç boyandı" : ""}`,
         );
       }
       return;
@@ -640,22 +774,185 @@ export default function ModelAvatar({
     // Default Caelinus mesh yolu — eski davranış (full override)
     const aura = new THREE.Color(auraColor);
     const base = new THREE.Color(resolvedSkin);
+    let tintedSkinMeshes = 0;
 
     scene.traverse((obj) => {
       if (!(obj instanceof THREE.Mesh)) return;
       obj.castShadow = true;
       obj.receiveShadow = true;
-      obj.material = new THREE.MeshPhysicalMaterial({
-        color: base,
-        emissive: aura,
-        emissiveIntensity: 0.12,
-        roughness: 0.42,
-        metalness: 0.08,
-        clearcoat: 0.35,
-        clearcoatRoughness: 0.3,
-      });
+      // Preserve hair (and other explicitly non-skin parts) — overriding it with
+      // the skin-tone material would paint the hair flesh-colored. Hair meshes
+      // ship their own PBR material from Blender, so we leave them untouched.
+      if (/hair|sac|saç|brow|lash|eye/i.test(obj.name)) return;
+      if (!isSkinSurface(obj)) return;
+
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((mat) =>
+          makeSkinMaterial(mat, base, aura),
+        );
+      } else {
+        obj.material = makeSkinMaterial(obj.material, base, aura);
+      }
+      tintedSkinMeshes++;
     });
-  }, [scene, auraColor, resolvedSkin, hairColor]);
+
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `[ModelAvatar] skin tone applied (${resolvedSkin}) to ${tintedSkinMeshes} mesh(es)`,
+      );
+      if (tintedSkinMeshes === 0) {
+        console.warn(
+          "[ModelAvatar] skin tone had no matching skin surface. Check body/material names.",
+        );
+      }
+    }
+    // hairColor deps'te: muse'un gömülü saç materyali swatch değişince
+    // canlı yeniden boyansın (preserveMaterials yolu).
+  }, [scene, auraColor, resolvedSkin, url, hairColor]);
+
+  // 3b) Disable frustum culling on all meshes.
+  //
+  // A SkinnedMesh computes its bounding sphere from the BIND pose. Once the
+  // catwalk clip plays, vertices move outside that stale sphere, so Three.js'
+  // frustum test decides the mesh is off-screen and culls it — the avatar
+  // "appears then vanishes". Turning culling off for these few meshes is the
+  // standard, cheap fix.
+  useEffect(() => {
+    scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) obj.frustumCulled = false;
+    });
+  }, [scene]);
+
+  // 3c) Hair — ayrı GLB'yi yükle ve Head bone'una RIGID bind et.
+  //
+  // Neden ayrı dosya + runtime attach: saç değiştirilebilir bir aksesuar
+  // (farklı stiller); body GLB'ye gömmek yerine kendi dosyasında tutup
+  // çalışma anında kafaya takıyoruz. Böylece saç kafa/animasyon
+  // hareketini takip eder ama mesh'ler ayrı kalır.
+  //
+  // Hizalama matematiği: saç, body ile AYNI Blender koordinatlarında
+  // modellendi (ikisi de aynı sahneden ayrı export edildi). Yani saç
+  // vertex'leri body'nin GLB-uzayıyla birebir aynı çerçevededir.
+  //   • body verts → world : scene.matrixWorld
+  //   • headBone-local → world : headBone.matrixWorld
+  // Saç container'ını headBone'a child yapıp local matrix'i
+  //   hairLocal = headBone.matrixWorld⁻¹ · scene.matrixWorld
+  // verirsek, container.matrixWorld = scene.matrixWorld olur → saç tam
+  // body ile çakışır. hairLocal SABİT (matrixAutoUpdate=false); kafa
+  // bone'u animasyonla döndükçe container rijit takip eder. Bu bağıl
+  // dönüşüm, sahne köküne uygulanan uniform ölçek/grounding'den
+  // bağımsızdır (her ikisi de aynı oranda ölçeklenir).
+  const hairRootRef = useRef<THREE.Object3D | null>(null);
+  useEffect(() => {
+    // Önce eski saçı temizle (url/scene değişimi).
+    const prev = hairRootRef.current;
+    if (prev) {
+      prev.parent?.remove(prev);
+      prev.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh) {
+          m.geometry?.dispose?.();
+          const mat = m.material as THREE.Material | THREE.Material[];
+          if (Array.isArray(mat)) mat.forEach((x) => x.dispose?.());
+          else mat?.dispose?.();
+        }
+      });
+      hairRootRef.current = null;
+    }
+
+    if (!resolvedHairUrl) return;
+
+    // Head bone'u bul ("mixamorig:Head" → prefix soyularak "Head").
+    let headBone: THREE.Bone | null = null;
+    const strip = (s: string) => s.replace(/^mixamorig[:_]?/i, "");
+    scene.traverse((o) => {
+      if (headBone) return;
+      if (o instanceof THREE.Bone && /^head$/i.test(strip(o.name))) headBone = o;
+    });
+    if (!headBone) {
+      scene.traverse((o) => {
+        if (headBone) return;
+        if (o instanceof THREE.Bone && /head/i.test(o.name)) headBone = o;
+      });
+    }
+    if (!headBone) {
+      console.warn("[ModelAvatar] saç bind atlandı — Head bone bulunamadı");
+      return;
+    }
+    const head: THREE.Bone = headBone;
+
+    let cancelled = false;
+    const loader = new GLTFLoader();
+    const safeHairUrl = /%[0-9a-f]{2}/i.test(resolvedHairUrl)
+      ? resolvedHairUrl
+      : encodeURI(resolvedHairUrl);
+
+    loader.load(
+      safeHairUrl,
+      (hairGltf) => {
+        if (cancelled) return;
+        // Skinned-aware clone → saç kendi Hair.rig'ine bağlı kalır.
+        const hairRoot = cloneSkinned(hairGltf.scene);
+
+        // Hizalama: hairLocal = head.matrixWorld⁻¹ · scene.matrixWorld
+        scene.updateMatrixWorld(true);
+        head.updateWorldMatrix(true, false);
+        const hairLocal = new THREE.Matrix4()
+          .copy(head.matrixWorld)
+          .invert()
+          .multiply(scene.matrixWorld);
+
+        hairRoot.matrixAutoUpdate = false;
+        hairRoot.matrix.copy(hairLocal);
+
+        // Saç da kalıcı görünür kalsın (skinned bbox frustum culling) +
+        // material normalizasyonu.
+        //
+        // Saç texture'ı bir hair-card atlası: ~%10 tam-opak saç teli,
+        // ~%90 tam-şeffaf arka plan (binary alpha mask). Blender'dan
+        // alphaMode=BLEND geliyor; bu modda teller depth-sorting yüzünden
+        // soluk/yarı-saydam ("ölü kep") görünüyor. Binary maske için
+        // doğru mod alpha-CUTOUT: alphaTest eşiğiyle teller solid render
+        // edilir, şeffaf arka plan tamamen kesilir → net saç, haze yok.
+        hairRoot.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          mesh.frustumCulled = false;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          const mats = Array.isArray(mesh.material)
+            ? mesh.material
+            : [mesh.material];
+          mats.forEach((m) => {
+            const mat = m as THREE.MeshStandardMaterial;
+            if (!mat) return;
+            // BLEND → CUTOUT: tellerin alfası ~1, arka plan ~0.
+            mat.alphaTest = 0.5;
+            mat.transparent = false;
+            mat.depthWrite = true;
+            mat.side = THREE.DoubleSide;
+            mat.needsUpdate = true;
+          });
+        });
+
+        head.add(hairRoot);
+        hairRoot.updateMatrixWorld(true);
+        hairRootRef.current = hairRoot;
+
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            `[ModelAvatar] ✓ saç bind edildi → "${head.name}" (${safeHairUrl})`,
+          );
+        }
+      },
+      undefined,
+      (err) => console.warn("[ModelAvatar] saç yükleme hatası:", err),
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [scene, resolvedHairUrl]);
 
   // 4) Animations — prefer external clip, then idle, then first available
   const activeClipRef = useRef<string | null>(null);
@@ -671,12 +968,36 @@ export default function ModelAvatar({
 
     let preferred: string | undefined;
 
-    if (animationUrl && extClipNamesRef.current.size > 0) {
-      // Prefer matching name, else take any external clip
-      preferred =
-        names.find((n) => extClipNamesRef.current.has(n) && /catwalk|walk|runway/i.test(n)) ??
-        names.find((n) => extClipNamesRef.current.has(n)) ??
-        undefined;
+    if (animationUrl && extClips.length > 0) {
+      // A single Mixamo/Cinema4D GLB often ships SEVERAL clips: a real
+      // skeletal clip, a root-motion-only clip ("Girl Dancer" → 1 node),
+      // and sometimes a clip authored for a totally different rig
+      // ("CINEMA_4D_Main" → DAZ Genesis names). Picking "the first external
+      // clip" is unreliable. Instead, score each retargeted clip by how many
+      // of its tracks actually resolve to THIS avatar's bones, and play the
+      // best-matching one. Falls back gracefully when nothing matches.
+      const avatarBoneSet = new Set<string>();
+      scene.traverse((o) => {
+        if (o instanceof THREE.Bone) avatarBoneSet.add(o.name);
+      });
+
+      const scoreClip = (clip: THREE.AnimationClip) =>
+        clip.tracks.reduce((acc, t) => {
+          const boneName = t.name.split(".")[0];
+          return acc + (avatarBoneSet.has(boneName) ? 1 : 0);
+        }, 0);
+
+      const ranked = extClips
+        .filter((c) => names.includes(c.name))
+        .map((c) => ({ name: c.name, score: scoreClip(c), tracks: c.tracks.length }))
+        .sort((a, b) => b.score - a.score);
+
+      console.info(
+        "[ModelAvatar] external clip ranking (by matched bones):",
+        ranked.map((r) => `${r.name}: ${r.score}/${r.tracks}`),
+      );
+
+      preferred = ranked.find((r) => r.score > 0)?.name ?? ranked[0]?.name;
     }
 
     if (!preferred) {
@@ -705,7 +1026,7 @@ export default function ModelAvatar({
       if (action) action.fadeOut(0.4);
       activeClipRef.current = null;
     };
-  }, [actions, names, animationUrl]);
+  }, [actions, names, animationUrl, extClips, scene]);
 
   // Breathing + gentle rotation
   useFrame((state) => {
@@ -752,4 +1073,4 @@ export default function ModelAvatar({
   );
 }
 
-useGLTF.preload("/models/caelinus-avatar.glb");
+useGLTF.preload("/models/caelinus-body-base-fem.glb");

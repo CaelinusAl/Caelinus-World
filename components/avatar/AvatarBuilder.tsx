@@ -9,7 +9,7 @@
  * sıfır AI maliyeti, oyun hissi.
  *
  * Sol/sağ ya da alt/üst layout (responsive):
- *   • Sol/Üst:    ParametricAvatar canlı preview (sticky)
+ *   • Sol/Üst:    TraitMoodboard canlı preview (sticky)
  *   • Sağ/Alt:    7 sekmeli kontrol paneli (Ten · Beden · Saç · Göz ·
  *                 Dudak · Burç · Glif)
  *

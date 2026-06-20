@@ -1,13 +1,18 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useCallback, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, useGLTF } from "@react-three/drei";
+import * as THREE from "three";
 import type { AvatarConfig } from "@/types/avatar";
+import type { OutfitBindingConfig } from "@/types/play";
 import type { AvatarFaceDeformConfig, ModelCapabilities } from "@/lib/face";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import ModelAvatar from "./ModelAvatar";
+import OutfitBindingLayer, { type OutfitBindingStatus } from "./scene/OutfitBindingLayer";
 
-const DEFAULT_MODEL_PATH = "/models/caelinus-avatar.glb";
+const DEFAULT_MODEL_PATH = "/models/caelinus-body-base-fem.glb";
 
 type Props = {
   config: AvatarConfig;
@@ -16,7 +21,9 @@ type Props = {
   faceTextureUrl?: string | null;
   faceDeform?: AvatarFaceDeformConfig | null;
   animationUrl?: string | null;
+  outfitBindings?: OutfitBindingConfig[];
   onCapabilities?: (caps: ModelCapabilities) => void;
+  onOutfitStatus?: (status: OutfitBindingStatus) => void;
 };
 
 export default function AvatarConfigurator({
@@ -25,9 +32,20 @@ export default function AvatarConfigurator({
   faceTextureUrl = null,
   faceDeform = null,
   animationUrl = null,
+  outfitBindings = [],
   onCapabilities,
+  onOutfitStatus,
 }: Props) {
+  const [avatarRoot, setAvatarRoot] = useState<THREE.Object3D | null>(null);
+  const handleSceneReady = useCallback((scene: THREE.Object3D) => {
+    setAvatarRoot(scene);
+  }, []);
+
+  if (AVATARS_IN_PRODUCTION) {
+    return <AvatarsInProduction className="avcfg-canvas" />;
+  }
   const modelUrl = avatarUrl || DEFAULT_MODEL_PATH;
+
   return (
     <div className="avcfg-canvas">
       {/* Kamera çerçevesi: avatar 2.8m yükseklik (170 cm referans), tam
@@ -44,6 +62,7 @@ export default function AvatarConfigurator({
           <directionalLight position={[-2, 1, -2]} intensity={0.7} color="#7b8dff" />
 
           <ModelAvatar
+            key={modelUrl}
             url={modelUrl}
             skinTone={config.skinTone}
             auraColor="#8b6fff"
@@ -52,7 +71,17 @@ export default function AvatarConfigurator({
             faceDeform={faceDeform}
             animationUrl={animationUrl}
             onCapabilities={onCapabilities}
+            onSceneReady={handleSceneReady}
           />
+
+          {outfitBindings.map((binding) => (
+            <OutfitBindingLayer
+              key={binding.glbUrl}
+              config={binding}
+              avatarRoot={avatarRoot}
+              onStatus={onOutfitStatus}
+            />
+          ))}
 
           <ContactShadows
             position={[0, -0.02, 0]}

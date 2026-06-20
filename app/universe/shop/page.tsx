@@ -7,15 +7,16 @@ import { useSceneStore } from "@/stores/scene-store";
 import { useCartStore } from "@/stores/cart-store";
 import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
+import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import { productsExtended } from "@/data/products";
 import ShopHeader from "./_components/ShopHeader";
+import MirrorGate from "./_components/MirrorGate";
 import TryOnSection from "./_components/TryOnSection";
 import ProductSection from "./_components/ProductSection";
 import OutfitBuilder from "./_components/OutfitBuilder";
 import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
-import FrequencyShelf from "./_components/FrequencyShelf";
 import AvatarBadge from "./_components/AvatarBadge";
 
 /**
@@ -73,40 +74,46 @@ export default function ShopPage() {
   }, []);
 
   return (
-    <main className="shop-page">
-      {/* BG */}
-      <div className="shop-bg" />
-      <div className="shop-overlay" />
-      <div className="shop-vignette" />
-
-      {/* Rain */}
-      <div className="shop-rain">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className={`shop-beam beam-${i % 6}`}
-            style={{ left: `${8 + i * 12}%`, animationDelay: `${i * 1.1}s`, animationDuration: `${7 + i * 0.6}s` }}
-          />
-        ))}
+    <main className="shop-page mirror-page">
+      {/* MIRROR GATE atmosferi — eski shop/merdiven videosu kaldırıldı.
+          Karanlık yansıtıcı su zemini, sütun silüetleri, mor ay,
+          altın partiküller ve hafif sis. Tamamı CSS katmanı. */}
+      <div className="mirror-bg" aria-hidden="true">
+        <div className="mirror-moon" />
+        <div className="mirror-columns" />
+        <div className="mirror-mist" />
+        <div className="mirror-particles">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span
+              key={i}
+              className="mirror-particle"
+              style={{
+                left: `${(i * 7 + 4) % 100}%`,
+                animationDelay: `${(i % 7) * 1.3}s`,
+                animationDuration: `${9 + (i % 5) * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+        <div className="mirror-water" />
       </div>
 
       <Suspense fallback={null}>
         <TryOnLauncher />
       </Suspense>
 
-      <div className="shop-shell">
-        <ShopHeader />
-
-        <FrequencyShelf />
-
-        {/* Faz 3.2 — Kullanıcının kayıtlı AI avatarı (yoksa "yarat"
-         * daveti) sahnenin üzerinde sticky. Vizyonun "her sayfada
-         * benim avatarım" sürekliliği için. */}
+      <div className="shop-shell mirror-shell">
+        {/* MIRROR CONSOLE — aynanın sağ üst kontrol paneli (sticky). */}
         <AvatarBadge />
 
+        <ShopHeader />
+
+        {/* Aynanın kendisi: oval portal + su üstündeki 3 ritüel taşı. */}
+        <MirrorGate />
+
         <section className="shop-main">
-          {/* 1. AVATAR STAGE — Always visible */}
-          <TryOnSection />
+          {/* 1. AVATAR STAGE — avatarlar yapımdayken gizli (placeholder gösterilmez) */}
+          {!AVATARS_IN_PRODUCTION && <TryOnSection />}
 
           {/* 2. VIRTUAL TRY-ON MODE */}
           <div className={`shop-section-panel ${activeMode === "tryon" ? "visible" : ""}`}>

@@ -64,19 +64,19 @@ parametric karşılığı.
    göz (11 renk + 4 kozmik), ten (7 ton), dudak (7 renk), beden
    silueti (söğüt / kum saati / ay), burç + alın glifi (yok / burç
    sembolü / Solfeggio frekans halkası)
-2. **Canlı SVG preview** — `components/avatar/ParametricAvatar.tsx`,
-   600×800 SVG portrait, painterly + cosmic stil
-3. **"Bu Tanrıçayı Kaydet"** — SVG canvas'a rasterize edilir
-   (`lib/avatar/export.ts`), PNG data URL alınır
-4. **localStorage'a yaz** — meta'da `kind: "parametric" + traits`
-   tam serialize edilir; re-edit'te builder kaldığın yerden açılır
+2. **Canlı moodboard preview** — `components/avatar/TraitMoodboard.tsx`,
+   600×800 oran, seçilen trait'leri anlık yansıtan kompozisyon
+3. **"✦ Tanrıçayı Doğur"** — `POST /api/avatar/portrait` ile 1024×1024
+   fotoreal AI portre üretilir
+4. **localStorage'a yaz** — meta'da `kind: "ai-portrait" + traits`
+   serialize edilir; login varsa opsiyonel `POST /api/avatar/save`
 
 | Modül | Konum |
 |-------|-------|
 | Trait şema + palette | `lib/avatar/builder.ts` |
-| SVG renderer | `components/avatar/ParametricAvatar.tsx` |
+| Moodboard preview | `components/avatar/TraitMoodboard.tsx` |
 | UI builder | `components/avatar/AvatarBuilder.tsx` |
-| SVG → PNG export | `lib/avatar/export.ts` |
+| AI portre üretimi | `app/api/avatar/portrait/route.ts` |
 | Sayfa flow | `app/avatar/BuilderFlow.tsx` |
 | Tab shell | `app/avatar/AvatarStudioBody.tsx` (default `AvatarStudio`) |
 

@@ -73,7 +73,7 @@ export default function StylistAvatarPreview({ look, onClose, lang }: Props) {
   };
 
   const buyAll = () => {
-    look.items.forEach((it) => addToCart(it.product, "M"));
+    look.items.forEach((it) => addToCart(it.product, "M-L"));
     onClose();
   };
 

@@ -3,9 +3,11 @@
  *
  * Single entry point: `sendEmail({ to, subject, html, text })`.
  *
- * • If `RESEND_API_KEY` is set, posts to https://api.resend.com/emails.
- * • Otherwise falls back to a structured console log so dev/CI runs
- *   never explode and reviewers can read the body in the server log.
+ * Sağlayıcı önceliği:
+ * • SMTP (Titan vb.) tanımlıysa (SMTP_HOST + SMTP_USER + SMTP_PASS) →
+ *   nodemailer ile gerçek posta kutusundan gönderir (yanıtlar kutuya düşer).
+ * • Değilse `RESEND_API_KEY` varsa → https://api.resend.com/emails.
+ * • Hiçbiri yoksa → yapılandırılmış console log (dev/CI patlamasın).
  *
  * Best-effort: returns `{ ok, error? }` instead of throwing. Callers
  * that depend on user-visible side-effects should NOT bubble errors —
@@ -31,23 +33,65 @@ export type SendEmailInput = {
   siteUrl?: string;
 };
 
+type Provider = "smtp" | "resend" | "console";
+
 export type SendEmailResult =
-  | { ok: true; provider: "resend" | "console"; id?: string }
-  | { ok: false; provider: "resend" | "console"; error: string };
+  | { ok: true; provider: Provider; id?: string }
+  | { ok: false; provider: Provider; error: string };
 
 const FALLBACK_FROM = "Caelinus <onboarding@resend.dev>";
 
 export function getDefaultFrom(): string {
-  return serverEnv.EMAIL_FROM || FALLBACK_FROM;
+  if (serverEnv.EMAIL_FROM) return serverEnv.EMAIL_FROM;
+  // Titan SMTP: From, kimlik doğrulanan kutuyla aynı olmalı.
+  if (serverEnv.SMTP_USER) return `Caelinus <${serverEnv.SMTP_USER}>`;
+  return FALLBACK_FROM;
 }
 
 export function getSiteUrl(): string {
   return clientEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
 }
 
+async function sendViaSmtp(
+  input: SendEmailInput,
+  from: string,
+): Promise<SendEmailResult> {
+  try {
+    const { default: nodemailer } = await import("nodemailer");
+    const port = serverEnv.SMTP_PORT ?? 465;
+    const secure = serverEnv.SMTP_SECURE ?? port === 465;
+    const transport = nodemailer.createTransport({
+      host: serverEnv.SMTP_HOST,
+      port,
+      secure,
+      auth: { user: serverEnv.SMTP_USER, pass: serverEnv.SMTP_PASS },
+    });
+    const info = await transport.sendMail({
+      from,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      replyTo: input.replyTo,
+    });
+    return { ok: true, provider: "smtp", id: info.messageId };
+  } catch (err) {
+    return {
+      ok: false,
+      provider: "smtp",
+      error: err instanceof Error ? err.message : "SMTP send failed",
+    };
+  }
+}
+
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   const key = serverEnv.RESEND_API_KEY;
   const from = input.from || getDefaultFrom();
+
+  // 1) SMTP (Titan vb.) tam yapılandırılmışsa onu kullan.
+  if (serverEnv.SMTP_HOST && serverEnv.SMTP_USER && serverEnv.SMTP_PASS) {
+    return sendViaSmtp(input, from);
+  }
 
   if (!key) {
     // Dev / CI fallback: log the mail body so a developer can copy it

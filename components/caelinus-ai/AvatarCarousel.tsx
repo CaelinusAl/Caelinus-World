@@ -34,6 +34,7 @@ import {
   DEFAULT_BODY_ID,
   type BodyEntry,
 } from "@/lib/avatar-bodies";
+import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import {
   loadGeneratedAvatar,
   type GeneratedAvatar,
@@ -187,9 +188,7 @@ export default function AvatarCarousel({
   if (items.length === 0) {
     return (
       <div className={`cai-carousel cai-carousel--empty ${className}`}>
-        <p className="cai-carousel-empty-text">
-          ✦ Caelinus body library yükleniyor…
-        </p>
+        <AvatarsInProduction compact />
       </div>
     );
   }

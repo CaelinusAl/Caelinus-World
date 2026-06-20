@@ -4,6 +4,12 @@ import { computeProfile } from "@/lib/frequency";
 
 const STORAGE_KEY = "caelinus_frequency_profile_v1";
 
+/**
+ * Kanonik kimlik omurgası (lib/identity) bu anahtarı doğrudan okuyabilsin
+ * diye dışa açılır. Tek doğru kaynak burası — kopyalanmaz, projekte edilir.
+ */
+export const FREQUENCY_PROFILE_KEY = STORAGE_KEY;
+
 function loadFromStorage(): FrequencyProfile | null {
   if (typeof window === "undefined") return null;
   try {

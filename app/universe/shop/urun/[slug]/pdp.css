@@ -15,7 +15,7 @@
     radial-gradient(circle at 18% 20%, rgba(150, 110, 230, 0.16) 0%, transparent 45%),
     radial-gradient(circle at 82% 75%, rgba(80, 140, 220, 0.14) 0%, transparent 50%),
     #04060f;
-  padding: 96px 24px 96px;
+  padding: calc(var(--cae-page-top) + 8px) 24px 96px;
   overflow: hidden;
 }
 
@@ -84,8 +84,113 @@
   display: block;
 }
 
+/* "Hikâyeyi Yaşa" — görselin yerinde canlanan video */
+.pdp-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.pdp-image-wrap.playing .pdp-video {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Oynatırken sağ-üst köşeyi durdurma butonuna bırak */
+.pdp-image-wrap.playing .pdp-zodiac-tag {
+  opacity: 0;
+}
+
+/* Görsel üzerindeki "oynat" daveti */
+.pdp-play-orb {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(4, 6, 15, 0.05),
+    rgba(4, 6, 15, 0.45)
+  );
+  transition: background 0.3s ease;
+}
+.pdp-play-orb:hover {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(150, 110, 230, 0.12),
+    rgba(4, 6, 15, 0.55)
+  );
+}
+.pdp-play-glyph {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  padding-left: 4px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(220, 200, 255, 0.55);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 30px rgba(150, 110, 230, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.pdp-play-orb:hover .pdp-play-glyph {
+  transform: scale(1.08);
+  box-shadow: 0 0 44px rgba(150, 110, 230, 0.55);
+}
+.pdp-play-label {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 255, 0.92);
+}
+
+.pdp-stop-orb {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(4, 6, 15, 0.55);
+  border: 1px solid rgba(220, 200, 255, 0.4);
+  backdrop-filter: blur(6px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.pdp-stop-orb:hover {
+  background: rgba(4, 6, 15, 0.8);
+  transform: scale(1.06);
+}
+
+.pdp-cta--primary.is-playing {
+  background: linear-gradient(135deg, rgba(150, 110, 230, 0.7), rgba(80, 140, 220, 0.7));
+}
+
 .pdp-freq-tag {
   position: absolute;
+  z-index: 4;
   top: 16px;
   left: 16px;
   padding: 6px 12px;
@@ -101,6 +206,7 @@
 
 .pdp-zodiac-tag {
   position: absolute;
+  z-index: 4;
   top: 16px;
   right: 16px;
   padding: 6px 12px;

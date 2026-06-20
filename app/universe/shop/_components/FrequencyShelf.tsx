@@ -15,6 +15,9 @@ import type { CSSProperties } from "react";
  *   highlighted first.
  * - When there's no profile, we render a soft invitation back to /onboarding.
  */
+/** Kod-yağmuru sütunları — her biri farklı hızda akar (Matrix hissi). */
+const FLOW_COLUMNS = ["24s", "31s", "27s"];
+
 export default function FrequencyShelf() {
   const profile = useProfileStore((s) => s.profile);
   const hydrated = useProfileStore((s) => s.hydrated);
@@ -50,7 +53,7 @@ export default function FrequencyShelf() {
             Henüz frekansını bulmadın.
           </h3>
           <p className="freq-shelf-cta-text">
-            Caelinus Shop'un sana göre kişiselleşmesi için önce eşikten geç.
+            Caelinus Shop&apos;un sana göre kişiselleşmesi için önce eşikten geç.
             3 dakika, 3 adım, sadece sana ait bir Hz.
           </p>
           <Link href="/onboarding" className="freq-shelf-cta-btn">
@@ -83,7 +86,7 @@ export default function FrequencyShelf() {
             <div className="freq-shelf-hz">
               {profile.frequency}<span>Hz</span>
             </div>
-            <div className="freq-shelf-motto">"{motto}"</div>
+            <div className="freq-shelf-motto">&quot;{motto}&quot;</div>
           </div>
         </div>
         <div className="freq-shelf-actions">
@@ -94,30 +97,44 @@ export default function FrequencyShelf() {
       </header>
 
       {matches.length > 0 && (
-        <div className="freq-shelf-rail">
-          {matches.slice(0, 8).map((p) => (
-            <article
-              key={p.id}
-              className={`freq-shelf-card ${p.id === profile.productId ? "is-signature" : ""}`}
-            >
-              <div className="freq-shelf-card-image">
-                <img src={p.image} alt={p.name} draggable={false} />
-                <span className="freq-shelf-card-hz">{p.frequency}</span>
-                {p.id === profile.productId && (
-                  <span className="freq-shelf-card-flag">SENİN İMZAN</span>
-                )}
+        <div className="freq-flow" aria-label="Frekansına akan parçalar">
+          {FLOW_COLUMNS.map((dur, c) => {
+            // Her sütun tüm havuzu içerir (sütuna göre kaydırılmış) →
+            // seyrek eşleşmede bile yoğun, çeşitli akış. 2x render = kusursuz döngü.
+            const pool = matches.slice(0, 8);
+            const rotated = [...pool.slice(c % pool.length), ...pool.slice(0, c % pool.length)];
+            const items = [...rotated, ...rotated];
+            return (
+              <div
+                key={c}
+                className="freq-flow-col"
+                style={{ ["--dur" as string]: dur } as CSSProperties}
+              >
+                <div className="freq-flow-track">
+                  {items.map((p, i) => {
+                    const original = i < rotated.length;
+                    return (
+                      <Link
+                        key={`${p.id}-${c}-${i}`}
+                        href={`/universe/shop/urun/${p.id}`}
+                        className={`freq-rain ${p.id === profile.productId ? "is-signature" : ""}`}
+                        aria-hidden={original ? undefined : true}
+                        tabIndex={original ? undefined : -1}
+                        prefetch={false}
+                      >
+                        <img src={p.image} alt={p.name} draggable={false} />
+                        <span className="freq-rain-hz">{p.frequency}</span>
+                        <span className="freq-rain-name">{p.name}</span>
+                        {p.id === profile.productId && (
+                          <span className="freq-rain-flag">SENİN İMZAN</span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="freq-shelf-card-name">{p.name}</div>
-              <div className="freq-shelf-card-meta">
-                <span>{p.price}</span>
-                {p.zodiac && (
-                  <span className="freq-shelf-card-zodiac">
-                    {(ZODIAC_LABEL as Record<string, { symbol: string }>)[p.zodiac]?.symbol}
-                  </span>
-                )}
-              </div>
-            </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

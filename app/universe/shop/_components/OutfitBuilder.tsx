@@ -44,7 +44,7 @@ export default function OutfitBuilder() {
     for (const product of Object.values(dressedSlots)) {
       if (!product) continue;
       const ext = productsExtended.find((p) => p.id === product.id);
-      if (ext) addToCart(ext, "M");
+      if (ext) addToCart(ext, "M-L");
     }
   };
 
@@ -119,7 +119,7 @@ export default function OutfitBuilder() {
                   Toplam: <strong>${total.toFixed(0)}</strong>
                 </div>
                 <Link href="/universe/shop/checkout" className="shop-checkout-btn">
-                  Satin Al
+                  Ön Sipariş Ver
                 </Link>
               </>
             )}

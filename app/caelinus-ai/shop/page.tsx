@@ -263,7 +263,7 @@ export default function CaelinusShopPage() {
               <Caelinus3DScene
                 avatar={sceneAvatar}
                 skinTone={sceneAvatar?.styleProfile.skinTone}
-                animationUrl="/models/catwalk.glb"
+                animationUrl="/models/caelinus-catwalk.glb"
                 autoRotate
                 tryOnAccent={accent}
                 tryOnLabel={tryOnLabel}

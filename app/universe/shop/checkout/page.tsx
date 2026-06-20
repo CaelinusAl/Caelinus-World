@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import type { CartItemExtended, OrderItem, OrderMetadata, SceneId } from "@/types/play";
 import { loadCart, removeItemFromCart, clearCart, cartTotal } from "@/lib/cart-storage";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
+import PriceDual from "@/components/shop/PriceDual";
 
 type CheckoutStep = "cart" | "address" | "confirm";
 
@@ -17,12 +18,15 @@ export default function CheckoutPage() {
   const [orderError, setOrderError] = useState<string | null>(null);
 
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [line1, setLine1] = useState("");
   const [line2, setLine2] = useState("");
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [country, setCountry] = useState("Turkey");
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   useEffect(() => {
     setItems(loadCart());
@@ -38,7 +42,7 @@ export default function CheckoutPage() {
   }, []);
 
   const handlePlaceOrder = useCallback(async () => {
-    if (!fullName || !city || !line1) return;
+    if (!fullName || !emailValid) return;
     setSubmitting(true);
     setOrderError(null);
 
@@ -70,8 +74,8 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: orderItems,
-          address: { fullName, line1, line2, city, zip, country },
-          paymentMethod,
+          email,
+          address: { fullName, phone, line1, line2, city, zip, country },
           metadata,
         }),
       });
@@ -83,14 +87,14 @@ export default function CheckoutPage() {
         setItems(clearCart());
         setStep("confirm");
       } else {
-        setOrderError("Siparis olusturulamadi. Lutfen tekrar deneyin.");
+        setOrderError("Ön sipariş oluşturulamadı. Lütfen tekrar deneyin.");
       }
     } catch {
-      setOrderError("Baglanti hatasi. Lutfen tekrar deneyin.");
+      setOrderError("Bağlantı hatası. Lütfen tekrar deneyin.");
     } finally {
       setSubmitting(false);
     }
-  }, [fullName, line1, line2, city, zip, country, paymentMethod, items]);
+  }, [fullName, email, phone, line1, line2, city, zip, country, items, emailValid]);
 
   /* ── Confirmation screen ── */
   if (step === "confirm" && orderId) {
@@ -102,13 +106,14 @@ export default function CheckoutPage() {
             <div className="checkout-confirm-icon">
               <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="rgba(110,255,180,0.92)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
-            <div className="checkout-kicker">CAELINUS</div>
+            <div className="checkout-kicker">CAELINUS · ÖN SİPARİŞ</div>
             <h1 className="checkout-confirm-title">
-              Siparisin Onaylandi!
+              Ön Siparişin Alındı!
             </h1>
             <div className="checkout-confirm-order-id">{orderId}</div>
             <p className="checkout-confirm-desc">
-              Frekansini giydikten sonra evrene geri donebilirsin.
+              Frekansın kaydedildi. Ekibimiz kısa süre içinde e-posta ile
+              seninle iletişime geçecek. Henüz herhangi bir ödeme alınmadı.
             </p>
             <div className="checkout-confirm-actions">
               <Link href="/universe/shop" className="checkout-back-link">
@@ -131,8 +136,8 @@ export default function CheckoutPage() {
         <div className="checkout-page-bg" />
         <div className="checkout-shell">
           <section className="checkout-hero">
-            <div className="checkout-kicker">CAELINUS CHECKOUT</div>
-            <h1 className="checkout-title">SATIN AL</h1>
+            <div className="checkout-kicker">CAELINUS · ÖN SİPARİŞ</div>
+            <h1 className="checkout-title">ÖN SİPARİŞ</h1>
           </section>
           <div className="checkout-card">
             <div className="ux-skeleton-panel">
@@ -152,8 +157,8 @@ export default function CheckoutPage() {
 
       <div className="checkout-shell">
         <section className="checkout-hero">
-          <div className="checkout-kicker">CAELINUS CHECKOUT</div>
-          <h1 className="checkout-title">SATIN AL</h1>
+          <div className="checkout-kicker">CAELINUS · ÖN SİPARİŞ</div>
+          <h1 className="checkout-title">ÖN SİPARİŞ</h1>
         </section>
 
         {items.length === 0 ? (
@@ -200,7 +205,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="checkout-item-right">
                       <span className="checkout-item-price">
-                        ${item.product.numericPrice * item.qty}
+                        <PriceDual usd={item.product.numericPrice * item.qty} />
                       </span>
                       <button
                         className="checkout-remove-btn"
@@ -217,14 +222,14 @@ export default function CheckoutPage() {
               <div className="checkout-total-row">
                 <span className="checkout-total-label">Toplam</span>
                 <span className="checkout-total-amount">
-                  ${total.toFixed(0)}
+                  <PriceDual usd={total} />
                 </span>
               </div>
             </div>
 
             {/* Address & Payment */}
             <div className="checkout-card">
-              <h2 className="checkout-card-title">Teslimat Bilgileri</h2>
+              <h2 className="checkout-card-title">İletişim &amp; Teslimat</h2>
               <div className="checkout-form">
                 <input
                   className="checkout-input"
@@ -235,7 +240,23 @@ export default function CheckoutPage() {
                 />
                 <input
                   className="checkout-input"
-                  placeholder="Adres Satiri 1"
+                  type="email"
+                  placeholder="E-posta (ekibimiz buradan ulaşacak)"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ gridColumn: "1 / -1" }}
+                />
+                <input
+                  className="checkout-input"
+                  type="tel"
+                  placeholder="Telefon (opsiyonel)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  style={{ gridColumn: "1 / -1" }}
+                />
+                <input
+                  className="checkout-input"
+                  placeholder="Adres Satırı 1 (opsiyonel)"
                   value={line1}
                   onChange={(e) => setLine1(e.target.value)}
                   style={{ gridColumn: "1 / -1" }}
@@ -273,25 +294,10 @@ export default function CheckoutPage() {
                   <option value="Other">Diger</option>
                 </select>
 
-                <div className="checkout-payment-section">
-                  <div className="checkout-payment-label">
-                    Odeme Yontemi
-                  </div>
-                  <div className="checkout-payment-row">
-                    {[
-                      { id: "credit_card", label: "Kredi Karti" },
-                      { id: "bank_transfer", label: "Havale/EFT" },
-                      { id: "crypto", label: "Kripto" },
-                    ].map((pm) => (
-                      <button
-                        key={pm.id}
-                        className={`checkout-payment-btn ${paymentMethod === pm.id ? "active" : ""}`}
-                        onClick={() => setPaymentMethod(pm.id)}
-                      >
-                        {pm.label}
-                      </button>
-                    ))}
-                  </div>
+                <div className="checkout-presale-note">
+                  <strong>Bu bir ön sipariştir.</strong> Şu an herhangi bir
+                  ödeme alınmaz. Ön siparişini aldıktan sonra ekibimiz e-posta
+                  ile seninle iletişime geçecek.
                 </div>
 
                 {orderError && (
@@ -301,9 +307,9 @@ export default function CheckoutPage() {
                 <button
                   className="checkout-place-btn"
                   onClick={handlePlaceOrder}
-                  disabled={submitting || !fullName || !city || !line1}
+                  disabled={submitting || !fullName || !emailValid}
                 >
-                  {submitting ? "Islem yapiliyor..." : "Siparisi Onayla"}
+                  {submitting ? "Gönderiliyor..." : "Ön Siparişi Tamamla"}
                 </button>
               </div>
             </div>

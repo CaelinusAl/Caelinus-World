@@ -379,7 +379,7 @@ export default function ItemFormBody({ mode, atelier, item }: Props) {
             {mode === "create" ? T.newTitle[L] : T.editTitle[L]}
           </h1>
           <p className="atelier-edit-handle">
-            {atelier.name} · caelinus.world/atelier/{atelier.slug}
+            {atelier.name} · caelinus.ai/atelier/{atelier.slug}
           </p>
           <p className="atelier-edit-intro" style={{ marginTop: 8 }}>
             {T.intro[L]}

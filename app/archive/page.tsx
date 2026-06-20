@@ -2,6 +2,7 @@ export default function ArchivePage() {
   return (
     <main style={{
       minHeight:"100vh",
+      paddingTop:"var(--cae-page-top)",
       background:"#080d1b",
       color:"white",
       display:"flex",

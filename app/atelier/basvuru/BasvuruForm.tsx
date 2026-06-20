@@ -41,8 +41,8 @@ const T = {
     },
     slug: { tr: "Tezgâh kısa adı (URL)", en: "Bench handle (URL)" },
     slugHint: {
-      tr: "caelinus.world/atelier/<kısa-ad> içinde görünür. Sadece küçük harf, rakam ve tire.",
-      en: "Appears in caelinus.world/atelier/<handle>. Lowercase letters, digits, and dashes only.",
+      tr: "caelinus.ai/atelier/<kısa-ad> içinde görünür. Sadece küçük harf, rakam ve tire.",
+      en: "Appears in caelinus.ai/atelier/<handle>. Lowercase letters, digits, and dashes only.",
     },
     kind: { tr: "Üretim türü", en: "Maker type" },
     region: { tr: "Bölge", en: "Region" },
@@ -275,7 +275,7 @@ export default function BasvuruForm({ email }: Props) {
               <span className="atelier-field-label">{T.fields.slug[L]}</span>
               <div className="atelier-input-prefix">
                 <span className="atelier-input-prefix-tag">
-                  caelinus.world/atelier/
+                  caelinus.ai/atelier/
                 </span>
                 <input
                   className="atelier-input atelier-input-bare"

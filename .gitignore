@@ -37,11 +37,32 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 
-# Caelinus avatar geçici render/kaynak
-.hair_tmp/
+# avatar pipeline scratch / working files (FBX, zip, previews — not for repo)
+public/models/_wip/
+public/models/_backup/
+
+# shop video optimization backups (originals kept locally, optimized ones committed)
+public/play/shop/_raw/
+
+# product photo optimization backups
+public/products/_raw/
+
+# universe video optimization backups
+public/universe/_raw/
+
+# hero background video optimization backups
+public/hero/_raw/
+
+# Blender çalışma + yedek dosyaları (repoya girmez; render çıktıları ayrı)
+*.blend
 *.blend1
 # Blender/FBX kaynakları web'e (public/) deploy edilmez — düzenlenebilir
 # kaynak assets/models-src/ altında tutulur, web'e sadece .glb gider.
 public/**/*.blend
 public/**/*.fbx
+
+# Caelinus avatar geçici render/kaynak
+.hair_tmp/
+
+# local Vercel project link dir
 .vercel

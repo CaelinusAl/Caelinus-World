@@ -1,0 +1,98 @@
+/* ─────────────────────────────────────────────────────────────────────
+   CAELINUS · DESIGN TOKENS  (Bible §2/§3 → kod)
+   Tek kaynak. Renk, tipografi, boşluk, radius, glow, z-index, geçiş.
+   Piksel değil ÖLÇEK taşır → mobil/VR'a aynı token'larla genişler.
+   Bu dosya globals.css'in en üstünde import edilir; mevcut stiller bozulmaz
+   (token'lar yalnızca kullanıldıkları yerde etki eder).
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Renk · evrensel palet ─────────────────────────────────────────── */
+  --cae-black: #03060f;        /* birincil — derin kozmik siyah */
+  --cae-midnight: #07111f;     /* ikincil — gece yarısı */
+  --cae-gold: #c9a45c;         /* aksan — metalik altın */
+  --cae-soft-gold: #e8d7a3;    /* yumuşak altın — glow / hover / metin */
+  --cae-ivory: #f5efe1;        /* fildişi — sıcak metin */
+  --cae-moon-silver: #cfd6df;  /* ay gümüşü — soğuk metin */
+  --cae-violet-glow: rgba(160, 110, 255, 0.24); /* portal aura moru */
+
+  /* ── Caelinus renk DNA'sı (lila → eflatun → indigo → altın → fildişi) ──
+     Sahneye "nefes gibi", abartısız yayılır: ay aurası, nebula, halkalar,
+     ufuk, yıldız tonu. Caelinus'ı jenerik "uzay sitesinden" ayıran imza. */
+  --cae-dna-lilac: #f4d9ff;   /* en açık ay-ışığı moru */
+  --cae-dna-violet: #caa4ff;  /* eflatun */
+  --cae-dna-indigo: #8c6dff;  /* derin indigo-mor */
+  --cae-dna-gold: #ffd98f;    /* sıcak enerji altını */
+  --cae-dna-ivory: #f7f1e8;   /* sıcak fildişi */
+
+  /* Geriye uyum alias'ları — eski isimler yeni token'lara işaret eder
+     (WorldShell/SANRI referansları kırılmadan premium tona kayar). */
+  --cae-gold-soft: var(--cae-soft-gold);
+  --cae-silver: var(--cae-moon-silver);
+
+  /* Metin tonları (ivory/silver üstüne opaklık katmanları) */
+  --cae-text: rgba(244, 248, 255, 0.92);
+  --cae-text-soft: rgba(244, 248, 255, 0.72);
+  --cae-text-faint: rgba(244, 248, 255, 0.5);
+
+  /* ── Dünya imza aksanları (Bible §5 · PORTAL_COLOR ile hizalı) ──────── */
+  --cae-world-sanri: var(--cae-silver);   /* ay gümüşü */
+  --cae-world-avatar: #b69cff;            /* menekşe → dönüşüm */
+  --cae-world-atelier: var(--cae-gold);   /* altın */
+  --cae-world-bazaar: var(--cae-gold-soft);
+  --cae-world-gaia: #79e6a0;              /* yaşayan yeşil */
+  --cae-world-play: #7aa2ff;              /* kozmik mavi */
+
+  /* ── Tipografi ─────────────────────────────────────────────────────── */
+  /* next/font değişkenlerine bağlanır (layout.tsx); yedeklerle güvenli. */
+  --cae-font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --cae-font-sans: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
+  --cae-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Ölçek (clamp → akışkan; cihazda yeniden ölçeklenir) */
+  --cae-text-xs: clamp(11px, 1vw, 12px);
+  --cae-text-sm: clamp(12px, 1.2vw, 14px);
+  --cae-text-base: clamp(14px, 1.4vw, 16px);
+  --cae-text-lg: clamp(16px, 1.8vw, 20px);
+  --cae-text-xl: clamp(20px, 2.4vw, 28px);
+  --cae-text-2xl: clamp(26px, 3.4vw, 40px);
+  --cae-text-display: clamp(40px, 7vw, 96px);
+
+  --cae-tracking-wide: 0.08em;
+  --cae-tracking-wider: 0.18em;
+  --cae-tracking-widest: 0.4em;
+
+  /* ── Boşluk ────────────────────────────────────────────────────────── */
+  --cae-space-1: 4px;
+  --cae-space-2: 8px;
+  --cae-space-3: 12px;
+  --cae-space-4: 16px;
+  --cae-space-5: 24px;
+  --cae-space-6: 32px;
+  --cae-space-7: 48px;
+  --cae-space-8: 64px;
+  --cae-space-9: 96px;
+
+  /* ── Radius ────────────────────────────────────────────────────────── */
+  --cae-radius-sm: 8px;
+  --cae-radius-md: 14px;
+  --cae-radius-lg: 22px;
+  --cae-radius-pill: 999px;
+
+  /* ── Glow / gölge (az kullanılır — lüks > fantezi) ─────────────────── */
+  --cae-glow-gold: 0 0 28px rgba(255, 220, 140, 0.22);
+  --cae-glow-soft: 0 0 22px rgba(190, 220, 255, 0.18);
+  --cae-shadow-card: 0 18px 50px rgba(0, 0, 0, 0.45);
+
+  /* ── Z-index katmanları ────────────────────────────────────────────── */
+  --cae-z-backdrop: 0;
+  --cae-z-content: 5;
+  --cae-z-ribbon: 40;
+  --cae-z-topbar: 80;
+  --cae-z-veil: 120;
+
+  /* ── Geçiş süreleri (JourneyProvider IN_MS/OUT_MS ile hizalı) ──────── */
+  --cae-dur-in: 460ms;
+  --cae-dur-out: 560ms;
+  --cae-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

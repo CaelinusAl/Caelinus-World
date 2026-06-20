@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import FrequencyBadge from "./FrequencyBadge";
 
+// v1 yumuşak lansman kapsamı — yalnızca tamamlanmış çekirdek alanlar menüde.
+// Gaia / Ağ / Ask gibi deneysel alanlar geçici olarak gizli (rotalar yaşıyor
+// ama menüden link verilmiyor; hazır oldukça geri eklenir).
 const NAV_ITEMS = [
   { href: "/universe", label: "Universe" },
   { href: "/universe/shop", label: "Shop" },
-  { href: "/universe/gaia", label: "Gaia" },
+  { href: "/atelier", label: "Atelier" },
   { href: "/manifesto", label: "Manifesto" },
-  { href: "/ai", label: "Ask" },
 ];
 
 const HIDDEN_PATHS = ["/", "/universe", "/onboarding"];
@@ -21,9 +23,13 @@ export default function TopBar() {
 
   return (
     <header className="cae-topbar" aria-label="Caelinus navigation">
-      <Link href="/" className="cae-topbar-brand">
-        <span className="cae-topbar-brand-mark">✦</span>
-        <span>CAELINUS</span>
+      <Link href="/" className="cae-topbar-brand" aria-label="Caelinus — Frekansın Sanatı">
+        <img
+          src="/logo/caelinus-mark.png"
+          alt="Caelinus — Frekansın Sanatı"
+          className="cae-topbar-logo"
+          draggable={false}
+        />
       </Link>
 
       <nav className="cae-topbar-nav">

@@ -19,10 +19,15 @@ export default function Footer() {
         Frekansını giy, evrenle dans et. — Wear your frequency, dance with the universe.
       </p>
       <div className="cae-footer-meta">
-        <Link href="/manifesto">Manifesto</Link>
-        <Link href="/universe/gaia">Gaia</Link>
+        <Link href="/universe">Universe</Link>
         <Link href="/universe/shop">Shop</Link>
-        <Link href="/designers">Designers</Link>
+        <Link href="/atelier">Atelier</Link>
+        <Link href="/manifesto">Manifesto</Link>
+      </div>
+      <div className="cae-footer-legal">
+        <Link href="/gizlilik">Gizlilik &amp; KVKK</Link>
+        <Link href="/cerez-politikasi">Çerez Politikası</Link>
+        <Link href="/iletisim">İletişim</Link>
         <span>© {year} Caelinus</span>
       </div>
     </footer>

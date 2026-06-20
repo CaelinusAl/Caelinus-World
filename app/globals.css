@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
 html,
 body {
@@ -19,29 +20,532 @@ main {
 .scene {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  min-height: 100svh;
+  height: 100svh;
   overflow: hidden;
+  /* Deep-black → midnight radial; token tabanlı. */
   background:
-    radial-gradient(circle at center, rgba(70, 110, 190, 0.12) 0%, rgba(10, 12, 22, 0.04) 28%, rgba(2, 4, 10, 1) 70%),
-    #02040a;
+    radial-gradient(ellipse 120% 82% at 50% 38%, var(--cae-midnight) 0%, transparent 62%),
+    radial-gradient(circle at 50% 50%, rgba(8, 14, 28, 0.55) 0%, var(--cae-black) 74%),
+    var(--cae-black);
+}
+
+/* Hero arka plan video katmanı — en arkada "nefes alan gökyüzü". */
+.hero-video-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-video,
+.hero-video-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* Statik fallback görseline neredeyse fark edilmez yavaş drift (video kendi
+   kamera kaymasını taşır; yalnızca still'e uygulanır). */
+.hero-video-img {
+  animation: heroDrift 44s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+/* Ay = yaşayan portal — videoya neredeyse fark edilmez nefes (1.00↔1.02). */
+.hero-video {
+  transform-origin: center;
+  animation: heroVideoBreath 12s ease-in-out infinite alternate;
+}
+
+/* Enerji dalgaları — mor + altın, screen-blend (yalnızca parlak ayı aydınlatır,
+   koyu gökte kaybolur). Yavaş yörünge + nefes; "içinde bir şey yaşıyor". */
+.hero-moon-energy {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.hme-blob {
+  position: absolute;
+  left: 50%;
+  top: 31%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  filter: blur(30px);
+  mix-blend-mode: screen;
+}
+
+.hme-violet {
+  width: 38vmin;
+  height: 38vmin;
+  background: radial-gradient(circle, rgba(160, 110, 255, 0.30), transparent 68%);
+  animation: hmeDriftViolet 17s ease-in-out infinite;
+}
+
+.hme-gold {
+  width: 31vmin;
+  height: 31vmin;
+  background: radial-gradient(circle, rgba(232, 215, 163, 0.24), transparent 70%);
+  animation: hmeDriftGold 13s ease-in-out infinite;
+}
+
+@keyframes heroVideoBreath {
+  from { transform: scale(1); }
+  to { transform: scale(1.02); }
+}
+@keyframes hmeDriftViolet {
+  0%, 100% { transform: translate(-52%, -50%) scale(1); opacity: 0.85; }
+  50% { transform: translate(-46%, -54%) scale(1.08); opacity: 1; }
+}
+@keyframes hmeDriftGold {
+  0%, 100% { transform: translate(-48%, -48%) scale(1.05); opacity: 0.7; }
+  50% { transform: translate(-54%, -52%) scale(1); opacity: 1; }
+}
+
+/* %35–50 siyah gradient overlay — atmosferi koyulaştırır, metni okunur tutar. */
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: var(--hero-overlay, 0.42);
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(3, 6, 15, 0.55) 0%,
+      rgba(3, 6, 15, 0.32) 46%,
+      rgba(3, 6, 15, 0.72) 100%
+    );
+}
+
+@keyframes heroDrift {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.06); }
+}
+
+/* ── Hero · Caelinus uygarlığı ufku ───────────────────────────────────────
+   "Gökyüzünün içine girmiş insan" hissi: ayın altında, KEŞFEDİLECEK bir şehir.
+   Arkadan aydınlatılmış (şafak bandı) silüetler → net ufuk çizgisi + merak. */
+.hero-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(48vh, 520px);
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: 50% 80%;
+  overflow: hidden;
+  /* Buton hover'ında "görünmez çekim" — ufuk çok hafif yaklaşır. */
+  transition: transform 0.6s ease;
+}
+
+/* Şafak bandı — şehrin ARKASINDA altın→mor backlight; net ufuk çizgisi. */
+.hh-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 150%;
+  height: 60%;
+  /* Soluk kadim şafak — DNA: altın → eflatun → lila (nefes gibi). */
+  background: radial-gradient(
+    62% 100% at 50% 100%,
+    rgba(255, 217, 143, 0.13) 0%,
+    rgba(202, 164, 255, 0.09) 30%,
+    rgba(140, 109, 255, 0.06) 54%,
+    transparent 80%
+  );
+  filter: blur(10px);
+  animation: hhGlowBreath 9s ease-in-out infinite;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+/* Atmosferik altın sis — şehirden yükselir, silüet tabanını yumuşatır. */
+.hh-haze {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: linear-gradient(
+    to top,
+    rgba(201, 164, 92, 0.12) 0%,
+    rgba(201, 164, 92, 0.05) 36%,
+    transparent 100%
+  );
+}
+
+.hh-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Üç derinlik katmanı — farklı parallax hızları = "evrenin içindeyim". */
+.hh-far {
+  opacity: 0.9;
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 0.45),
+    calc(var(--par-y, 0px) * 0.3),
+    0
+  );
+}
+.hh-mid {
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 1.0),
+    calc(var(--par-y, 0px) * 0.6),
+    0
+  );
+}
+.hh-near {
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 1.7),
+    calc(var(--par-y, 0px) * 0.9),
+    0
+  );
+}
+
+.hh-bob {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.hh-bob-far { animation: hhBob 21s ease-in-out infinite; }
+.hh-bob-mid { animation: hhBob 16s ease-in-out infinite reverse; }
+.hh-bob-near { animation: hhBob 13s ease-in-out infinite; }
+
+.hh-svg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(1700px, 160vw);
+  height: 100%;
+}
+
+/* altın pencere ışıkları — yaşayan şehir */
+.hh-light {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cae-soft-gold, #e8d7a3);
+  box-shadow:
+    0 0 4px rgba(232, 215, 163, 0.9),
+    0 0 12px rgba(201, 164, 92, 0.6);
+  animation-name: hhFlicker;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Merkez KAPI — şehrin kalbi. DOM'da far ile mid arasında → sütunlar
+   parıltıyı çerçeveler; içinden ışık sızar. */
+.hh-gate {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  transform: translateX(-50%);
+  width: clamp(60px, 8vw, 130px);
+  height: clamp(110px, 18vh, 240px);
+  border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+  background: linear-gradient(
+    to top,
+    rgba(255, 236, 190, 0.6) 0%,
+    rgba(232, 215, 163, 0.4) 30%,
+    rgba(201, 164, 92, 0.2) 56%,
+    rgba(160, 110, 255, 0.12) 80%,
+    transparent 100%
+  );
+  filter: blur(9px);
+  /* Alev ritmi — düzenli değil, organik flicker. */
+  animation: hhGate 7s ease-in-out infinite;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+/* Kapının içinden sızan ince altın ışın — sütunlar çerçeveler. */
+.hh-gate-beam {
+  position: absolute;
+  left: 50%;
+  bottom: 3%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: clamp(80px, 14vh, 200px);
+  background: linear-gradient(
+    to top,
+    rgba(255, 236, 190, 0) 0%,
+    rgba(255, 236, 190, 0.5) 30%,
+    rgba(160, 110, 255, 0.3) 80%,
+    transparent 100%
+  );
+  filter: blur(1px);
+  opacity: 0.55;
+  animation: hhBeam 4.5s ease-in-out infinite;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes hhBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes hhFlicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes hhGlowBreath {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+/* Alev ritmi — asimetrik adımlar, organik nabız. */
+@keyframes hhGate {
+  0%   { opacity: 0.66; transform: translateX(-50%) scaleY(1.0); }
+  18%  { opacity: 0.9;  transform: translateX(-50%) scaleY(1.04); }
+  33%  { opacity: 0.74; transform: translateX(-50%) scaleY(0.99); }
+  52%  { opacity: 1.0;  transform: translateX(-50%) scaleY(1.07); }
+  70%  { opacity: 0.8;  transform: translateX(-50%) scaleY(1.02); }
+  100% { opacity: 0.66; transform: translateX(-50%) scaleY(1.0); }
+}
+@keyframes hhBeam {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) scaleY(0.9); }
+  50% { opacity: 0.7; transform: translateX(-50%) scaleY(1.06); }
+}
+
+/* "Enter When Ready" hover → kapı çağırır: ışık yükselir, ufuk yaklaşır/titrer. */
+.scene:has(.tap:hover) .hero-horizon {
+  transform: translateY(-5px);
+}
+.scene:has(.tap:hover) .hh-gate {
+  opacity: 1;
+  filter: blur(7px) brightness(1.45);
+}
+.scene:has(.tap:hover) .hh-gate-beam {
+  opacity: 0.95;
+}
+.scene:has(.tap:hover) .hh-glow {
+  opacity: 1;
+  filter: blur(6px) brightness(1.18);
+}
+
+/* Video modu — videonun kendi ayı var; çift ay olmasın diye CSS ayı gizlenir,
+   ama merkez tıklanabilir kalır (videodaki ay = portal). Yıldız/nebula kısılır
+   (video zaten yıldız taşıyor). */
+.scene--video .moon,
+.scene--video .moon-pink,
+.scene--video .moon-backglow,
+.scene--video .moon-ring {
+  display: none;
+}
+.scene--video .stars-parallax { opacity: 0.4; }
+.scene--video .nebula { opacity: 0.14; }
+
+/* ── Hero sahne görseli modu — hayalindeki giriş evreni yaşar ────────────
+   Görsel tam-kanvas arka plan; üstüne ince hayat (nefes, altın toz, kapı
+   parıltısı, parallax) + okunabilirlik vignette'i + metin biner. Prosedürel
+   nebula/dust pseudo-elementleri kapatılır (kompozisyon zaten görselde). */
+.scene--image { background: #06060c; }
+.scene--image::before,
+.scene--image::after { display: none !important; }
+
+.hero-scene-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* Eşikten geçiş dalışı kapıya odaklı büyür. */
+  transform-origin: 50% 64%;
+  /* İşaretçi parallax — sahne çok hafif kayar (≤4px). */
+  transform: translate3d(
+    calc(var(--par-x, 0px) * 0.5),
+    calc(var(--par-y, 0px) * 0.5),
+    0
+  );
+  transition: transform 0.5s ease-out;
+}
+.hero-scene-bg picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hero-scene-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  /* Nefes alan evren — neredeyse fark edilmez yavaş zoom. */
+  transform: scale(1.06);
+  transform-origin: 50% 46%;
+  animation: heroSceneBreath 26s ease-in-out infinite alternate;
+}
+@keyframes heroSceneBreath {
+  0% { transform: scale(1.055); }
+  100% { transform: scale(1.105); }
+}
+
+/* Altın kozmik toz — yukarı süzülen ince doku. */
+.hero-scene-dust {
+  position: absolute;
+  inset: -10% 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 30%, rgba(255, 226, 170, 0.7), transparent 60%),
+    radial-gradient(1.2px 1.2px at 62% 18%, rgba(255, 216, 150, 0.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 82% 52%, rgba(255, 232, 190, 0.6), transparent 60%),
+    radial-gradient(1.1px 1.1px at 38% 72%, rgba(232, 200, 255, 0.5), transparent 60%),
+    radial-gradient(1.3px 1.3px at 72% 84%, rgba(255, 220, 160, 0.55), transparent 60%),
+    radial-gradient(1.1px 1.1px at 8% 60%, rgba(255, 226, 180, 0.5), transparent 60%);
+  background-size: 100% 100%;
+  animation: heroSceneDust 34s linear infinite;
+}
+@keyframes heroSceneDust {
+  0% { transform: translateY(0); opacity: 0.42; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-7%); opacity: 0.42; }
+}
+
+/* Kapının nefes alan ışığı — merkez-alt; hover'da görünmez çekim güçlenir. */
+.hero-scene-glow {
+  position: absolute;
+  left: 50%;
+  top: 65%;
+  width: min(46vw, 460px);
+  height: min(36vh, 380px);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 226, 170, 0.30) 0%,
+    rgba(190, 140, 255, 0.14) 44%,
+    transparent 70%
+  );
+  filter: blur(16px);
+  animation: heroGateGlow 6.5s ease-in-out infinite;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+@keyframes heroGateGlow {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.97); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.04); }
+}
+.scene--image:has(.tap:hover) .hero-scene-glow {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Vignette — kenarları koyulaştırır, üst menü ve alt CTA okunur kalır. */
+.hero-scene-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 122% 92% at 50% 44%, transparent 50%, rgba(4, 4, 12, 0.55) 100%),
+    linear-gradient(
+      to bottom,
+      rgba(4, 4, 12, 0.32) 0%,
+      transparent 20%,
+      transparent 58%,
+      rgba(4, 4, 12, 0.62) 100%
+    );
+}
+
+/* Erişilebilirlik — görünmez marka başlığı (mühür görsele gömülü). */
+.hero-scene-h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Görsel modunda metin yerleşimi — tagline ay üzerinde, davet+CTA kapı altında. */
+.scene--image .logo-wrap {
+  top: clamp(150px, 28vh, 300px);
+  z-index: 5;
+}
+.scene--image .subtitle {
+  top: auto;
+  bottom: clamp(118px, 17vh, 168px);
+}
+.scene--image .tap {
+  top: auto;
+  bottom: clamp(56px, 9vh, 96px);
+}
+
+/* Ay arkası — çok hafif nebula glow (mor + soft gold). Statik konum, yavaş
+   nefes; ucuz (tek blur'lu daire). */
+.scene::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  /* Ayla birlikte yukarı — nebula glow ayın arkasında kalır. */
+  top: 42%;
+  width: 96vmin;
+  height: 96vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(140, 109, 255, 0.30) 0%,
+      rgba(202, 164, 255, 0.16) 26%,
+      rgba(255, 217, 143, 0.08) 46%,
+      transparent 70%);
+  filter: blur(72px);
+  z-index: 0;
+  pointer-events: none;
+  animation: nebulaBreath 16s ease-in-out infinite;
+}
+
+/* Çok ince gold-dust — neredeyse görünmez doku, atmosfer için. */
+.scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: radial-gradient(rgba(232, 215, 163, 0.85) 0.6px, transparent 0.7px);
+  background-size: 7px 7px;
+}
+
+.stars-parallax {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Pointer-parallax: --par-x/y .scene'den miras (≤4px). Transform tabanlı. */
+  transform: translate3d(var(--par-x, 0px), var(--par-y, 0px), 0);
+  will-change: transform;
 }
 
 .stars-layer {
   position: absolute;
   inset: 0;
-  z-index: 1;
   pointer-events: none;
+  transform: scale(1.3);
   transition: transform 1.2s ease, opacity 1.2s ease, filter 1.2s ease;
 }
 
 .star {
   position: absolute;
   border-radius: 50%;
-  background: white;
-  opacity: 0.82;
+  /* Çok hafif lila ton — yıldızlar bile Caelinus DNA'sını taşır. */
+  background: rgba(248, 240, 255, 0.92);
+  opacity: 0.68;
   box-shadow:
-    0 0 6px rgba(255, 255, 255, 0.9),
-    0 0 14px rgba(170, 210, 255, 0.28);
+    0 0 4px rgba(255, 255, 255, 0.6),
+    0 0 9px rgba(202, 164, 255, 0.18);
   animation: twinkle ease-in-out infinite;
 }
 
@@ -57,23 +561,39 @@ main {
   filter: blur(2px);
 }
 
+/* Arka plan katmanı sarmalayıcısı — yıldız + nebula + altın toz burada yaşar. */
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .nebula {
   position: absolute;
   border-radius: 999px;
   filter: blur(95px);
   pointer-events: none;
-  opacity: 0.34;
+  opacity: 0.24;
   z-index: 0;
   transition: opacity 1.2s ease;
+  /* Parallax: yıldızların tersine, daha az (derinlik hissi). */
+  transform: translate3d(
+    calc(var(--par-x, 0px) * -0.7),
+    calc(var(--par-y, 0px) * -0.7),
+    0
+  );
 }
 
+/* Nebulalar — Caelinus DNA: indigo (sol) + eflatun (sağ) + soluk lila (alt).
+   Lacivert geri çeker; mor-lila imza öne çıkar. */
 .nebula-left {
   width: 42vw;
   height: 42vw;
   left: -14vw;
   top: 6vh;
   background:
-    radial-gradient(circle, rgba(128, 70, 255, 0.46) 0%, rgba(128, 70, 255, 0.18) 34%, rgba(128, 70, 255, 0.04) 56%, transparent 74%);
+    radial-gradient(circle, rgba(140, 109, 255, 0.42) 0%, rgba(140, 109, 255, 0.16) 34%, rgba(140, 109, 255, 0.04) 56%, transparent 74%);
 }
 
 .nebula-right {
@@ -82,7 +602,7 @@ main {
   right: -12vw;
   top: 10vh;
   background:
-    radial-gradient(circle, rgba(195, 110, 255, 0.36) 0%, rgba(195, 110, 255, 0.16) 34%, rgba(195, 110, 255, 0.04) 58%, transparent 76%);
+    radial-gradient(circle, rgba(202, 164, 255, 0.34) 0%, rgba(202, 164, 255, 0.15) 34%, rgba(202, 164, 255, 0.04) 58%, transparent 76%);
 }
 
 .nebula-bottom {
@@ -91,15 +611,18 @@ main {
   left: 21vw;
   bottom: -8vw;
   background:
-    radial-gradient(circle, rgba(80, 145, 255, 0.28) 0%, rgba(80, 145, 255, 0.12) 36%, rgba(80, 145, 255, 0.03) 58%, transparent 76%);
+    radial-gradient(circle, rgba(140, 109, 255, 0.22) 0%, rgba(160, 130, 255, 0.10) 36%, rgba(140, 109, 255, 0.03) 58%, transparent 76%);
 }
 
 .logo-wrap {
   position: absolute;
-  top: 38px;
+  /* Daha çok nefes; aya mesafe. */
+  top: clamp(40px, 6vh, 76px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 5;
+  /* Aydan (z6) ÜSTTE — metin ayın üstüne taşsa bile okunur kalır. */
+  z-index: 8;
+  width: min(620px, 90vw);
   text-align: center;
   animation: logoBreath 7s ease-in-out infinite;
   transition: transform 0.9s ease, opacity 0.9s ease;
@@ -125,11 +648,289 @@ main {
     0 0 72px rgba(130, 185, 255, 0.10);
 }
 
+/* Altın kanatlı marka mührü — transparan PNG (caelinus-mark.png). Siyah zemin
+   asset düzeyinde temizlendi; CSS blend hack'ine gerek yok. */
+.logo-emblem-wrap {
+  margin: 0;
+  line-height: 0;
+}
+
+.logo-emblem {
+  display: block;
+  /* Marka mührü — banner değil. Biraz küçük: aya nefes mesafesi. */
+  width: clamp(150px, 14vw, 210px);
+  height: auto;
+  margin: 0 auto;
+  /* Transparan PNG (caelinus-mark.png) → blend hack'i yok. Hafif soft-gold
+     parıltı atmosferle bütünleştirir; abartısız. */
+  filter: drop-shadow(0 0 20px rgba(232, 215, 163, 0.20));
+  user-select: none;
+}
+
+/* Ana slogan — şiirsel serif başlık. */
+.hero-headline {
+  margin: clamp(20px, 3.4vh, 34px) auto 0;
+  font-family: var(--cae-font-serif);
+  font-weight: 500;
+  font-size: clamp(22px, 2.6vw, 32px);
+  letter-spacing: 0.04em;
+  line-height: 1.16;
+  /* ivory ↔ soft-gold arası ton. */
+  color: color-mix(in srgb, var(--cae-ivory) 66%, var(--cae-soft-gold));
+  /* Ayın üstüne taşsa bile okunur — koyu halo + altın ışıma. */
+  text-shadow:
+    0 2px 18px rgba(3, 6, 15, 0.7),
+    0 1px 20px rgba(232, 215, 163, 0.14);
+}
+
+/* Alt açıklama — sakin Inter light. */
+.hero-subline {
+  margin: 12px auto 0;
+  max-width: min(560px, 86vw);
+  font-family: var(--cae-font-sans);
+  font-weight: 300;
+  font-size: clamp(12px, 1.4vw, 15px);
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  color: var(--cae-ivory);
+  opacity: 0.72;
+  text-shadow: 0 1px 14px rgba(3, 6, 15, 0.65);
+}
+
+/* ── Living Logo — logo yüklenmez, DOĞAR ─────────────────────────────────
+   Ayın enerjisinden yükselen partiküller birleşir → mühür yukarıdan aşağı
+   belirir (kanatlar → CAELINUS) → canlı metal + yıldız nabzı + nefes + parallax.
+   Tüm zamanlama animation-delay ile deklaratif; reduced-motion'da anında/dingin. */
+.living-logo {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+/* Tilt (parallax 1–2°) bu kutuda; kanat nefesi iç gruplarda → çakışmaz. */
+.ll-emblem-box {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+  transform:
+    perspective(700px)
+    rotateX(var(--ll-rx, 0deg))
+    rotateY(var(--ll-ry, 0deg));
+}
+
+/* Göksel mühür — portal enerjisinden DOĞAR (header logosu değil). */
+@keyframes llFadeIn { to { opacity: 1; } }
+
+/* Enerji aurası — mühür ayın mor-altın enerjisinden oluşuyormuş hissi. */
+.ll-aura {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: clamp(170px, 18vw, 250px);
+  height: clamp(170px, 18vw, 250px);
+  transform: translate(-50%, -50%) scale(0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 226, 160, 0.22) 0%,
+    rgba(216, 183, 255, 0.16) 34%,
+    rgba(143, 108, 255, 0.08) 56%,
+    transparent 72%
+  );
+  filter: blur(8px);
+  animation:
+    llAuraIgnite 1.6s ease 0.1s both,
+    llAuraBreath 9s ease-in-out 1.7s infinite;
+  z-index: -1;
+}
+@keyframes llAuraIgnite {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes llAuraBreath {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
+}
+
+/* SVG kanat mührü. */
+.ll-mark {
+  display: block;
+  width: clamp(190px, 22vw, 300px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 16px rgba(232, 215, 163, 0.24));
+}
+
+/* Kanat tüyleri — altın çizgiler stroke-draw ile oluşur (gecikme inline). */
+.ll-feather {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation:
+    llDraw 1.3s cubic-bezier(0.22, 1, 0.36, 1) both,
+    llFadeIn 0.5s ease both;
+}
+@keyframes llDraw { to { stroke-dashoffset: 0; } }
+
+/* Kanat nefesi — çırpmaz: 12s'de bir çok hafif açılır/kapanır. Aynalama dış
+   grupta, nefes iç grupta → çakışmaz. */
+.ll-wing {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: llWingBreath 12s ease-in-out 3s infinite;
+}
+@keyframes llWingBreath {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1.8deg); }
+}
+
+/* Merkez alev/yıldız — ÖNCE belirir; yavaş nabız + altın ışık yayıp söner. */
+.ll-spire {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: llDraw 1s ease 1s both;
+}
+.ll-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation:
+    llFadeIn 0.7s ease 0.4s both,
+    llStarPulse 4.2s ease-in-out 0.6s infinite;
+}
+.ll-star-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation:
+    llFadeIn 0.9s ease 0.4s both,
+    llStarGlow 4.2s ease-in-out 0.6s infinite;
+}
+@keyframes llStarPulse {
+  0%, 100% { transform: scale(0.84); filter: brightness(0.8); }
+  50% { transform: scale(1.2); filter: brightness(1.5); }
+}
+@keyframes llStarGlow {
+  0%, 100% { transform: scale(0.85); opacity: 0.45; }
+  50% { transform: scale(1.35); opacity: 0.95; }
+}
+
+/* Wordmark — harf harf soldan sağa doğar; her harf canlı metalik altın
+   (gold · rose-gold · moon-silver). Gecikme inline (kademeli). */
+.ll-word {
+  display: block;
+  margin-top: clamp(6px, 1vh, 12px);
+  font-family: var(--cae-font-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-indent: 0.14em;
+}
+.ll-letter {
+  display: inline-block;
+  background: linear-gradient(
+    100deg,
+    #e8d7a3 0%, #ffd98f 20%, #fff4d6 36%, #f4d9ff 50%,
+    #cfd6df 64%, #ffd98f 82%, #e8d7a3 100%
+  );
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation:
+    llLetterIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) both,
+    llWordMetal 7s linear infinite;
+}
+@keyframes llLetterIn {
+  0% {
+    opacity: 0;
+    transform: translateY(7px) scale(0.96);
+    filter: blur(5px) drop-shadow(0 0 12px rgba(255, 217, 143, 0.6));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0) drop-shadow(0 1px 8px rgba(3, 6, 15, 0.5));
+  }
+}
+@keyframes llWordMetal {
+  0% { background-position: 0 0; }
+  100% { background-position: 280% 0; }
+}
+
+.ll-kicker {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--cae-font-sans);
+  font-weight: 400;
+  font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--cae-soft-gold) 70%, var(--cae-ivory));
+  opacity: 0;
+  animation: llKickIn 1.2s ease 4.4s both;
+}
+@keyframes llKickIn {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 0.82; transform: translateY(0); }
+}
+
+/* Aydan yükselen altın partiküller — birleşip mührü doğurur. */
+.ll-particles {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 0;
+  height: 0;
+}
+.ll-particle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 200, 1) 0%, rgba(255, 217, 143, 0.6) 50%, transparent 76%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  animation-name: llRise;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.3, 1);
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+}
+@keyframes llRise {
+  0% { opacity: 0; transform: translate(calc(-50% + var(--x0)), 150px) scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--x1)), -8px) scale(1.1); }
+}
+
+/* Gecikmeli giriş — sembol doğduktan sonra metin belirir. */
+.hero-headline.ll-late { animation: llLateH 1.4s ease 5.6s both; }
+.hero-subline.ll-late { animation: llLateS 1.4s ease 5.8s both; }
+@keyframes llLateH {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes llLateS {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 0.72; transform: translateY(0); }
+}
+
 .moon-wrap {
   position: absolute;
   left: 50%;
-  top: 51%;
-  width: min(46vw, 470px);
+  /* Ay yukarıda, altında şehir için yer açılır (sky → city). */
+  top: 45%;
+  /* Büyük portal ama vh ile sınırlı: kısa ekranlarda üst metni/şehri ezmez. */
+  width: min(50vw, 500px, 58vh);
   aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
   background: transparent;
@@ -140,38 +941,1083 @@ main {
   transition: transform 1s ease, opacity 1s ease, filter 1s ease;
 }
 
+/* Portal aura — gold + violet + ay ışığı pembesi; yavaş nefes. */
 .moon-backglow {
   position: absolute;
   inset: 50%;
-  width: 190%;
-  height: 190%;
+  width: 196%;
+  height: 196%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
+  /* Caelinus DNA aurası — lila → indigo → eflatun → altın (nefes gibi). */
   background:
-    radial-gradient(circle, rgba(190, 225, 255, 0.30) 0%, rgba(125, 175, 255, 0.22) 18%, rgba(80, 135, 255, 0.12) 34%, rgba(80, 135, 255, 0.04) 48%, transparent 68%);
-  filter: blur(36px);
+    radial-gradient(circle,
+      rgba(244, 217, 255, 0.18) 0%,
+      rgba(140, 109, 255, 0.26) 24%,
+      rgba(202, 164, 255, 0.16) 42%,
+      rgba(255, 217, 143, 0.10) 58%,
+      transparent 72%);
+  filter: blur(44px);
   animation: haloPulse 5s ease-in-out infinite;
 }
 
+/* Pembe ay — gerçekçi ay görselinin üstüne screen-blend ile pembe ışık
+   bindirir (kraterler korunur, disk pembe ay ışığına bürünür). moon-wrap
+   çocuğu olduğu için "içine dalış" zoom'unda ayla birlikte büyür. */
+.moon-pink {
+  position: absolute;
+  inset: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 192, 222, 0.55) 0%, rgba(255, 150, 200, 0.32) 42%, rgba(255, 140, 196, 0.10) 62%, transparent 72%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: moonBreath 6s ease-in-out infinite;
+}
+
+/* Yaşayan portal — WebGL enerji canvas'ı gerçek ayın ÜSTÜNDE, screen-blend ile
+   eklenir (ay opak kapanmaz, sadece nefes alan enerji bindirir). Kenar parıltısı
+   disk dışına biraz taşsın diye negatif inset. */
+.portal-moon-gl {
+  position: absolute;
+  inset: -7%;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.portal-moon-gl canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Yaşayan moddayken ay YÜZEYİ kısılır (Portal Core): parlaklık + detay ~%20
+   düşer, hafif violet'e bürünür → üstündeki WebGL enerji baskın gelir. */
+.moon-wrap.is-living .moon {
+  filter:
+    brightness(0.74) contrast(0.86) saturate(0.82) blur(0.5px)
+    drop-shadow(0 0 26px rgba(202, 164, 255, 0.30))
+    drop-shadow(0 0 84px rgba(140, 109, 255, 0.24));
+  opacity: 0.92;
+}
+.moon-wrap.is-living .moon-pink {
+  opacity: 0.26;
+}
+
+/* ── /vr — gelecekte açılacak kapı ───────────────────────────────────────── */
+.vr-gate {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--cae-black);
+}
+.vr-gate-canvas {
+  position: absolute;
+  inset: 0;
+}
+.vr-gate-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(48px, 12vh, 140px);
+  text-align: center;
+}
+.vr-gate-kicker {
+  margin: 0 0 14px;
+  font-family: var(--cae-font-sans);
+  font-size: 12px;
+  letter-spacing: 0.42em;
+  color: var(--cae-soft-gold);
+  opacity: 0.8;
+}
+.vr-gate-title {
+  margin: 0;
+  font-family: var(--cae-font-serif);
+  font-weight: 500;
+  font-size: clamp(26px, 4.4vw, 48px);
+  letter-spacing: 0.02em;
+  color: var(--cae-ivory);
+  text-shadow: 0 1px 24px rgba(232, 215, 163, 0.16);
+}
+.vr-gate-sub {
+  margin: 14px auto 0;
+  max-width: min(520px, 86vw);
+  font-family: var(--cae-font-sans);
+  font-weight: 300;
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.6;
+  color: var(--cae-ivory);
+  opacity: 0.66;
+}
+.vr-gate-actions {
+  pointer-events: auto;
+  margin-top: clamp(22px, 4vh, 36px);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.vr-gate-enter {
+  padding: 13px 30px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--cae-gold) 52%, transparent);
+  color: var(--cae-ivory);
+  background: rgba(7, 17, 31, 0.42);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  cursor: pointer;
+  font-family: var(--cae-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+}
+.vr-gate-enter:hover {
+  border-color: color-mix(in srgb, var(--cae-soft-gold) 78%, transparent);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(201, 164, 92, 0.26);
+}
+.vr-gate-note {
+  font-family: var(--cae-font-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--cae-moon-silver);
+  opacity: 0.62;
+}
+.vr-gate-back {
+  font-family: var(--cae-font-sans);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--cae-moon-silver);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.vr-gate-back:hover {
+  opacity: 1;
+}
+
+/* ── SHOWROOM · Caelinus Salonu (5D) ───────────────────── */
+.sr-page {
+  position: fixed;
+  inset: 0;
+  background: #05060d;
+  overflow: hidden;
+}
+
+.sr-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(230, 236, 248, 0.7);
+  letter-spacing: 0.12em;
+  font-size: 14px;
+}
+
+.sr-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(18px, 4vw, 44px);
+  /* Üstteki kicker sabit topbar'ın altından başlasın (showroom + gaia/dunya). */
+  padding-top: calc(var(--cae-page-top) + 8px);
+}
+
+.sr-top {
+  text-align: center;
+}
+
+.sr-kicker {
+  color: rgba(255, 255, 255, 0.86);
+  letter-spacing: 0.34em;
+  font-size: 13px;
+  text-shadow: 0 0 22px rgba(140, 180, 255, 0.4);
+}
+
+.sr-hint {
+  margin-top: 8px;
+  color: rgba(214, 224, 244, 0.6);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+}
+
+/* Frekans dalışı — canlı katman okuması */
+.dive-readout {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(6, 8, 18, 0.5);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  text-align: center;
+  transition: border-color 0.6s ease;
+}
+.dive-hz {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  transition: color 0.6s ease;
+  text-shadow: 0 0 24px currentColor;
+}
+.dive-name {
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.92);
+}
+.dive-depth {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: rgba(200, 212, 236, 0.5);
+}
+
+/* ════════════════════════════════════════════════
+   Burç Koleksiyonu — yaşayan deneyim (/universe/shop/burclar)
+   ════════════════════════════════════════════════ */
+.zc-page {
+  position: relative;
+  min-height: 100vh;
+  padding: calc(var(--cae-page-top) + 22px) 24px 90px;
+  color: #eef2fb;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(70, 100, 190, 0.2), transparent 58%),
+    radial-gradient(circle at 50% 100%, rgba(245, 212, 134, 0.08), transparent 55%),
+    linear-gradient(#05070f, #03040b);
+}
+.zc-head {
+  max-width: 760px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+.zc-kicker {
+  font-size: 12px;
+  letter-spacing: 0.36em;
+  color: rgba(245, 216, 140, 0.82);
+  text-transform: uppercase;
+}
+.zc-title {
+  margin: 16px 0 0;
+  font-weight: 200;
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.1;
+  color: #fff;
+}
+.zc-sub {
+  margin: 18px auto 0;
+  max-width: 540px;
+  font-size: clamp(14px, 1.6vw, 16px);
+  line-height: 1.7;
+  color: rgba(214, 224, 248, 0.72);
+}
+
+.zc-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 26px;
+  perspective: 1200px;
+}
+
+.zc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(10, 14, 28, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.45s ease, border-color 0.45s ease;
+  will-change: transform;
+}
+.zc-card:hover {
+  border-color: color-mix(in srgb, var(--zc, #f5d486) 55%, transparent);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.5),
+    0 0 60px var(--zc-glow, rgba(245, 216, 140, 0.4));
+}
+.zc-card.is-featured {
+  border-color: color-mix(in srgb, var(--zc, #f5d486) 70%, transparent);
+  box-shadow: 0 0 40px var(--zc-glow, rgba(245, 216, 140, 0.4));
+}
+
+.zc-media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+.zc-media-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s ease;
+}
+.zc-card:hover .zc-media-el {
+  transform: scale(1.06);
+}
+/* Hover videosu — poster JPG'in üstüne biner; yoksa şeffaf kalır (JPG görünür) */
+.zc-media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+.zc-card:hover .zc-media-video {
+  opacity: 1;
+}
+.zc-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(4, 6, 14, 0.72) 100%
+  );
+  pointer-events: none;
+}
+/* Element renginde dönen frekans halkası */
+.zc-ring {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--zc, #f5d486);
+  border-top-color: transparent;
+  opacity: 0.85;
+  box-shadow: 0 0 16px var(--zc-glow, rgba(245, 216, 140, 0.4));
+  animation: zcSpin 4.5s linear infinite;
+}
+@keyframes zcSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.zc-glyph {
+  position: absolute;
+  top: 13px;
+  left: 16px;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--zc, #f5d486);
+  text-shadow: 0 0 18px var(--zc-glow, rgba(245, 216, 140, 0.5));
+}
+.zc-hz {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(6, 8, 16, 0.55);
+  border: 1px solid color-mix(in srgb, var(--zc, #f5d486) 40%, transparent);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+.zc-flag {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--zc, #f5d486);
+  color: #1a1305;
+  font-weight: 700;
+}
+
+.zc-body {
+  padding: 16px 18px 18px;
+}
+.zc-name {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+}
+.zc-story {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(214, 224, 248, 0.6);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.zc-foot {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.zc-price {
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+.zc-enter {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--zc, #f5d486);
+}
+
+.zc-page-foot {
+  margin-top: 64px;
+  text-align: center;
+}
+.zc-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #eef2fb;
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.zc-back:hover {
+  border-color: rgba(245, 216, 140, 0.6);
+  color: #f5d486;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zc-ring {
+    animation: none;
+  }
+  .zc-card,
+  .zc-media-el {
+    transition: none;
+  }
+}
+
+/* ── GlobalAtmosphere — tüm sitede yaşayan ışık + tıklama dalgası ── */
+.global-aura {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    var(--aura-size, 300px) circle at var(--mx, 50%) var(--my, 40%),
+    var(--aura-color, rgba(245, 216, 140, 0.16)),
+    transparent 64%
+  );
+}
+.global-ripple {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  border: 2px solid var(--ripple-color, rgba(245, 216, 140, 0.55));
+  pointer-events: none;
+  z-index: 31;
+  mix-blend-mode: screen;
+  animation: globalRipple 760ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes globalRipple {
+  from {
+    transform: scale(0.3);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(11);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .global-aura {
+    display: none;
+  }
+}
+
+/* Parallax — GlobalAtmosphere kökte --nx/--ny yazar, katmanlar miras alır.
+   Derinlik için farklı katmanlar farklı yönde/şiddette/hızda kayar →
+   "animasyon" değil, fareye CANLI tepki veren bir dünya hissi. */
+
+/* Giriş (Caelinus + AY) */
+@media (prefers-reduced-motion: no-preference) {
+  /* Uzak nebulalar — geniş, yavaş kayar */
+  .scene .nebula {
+    transition: opacity 1.2s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+  .scene .nebula-left {
+    transform: translate3d(calc(var(--nx, 0) * -72px), calc(var(--ny, 0) * -54px), 0);
+  }
+  .scene .nebula-right {
+    transform: translate3d(calc(var(--nx, 0) * 80px), calc(var(--ny, 0) * 56px), 0);
+  }
+  .scene .nebula-bottom {
+    transform: translate3d(calc(var(--nx, 0) * 50px), calc(var(--ny, 0) * -40px), 0);
+  }
+  /* Yıldız tabakası — orta katman. Düzgün alan kayması fark edilmez; bu yüzden
+     sarmalayıcıya belirgin KAYMA + hafif DÖNÜŞ veriyoruz (gökyüzü dönüyormuş
+     hissi). Tabaka 1.3x ölçekli → dönüş/kayma köşeleri açığa çıkarmaz. */
+  .scene .stars-parallax {
+    transform: translate3d(
+        calc(var(--nx, 0) * -58px),
+        calc(var(--ny, 0) * -40px),
+        0
+      )
+      rotate(calc(var(--nx, 0) * 1.6deg));
+    transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+  /* AY — yakın katman, en çok kayan; merkezlemeyi koruyarak */
+  .scene .moon-wrap {
+    transform: translate(calc(-50% + var(--nx, 0) * 38px), calc(-50% + var(--ny, 0) * 30px));
+    transition: transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 1s ease, filter 1s ease;
+    will-change: transform;
+  }
+  .scene .subtitle {
+    transform: translate(calc(-50% + var(--nx, 0) * 16px), calc(var(--ny, 0) * 10px));
+    transition: transform 0.4s ease, opacity 0.8s ease;
+  }
+  .scene .tap {
+    transform: translate(calc(-50% + var(--nx, 0) * 16px), calc(var(--ny, 0) * 10px));
+    transition: transform 0.4s ease, opacity 0.8s ease;
+  }
+}
+
+/* Universe (videolu arka plan) */
+@media (prefers-reduced-motion: no-preference) {
+  .cu-scene .cu-nebula {
+    transition: opacity 1s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+  .cu-scene .cu-nebula-left {
+    transform: translate3d(calc(var(--nx, 0) * -70px), calc(var(--ny, 0) * -52px), 0);
+  }
+  .cu-scene .cu-nebula-right {
+    transform: translate3d(calc(var(--nx, 0) * 78px), calc(var(--ny, 0) * 56px), 0);
+  }
+  .cu-scene .cu-nebula-bottom {
+    transform: translate3d(calc(var(--nx, 0) * 52px), calc(var(--ny, 0) * -42px), 0);
+  }
+  /* Uçuşan parçacıklar — orta katman */
+  .cu-scene .cu-fairies {
+    transform: translate3d(calc(var(--nx, 0) * 32px), calc(var(--ny, 0) * 24px), 0);
+    transition: transform 0.5s ease;
+    will-change: transform;
+  }
+  /* Başlık bloğu yakın (cursor'a doğru), portal ızgarası ters (derinlik) */
+  .cu-scene .cu-title-wrap {
+    transform: translate3d(calc(var(--nx, 0) * 22px), calc(var(--ny, 0) * 16px), 0);
+    transition: transform 0.45s ease;
+    will-change: transform;
+  }
+  .cu-scene .cu-portal-grid {
+    transform: translate3d(calc(var(--nx, 0) * -16px), calc(var(--ny, 0) * -12px), 0);
+    transition: transform 0.55s ease;
+    will-change: transform;
+  }
+}
+
+/* ════════════════════════════════════════════════
+   Immersive ana sayfa prototipi (/experience)
+   Karanlık lacivert + altın · yaşayan evren kapısı
+   ════════════════════════════════════════════════ */
+.xp {
+  position: relative;
+  background: #03050f;
+  color: #eef2fb;
+  overflow-x: hidden;
+}
+
+/* ── Hero ── */
+.xp-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(var(--cae-page-top) + 8px) 24px 64px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(60, 95, 190, 0.24), transparent 60%),
+    radial-gradient(circle at 50% 92%, rgba(245, 212, 134, 0.1), transparent 55%),
+    linear-gradient(#050920, #02040c);
+}
+.xp-hero-canvas {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+}
+.xp-hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 40%),
+    rgba(245, 216, 140, 0.14),
+    transparent 66%
+  );
+}
+.xp-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+.xp-kicker {
+  font-size: 12px;
+  letter-spacing: 0.42em;
+  color: rgba(245, 216, 140, 0.85);
+  text-transform: uppercase;
+  margin-bottom: 26px;
+}
+.xp-title {
+  margin: 0;
+  font-weight: 200;
+  font-size: clamp(34px, 6.4vw, 82px);
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow: 0 0 44px rgba(120, 150, 255, 0.2);
+}
+.xp-title em {
+  font-style: normal;
+  color: #f5d486;
+  text-shadow: 0 0 36px rgba(245, 212, 134, 0.4);
+}
+.xp-sub {
+  margin: 24px auto 0;
+  max-width: 560px;
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.7;
+  color: rgba(214, 224, 248, 0.74);
+}
+.xp-cta-row {
+  margin-top: 42px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.xp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 32px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  color: #1a1305;
+  background: linear-gradient(135deg, #f7dc92, #e6b056);
+  box-shadow: 0 10px 40px rgba(245, 212, 134, 0.26);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.xp-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 54px rgba(245, 212, 134, 0.4);
+}
+.xp-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 28px;
+  border-radius: 999px;
+  background: transparent;
+  color: #eef2fb;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.xp-cta-ghost:hover {
+  border-color: rgba(245, 216, 140, 0.6);
+  color: #f5d486;
+}
+.xp-scrollcue {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  color: rgba(214, 224, 248, 0.5);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  animation: xpCue 2.4s ease-in-out infinite;
+}
+@keyframes xpCue {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.5; }
+  50% { transform: translate(-50%, 6px); opacity: 0.9; }
+}
+
+/* ── Bölümler ── */
+.xp-section {
+  position: relative;
+  padding: 116px 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.xp-eyebrow {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  color: rgba(245, 216, 140, 0.82);
+  text-transform: uppercase;
+}
+.xp-heading {
+  text-align: center;
+  font-weight: 200;
+  font-size: clamp(26px, 4vw, 48px);
+  margin: 14px 0 56px;
+  color: #fff;
+}
+
+/* ── Kapılar ── */
+.xp-gates {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.xp-gate {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  padding: 28px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  background: rgba(10, 14, 30, 0.5);
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: border-color 0.4s ease, transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+.xp-gate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    560px circle at 0% 50%,
+    color-mix(in srgb, var(--xp, #8aa0ff) 22%, transparent),
+    transparent 60%
+  );
+  transition: opacity 0.4s ease;
+}
+.xp-gate:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--xp, #8aa0ff) 55%, transparent);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42),
+    0 0 56px color-mix(in srgb, var(--xp, #8aa0ff) 18%, transparent);
+}
+.xp-gate:hover::before {
+  opacity: 1;
+}
+.xp-gate-no {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: rgba(214, 224, 248, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+.xp-gate-glyph {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--xp, #8aa0ff);
+  text-shadow: 0 0 22px currentColor;
+}
+.xp-gate-body {
+  flex: 1;
+  min-width: 200px;
+}
+.xp-gate-title {
+  display: block;
+  font-size: clamp(20px, 2.6vw, 29px);
+  font-weight: 300;
+  color: #fff;
+}
+.xp-gate-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(214, 224, 248, 0.66);
+}
+.xp-gate-cta {
+  margin-left: auto;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: var(--xp, #8aa0ff);
+}
+
+/* ── Roller ── */
+.xp-roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+}
+.xp-role {
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(10, 14, 30, 0.42);
+  transition: border-color 0.4s ease, transform 0.4s ease;
+}
+.xp-role:hover {
+  transform: translateY(-3px);
+  border-color: rgba(245, 216, 140, 0.4);
+}
+.xp-role-name {
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+.xp-role-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(214, 224, 248, 0.62);
+}
+
+/* ── Kapanış ── */
+.xp-closing {
+  margin-top: 64px;
+  text-align: center;
+}
+.xp-closing-line {
+  font-weight: 200;
+  font-size: clamp(20px, 3vw, 32px);
+  color: #fff;
+  margin: 0 0 28px;
+}
+
+@media (max-width: 600px) {
+  .xp-gate {
+    padding: 22px 22px;
+  }
+  .xp-gate-cta {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-scrollcue {
+    animation: none;
+  }
+}
+
+/* Eser etiketi (3B Html overlay) */
+.sr-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  user-select: none;
+  white-space: nowrap;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.sr-label-glyph {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.sr-label-name {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: rgba(240, 244, 252, 0.92);
+}
+
+/* Seçili eser paneli */
+.sr-panel {
+  pointer-events: auto;
+  align-self: center;
+  max-width: 420px;
+  width: min(92vw, 420px);
+  text-align: center;
+  padding: 22px 26px;
+  border-radius: 20px;
+  background: rgba(8, 12, 22, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.sr-panel.is-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sr-panel-glyph {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.sr-panel-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.sr-panel-tagline {
+  margin-top: 4px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: rgba(214, 224, 244, 0.7);
+}
+
+.sr-enter {
+  display: inline-block;
+  text-decoration: none;
+  padding: 11px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #fff;
+  background: rgba(12, 18, 30, 0.5);
+  letter-spacing: 0.04em;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.sr-enter:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── JOURNEY · dünyalar arası dalış geçişi ─────────────── */
+.journey-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%,
+      color-mix(in srgb, var(--veil-color, #8aa0ff) 62%, #03060f) 0%,
+      #03060f 58%);
+  transition: opacity 0.56s ease;
+  overflow: hidden;
+}
+
+.journey-veil.is-in {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.46s ease;
+}
+
+.journey-veil.is-out {
+  opacity: 0;
+  transition: opacity 0.56s ease;
+}
+
+.journey-veil-bloom {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44vmax;
+  height: 44vmax;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.2);
+  background: radial-gradient(circle,
+    var(--veil-color, #8aa0ff) 0%, transparent 68%);
+  filter: blur(34px);
+  opacity: 0;
+}
+
+.journey-veil.is-in .journey-veil-bloom {
+  animation: journeyDive 0.48s ease forwards;
+}
+
+@keyframes journeyDive {
+  from { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(3.2); opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-veil,
+  .journey-veil-bloom {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Sacred-circle halkaları — altın/mor, eş merkezli; "kutsal çember" kodu. */
 .moon-ring {
   position: absolute;
   inset: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 1px solid rgba(156, 194, 255, 0.18);
+  border: 1px solid rgba(232, 215, 163, 0.16);
+  box-shadow: 0 0 0 1px rgba(160, 110, 255, 0.05) inset;
   pointer-events: none;
 }
 
 .ring-1 {
-  width: 110%;
-  height: 110%;
-  opacity: 0.45;
+  width: 108%;
+  height: 108%;
+  opacity: 0.5;
 }
 
 .ring-2 {
-  width: 122%;
-  height: 122%;
-  opacity: 0.2;
+  width: 120%;
+  height: 120%;
+  opacity: 0.28;
+  border-color: rgba(160, 110, 255, 0.14);
+}
+
+.ring-3 {
+  width: 136%;
+  height: 136%;
+  opacity: 0.14;
 }
 
 .moon {
@@ -182,8 +2028,10 @@ main {
   object-fit: contain;
   transform: translate(-50%, -50%);
   filter:
-    drop-shadow(0 0 22px rgba(139, 191, 255, 0.28))
-    drop-shadow(0 0 80px rgba(108, 167, 255, 0.16));
+    drop-shadow(0 0 22px rgba(232, 215, 163, 0.22))
+    drop-shadow(0 0 64px var(--cae-violet-glow))
+    drop-shadow(0 0 96px rgba(245, 140, 200, 0.14))
+    saturate(1.04);
   animation: moonBreath 6s ease-in-out infinite;
   user-select: none;
   -webkit-user-drag: none;
@@ -192,31 +2040,229 @@ main {
 .subtitle {
   position: absolute;
   left: 50%;
-  top: calc(51% + 255px);
+  top: calc(50% + 246px);
   transform: translateX(-50%);
-  color: rgba(230, 236, 248, 0.85);
-  font-size: 14px;
-  letter-spacing: 0.08em;
+  /* Davet — komut değil: şiirsel serif, yumuşak. */
+  font-family: var(--cae-font-serif);
+  font-style: italic;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--cae-ivory) 72%, var(--cae-soft-gold));
+  opacity: 0.82;
+  font-size: clamp(15px, 1.6vw, 19px);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
   z-index: 7;
   transition: opacity 0.8s ease;
 }
 
+/* CTA — lüks glassmorphism: ince gold border, koyu translucent zemin,
+   hover'da gold glow. */
 .tap {
   position: absolute;
   left: 50%;
-  top: calc(51% + 292px);
+  top: calc(50% + 300px);
   transform: translateX(-50%);
-  padding: 11px 20px;
+  padding: 13px 28px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: white;
-  background: rgba(10, 14, 24, 0.42);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--cae-gold) 52%, transparent);
+  color: var(--cae-ivory);
+  background: rgba(7, 17, 31, 0.42);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   cursor: pointer;
   z-index: 7;
-  box-shadow: 0 0 18px rgba(130, 180, 255, 0.08);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  font-family: var(--cae-font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  box-shadow:
+    0 0 0 1px rgba(232, 215, 163, 0.06) inset,
+    0 8px 30px rgba(0, 0, 0, 0.4);
+  transition:
+    opacity 0.8s ease,
+    transform 0.4s var(--cae-ease),
+    box-shadow 0.45s ease,
+    border-color 0.45s ease,
+    color 0.45s ease;
+}
+
+.tap:hover {
+  border-color: color-mix(in srgb, var(--cae-soft-gold) 78%, transparent);
+  color: #fff;
+  box-shadow:
+    0 0 26px rgba(201, 164, 92, 0.26),
+    0 0 0 1px rgba(232, 215, 163, 0.14) inset,
+    0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.tap:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* Eşikten geçiş — tıklamada merkeze toplanan altın partiküller. anime.js
+   left/top'u %50'ye çeker; normalde gizli (opacity:0). */
+.enter-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.enter-particle {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle,
+    rgba(255, 244, 210, 1) 0%,
+    rgba(255, 217, 143, 0.7) 50%,
+    transparent 76%
+  );
+  box-shadow: 0 0 8px rgba(255, 217, 143, 0.7);
+}
+
+/* Ay-arkası nebula'nın yavaş nefesi — neredeyse fark edilmez. */
+@keyframes nebulaBreath {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.82; transform: translate(-50%, -50%) scale(1.06); }
+}
+
+/* ── Landing · mobil ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .logo-wrap {
+    top: clamp(40px, 6vh, 56px);
+    width: 92vw;
+  }
+  .logo-emblem {
+    width: clamp(160px, 50vw, 190px);
+  }
+  .hero-headline {
+    font-size: clamp(22px, 6.6vw, 26px);
+    margin-top: clamp(18px, 3vh, 26px);
+  }
+  .hero-subline {
+    font-size: clamp(12px, 3.6vw, 14px);
+  }
+  .moon-wrap {
+    top: 38%;
+    width: 70vw;
+  }
+  .hero-horizon {
+    height: min(40vh, 380px);
+  }
+  .subtitle {
+    top: calc(38% + 38vw);
+    white-space: normal;
+    width: 84vw;
+    text-align: center;
+  }
+  .tap {
+    top: calc(38% + 47vw);
+    /* Dokunma alanı büyük. */
+    padding: 15px 32px;
+  }
+  /* Görsel sahne modu — mobil yerleşim. */
+  .scene--image .logo-wrap {
+    top: clamp(116px, 23vh, 230px);
+    width: 92vw;
+  }
+  .scene--image .subtitle {
+    top: auto;
+    bottom: clamp(100px, 15vh, 150px);
+    white-space: normal;
+    width: 84vw;
+    text-align: center;
+  }
+  .scene--image .tap {
+    top: auto;
+    bottom: clamp(46px, 8vh, 84px);
+    padding: 15px 32px;
+  }
+}
+
+/* Erişilebilirlik / sakinlik — hareket azaltma isteğinde landing dingin durur. */
+@media (prefers-reduced-motion: reduce) {
+  .stars-parallax,
+  .nebula {
+    transform: none !important;
+  }
+  .scene::before,
+  .star,
+  .moon,
+  .moon-pink,
+  .moon-backglow,
+  .logo-wrap,
+  .hero-video-img,
+  .hero-video,
+  .hme-violet,
+  .hme-gold,
+  .hh-bob,
+  .hh-light,
+  .hh-glow,
+  .hh-gate,
+  .hh-gate-beam {
+    animation: none !important;
+  }
+  .hh-far,
+  .hh-mid,
+  .hh-near {
+    transform: none !important;
+  }
+  /* Living Logo — doğuş atlanır: mühür anında, dingin görünür. */
+  .ll-aura,
+  .ll-feather,
+  .ll-wing,
+  .ll-spire,
+  .ll-star,
+  .ll-star-glow,
+  .ll-letter,
+  .ll-kicker,
+  .ll-particle,
+  .ll-emblem-box,
+  .hero-headline.ll-late,
+  .hero-subline.ll-late {
+    animation: none !important;
+  }
+  .ll-feather,
+  .ll-spire {
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+  .ll-aura,
+  .ll-star,
+  .ll-star-glow,
+  .ll-letter,
+  .ll-kicker {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ll-aura { transform: translate(-50%, -50%) !important; }
+  .ll-kicker { opacity: 0.82 !important; }
+  .ll-emblem-box {
+    transform: none !important;
+  }
+  .ll-particles {
+    display: none !important;
+  }
+  .hero-subline.ll-late {
+    opacity: 0.72;
+  }
+  /* Eşik partikülleri — dingin modda gizli. */
+  .enter-burst { display: none !important; }
+  /* Hero sahne görseli — dingin: nefes/toz/parıltı/parallax durur. */
+  .hero-scene-img,
+  .hero-scene-dust,
+  .hero-scene-glow {
+    animation: none !important;
+  }
+  .hero-scene-img {
+    transform: scale(1.04) !important;
+  }
+  .hero-scene-bg {
+    transform: none !important;
+  }
 }
 
 /* VORTEX */
@@ -751,6 +2797,91 @@ main {
 .cu-portal.cyan .cu-portal-symbol { color: #c8ffff; }
 .cu-portal.cyan .cu-portal-ring { border-color: rgba(200,255,255,0.42); box-shadow: 0 0 28px rgba(200,255,255,0.12); }
 
+/* ── Yönlendirilmiş başlangıç ──────────────────────────────────────────
+   "Find Your Frequency" featured portal: diğerleriyle aynı kutu boyutunda
+   (mobil grid bozulmaz) ama altın aura + parlak halka + "Start here" rozeti
+   ile görsel olarak ağır. Duygusal giriş, satıştan (Shop) önce öne çıkar. */
+.cu-portal.featured {
+  z-index: 2;
+}
+
+.cu-portal.featured::after {
+  content: "";
+  position: absolute;
+  width: 184px;
+  height: 184px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,221,150,0.32) 0%, rgba(255,210,130,0.12) 46%, transparent 72%);
+  filter: blur(10px);
+  z-index: -1;
+  animation: cuFeaturedPulse 3.6s ease-in-out infinite;
+}
+
+.cu-portal.featured .cu-portal-ring {
+  border-color: rgba(255,228,160,0.72);
+  box-shadow:
+    0 0 34px rgba(255,214,130,0.30),
+    inset 0 0 20px rgba(255,255,255,0.14);
+}
+
+.cu-portal.featured .cu-portal-core {
+  background: radial-gradient(circle, rgba(255,236,190,0.36) 0%, rgba(255,220,150,0.10) 50%, transparent 78%);
+}
+
+.cu-portal.featured .cu-portal-symbol {
+  color: #ffe9a8;
+  text-shadow:
+    0 0 22px rgba(255,220,140,0.5),
+    0 0 46px rgba(255,200,110,0.3);
+}
+
+.cu-portal-hint {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1a1306;
+  background: linear-gradient(180deg, #ffe6a6, #f3c969);
+  box-shadow:
+    0 4px 18px rgba(255,200,110,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.3);
+  white-space: nowrap;
+  z-index: 5;
+  animation: cuHintFloat 3.6s ease-in-out infinite;
+}
+
+@keyframes cuFeaturedPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes cuHintFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+/* Başlangıç ipucu satırı — başlık altında "buradan başla" yönlendirmesi. */
+.cu-guide {
+  margin-top: 14px;
+  color: rgba(238, 232, 210, 0.84);
+  font-size: clamp(12px, 1.3vw, 15px);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.cu-guide-mark {
+  color: #ffe9a8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .cu-fairies {
   position: absolute;
   inset: 0;
@@ -872,6 +3003,91 @@ main {
     font-size: clamp(38px, 10vw, 64px);
   }
 }
+
+/* ── Telefon (≤600px) ──────────────────────────────────────────────────
+   İki sorun çözülür:
+   1) Yatay taşma: 2×180px + boşluk telefon genişliğini aşıyordu, kapılar
+      ekran kenarlarında kesiliyordu → kapı + halka + disk küçültülür,
+      grid daraltılır.
+   2) Dikey kesilme: .cu-scene 100vh + overflow:hidden tüm portalları
+      kırpıyordu (10 kapı sığmaz) → sahne büyüyebilir, arka plan/overlay
+      sabitlenir, body kayar; tüm kapılara ulaşılır. */
+@media (max-width: 600px) {
+  .cu-scene {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  /* Arka plan + overlay viewport'a sabit; içerik üstünden akar. */
+  .cu-bg,
+  .cu-bg-video,
+  .cu-overlay {
+    position: fixed;
+  }
+
+  .cu-content {
+    height: auto;
+    min-height: 100dvh;
+    padding-top: 38px;
+    padding-bottom: 72px;
+  }
+
+  .cu-portal-grid {
+    width: min(440px, 92vw);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px 12px;
+    margin-top: 38px;
+  }
+
+  .cu-portal {
+    width: 156px;
+    height: 156px;
+  }
+
+  .cu-portal::before {
+    width: 120px;
+    height: 120px;
+  }
+
+  .cu-portal-core {
+    width: 58px;
+    height: 58px;
+  }
+
+  .cu-portal .ring-one {
+    width: 88px;
+    height: 88px;
+  }
+
+  .cu-portal .ring-two {
+    width: 116px;
+    height: 116px;
+  }
+
+  .cu-portal-symbol {
+    font-size: 32px;
+  }
+
+  .cu-portal-label {
+    bottom: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: normal;
+    max-width: 140px;
+    text-align: center;
+  }
+
+  .cu-title {
+    font-size: clamp(32px, 9vw, 52px);
+  }
+
+  .cu-subtitle {
+    font-size: 13px;
+  }
+}
 /* =========================
    GAIA PAGE - FINAL RESET
    ========================= */
@@ -892,6 +3108,18 @@ main {
   background-position: center;
   transform: scale(1.03);
   animation: gaiaBgBreath 16s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* Canlı arka plan videosu — statik gaia-bg'nin yerini alır. */
+.gaia-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.03);
   z-index: 0;
 }
 
@@ -1226,6 +3454,172 @@ main {
 }
 
 /* bottom */
+
+/* ── GAIA PAZARI / BÜYÜYEN BAHÇE ───────────────────────── */
+.gaia-market {
+  margin-top: 64px;
+  position: relative;
+}
+
+.gaia-market-head {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.gaia-market-title {
+  margin: 8px 0 10px;
+  font-size: clamp(28px, 4.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow: 0 2px 30px rgba(120, 255, 180, 0.18);
+}
+
+.gaia-market-sub {
+  max-width: 640px;
+  margin: 0 auto;
+  color: rgba(232, 244, 232, 0.78);
+  line-height: 1.6;
+}
+
+/* Büyüyen ürünler — topraktan çıkan meyve/sebzeler */
+.gaia-orchard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(10px, 2.4vw, 26px);
+  margin: 6px auto 44px;
+  padding-bottom: 6px;
+  max-width: 820px;
+}
+
+.gaia-crop {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 100%;
+}
+
+.gaia-crop-fruit {
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+  animation: cropSway 5.5s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.gaia-crop:nth-child(2n) .gaia-crop-fruit { animation-delay: -1.4s; }
+.gaia-crop:nth-child(3n) .gaia-crop-fruit { animation-delay: -2.8s; }
+
+.gaia-crop-mound {
+  width: clamp(34px, 5vw, 52px);
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(86, 58, 32, 0.85) 0%, rgba(56, 38, 22, 0.5) 60%, transparent 78%);
+  filter: blur(1px);
+}
+
+@keyframes cropSway {
+  0%, 100% { transform: rotate(-3deg) translateY(0); }
+  50%      { transform: rotate(3deg) translateY(-3px); }
+}
+
+/* Üretici dükkân vitrinleri */
+.gaia-shops {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.gaia-shop {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  background: rgba(10, 20, 14, 0.42);
+  border: 1px solid rgba(170, 235, 190, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1),
+    border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.gaia-shop:hover {
+  transform: translateY(-6px);
+  border-color: rgba(170, 235, 190, 0.42);
+  box-shadow: 0 18px 44px rgba(40, 120, 70, 0.28);
+}
+
+.gaia-shop-glow {
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(120, 230, 160, 0.22), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.gaia-shop:hover .gaia-shop-glow { opacity: 1; }
+
+.gaia-shop-icon {
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.gaia-shop-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.gaia-shop-meta {
+  font-size: 12.5px;
+  color: rgba(214, 236, 220, 0.7);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.gaia-shop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gaia-shop-since {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(190, 222, 198, 0.6);
+}
+
+.gaia-shop-chip {
+  font-size: 10.5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(120, 220, 150, 0.12);
+  border: 1px solid rgba(150, 230, 175, 0.28);
+  color: rgba(206, 244, 214, 0.92);
+}
+
+.gaia-market-cta {
+  margin-top: 26px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaia-crop-fruit { animation: none; }
+}
 
 .gaia-bottom {
   margin-top: 36px;
@@ -1894,6 +4288,7 @@ main {
 .plants-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   height: auto;
   overflow-x: hidden;
   overflow-y: visible;
@@ -2357,6 +4752,7 @@ main {
 .producers-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   overflow-y: auto;
   background: #060d18;
@@ -2724,6 +5120,7 @@ main {
 .shop-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   overflow-y: auto;
   background: #06091a;
@@ -2740,11 +5137,22 @@ main {
   z-index: 0;
 }
 
+.shop-bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.92) saturate(1.05);
+  pointer-events: none;
+}
+
 .shop-overlay {
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(to bottom, rgba(5, 8, 16, 0.25), rgba(5, 8, 16, 0.58)),
+    linear-gradient(to bottom, rgba(5, 8, 16, 0.12), rgba(5, 8, 16, 0.42)),
     repeating-linear-gradient(
       to right,
       rgba(140, 220, 255, 0.04) 0px,
@@ -5392,6 +7800,7 @@ main {
 .checkout-page {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--cae-page-top);
   overflow-x: hidden;
   background: #060914;
   color: white;
@@ -6712,6 +9121,20 @@ main {
   cursor: not-allowed;
 }
 
+.checkout-presale-note {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(200, 162, 94, 0.28);
+  background: rgba(200, 162, 94, 0.07);
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(240, 230, 210, 0.82);
+}
+.checkout-presale-note strong {
+  color: #f0d59a;
+}
+
 .checkout-remove-btn {
   width: 28px;
   height: 28px;
@@ -7224,6 +9647,10 @@ main {
      başına +16px nefes payı bu en kötü durumu da net temizler. Mobilde
      (≤720px) topbar küçülür → 56px override. */
   --cae-topbar-h: 72px;
+  /* Sabit topbar'ı temizleyen standart sayfa üst boşluğu. Tüm sayfa
+     wrapper'ları bunu kullanır; topbar yüksekliği breakpoint'le değişince
+     (72→56) otomatik uyum sağlar. Tek kaynak = tutarlı hizalama. */
+  --cae-page-top: calc(var(--cae-topbar-h, 72px) + 16px);
 }
 
 .cae-topbar {
@@ -7258,6 +9685,14 @@ main {
   font-size: 10px;
   opacity: 0.7;
   color: #c8b888;
+}
+
+/* Navbar amblemi — transparan PNG (caelinus-mark.png), blend hack'i yok. */
+.cae-topbar-logo {
+  display: block;
+  height: 40px;
+  width: auto;
+  user-select: none;
 }
 
 .cae-topbar-nav {
@@ -7363,6 +9798,9 @@ main {
     letter-spacing: 0.3em;
     font-size: 12px;
   }
+  .cae-topbar-logo {
+    height: 34px;
+  }
   .cae-topbar-nav {
     gap: 14px;
   }
@@ -7373,6 +9811,18 @@ main {
   .cae-topbar-aside { margin-left: 8px; }
   .cae-freq-pill { padding: 6px 10px; font-size: 10px; letter-spacing: 0.2em; gap: 6px; }
   .cae-freq-pill-symbol { font-size: 12px; }
+}
+
+/* Dar telefonlarda topbar tek satıra sığsın — taşma/kırpılma olmasın.
+   "Frekansını Bul" CTA metni gizlenip yalnız ✦ simgesi kalır (akort olmuş
+   durumda "Hz" değeri zaten kısa, korunur); nav aralığı daha da sıkışır. */
+@media (max-width: 560px) {
+  .cae-topbar { padding: 10px 12px; }
+  .cae-topbar-nav { gap: 11px; }
+  .cae-topbar-link { font-size: 10px; letter-spacing: 0.1em; }
+  .cae-topbar-aside { margin-left: 6px; }
+  .cae-freq-pill-label { display: none; }
+  .cae-freq-pill.is-cta { padding: 6px 9px; }
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -7429,6 +9879,35 @@ main {
 
 .cae-footer-meta a:hover {
   color: #ffe9b8;
+}
+
+.cae-footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.42;
+  text-transform: uppercase;
+}
+.cae-footer-legal a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cae-footer-legal a:hover {
+  color: #ffe9b8;
+}
+
+/* USD birincil · TL ikincil (canlı kur) */
+.price-try {
+  opacity: 0.66;
+  font-size: 0.86em;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -9116,6 +11595,14 @@ main {
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* Akan vitrin modunda buğulu panel YOK — görseller doğrudan video üzerinde */
+.freq-shelf.is-tuned {
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 8px 0 0;
+}
+
 .freq-shelf.is-cta {
   border-style: dashed;
   border-color: rgba(212, 183, 138, 0.35);
@@ -9249,27 +11736,142 @@ main {
   border-color: var(--shelf-color);
 }
 
-.freq-shelf-rail {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
+/* Kod-yağmuru — temiz görseller, çok sütun, farklı hızlarda süzülür */
+.freq-flow {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  max-width: 820px;
+  margin: 0 auto;
+  height: clamp(380px, 60vh, 620px);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
 }
 
-.freq-shelf-card {
+.freq-flow-col {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 240px;
+}
+
+.freq-flow-track {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid rgba(244, 236, 216, 0.12);
-  border-radius: 14px;
-  background: rgba(8, 10, 22, 0.55);
-  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  gap: 16px;
+  animation: freqFlow var(--dur, 26s) linear infinite;
+  will-change: transform;
+}
+/* Üstüne gelince TÜM sütunlar durur (incele/tıkla) */
+.freq-flow:hover .freq-flow-track {
+  animation-play-state: paused;
 }
 
-.freq-shelf-card:hover {
-  border-color: color-mix(in oklab, var(--shelf-color) 50%, transparent);
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+@keyframes freqFlow {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Tek bir akan görsel — kutu/buğu yok, sadece net görsel */
+.freq-rain {
+  position: relative;
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.freq-rain img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.freq-rain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(6, 9, 20, 0.82));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.freq-rain:hover {
+  transform: scale(1.04);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6),
+    0 0 26px var(--shelf-glow);
+}
+.freq-rain:hover::after {
+  opacity: 1;
+}
+.freq-rain.is-signature {
+  box-shadow: 0 0 0 2px var(--shelf-color), 0 14px 32px var(--shelf-glow);
+}
+
+.freq-rain-hz {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid color-mix(in oklab, var(--shelf-color) 35%, transparent);
+  color: rgba(244, 236, 216, 0.92);
+}
+.freq-rain-name {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.freq-rain:hover .freq-rain-name {
+  opacity: 1;
+  transform: translateY(0);
+}
+.freq-rain-flag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: #0a0a14;
+  background: linear-gradient(135deg, #f0d9a8 0%, #d4b78a 50%, #a8865a 100%);
+}
+
+@media (max-width: 640px) {
+  .freq-flow-col:nth-child(3) {
+    display: none;
+  }
 }
 
 .freq-shelf-card.is-signature {
@@ -9277,9 +11879,18 @@ main {
   box-shadow: 0 0 0 1px var(--shelf-color), 0 14px 30px var(--shelf-glow);
 }
 
+.freq-shelf-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .freq-shelf-card-image {
   position: relative;
-  width: 100%;
+  width: 96px;
+  flex-shrink: 0;
   aspect-ratio: 4 / 5;
   border-radius: 10px;
   overflow: hidden;
@@ -9344,7 +11955,17 @@ main {
 @media (max-width: 720px) {
   .freq-shelf-symbol { font-size: 30px; }
   .freq-shelf-hz { font-size: 30px; }
-  .freq-shelf-rail { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freq-flow {
+    height: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .freq-flow-track {
+    animation: none;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -9672,6 +12293,7 @@ main {
   color: #f4ecd8;
   font-family: "Inter", "Helvetica Neue", system-ui, sans-serif;
   isolation: isolate;
+  padding-top: var(--cae-page-top);
   padding-bottom: 60px;
 }
 
@@ -11618,7 +14240,7 @@ main {
   position: relative;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 56px 24px 120px;
+  padding: var(--cae-page-top) 24px 120px;
   color: #e9f8ee;
 }
 
@@ -11850,7 +14472,7 @@ body.atlas-host {
 }
 
 @media (max-width: 720px) {
-  .atlas-page { padding: 28px 16px 96px; }
+  .atlas-page { padding: var(--cae-page-top) 16px 96px; }
 }
 
 /* hero ─────────────────────────────────────── */
@@ -13017,7 +15639,7 @@ body.atlas-host {
 .ai-hero {
   position: relative;
   max-width: 760px;
-  margin: 80px auto 0;
+  margin: var(--cae-page-top) auto 0;
   text-align: center;
   z-index: 2;
 }
@@ -15502,6 +18124,7 @@ body.atlas-host {
 .atelier-shell {
   position: relative;
   min-height: 100dvh;
+  padding-top: var(--cae-page-top);
   background: var(--atelier-obsidian);
   /* Nebula stack:
      1) magenta bloom from the top — "the lamp"
@@ -15660,7 +18283,10 @@ button.atelier-ribbon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100dvh - 60px);
+  /* .atelier-shell artık üstte topbar payı bıraktığı için auth alanı
+     kalan görünür yüksekliği doldurur; kart dikeyde ortalı kalır,
+     taşma/scroll oluşmaz. */
+  min-height: calc(100dvh - var(--cae-page-top) - 60px);
   padding: 48px 20px;
 }
 
@@ -26144,3 +28770,1882 @@ div.stage-card {
     font-size: 20px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Avatarlar yapımda — boş-durum placeholder
+   Beden kütüphanesi boşken (AVATARS_IN_PRODUCTION) tüm 3D avatar
+   yüzeylerinin yerine gösterilir. Sahnenin kapladığı alanı doldurur.
+   ═══════════════════════════════════════════════════════════ */
+.avatars-in-production {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 360px;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(202, 165, 106, 0.12), transparent 60%),
+    linear-gradient(180deg, #0c0a08 0%, #060504 100%);
+  border: 1px solid rgba(202, 165, 106, 0.18);
+}
+.avatars-in-production .aip-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  padding: 32px 28px;
+  text-align: center;
+}
+.avatars-in-production .aip-glyph {
+  display: inline-block;
+  font-size: 34px;
+  line-height: 1;
+  color: #e6c896;
+  opacity: 0.9;
+  margin-bottom: 14px;
+  animation: aip-breathe 3.4s ease-in-out infinite;
+}
+.avatars-in-production .aip-title {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f4e8d2;
+}
+.avatars-in-production .aip-sub {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(244, 232, 210, 0.62);
+}
+@keyframes aip-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Caelinus WebGL Dünyası — global kalıcı canvas katmanı
+   Sabit tam-ekran, içeriğin ARKASINDA (z-index:0 + sayfa içeriği
+   üstte). Koyu kozmik gradient burada; canvas saydam (alpha) çizer.
+   pointer-events:none → sayfa etkileşimini engellemez.
+   ═══════════════════════════════════════════════════════════ */
+.world-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 38%,
+    #141d3c 0%,
+    #080d1c 52%,
+    #03040a 100%
+  );
+}
+.world-canvas canvas {
+  display: block;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CAELINUS BAZAAR / ATELIER DISTRICT
+   Klasik grid yerine "içinde gezilen" yaşayan dijital pazar.
+   Dark navy + altın, glassmorphism, ayna yansıması, parallax.
+   ════════════════════════════════════════════════════════════════ */
+.bazaar {
+  --gold: #e8c879;
+  --gold-soft: rgba(232, 200, 121, 0.5);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+/* ── Giriş alanı ──────────────────────────────────────────────── */
+.bazaar-hero {
+  position: relative;
+  text-align: center;
+  padding: 40px 16px 8px;
+}
+.bazaar-hero-kicker {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  color: var(--gold-soft);
+  margin-bottom: 14px;
+}
+.bazaar-hero-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1.04;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  margin: 0;
+  background: linear-gradient(180deg, #fff 0%, #f2e4c0 55%, #c9a44f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(232, 200, 121, 0.12);
+}
+.bazaar-hero-sub {
+  margin: 14px auto 0;
+  max-width: 30ch;
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.66);
+}
+.bazaar-hero-cta {
+  margin-top: 22px;
+  padding: 12px 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 200, 121, 0.4);
+  background: linear-gradient(180deg, rgba(232, 200, 121, 0.14), rgba(232, 200, 121, 0.04));
+  color: #f3e6c4;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.bazaar-hero-cta:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, rgba(232, 200, 121, 0.24), rgba(232, 200, 121, 0.08));
+  box-shadow: 0 10px 34px rgba(232, 200, 121, 0.22);
+}
+
+.bazaar-nav {
+  margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.bazaar-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.28s ease;
+}
+.bazaar-nav-pill:hover {
+  border-color: var(--gold-soft);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(232, 200, 121, 0.18);
+  transform: translateY(-1px);
+}
+.bazaar-nav-glyph {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+/* ── Odalar ───────────────────────────────────────────────────── */
+.bazaar-room {
+  scroll-margin-top: 24px;
+}
+.bazaar-room-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 4px 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(232, 200, 121, 0.14);
+}
+.bazaar-room-glyph {
+  display: block;
+  font-size: 18px;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-shadow: 0 0 16px rgba(232, 200, 121, 0.4);
+}
+.bazaar-room-name {
+  margin: 0;
+  font-size: clamp(1.3rem, 3.4vw, 1.9rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #f6efdd;
+}
+.bazaar-room-tagline {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 56ch;
+}
+.bazaar-room-count {
+  flex-shrink: 0;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--gold-soft);
+  white-space: nowrap;
+}
+.bazaar-room-link {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.bazaar-room-link:hover {
+  opacity: 0.75;
+  transform: translateX(2px);
+}
+
+/* Yatay akan ayna vitrini */
+.bazaar-vitrine {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px 22px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 200, 121, 0.3) transparent;
+}
+.bazaar-vitrine::-webkit-scrollbar {
+  height: 6px;
+}
+.bazaar-vitrine::-webkit-scrollbar-thumb {
+  background: rgba(232, 200, 121, 0.28);
+  border-radius: 999px;
+}
+
+/* ── Mirror kart ──────────────────────────────────────────────── */
+.bazaar-card {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 30%;
+  flex: 0 0 264px;
+  width: 264px;
+  scroll-snap-align: start;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(20, 27, 52, 0.7), rgba(8, 12, 26, 0.85));
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease, border-color 0.32s ease;
+  will-change: transform;
+}
+.bazaar-card:hover {
+  border-color: rgba(232, 200, 121, 0.4);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(232, 200, 121, 0.14);
+}
+
+.bazaar-mirror {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #1a2347, #070b18);
+}
+.bazaar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
+  filter: saturate(0.96) brightness(0.92);
+}
+.bazaar-card:hover .bazaar-photo {
+  transform: scale(1.07);
+  filter: saturate(1.05) brightness(1);
+}
+
+/* Ayna yansıması — alt kenarda sönümlenen ters görsel */
+.bazaar-reflection {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background-size: cover;
+  background-position: center top;
+  transform: scaleY(-1);
+  opacity: 0.18;
+  filter: blur(2px);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 92%);
+  mask-image: linear-gradient(180deg, transparent, #000 92%);
+  pointer-events: none;
+}
+
+/* Fareyle dolaşan altın aura */
+.bazaar-aura {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    220px circle at var(--mx) var(--my),
+    rgba(232, 200, 121, 0.32),
+    transparent 60%
+  );
+  transition: opacity 0.4s ease;
+}
+.bazaar-card:hover .bazaar-aura {
+  opacity: 1;
+}
+/* Üstte sabit altın kenar ışığı */
+.bazaar-edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(232, 200, 121, 0.16),
+    inset 0 60px 70px -50px rgba(232, 200, 121, 0.18);
+}
+
+.bazaar-freq {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #0c1024;
+  background: linear-gradient(180deg, #f4e6bf, #d8b25e);
+  box-shadow: 0 4px 14px rgba(232, 200, 121, 0.3);
+}
+.bazaar-rec {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: rgba(170, 138, 255, 0.32);
+  border: 1px solid rgba(170, 138, 255, 0.5);
+  backdrop-filter: blur(6px);
+}
+
+/* Hover'da açılan hikâye */
+.bazaar-story {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 16px 18px;
+  background: linear-gradient(180deg, transparent, rgba(6, 9, 20, 0.92) 46%);
+  transform: translateY(18px);
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+.bazaar-card:hover .bazaar-story {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.bazaar-story-glyph {
+  color: var(--gold);
+  font-size: 13px;
+}
+.bazaar-story p {
+  margin: 6px 0 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.82);
+}
+.bazaar-story-more {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  text-decoration: none;
+}
+.bazaar-story-more:hover {
+  text-decoration: underline;
+}
+
+/* Kart gövdesi */
+.bazaar-info {
+  padding: 14px 15px 16px;
+}
+.bazaar-collection {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 5px;
+}
+.bazaar-name-link {
+  text-decoration: none;
+}
+.bazaar-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #f4efe2;
+  transition: color 0.25s ease;
+}
+.bazaar-name-link:hover .bazaar-name {
+  color: var(--gold);
+}
+.bazaar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+}
+.bazaar-designer {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.52);
+}
+.bazaar-sign {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.66);
+  white-space: nowrap;
+}
+.bazaar-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 12px 0 10px;
+}
+.bazaar-price {
+  font-size: 18px;
+  font-weight: 500;
+  color: #f6efdd;
+}
+.bazaar-stock {
+  font-size: 11px;
+  color: rgba(120, 220, 170, 0.8);
+}
+.bazaar-stock.low {
+  color: #f0c060;
+}
+.bazaar-stock.out {
+  color: #e87a7a;
+}
+
+.bazaar-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.bazaar-size {
+  min-width: 48px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bazaar-size:hover:not(.out) {
+  border-color: var(--gold-soft);
+}
+.bazaar-size.active {
+  background: linear-gradient(180deg, rgba(232, 200, 121, 0.2), rgba(232, 200, 121, 0.06));
+  border-color: var(--gold);
+  color: #fff;
+}
+.bazaar-size.rec {
+  border-color: rgba(170, 138, 255, 0.45);
+}
+.bazaar-size.out {
+  opacity: 0.32;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.bazaar-actions {
+  display: flex;
+  gap: 8px;
+}
+.bazaar-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 11px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+.bazaar-btn--try {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.86);
+}
+.bazaar-btn--try:hover {
+  border-color: var(--gold-soft);
+  color: #fff;
+}
+.bazaar-btn--cart {
+  background: linear-gradient(180deg, #f4e6bf, #d8b25e);
+  color: #0c1024;
+  font-weight: 600;
+}
+.bazaar-btn--cart:hover:not(:disabled) {
+  box-shadow: 0 8px 22px rgba(232, 200, 121, 0.34);
+  transform: translateY(-1px);
+}
+.bazaar-btn--cart.added {
+  background: linear-gradient(180deg, #aef0c8, #5fd49b);
+}
+.bazaar-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Atölye portal odası (Selin Irmak) ────────────────────────── */
+.bazaar-room--portal {
+  display: flex;
+  justify-content: center;
+}
+.bazaar-portal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: left;
+  max-width: 720px;
+  padding: 34px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(232, 200, 121, 0.22);
+  background: radial-gradient(circle at 18% 20%, rgba(232, 200, 121, 0.08), transparent 60%),
+    linear-gradient(180deg, rgba(20, 27, 52, 0.6), rgba(8, 12, 26, 0.85));
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+.bazaar-portal-ring {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  left: -120px;
+  top: -120px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 200, 121, 0.2);
+  box-shadow: 0 0 70px rgba(232, 200, 121, 0.12) inset;
+  animation: bazaarSpin 26s linear infinite;
+  pointer-events: none;
+}
+@keyframes bazaarSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.bazaar-portal-glyph {
+  font-size: 52px;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(232, 200, 121, 0.5);
+  flex-shrink: 0;
+}
+.bazaar-portal-kicker {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold-soft);
+}
+.bazaar-portal-name {
+  margin: 6px 0 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 300;
+  color: #f6efdd;
+}
+.bazaar-portal-tagline {
+  margin: 8px 0 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 42ch;
+}
+.bazaar-portal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ── Guest designers odası ────────────────────────────────────── */
+.bazaar-room--guest {
+  text-align: center;
+}
+.bazaar-guest {
+  padding: 40px 20px;
+  border-radius: 24px;
+  border: 1px dashed rgba(232, 200, 121, 0.28);
+  background: linear-gradient(180deg, rgba(20, 27, 52, 0.4), rgba(8, 12, 26, 0.6));
+}
+.bazaar-guest .bazaar-room-name {
+  margin-top: 8px;
+}
+.bazaar-guest .bazaar-room-tagline {
+  margin: 8px auto 18px;
+  max-width: 44ch;
+}
+
+/* ── Responsive / mobil ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .bazaar {
+    gap: 40px;
+  }
+  .bazaar-card {
+    flex-basis: 76vw;
+    width: 76vw;
+    max-width: 300px;
+  }
+  .bazaar-portal {
+    padding: 26px 20px;
+    text-align: center;
+  }
+  .bazaar-portal-links {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazaar-card {
+    transform: none !important;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .bazaar-portal-ring {
+    animation: none;
+  }
+  .bazaar-card:hover .bazaar-photo {
+    transform: none;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BAZAAR KEŞİF ŞERİDİ — look.mp4 tam-sayfa arka planın üzerinde
+   ════════════════════════════════════════════════════════════════ */
+.bz-show {
+  --gold: #e8c879;
+  --gold-glow: rgba(232, 200, 121, 0.4);
+  margin: 22px auto 4px;
+  max-width: 1080px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.bz-show-cta {
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #f4e6bf, var(--gold));
+  color: #0c1024;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.bz-show-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--gold-glow);
+}
+
+/* Burç rozetleri */
+.bz-show-signs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.bz-show-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.bz-show-sign:hover {
+  color: #fff;
+  border-color: var(--gold-glow);
+  box-shadow: 0 0 18px var(--gold-glow);
+  transform: translateY(-1px);
+}
+.bz-show-sign-glyph {
+  font-size: 15px;
+  color: var(--gold);
+}
+.bz-show-sign-name {
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .bz-show-sign-name {
+    display: none;
+  }
+}
+
+/* topbar mobile compaction applied */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MIRROR GATE — Avatar Studio eşiği
+   Cam · su · ayna · mor-lila glow · soft gold sacred geometry.
+   Kutulu e-ticaret yok; portal odası. Bu blok dosyanın sonunda durur,
+   böylece mevcut .shop-* kuralları cascade ile güvenle override edilir.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --mg-violet: #caa4ff;
+  --mg-indigo: #8c6dff;
+  --mg-lilac: #f4d9ff;
+  --mg-gold: #c9a45c;
+  --mg-soft-gold: #e8d7a3;
+  --mg-ivory: #f7f1e8;
+  --mg-ink: #060512;
+}
+
+/* ── Sahne kabuğu — eski video atmosferini bastır ──────────────────────── */
+.mirror-page {
+  position: relative;
+  background: radial-gradient(140% 120% at 50% -10%, #120d28 0%, #08061a 46%, #040310 100%);
+  overflow: hidden;
+}
+
+.mirror-shell {
+  position: relative;
+  z-index: 3;
+}
+
+/* ── Arka plan atmosferi ───────────────────────────────────────────────── */
+.mirror-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Mor ay — üst-merkez yumuşak halo */
+.mirror-moon {
+  position: absolute;
+  top: -22vh;
+  left: 50%;
+  width: 60vw;
+  max-width: 760px;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%,
+      rgba(244, 217, 255, 0.22) 0%,
+      rgba(140, 109, 255, 0.18) 32%,
+      rgba(140, 109, 255, 0.06) 56%,
+      transparent 70%);
+  filter: blur(8px);
+  animation: mgMoonBreath 11s ease-in-out infinite;
+}
+
+@keyframes mgMoonBreath {
+  0%, 100% { opacity: 0.78; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+}
+
+/* İnce sütun silüetleri — Yerebatan ritmi (alt kenarda) */
+.mirror-columns {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 8.5%,
+    rgba(180, 160, 230, 0.05) 8.5%,
+    rgba(120, 100, 180, 0.09) 9.2%,
+    rgba(180, 160, 230, 0.05) 9.9%,
+    transparent 9.9%,
+    transparent 16.6%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 78%, transparent 92%);
+  mask-image: linear-gradient(to bottom, transparent 18%, #000 58%, #000 78%, transparent 92%);
+  opacity: 0.7;
+}
+
+/* Hafif sürüklenen sis */
+.mirror-mist {
+  position: absolute;
+  inset: -10% -10% 18%;
+  background:
+    radial-gradient(40% 30% at 22% 60%, rgba(160, 120, 240, 0.10), transparent 70%),
+    radial-gradient(46% 34% at 78% 52%, rgba(200, 170, 255, 0.08), transparent 72%),
+    radial-gradient(54% 30% at 50% 78%, rgba(120, 100, 200, 0.10), transparent 70%);
+  filter: blur(22px);
+  animation: mgMistDrift 24s ease-in-out infinite alternate;
+}
+
+@keyframes mgMistDrift {
+  0% { transform: translate3d(-2%, 0, 0) scale(1.02); opacity: 0.8; }
+  100% { transform: translate3d(2%, -1.5%, 0) scale(1.06); opacity: 1; }
+}
+
+/* Altın partiküller — yukarı süzülen toz */
+.mirror-particles { position: absolute; inset: 0; }
+
+.mirror-particle {
+  position: absolute;
+  bottom: 16%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 215, 163, 0.95), rgba(201, 164, 92, 0.2) 60%, transparent 70%);
+  box-shadow: 0 0 8px rgba(232, 215, 163, 0.6);
+  opacity: 0;
+  animation: mgParticleRise linear infinite;
+}
+
+@keyframes mgParticleRise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  12% { opacity: 0.9; }
+  70% { opacity: 0.55; }
+  100% { transform: translateY(-72vh) scale(1.1); opacity: 0; }
+}
+
+/* Karanlık yansıtıcı su zemini */
+.mirror-water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34vh;
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      rgba(80, 60, 140, 0.08) 30%,
+      rgba(20, 14, 44, 0.55) 70%,
+      rgba(6, 5, 18, 0.85) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 40%);
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+}
+
+.mirror-water::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(200, 180, 255, 0.05) 0,
+    rgba(200, 180, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  opacity: 0.5;
+  animation: mgWaterShimmer 9s ease-in-out infinite;
+}
+
+@keyframes mgWaterShimmer {
+  0%, 100% { opacity: 0.30; transform: translateY(0); }
+  50% { opacity: 0.55; transform: translateY(3px); }
+}
+
+/* ── Hero — eşik başlığı (eski e-ticaret hero override) ────────────────── */
+.mirror-hero {
+  position: relative;
+  z-index: 4;
+  max-width: 760px;
+  margin: 0 auto 8px;
+  padding-top: 8px;
+}
+
+.mirror-kicker {
+  color: rgba(244, 217, 255, 0.78);
+  text-shadow: 0 0 16px rgba(140, 109, 255, 0.4);
+}
+
+.mirror-title {
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  font-size: clamp(44px, 7vw, 92px);
+  background: linear-gradient(180deg, #fff 0%, var(--mg-lilac) 60%, var(--mg-violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(140, 109, 255, 0.25);
+}
+
+.mirror-subtitle {
+  margin-top: 14px;
+  color: rgba(244, 240, 255, 0.9);
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: 0.01em;
+}
+
+.mirror-hero-alt {
+  margin: 8px auto 0;
+  max-width: 520px;
+  font-size: clamp(12px, 1.1vw, 14px);
+  line-height: 1.6;
+  color: rgba(220, 210, 245, 0.62);
+  letter-spacing: 0.02em;
+}
+
+/* Birincil CTA — "Aynaya Gir" */
+.mirror-cta-row {
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mirror-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 30px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-ivory);
+  background: linear-gradient(135deg, rgba(140, 109, 255, 0.28), rgba(201, 164, 92, 0.16));
+  border: 1px solid rgba(232, 215, 163, 0.4);
+  box-shadow: 0 0 24px rgba(140, 109, 255, 0.25), inset 0 0 18px rgba(244, 217, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.35s var(--cae-ease, ease), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.mirror-cta-primary:hover {
+  transform: translateY(-2px) scale(1.03);
+  border-color: rgba(232, 215, 163, 0.7);
+  box-shadow: 0 0 36px rgba(140, 109, 255, 0.4), 0 0 22px rgba(232, 215, 163, 0.25), inset 0 0 22px rgba(244, 217, 255, 0.14);
+}
+
+.mirror-cta-glyph {
+  font-size: 17px;
+  color: var(--mg-soft-gold);
+  filter: drop-shadow(0 0 6px rgba(232, 215, 163, 0.7));
+}
+
+.mirror-cart-pill {
+  border-color: rgba(232, 215, 163, 0.3) !important;
+}
+
+/* Mod butonları — mor/altın retheme (cyan/yeşil neon kaldırıldı) */
+.mirror-modes { margin-top: 24px; }
+
+.mirror-modes .shop-action-btn--ai,
+.mirror-modes .shop-action-btn--freq,
+.mirror-modes .shop-action-btn--tryon,
+.mirror-modes .shop-action-btn--live {
+  --btn-glow: rgba(140, 109, 255, 0.26);
+  --btn-border: rgba(202, 164, 255, 0.4);
+  --btn-bg: rgba(140, 109, 255, 0.12);
+  background: rgba(12, 9, 28, 0.42);
+  border-color: rgba(202, 164, 255, 0.18);
+}
+
+.mirror-modes .shop-action-btn--tryon,
+.mirror-modes .shop-action-btn--live.active {
+  --btn-glow: rgba(232, 215, 163, 0.22);
+  --btn-border: rgba(232, 215, 163, 0.42);
+  --btn-bg: rgba(201, 164, 92, 0.12);
+}
+
+/* ── MIRROR GATE — portal sahnesi ──────────────────────────────────────── */
+.mirror-gate {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 18px auto 56px;
+  padding: 0 16px;
+}
+
+.mirror-portal-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Oval ayna kapı */
+.mirror-portal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(260px, 34vw, 420px);
+  aspect-ratio: 0.78;
+  border-radius: 50%;
+  text-decoration: none;
+  isolation: isolate;
+  transition: transform 0.6s var(--cae-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.mirror-portal:hover { transform: translateY(-4px) scale(1.015); }
+
+/* Altın sacred geometry halkası */
+.mirror-portal-geo {
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 0deg,
+      transparent 0deg, rgba(232, 215, 163, 0.0) 6deg,
+      rgba(232, 215, 163, 0.55) 8deg, transparent 10deg,
+      transparent 20deg, rgba(232, 215, 163, 0.35) 22deg, transparent 24deg);
+  -webkit-mask: radial-gradient(circle, transparent 64%, #000 65%, #000 70%, transparent 71%);
+  mask: radial-gradient(circle, transparent 64%, #000 65%, #000 70%, transparent 71%);
+  opacity: 0.55;
+  animation: mgGeoSpin 38s linear infinite;
+  transition: opacity 0.6s ease;
+}
+
+@keyframes mgGeoSpin { to { transform: rotate(360deg); } }
+
+/* İç çerçeve halkası */
+.mirror-portal-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 215, 163, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(202, 164, 255, 0.18),
+    0 0 48px rgba(140, 109, 255, 0.4),
+    inset 0 0 60px rgba(140, 109, 255, 0.22);
+  transition: box-shadow 0.6s ease, border-color 0.6s ease;
+}
+
+/* İç mor sis */
+.mirror-portal-mist {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background:
+    radial-gradient(60% 60% at 50% 38%, rgba(244, 217, 255, 0.30), transparent 70%),
+    radial-gradient(70% 70% at 50% 70%, rgba(140, 109, 255, 0.4), transparent 72%),
+    radial-gradient(100% 100% at 50% 50%, rgba(40, 26, 78, 0.85), rgba(10, 7, 26, 0.95));
+  filter: blur(2px);
+  animation: mgPortalMist 14s ease-in-out infinite alternate;
+}
+
+@keyframes mgPortalMist {
+  0% { background-position: 0 0, 0 0, 0 0; opacity: 0.92; }
+  100% { background-position: 0 0, 6% -8%, 0 0; opacity: 1; }
+}
+
+/* Cam/ayna yüzeyi */
+.mirror-portal-surface {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: linear-gradient(150deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(202, 164, 255, 0.05) 30%,
+    transparent 52%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  mix-blend-mode: screen;
+}
+
+/* Hareketli ışık parıltısı (sheen) */
+.mirror-portal-sheen {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.mirror-portal-sheen::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 60%;
+  height: 180%;
+  background: linear-gradient(100deg, transparent, rgba(244, 240, 255, 0.4), transparent);
+  transform: rotate(8deg);
+  animation: mgSheen 4.5s ease-in-out infinite;
+}
+
+@keyframes mgSheen {
+  0% { left: -60%; }
+  60%, 100% { left: 130%; }
+}
+
+/* Etiket — "Aynaya Gir" */
+.mirror-portal-label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(16px, 1.6vw, 22px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(247, 241, 232, 0.78);
+  text-shadow: 0 0 18px rgba(140, 109, 255, 0.6);
+  transition: color 0.5s ease, text-shadow 0.5s ease, transform 0.5s ease;
+}
+
+.mirror-portal-label-glyph {
+  font-size: 30px;
+  color: var(--mg-soft-gold);
+  filter: drop-shadow(0 0 10px rgba(232, 215, 163, 0.7));
+}
+
+/* Hover → ayna canlanır */
+.mirror-portal:hover .mirror-portal-geo { opacity: 1; }
+.mirror-portal:hover .mirror-portal-ring {
+  border-color: rgba(232, 215, 163, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(232, 215, 163, 0.3),
+    0 0 80px rgba(140, 109, 255, 0.6),
+    inset 0 0 90px rgba(160, 120, 255, 0.4);
+}
+.mirror-portal:hover .mirror-portal-mist { animation-duration: 6s; }
+.mirror-portal:hover .mirror-portal-sheen { opacity: 1; }
+.mirror-portal:hover .mirror-portal-label {
+  color: #fff;
+  text-shadow: 0 0 26px rgba(232, 215, 163, 0.8);
+  transform: scale(1.04);
+}
+
+/* Su üzerindeki yansıma */
+.mirror-portal-reflection {
+  width: clamp(260px, 34vw, 420px);
+  height: 90px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(140, 109, 255, 0.3), rgba(202, 164, 255, 0.08) 50%, transparent 75%);
+  filter: blur(7px);
+  transform: scaleY(-0.5);
+  opacity: 0.6;
+  animation: mgReflect 9s ease-in-out infinite;
+}
+
+@keyframes mgReflect {
+  0%, 100% { opacity: 0.45; transform: scaleY(-0.5) translateY(0); }
+  50% { opacity: 0.7; transform: scaleY(-0.55) translateY(3px); }
+}
+
+/* ── Üç ritüel ışık taşı ───────────────────────────────────────────────── */
+.ritual-stones {
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 46px);
+}
+
+.ritual-stone {
+  position: relative;
+  text-align: center;
+  animation: mgStoneFloat 6s ease-in-out infinite;
+}
+
+.ritual-stone:nth-child(2) { animation-delay: -2s; }
+.ritual-stone:nth-child(3) { animation-delay: -4s; }
+
+@keyframes mgStoneFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.ritual-stone-core {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: clamp(150px, 22vw, 200px);
+  padding: 22px 18px 20px;
+  border-radius: 50% 50% 48% 48% / 60% 60% 42% 42%;
+  background: radial-gradient(120% 120% at 50% 20%, rgba(50, 36, 92, 0.6), rgba(14, 10, 32, 0.7));
+  border: 1px solid rgba(202, 164, 255, 0.22);
+  box-shadow: 0 0 30px rgba(140, 109, 255, 0.2), inset 0 0 22px rgba(244, 217, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+/* Su üstünde duruyormuş yansıması */
+.ritual-stone-core::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -16px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(140, 109, 255, 0.32), transparent 78%);
+  filter: blur(5px);
+}
+
+.ritual-stone:hover .ritual-stone-core {
+  transform: translateY(-3px);
+  border-color: rgba(232, 215, 163, 0.5);
+  box-shadow: 0 0 40px rgba(140, 109, 255, 0.34), inset 0 0 26px rgba(232, 215, 163, 0.1);
+}
+
+.ritual-stone-num {
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--mg-soft-gold);
+  text-shadow: 0 0 16px rgba(232, 215, 163, 0.5);
+}
+
+.ritual-stone-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(247, 241, 232, 0.95);
+}
+
+.ritual-stone-desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(220, 210, 245, 0.6);
+}
+
+/* ── MIRROR CONSOLE — sağ üst sticky kart (AvatarBadge yeni hâli) ──────── */
+.shop-avatar-badge--console {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 16px 16px 14px;
+  max-width: 280px;
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(40, 28, 78, 0.5), rgba(16, 11, 36, 0.4));
+  border: 1px solid rgba(202, 164, 255, 0.28);
+  box-shadow: 0 0 30px rgba(140, 109, 255, 0.2), inset 0 0 22px rgba(244, 217, 255, 0.05);
+}
+
+.mirror-console-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mirror-console-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mg-soft-gold);
+  box-shadow: 0 0 10px rgba(232, 215, 163, 0.9);
+  animation: mgConsolePulse 2.2s ease-in-out infinite;
+}
+
+@keyframes mgConsolePulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.mirror-console-status {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 217, 255, 0.78);
+}
+
+.mirror-console-title {
+  margin: 0;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  color: var(--mg-ivory);
+}
+
+.mirror-console-steps {
+  list-style: none;
+  margin: 2px 0 4px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mirror-console-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: rgba(228, 220, 248, 0.85);
+}
+
+.mirror-console-step-dot {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 11px;
+  color: var(--mg-soft-gold);
+  background: rgba(140, 109, 255, 0.14);
+  border: 1px solid rgba(232, 215, 163, 0.35);
+}
+
+.mirror-console-cta {
+  margin-top: 4px;
+  display: inline-block;
+  text-align: center;
+  padding: 9px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mg-ivory);
+  background: linear-gradient(135deg, rgba(140, 109, 255, 0.3), rgba(201, 164, 92, 0.18));
+  border: 1px solid rgba(232, 215, 163, 0.45);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.mirror-console-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(140, 109, 255, 0.4);
+}
+
+/* ── Mobil sadeleşme ───────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .mirror-portal { width: clamp(220px, 72vw, 300px); }
+  .mirror-portal-reflection { width: clamp(220px, 72vw, 300px); }
+  .ritual-stones { gap: 14px; }
+  .ritual-stone-core { width: clamp(120px, 40vw, 160px); padding: 16px 12px 14px; }
+  .mirror-columns { opacity: 0.4; }
+  .shop-avatar-badge--console {
+    position: relative;
+    top: auto;
+    max-width: none;
+    width: auto;
+    margin: 0 0 14px;
+  }
+}
+
+/* Avatar shop room: stage + wardrobe inventory */
+.avcfg-game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  gap: clamp(16px, 2vw, 28px);
+  align-items: stretch;
+  min-height: min(760px, calc(100svh - 170px));
+}
+
+.avcfg-stage-panel,
+.avcfg-inventory-panel,
+.avcfg-studio-drawer {
+  position: relative;
+  border: 1px solid rgba(232, 215, 163, 0.22);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035)),
+    radial-gradient(circle at 28% 12%, rgba(232, 215, 163, 0.14), transparent 34%),
+    rgba(8, 8, 18, 0.48);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.avcfg-stage-panel {
+  overflow: hidden;
+  min-height: 640px;
+}
+
+.avcfg-stage-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: radial-gradient(circle at 44% 44%, #000 0, transparent 72%);
+  opacity: 0.42;
+}
+
+.avcfg-stage-hud {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(247, 241, 232, 0.72);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.avcfg-stage-panel .avcfg-canvas {
+  width: 100%;
+  min-height: 640px;
+  height: min(760px, calc(100svh - 190px));
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 246, 226, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(245, 235, 220, 0.08), rgba(13, 12, 26, 0.84));
+  box-shadow: none;
+}
+
+.avcfg-stage-panel .avcfg-save-bar {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  z-index: 8;
+  justify-content: center;
+  margin: 0;
+}
+
+.avcfg-radial-tools {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  right: clamp(14px, 3vw, 34px);
+  transform: translateY(-50%);
+  display: grid;
+  gap: 12px;
+}
+
+.avcfg-tool-orb,
+.avcfg-category-tab {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(247, 241, 232, 0.9);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.avcfg-tool-orb {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+.avcfg-tool-orb:hover,
+.avcfg-category-tab:hover,
+.avcfg-tool-orb.is-active,
+.avcfg-category-tab.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(232, 215, 163, 0.72);
+  background: rgba(232, 215, 163, 0.22);
+}
+
+.avcfg-tool-icon {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.avcfg-tool-icon::before,
+.avcfg-tool-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: block;
+}
+
+.avcfg-tool-icon--sun::before {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #f1d58f;
+  box-shadow: 0 0 0 4px rgba(241, 213, 143, 0.2);
+}
+
+.avcfg-tool-icon--wave::before {
+  width: 20px;
+  height: 12px;
+  border: 2px solid #e9ddc4;
+  border-top: 0;
+  border-right: 0;
+  border-radius: 0 0 0 18px;
+  transform: rotate(-20deg);
+}
+
+.avcfg-tool-icon--bag::before {
+  width: 16px;
+  height: 14px;
+  top: 6px;
+  border: 2px solid #e9ddc4;
+  border-radius: 4px;
+}
+
+.avcfg-tool-icon--bag::after {
+  width: 9px;
+  height: 7px;
+  top: -7px;
+  border: 2px solid #e9ddc4;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.avcfg-tool-icon--heel::before {
+  width: 20px;
+  height: 8px;
+  border-bottom: 3px solid #e9ddc4;
+  border-left: 8px solid transparent;
+  transform: skewX(-22deg) translateY(3px);
+}
+
+.avcfg-tool-icon--heel::after {
+  width: 3px;
+  height: 12px;
+  right: 2px;
+  top: 9px;
+  background: #e9ddc4;
+  transform: rotate(10deg);
+}
+
+.avcfg-tool-icon--gem::before {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e9ddc4;
+  transform: rotate(45deg) scale(0.78);
+}
+
+.avcfg-inventory-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 640px;
+  overflow: hidden;
+}
+
+.avcfg-inventory-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 12px;
+}
+
+.avcfg-inventory-kicker,
+.avcfg-selected-kicker {
+  color: rgba(232, 215, 163, 0.78);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.avcfg-inventory-title {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-family: var(--cae-font-serif, serif);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 400;
+}
+
+.avcfg-inventory-count {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 215, 163, 0.32);
+  color: rgba(247, 241, 232, 0.9);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.avcfg-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 18px 16px;
+}
+
+.avcfg-category-tab {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  min-height: 58px;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.avcfg-category-tab .avcfg-tool-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.avcfg-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 18px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.avcfg-product-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 0.78;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avcfg-product-card:hover,
+.avcfg-product-card.is-selected {
+  transform: translateY(-2px);
+  border-color: rgba(120, 218, 135, 0.88);
+  box-shadow: 0 0 0 2px rgba(120, 218, 135, 0.18);
+}
+
+.avcfg-product-card img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.avcfg-product-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 46%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.58), transparent);
+}
+
+.avcfg-product-fav {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+}
+
+.avcfg-product-meta {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.avcfg-selected-product {
+  margin-top: auto;
+  padding: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(6, 5, 14, 0.42);
+}
+
+.avcfg-selected-product h3 {
+  margin: 5px 0 6px;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: var(--cae-font-serif, serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.avcfg-selected-product p {
+  margin: 0;
+  color: rgba(247, 241, 232, 0.68);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.avcfg-selected-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.avcfg-wear-btn,
+.avcfg-details-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.avcfg-wear-btn {
+  color: #20180d;
+  background: linear-gradient(135deg, #f1d58f, #f7f1e8);
+}
+
+.avcfg-details-btn {
+  color: rgba(247, 241, 232, 0.9);
+  border: 1px solid rgba(232, 215, 163, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.avcfg-studio-drawer {
+  margin-top: 22px;
+  padding: clamp(16px, 2vw, 24px);
+}
+
+.avcfg-studio-drawer .body-picker {
+  margin: 0 0 18px;
+}
+
+.avcfg-studio-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+  gap: 18px;
+}
+
+.avcfg-face-card {
+  margin: 0;
+}
+
+@media (max-width: 1120px) {
+  .avcfg-game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .avcfg-stage-panel,
+  .avcfg-inventory-panel {
+    min-height: auto;
+  }
+
+  .avcfg-inventory-panel {
+    max-height: none;
+  }
+
+  .avcfg-product-grid {
+    grid-template-columns: repeat(6, minmax(118px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 20px;
+  }
+
+  .avcfg-product-card {
+    min-width: 118px;
+  }
+
+  .avcfg-studio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .avcfg-page-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .avcfg-page-hero {
+    text-align: left;
+  }
+
+  .avcfg-game-layout {
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .avcfg-stage-panel .avcfg-canvas {
+    min-height: 520px;
+    height: 68svh;
+  }
+
+  .avcfg-stage-hud {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    font-size: 9px;
+  }
+
+  .avcfg-radial-tools {
+    right: 10px;
+    gap: 8px;
+  }
+
+  .avcfg-tool-orb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avcfg-stage-panel .avcfg-save-bar {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .avcfg-category-tabs {
+    overflow-x: auto;
+    grid-template-columns: repeat(5, 74px);
+  }
+
+  .avcfg-product-grid {
+    grid-template-columns: repeat(6, minmax(104px, 1fr));
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .avcfg-selected-actions {
+    grid-template-columns: 1fr;
+  }
+}
+

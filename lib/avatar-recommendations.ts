@@ -16,11 +16,18 @@ export type AvatarProductRecommendation = {
   rationale: string;
 };
 
-const SIZE_ORDER: ProductSize[] = ["XS", "S", "M", "L", "XL"];
+/**
+ * İki bedenli koleksiyon (XS-S, M-L). computeSizeFloat 0–4 ölçeğinde döner;
+ * her bedeni o ölçekte temsilî bir noktaya bağlarız ki "en yakın beden" ve
+ * fit skoru tutarlı kalsın (eşik ~2: altı XS-S, üstü M-L).
+ */
+const SIZE_REP: Record<ProductSize, number> = {
+  "XS-S": 1,
+  "M-L": 3,
+};
 
 function sizeToIndex(s: ProductSize): number {
-  const i = SIZE_ORDER.indexOf(s);
-  return i >= 0 ? i : 2;
+  return SIZE_REP[s] ?? 2;
 }
 
 /** Continuous 0–4 (XS…XL) from body metrics */

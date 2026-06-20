@@ -182,7 +182,7 @@ export const atelierEditSchema = z.object({
     .trim()
     .max(60)
     .regex(/^[A-Za-z0-9._]+$/, {
-      message: "Sadece kullanıcı adı (örn. caelinus.world)",
+      message: "Sadece kullanıcı adı (örn. caelinus.ai)",
     })
     .optional()
     .or(z.literal("")),

@@ -75,7 +75,7 @@ export default function SifremiUnuttumPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="ada@caelinus.world"
+            placeholder="ada@caelinus.ai"
           />
         </label>
 

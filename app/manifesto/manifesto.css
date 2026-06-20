@@ -16,7 +16,7 @@
     radial-gradient(circle at 20% 18%, rgba(150, 110, 230, 0.18) 0%, transparent 45%),
     radial-gradient(circle at 80% 70%, rgba(80, 140, 220, 0.16) 0%, transparent 50%),
     #04060f;
-  padding: 120px 24px 96px;
+  padding: calc(var(--cae-page-top) + 24px) 24px 96px;
   display: flex;
   flex-direction: column;
   align-items: center;

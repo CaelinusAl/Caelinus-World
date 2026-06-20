@@ -19,7 +19,9 @@ import { mergeOutfitBinding } from "@/lib/config/outfit-binding-config";
    ═══════════════════════════════════════════════════════════════ */
 
 const OUTFIT_GLB_MAP: Record<string, OutfitBindingConfig> = {
-  b1:  mergeOutfitBinding("bikini", "/models/Meshy_Al/aries.glb"),
+  // b1: aries — GLB bozuk (zstd-blend, geçerli GLB değil). Düzgün GLB
+  //     export edilene kadar önizleme-only. Dosya düzelince bu satırı geri aç:
+  //     b1:  mergeOutfitBinding("bikini", "/models/Meshy_Al/aries.glb"),
   // b2: taurus — GLB henuz yok
   b3:  mergeOutfitBinding("bikini", "/models/Meshy_Al/gemini.glb"),
   b4:  mergeOutfitBinding("bikini", "/models/Meshy_Al/cancer.glb"),
@@ -82,16 +84,61 @@ function parsePrice(p: string): number {
   return parseFloat(p.replace(/[^0-9.]/g, "")) || 0;
 }
 
-const ALL_SIZES: ProductSize[] = ["XS", "S", "M", "L", "XL"];
+// Caelinus mayo/bikini koleksiyonu iki bedende: XS-S ve M-L.
+const ALL_SIZES: ProductSize[] = ["XS-S", "M-L"];
 
 function defaultStock(): Partial<Record<ProductSize, number>> {
-  return { XS: 5, S: 12, M: 18, L: 14, XL: 8 };
+  return { "XS-S": 14, "M-L": 14 };
 }
 
 export const productsExtended: ProductExtended[] = products.map((p) => ({
   ...p,
-  sizes: p.category === "bag" || p.category === "jewelry" ? ["S", "M", "L"] : ALL_SIZES,
+  sizes: ALL_SIZES,
   stock: defaultStock(),
   numericPrice: parsePrice(p.price),
   outfitGlb: OUTFIT_GLB_MAP[p.id],
 }));
+
+export const SHOP_CATEGORY_ORDER: Product["category"][] = [
+  "bikini",
+  "pareo",
+  "bag",
+  "heels",
+  "jewelry",
+];
+
+export const ZODIAC_PRODUCT_ORDER = [
+  "aries",
+  "taurus",
+  "gemini",
+  "cancer",
+  "leo",
+  "virgo",
+  "libra",
+  "scorpio",
+  "sagittarius",
+  "capricorn",
+  "aquarius",
+  "pisces",
+] as const;
+
+export function getProductSortRank(product: Product): number {
+  const categoryRank = SHOP_CATEGORY_ORDER.indexOf(product.category);
+  const safeCategoryRank =
+    categoryRank === -1 ? SHOP_CATEGORY_ORDER.length : categoryRank;
+  const zodiacRank = product.zodiac
+    ? ZODIAC_PRODUCT_ORDER.indexOf(
+        product.zodiac as (typeof ZODIAC_PRODUCT_ORDER)[number],
+      )
+    : -1;
+
+  return safeCategoryRank * 100 + (zodiacRank === -1 ? 50 : zodiacRank);
+}
+
+export function sortProductsForAvatar<T extends Product>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const rank = getProductSortRank(a) - getProductSortRank(b);
+    if (rank !== 0) return rank;
+    return a.id.localeCompare(b.id);
+  });
+}

@@ -6,7 +6,7 @@
     "newOutfitsGoUnder": "public/models/Meshy_Al/",
     "registerInCode": "data/products.ts → OUTFIT_GLB_MAP, mergeOutfitBinding(category, glbPath)",
     "categoryPresets": "lib/config/outfit-binding-config.ts (per-category bone targets + scale)",
-    "tryOnVariants": "lib/caelinus-ai/try-on-variants.ts → 9 selin*.glb body silhouettes used as a 'wore the outfit' illusion in MVP"
+    "tryOnVariants": "lib/caelinus-ai/try-on-variants.ts → tek selin.glb silüet (0.4'te sadeleştirildi; eski 9 varyant kaldırıldı)"
   },
   "outfits": [
     { "productId": "b1",  "category": "bikini", "zodiac": "aries",       "url": "/models/Meshy_Al/aries.glb"     },
@@ -28,14 +28,6 @@
     { "productId": "pr3", "category": "pareo",     "note": "Pareo GLB'ler henüz üretilmedi" }
   ],
   "tryOnVariants": [
-    "/models/selin.glb",
-    "/models/selin (1).glb",
-    "/models/selin(2).glb",
-    "/models/selin(3).glb",
-    "/models/selin (3).glb",
-    "/models/selin(4).glb",
-    "/models/selin (5).glb",
-    "/models/selin (6).glb",
-    "/models/selin (7).glb"
+    "/models/selin.glb"
   ]
 }

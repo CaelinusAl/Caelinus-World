@@ -5,6 +5,20 @@ const STORAGE_KEY = "caelinus-avatar-config";
 const FACE_TEXTURE_KEY = "caelinus_face_texture";
 const BODY_ID_KEY = "caelinus-avatar-body-id";
 
+/** Kanonik kimlik omurgası (lib/identity) için anahtar export'ları. */
+export const AVATAR_CONFIG_KEY = STORAGE_KEY;
+export const AVATAR_FACE_TEXTURE_KEY = FACE_TEXTURE_KEY;
+
+/** Selfie/yüz dokusu yüklenmiş mi? — kimlik projeksiyonu için. */
+export function hasFaceTexture(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(FACE_TEXTURE_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────
    Body ID — kullanıcının seçtiği base mesh kimliği. AvatarConfig
    içine (sliders/skin tone) gömmüyoruz çünkü body değiştirilince

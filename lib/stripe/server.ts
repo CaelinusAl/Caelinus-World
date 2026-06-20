@@ -28,7 +28,7 @@ export function getStripe(): Stripe {
     typescript: true,
     appInfo: {
       name: "caelinus",
-      url: "https://caelinus.world",
+      url: "https://caelinus.ai",
     },
   });
   return _stripe;

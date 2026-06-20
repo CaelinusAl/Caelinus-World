@@ -1,6 +1,6 @@
 {
   "name": "caelinus",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,18 +22,28 @@
     "play:purge:stubs": "tsx scripts/purge-stub-renders.ts",
     "play:purge:stubs:apply": "tsx scripts/purge-stub-renders.ts --apply",
     "atelier:seed:naz": "tsx scripts/seed-naz-yardimci.ts",
-    "atelier:seed:naz:dry": "tsx scripts/seed-naz-yardimci.ts --dry-run"
+    "atelier:seed:naz:dry": "tsx scripts/seed-naz-yardimci.ts --dry-run",
+    "shop:optimize": "node scripts/optimize-shop-videos.mjs",
+    "shop:optimize:dry": "node scripts/optimize-shop-videos.mjs --dry-run",
+    "shop:photos": "node scripts/optimize-product-photos.mjs",
+    "shop:photos:dry": "node scripts/optimize-product-photos.mjs --dry-run",
+    "shop:vids": "node scripts/optimize-product-videos.mjs",
+    "shop:vids:dry": "node scripts/optimize-product-videos.mjs --dry-run"
   },
   "dependencies": {
-    "@avaturn/sdk": "^1.1.4",
     "@mediapipe/tasks-vision": "^0.10.34",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/xr": "^6.6.30",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "animejs": "^4.4.1",
     "jszip": "^3.10.1",
-    "next": "16.1.6",
+    "next": "16.2.9",
+    "nodemailer": "^9.0.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -45,10 +55,11 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"

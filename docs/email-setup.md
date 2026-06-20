@@ -11,7 +11,7 @@ istersen onu koyabilirsin — interface aynı.
 
 1. https://resend.com → kayıt ol (ücretsiz: ay 3K mail / gün 100 mail).
 2. **Domains** → "Add Domain" → kullanmak istediğin domain'i gir, örn.
-   `mail.caelinus.world`. Resend sana 4 DNS satırı verir
+   `mail.caelinus.ai`. Resend sana 4 DNS satırı verir
    (DKIM + Return-Path); bunları DNS sağlayıcına ekle.
 3. Resend domain durumu "Verified" olduğunda devam et.
 4. **API Keys** → "Create API Key" → scope: **Sending access** seç →
@@ -23,8 +23,8 @@ istersen onu koyabilirsin — interface aynı.
 
 ```bash
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM="Caelinus <hello@mail.caelinus.world>"
-NEXT_PUBLIC_SITE_URL=https://caelinus.world
+EMAIL_FROM="Caelinus <hello@mail.caelinus.ai>"
+NEXT_PUBLIC_SITE_URL=https://caelinus.ai
 ```
 
 > `EMAIL_FROM`'daki adres, doğruladığın domain'de olmalı; aksi halde
