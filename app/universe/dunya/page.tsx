@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import "./dunya.css";
 import type { StoneData } from "./_components/MemoryStone";
+import { createWorldAudio, type WorldAudio } from "./_components/worldAudio";
 
 const World = dynamic(() => import("./_components/World"), {
   ssr: false,
@@ -13,9 +14,24 @@ const World = dynamic(() => import("./_components/World"), {
 
 export default function DunyaPage() {
   const [active, setActive] = useState<StoneData | null>(null);
+  const audioRef = useRef<WorldAudio | null>(null);
+  const startedRef = useRef(false);
+
+  const begin = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    audioRef.current = createWorldAudio();
+    audioRef.current.start();
+  };
+
+  useEffect(() => {
+    audioRef.current?.enter(active?.id ?? null);
+  }, [active]);
+
+  useEffect(() => () => audioRef.current?.stop(), []);
 
   return (
-    <div className="dw-root">
+    <div className="dw-root" onPointerDown={begin}>
       <World onActive={setActive} />
 
       <header className="dw-head">
