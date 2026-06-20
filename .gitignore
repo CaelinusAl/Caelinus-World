@@ -40,3 +40,7 @@ __pycache__/
 # Caelinus avatar geçici render/kaynak
 .hair_tmp/
 *.blend1
+# Blender/FBX kaynakları web'e (public/) deploy edilmez — düzenlenebilir
+# kaynak assets/models-src/ altında tutulur, web'e sadece .glb gider.
+public/**/*.blend
+public/**/*.fbx
