@@ -19,7 +19,41 @@ const WASM_CDN =
 const MODEL_CDN =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
+/**
+ * Init timeout'ları — WASM + model (~5MB) CDN'den çekilir.
+ *
+ * GPU: bazı Windows + entegre GPU/sürücü kombinasyonlarında
+ * `createFromOptions(delegate:"GPU")` ASLA dönmez (ölçüldü: 12sn+ asılı).
+ * Sonsuz donmanın esas sebebi bu. Kısa cap koyup hızlıca CPU'ya düşeriz.
+ *
+ * CPU: güvenilir fallback ama ilk init XNNPACK derlemesi yüzünden yavaş
+ * olabilir (ölçüldü: ~18sn). Bu TEK çalışan yol olduğu için cömert cap
+ * veririz — fazla kısa cap fallback'i de kırar. Singleton olduğundan bu
+ * bedel oturumda yalnızca bir kez ödenir (warmUpFace ile gizlenebilir).
+ */
+const GPU_INIT_TIMEOUT_MS = 8000;
+const CPU_INIT_TIMEOUT_MS = 45000;
+
 let instancePromise: Promise<InstanceType<any>> | null = null;
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`${label} ${ms}ms içinde tamamlanmadı`)),
+      ms,
+    );
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
 
 async function getLandmarker() {
   if (instancePromise) return instancePromise;
@@ -38,27 +72,54 @@ async function getLandmarker() {
       origError.apply(console, args);
     };
 
-    let landmarker;
     try {
       const vision = await FilesetResolver.forVisionTasks(WASM_CDN);
-      landmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: MODEL_CDN,
-          delegate: "GPU",
-        },
-        runningMode: "IMAGE",
-        numFaces: 1,
-        outputFaceBlendshapes: false,
-        outputFacialTransformationMatrixes: false,
-      });
+
+      const create = (delegate: "GPU" | "CPU") =>
+        FaceLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: MODEL_CDN, delegate },
+          runningMode: "IMAGE",
+          numFaces: 1,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false,
+        });
+
+      // GPU delegate (Windows + bazı entegre GPU/sürücülerde) takılabilir
+      // ya da çökebilir — bu donmaların başlıca sebebi. GPU'yu dene; hata
+      // ya da timeout olursa daha yavaş ama her cihazda çalışan CPU'ya düş.
+      try {
+        return await withTimeout(create("GPU"), GPU_INIT_TIMEOUT_MS, "GPU init");
+      } catch (gpuErr) {
+        console.warn(
+          "[mediapipe-face] GPU delegate başarısız, CPU'ya düşülüyor:",
+          gpuErr,
+        );
+        return await withTimeout(create("CPU"), CPU_INIT_TIMEOUT_MS, "CPU init");
+      }
     } finally {
       console.error = origError;
     }
-
-    return landmarker;
   })();
 
+  // Reddedilen promise'i KALICI cache'leme — transient bir CDN/GPU hatası
+  // yüz analizini sayfa yenilenene kadar bozmasın. Hata olursa cache'i
+  // temizle ki bir sonraki deneme yeniden init etsin.
+  instancePromise.catch(() => {
+    instancePromise = null;
+  });
+
   return instancePromise;
+}
+
+/**
+ * Warm-up — landmarker init'ini (GPU dene → CPU fallback, ~8-26sn ilk
+ * sefer) erkenden, arka planda tetikler. Selfie yüklenir yüklenmez
+ * çağrılırsa kullanıcı stil seçerken init biter; "Avatarımı Oluştur"
+ * anında detect hazır olur. Hata yutulur — gerçek init yine detectFace
+ * içinde denenir. Idempotent (singleton promise).
+ */
+export function warmUpFace(): void {
+  void getLandmarker().catch(() => {});
 }
 
 /**
