@@ -9,9 +9,9 @@ import MemoryStone, { type StoneData } from "./MemoryStone";
 
 const STONES: StoneData[] = [
   { id: "hatirlama", name: "Hatırlama Taşı", fragment: "Hiçbir şey öğrenmedin. Sadece hatırladın.", position: [-5.2, 0, -4], rotation: 0.5 },
-  { id: "nehir", name: "Nehir Taşı", fragment: "Işık hep aktı — sen durduğunda bile.", position: [-1.9, 0, -7], rotation: 0.16 },
-  { id: "gecit", name: "Geçit Taşı", fragment: "Bir kapıdan geçtin. Kapı sendin.", position: [1.9, 0, -7], rotation: -0.16 },
-  { id: "sessizlik", name: "Sessizlik Taşı", fragment: "En derin frekans, sessizliktir.", position: [5.2, 0, -4], rotation: -0.5 },
+  { id: "nehir", name: "Nehir Taşı", fragment: "Işık hep aktı. Sen durduğunda bile.", position: [-1.9, 0, -7], rotation: 0.16 },
+  { id: "donus", name: "Dönüş Taşı", fragment: "Geri dönmedin. Hiç gitmemiştin.", position: [1.9, 0, -7], rotation: -0.16 },
+  { id: "sessizlik", name: "Sessizlik Taşı", fragment: "Sessizlik de bir sestir. Onu unuttun.", position: [5.2, 0, -4], rotation: -0.5 },
 ];
 
 const _cam = new THREE.Vector3();
