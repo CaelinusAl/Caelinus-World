@@ -31,6 +31,28 @@ import "./pdp.css";
 
 const PUBLIC = join(process.cwd(), "public");
 const VIDEO_RE = /\.(mp4|mov|m4v|webm)$/i;
+const IMAGE_RE = /\.(jpe?g|png|webp|avif)$/i;
+
+/**
+ * PDP carousel için modelli galeri — `public/products/<burç>/` klasöründeki
+ * gerçek model fotoğrafları (ön/arka/farklı açılar). İsim ne olursa olsun
+ * (IMG_*.JPG, Türkçe adlar …) tümü alfabetik sırayla döner; URL segmentleri
+ * encode edilir. Klasör/yoksa boş dizi → çağıran taraf product.image'a düşer.
+ * Sunucuda çözülür (PDP statik render); video çözümüyle aynı desen.
+ */
+function resolveGallery(zodiac?: string | null): string[] {
+  if (!zodiac) return [];
+  const dir = join(PUBLIC, "products", zodiac);
+  if (!existsSync(dir)) return [];
+  try {
+    return readdirSync(dir)
+      .filter((f) => IMAGE_RE.test(f))
+      .sort()
+      .map((f) => `/products/${zodiac}/${encodeURIComponent(f)}`);
+  } catch {
+    return [];
+  }
+}
 
 /**
  * "Hikâyeyi Yaşa" — gerçek çekim canlı videosu (gerçek modeller üzerinde,
@@ -138,6 +160,7 @@ export default async function ProductPage({
   const has3D = !!productExt?.outfitGlb;
 
   const storyVideo = resolveStoryVideo(product.zodiac);
+  const gallery = resolveGallery(product.zodiac);
 
   return (
     <main className="pdp-scene">
@@ -157,6 +180,7 @@ export default async function ProductPage({
           isTr={isTr}
           playHref={playHref}
           videoSrc={storyVideo}
+          gallery={gallery}
           priceUsd={productExt?.numericPrice ?? null}
         />
 
