@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { productsExtended } from "@/data/products";
 import {
   elementOf,
@@ -107,12 +108,16 @@ function ZodiacCard({
       onPointerLeave={onLeave}
     >
       <div className="zc-media">
-        {/* Taban: her zaman poster JPG (video gelmese de görsel hep var) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        {/* Taban: her zaman poster JPG (video gelmese de görsel hep var).
+         * next/image fill → AVIF/WebP + responsive srcset. Kutu .zc-media
+         * position:relative + aspect-ratio 3/4 olduğu için fill doğru kalıp. */}
+        <Image
           className="zc-media-el"
           src={product.image}
           alt={product.name}
+          fill
+          sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          quality={80}
           draggable={false}
         />
         {/* Bindirme: hover'da oynayan video; yoksa/yüklenemezse gizlenir */}

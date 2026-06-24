@@ -13,6 +13,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/types/play";
 import PriceDual from "@/components/shop/PriceDual";
 import TryOnCTA from "./TryOnCTA";
@@ -99,8 +100,9 @@ export default function StoryHero({
             const isProduct = s.kind === "product";
             return (
               <div className="pdp-car-slide" key={`${s.kind}-${s.src}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* next/image fill → 1024×1820 PNG, AVIF/WebP + responsive
+                 * srcset. İlk slayt LCP adayı → priority (preload, lazy yok). */}
+                <Image
                   src={s.src}
                   alt={
                     isProduct
@@ -108,7 +110,10 @@ export default function StoryHero({
                       : product.name
                   }
                   className={`pdp-image${isProduct ? " pdp-image--contain" : ""}`}
-                  loading={idx === 0 ? "eager" : "lazy"}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  quality={80}
+                  priority={idx === 0}
                   draggable={false}
                 />
                 {isProduct && (

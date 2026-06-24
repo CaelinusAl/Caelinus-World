@@ -28836,15 +28836,43 @@ div.stage-card {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  /* Çekirdek ton route atmosferinden gelir (template.tsx → --atmosphere-tint);
+   * değişken yoksa kozmik mor-lacivere düşer. Geçişte yumuşak boyanır. */
   background: radial-gradient(
     circle at 50% 38%,
-    #141d3c 0%,
+    var(--atmosphere-tint, #141d3c) 0%,
     #080d1c 52%,
     #03040a 100%
   );
+  transition: background 900ms ease;
 }
 .world-canvas canvas {
   display: block;
+}
+
+/* ── Sayfa giriş animasyonu (template.tsx her gezinmede replay eder) ── */
+.page-transition {
+  animation: page-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+  .world-canvas {
+    transition: none;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════

@@ -10,6 +10,7 @@
  * Cihaz uyumu:
  *   • prefers-reduced-motion → sahne sürüklenmeleri durur.
  *   • PerformanceMonitor → FPS düşerse DPR ve kalite kademesi otomatik iner.
+ *   • WebGL yok / kapalı → Canvas hiç kurulmaz, CSS gradient fallback gösterilir.
  *   • alpha:true → arka plan saydam; koyu gradient CSS'ten gelir.
  *
  * SSR: WorldBackdrop bunu `dynamic(..., { ssr:false })` ile yükler —
@@ -33,6 +34,10 @@ export default function WorldCanvas({ scene }: { scene: WorldSceneId }) {
 
   const [dpr, setDpr] = useState(1.4);
 
+  // WebGL desteğini bir kez, senkron ölçeriz (bileşen ssr:false → window var).
+  // Başarısızsa Canvas hiç denenmez; siyah ekran yerine CSS gradient kalır.
+  const [webglOk] = useState(detectWebGL);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mq.matches);
@@ -43,6 +48,11 @@ export default function WorldCanvas({ scene }: { scene: WorldSceneId }) {
 
   // Sayfa bir sahne override ettiyse onu, yoksa route eşlemesini kullan.
   const active = sceneOverride ?? scene;
+
+  // WebGL yoksa: aynı katman kutusu, sadece CSS gradient (WorldBackdrop'tan).
+  if (!webglOk) {
+    return <div className="world-canvas world-canvas--fallback" aria-hidden="true" />;
+  }
 
   return (
     <div className="world-canvas" aria-hidden="true">
@@ -70,4 +80,23 @@ export default function WorldCanvas({ scene }: { scene: WorldSceneId }) {
 
 function stepDownQuality(q: WorldQuality): WorldQuality {
   return q === "high" ? "medium" : "low";
+}
+
+/**
+ * Tarayıcının WebGL bağlamı oluşturabildiğini bir kez dener.
+ * Geçici bir <canvas> üzerinde webgl2 → webgl → experimental-webgl sırasıyla
+ * dener; hiçbiri yoksa (eski cihaz, WebGL devre dışı, GPU yok) false döner.
+ */
+function detectWebGL(): boolean {
+  if (typeof window === "undefined") return true; // ssr: optimist, mount'ta yeniden değerlenir
+  try {
+    const canvas = document.createElement("canvas");
+    const gl =
+      canvas.getContext("webgl2") ||
+      canvas.getContext("webgl") ||
+      canvas.getContext("experimental-webgl");
+    return !!gl;
+  } catch {
+    return false;
+  }
 }

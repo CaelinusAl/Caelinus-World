@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ProductExtended, ProductSize } from "@/types/play";
 import type { AvatarProductRecommendation } from "@/lib/avatar-recommendations";
 
@@ -47,11 +48,13 @@ export default function ProductCard({
   return (
     <div className="ecom-product-card">
       <div className="ecom-product-image-wrap">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
           className="ecom-product-image"
-          loading="lazy"
+          fill
+          sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 280px"
+          quality={80}
         />
         {recommendation?.tags.includes("best_fit") && (
           <div className="ecom-rec-badge ecom-rec-badge--ideal" title={recommendation.rationale}>

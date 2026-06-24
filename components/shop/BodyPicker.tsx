@@ -21,6 +21,7 @@
  */
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   CAELINUS_BODY_LIBRARY,
   AVATARS_IN_PRODUCTION,
@@ -47,7 +48,7 @@ export default function BodyPicker({ selectedId, onSelect }: Props) {
         <div className="body-picker-kicker">✦ CAELINUS · BEDEN KÜTÜPHANESİ</div>
         <h3 className="body-picker-title">Bedenini Seç</h3>
         <p className="body-picker-sub">
-          Senin mesh'in burada — boy, ölçü, ten rengi sliderlarla
+          Senin mesh&apos;in burada — boy, ölçü, ten rengi sliderlarla
           ayarlanır, yüzünü yükle, shop&apos;ta deneyeceğin bedeni o.
         </p>
       </header>
@@ -88,10 +89,12 @@ function BodyCard({
     >
       <div className="body-card-thumb">
         {showPreview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={body.preview!}
             alt={body.label}
+            fill
+            sizes="160px"
+            quality={80}
             onError={() => setImgError(true)}
           />
         ) : (

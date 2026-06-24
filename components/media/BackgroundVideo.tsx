@@ -9,6 +9,8 @@
  *   • prefers-reduced-motion AÇIK  → oynatma yok, poster karesi durur.
  *   • Save-Data (veri tasarrufu) AÇIK → poster, video hiç indirilmez.
  *   • Çok yavaş ağ (2g / slow-2g) → poster, video hiç indirilmez.
+ *   • Ekran dışına kayınca (IntersectionObserver) → oynatma duraklar,
+ *     geri görünür olunca devam eder. Görünmeyen video CPU/GPU yakmaz.
  *
  * SSR/hidrasyon güvenli: ilk render herkes için <video> (markup eşleşir),
  * istemcide ölçüm sonrası gerekiyorsa poster <img>'e geçer.
@@ -44,6 +46,8 @@ export default function BackgroundVideo({
   const videoRef = useRef<HTMLVideoElement>(null);
   // null = henüz ölçülmedi (SSR + ilk paint) → video göster (markup eşleşsin).
   const [lite, setLite] = useState<boolean | null>(null);
+  // Video viewport içinde mi? Ölçülene kadar görünür say (ilk paint oynasın).
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
     const conn = (
@@ -54,17 +58,30 @@ export default function BackgroundVideo({
     setLite(saveData || slowNet || prefersReducedMotion());
   }, []);
 
+  // Görünürlük takibi: ekran dışındaki videoyu duraklat, geri gelince devam et.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return; // lite modda <img> render edilir, ref boştur.
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, [lite]);
+
+  // Oynatma kararı: yalnızca lite değilken VE görünürken oynat.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (lite) {
+    if (lite || !inView) {
       v.pause();
     } else if (lite === false) {
       v.play().catch(() => {
         /* otomatik oynatma engellenirse poster görünür kalır */
       });
     }
-  }, [lite]);
+  }, [lite, inView]);
 
   if (lite) {
     // eslint-disable-next-line @next/next/no-img-element

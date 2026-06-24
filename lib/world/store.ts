@@ -8,7 +8,7 @@
  */
 
 import { create } from "zustand";
-import type { WorldSceneId } from "./config";
+import type { WorldSceneId, AtmosphereId } from "./config";
 import { DEFAULT_RESONANCE, type Resonance } from "./resonance";
 
 export type WorldQuality = "high" | "medium" | "low";
@@ -22,11 +22,17 @@ type WorldState = {
   reducedMotion: boolean;
   /** Kullanıcının frekansına göre türetilen sahne parametreleri (5D). */
   resonance: Resonance;
+  /**
+   * Aktif route'un atmosferi (NEREDESİN). resonance'tan (KİMSİN) bağımsız:
+   * template.tsx her gezinmede buraya yazar, canvas/CSS yumuşakça boyar.
+   */
+  atmosphere: AtmosphereId;
 
   setSceneOverride: (scene: WorldSceneId | null) => void;
   setQuality: (q: WorldQuality) => void;
   setReducedMotion: (b: boolean) => void;
   setResonance: (r: Resonance) => void;
+  setAtmosphere: (a: AtmosphereId) => void;
 };
 
 export const useWorldStore = create<WorldState>((set) => ({
@@ -34,8 +40,10 @@ export const useWorldStore = create<WorldState>((set) => ({
   quality: "high",
   reducedMotion: false,
   resonance: DEFAULT_RESONANCE,
+  atmosphere: "neutral",
   setSceneOverride: (scene) => set({ sceneOverride: scene }),
   setQuality: (quality) => set({ quality }),
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
   setResonance: (resonance) => set({ resonance }),
+  setAtmosphere: (atmosphere) => set({ atmosphere }),
 }));

@@ -40,3 +40,35 @@ export function sceneForPath(pathname: string): WorldSceneId {
 
   return "off";
 }
+
+/**
+ * Route → ATMOSFER (sahneden bağımsız "ortam tonu").
+ *
+ * `scene` ağır WebGL sahne grafiğini seçer (çoğu route'ta "off"); atmosphere
+ * ise HER route'ta geçerli olan hafif bir ton/parametre kimliğidir. Sayfa
+ * geçişinde template.tsx bunu world store'a + `--atmosphere-tint` CSS
+ * değişkenine yazar; canvas açıksa shader, kapalıysa CSS gradient boyar.
+ * Böylece her bölgenin kendi atmosferi olur, canvas hiç remount olmadan.
+ */
+export type AtmosphereId = "cosmos" | "gaia" | "sanctum" | "shop" | "neutral";
+
+export function atmosphereForPath(pathname: string): AtmosphereId {
+  if (pathname.startsWith("/universe/gaia")) return "gaia";
+  if (pathname.startsWith("/universe/shop")) return "shop";
+  if (pathname.startsWith("/universe/sanctum") || pathname === "/manifesto")
+    return "sanctum";
+  if (pathname === "/" || pathname.startsWith("/universe")) return "cosmos";
+  return "neutral";
+}
+
+/**
+ * Her atmosfer için temel ton (radial gradient çekirdek rengi).
+ * WorldCanvas gradyanı ve gelecekteki shader bunu okur.
+ */
+export const ATMOSPHERE_TINT: Record<AtmosphereId, string> = {
+  cosmos: "#141d3c", // mevcut kozmik mor-lacivert (varsayılan)
+  gaia: "#13321f", // toprak/orman yeşili
+  sanctum: "#2a1840", // mistik mor
+  shop: "#1a1430", // amethyst vitrin
+  neutral: "#0b1020", // sade koyu (utility sayfalar)
+};
