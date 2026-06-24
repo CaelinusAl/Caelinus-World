@@ -1,0 +1,180 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CAELINUS SHOP — Giriş netliği & yön bulma (QA / SEO redesign)
+   ─────────────────────────────────────────────────────────────────────
+   Hero öne çıkan rozetleri, ikincil CTA ve "İçeride neler var?" rehber
+   şeridi. Tamamı mevcut mirror (mor/altın cam) diline uyumlu; globals.css'i
+   şişirmemek için shop'a özel bu dosyada tutulur (page.tsx import eder).
+   Eklenen sınıflar benzersiz — mevcut stiller etkilenmez.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Hero öne çıkan rozetler ── */
+.shop-hero-highlights {
+  list-style: none;
+  margin: 18px auto 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.shop-hero-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: rgba(244, 240, 255, 0.9);
+  background: rgba(12, 9, 28, 0.4);
+  border: 1px solid rgba(202, 164, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.shop-hero-highlight-icon {
+  font-size: 14px;
+  color: var(--mg-soft-gold, #e8d7a3);
+  filter: drop-shadow(0 0 5px rgba(232, 215, 163, 0.5));
+}
+
+/* ── İkincil CTA — "Koleksiyonları Gör" ── */
+.mirror-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 240, 255, 0.92);
+  background: rgba(12, 9, 28, 0.42);
+  border: 1px solid rgba(202, 164, 255, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mirror-cta-secondary:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 215, 163, 0.5);
+  box-shadow: 0 0 22px rgba(140, 109, 255, 0.25);
+}
+
+/* ── "İçeride neler var?" rehber şeridi ── */
+.shop-guide {
+  position: relative;
+  z-index: 4;
+  max-width: 1080px;
+  margin: 8px auto 40px;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.shop-guide-title {
+  margin: 0;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-weight: 300;
+  font-size: clamp(24px, 3vw, 36px);
+  letter-spacing: 0.06em;
+  color: rgba(248, 244, 255, 0.96);
+}
+
+.shop-guide-sub {
+  margin: 8px auto 24px;
+  max-width: 560px;
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.6;
+  color: rgba(220, 210, 245, 0.7);
+}
+
+.shop-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.shop-guide-card {
+  --gc-accent: rgba(140, 109, 255, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 18px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 18px;
+  color: rgba(244, 240, 255, 0.92);
+  background: rgba(12, 9, 28, 0.46);
+  border: 1px solid rgba(202, 164, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+.shop-guide-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gc-accent);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.34), 0 0 26px var(--gc-accent);
+}
+
+.shop-guide-card.active {
+  border-color: var(--gc-accent);
+  background: rgba(140, 109, 255, 0.12);
+  box-shadow: 0 0 28px var(--gc-accent);
+}
+
+.shop-guide-card-icon {
+  font-size: 26px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px var(--gc-accent));
+}
+
+.shop-guide-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.shop-guide-card-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(220, 210, 245, 0.74);
+}
+
+.shop-guide-card-go {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mg-soft-gold, #e8d7a3);
+}
+
+.shop-guide-card--tryon { --gc-accent: rgba(255, 140, 200, 0.42); }
+.shop-guide-card--freq  { --gc-accent: rgba(100, 180, 255, 0.42); }
+.shop-guide-card--ai    { --gc-accent: rgba(170, 140, 255, 0.46); }
+.shop-guide-card--live  { --gc-accent: rgba(232, 215, 163, 0.46); }
+
+@media (max-width: 880px) {
+  .shop-guide-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .shop-guide-grid {
+    grid-template-columns: 1fr;
+  }
+  .shop-hero-highlight {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
