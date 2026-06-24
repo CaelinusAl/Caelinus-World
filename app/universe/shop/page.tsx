@@ -10,6 +10,7 @@ import { loadAvatarConfig } from "@/lib/avatar-storage";
 import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import { productsExtended } from "@/data/products";
 import ShopHeader from "./_components/ShopHeader";
+import ShopGuide from "./_components/ShopGuide";
 import MirrorGate from "./_components/MirrorGate";
 import TryOnSection from "./_components/TryOnSection";
 import ProductSection from "./_components/ProductSection";
@@ -18,6 +19,7 @@ import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
 import AvatarBadge from "./_components/AvatarBadge";
+import "./shop-experience.css";
 
 /**
  * TryOnLauncher — PDP'den (`/universe/shop/urun/<id>`) gelen
@@ -107,6 +109,9 @@ export default function ShopPage() {
         <AvatarBadge />
 
         <ShopHeader />
+
+        {/* İçeride neler var? — ilk girişte yön bulma rehberi (mod seçici). */}
+        <ShopGuide />
 
         {/* Aynanın kendisi: oval portal + su üstündeki 3 ritüel taşı. */}
         <MirrorGate />
