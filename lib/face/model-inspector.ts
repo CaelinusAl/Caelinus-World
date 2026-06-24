@@ -2,11 +2,27 @@ import * as THREE from "three";
 import type { ModelCapabilities, MorphTargetInfo } from "./types";
 
 const HEAD_BONE_RE = [/^head$/i, /head/i, /skull/i, /cranium/i];
-const FACE_MORPH_RE = [
-  /jaw/i, /mouth/i, /lip/i, /eye/i, /brow/i, /nose/i,
-  /cheek/i, /chin/i, /forehead/i, /face/i, /smile/i,
-  /frown/i, /blink/i, /squint/i, /wide/i, /narrow/i,
-];
+
+/**
+ * IDENTITY (şekil) morph sözleşmesi — Faz B.
+ *
+ * Kimlik morph'ları (yüz oranlarını kalıcı değiştiren shape-key'ler) ARKit
+ * İFADE blendshape'lerinden (eyeBlink, jawOpen, mouthSmile, browDown...) AYRI
+ * tutulur. Aksi halde "göz aralığı" slider'ı `eyeWide` ifadesini, "ağız
+ * genişliği" `mouthSmile` ifadesini sürükler → avatar slider oynatınca
+ * gülümser / gözünü fal taşı gibi açar (uncanny).
+ *
+ * Sözleşme: kimlik shape-key'leri `id` + PascalCase ile başlar
+ *   idJawWidth · idChinLength · idEyeSpacing · idEyeSize
+ *   idNoseWidth · idMouthWidth · idForehead · idHeadWidth
+ *
+ * ARKit ifadeleri hep küçük harfle başladığından (`jawOpen`, `mouthSmileLeft`)
+ * `^id[A-Z]` deseni onlarla ÇAKIŞMAZ. Gövdede gerçek `id*` shape-key yokken
+ * `hasFaceMorphTargets=false` döner → motor head-bone fallback'ine düşer
+ * (kaba ama doğal), ifade morph'larını kimlik için ASLA çalmaz. Şeyma `id*`
+ * shape-key'lerini ekleyince strateji otomatik `morph-targets`'a geçer.
+ */
+const IDENTITY_MORPH_RE = [/^id[A-Z]/];
 
 /**
  * Inspect a loaded GLB scene and report its capabilities:
@@ -58,8 +74,10 @@ export function inspectModel(root: THREE.Object3D): ModelCapabilities {
   });
 
   const hasBones = boneNames.length > 0;
+  // Yalnızca KİMLİK (id*) shape-key'leri morph-targets stratejisini açar;
+  // ARKit ifade blendshape'leri kimlik deformasyonu için kullanılmaz.
   const hasFaceMorphTargets = morphTargets.some((mt) =>
-    FACE_MORPH_RE.some((re) => re.test(mt.targetName))
+    IDENTITY_MORPH_RE.some((re) => re.test(mt.targetName))
   );
 
   let strategy: ModelCapabilities["strategy"];

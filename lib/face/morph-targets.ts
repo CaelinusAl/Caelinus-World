@@ -8,23 +8,32 @@ import type {
 import { IDENTITY_DEFORM } from "./types";
 
 /**
- * Regex → deformConfig accessor + scale factor.
- * When a morph target name matches the regex, the deform config value
- * is mapped to a 0–1 weight: (configValue - 1) * gain, clamped.
+ * KİMLİK (şekil) morph eşleme kuralları — Faz B sözleşmesi.
+ *
+ * Yalnızca `id*` ile başlayan KİMLİK shape-key'leri eşlenir; ARKit İFADE
+ * blendshape'leri (eyeBlink/jawOpen/mouthSmile/browDown...) BİLİNÇLİ olarak
+ * kapsam dışıdır — onları kimlik deformasyonu için kullanmak avatarı slider
+ * oynatınca gülümsetir/gözünü açar (uncanny). Eşleşme tam isimledir
+ * (`^id…$`), gevşek `smile`/`wide` desenleri kaldırıldı.
+ *
+ * Bir morph adı kurala uyduğunda deform değeri 0–1 ağırlığa map'lenir:
+ * (configValue - 1) * gain + 0.5, clamp[0,1].
+ *
+ * Şeyma'nın gövdeye eklemesi gereken 8 kimlik shape-key adı (sol sütun):
  */
 const MORPH_RULES: Array<{
   re: RegExp;
   key: keyof AvatarFaceDeformConfig;
   gain: number;
 }> = [
-  { re: /jaw.*width|jaw.*wide/i,           key: "jawWidthScale",      gain: 3.0 },
-  { re: /chin.*length|chin.*down|chin.*y/i, key: "chinScaleY",         gain: 3.0 },
-  { re: /eye.*spac|eye.*dist|eye.*wide/i,  key: "eyeSpacingScale",    gain: 3.0 },
-  { re: /eye.*size|eye.*scale|eye.*open/i,  key: "eyeScale",           gain: 3.0 },
-  { re: /nose.*width|nose.*wide/i,          key: "noseWidthScale",     gain: 3.0 },
-  { re: /mouth.*width|mouth.*wide|smile/i,  key: "mouthWidthScale",    gain: 3.0 },
-  { re: /forehead|brow.*height/i,           key: "foreheadScale",      gain: 2.5 },
-  { re: /head.*width|face.*width/i,         key: "headWidthScale",     gain: 3.0 },
+  { re: /^idJawWidth$/i,    key: "jawWidthScale",   gain: 3.0 },
+  { re: /^idChinLength$/i,  key: "chinScaleY",      gain: 3.0 },
+  { re: /^idEyeSpacing$/i,  key: "eyeSpacingScale", gain: 3.0 },
+  { re: /^idEyeSize$/i,     key: "eyeScale",        gain: 3.0 },
+  { re: /^idNoseWidth$/i,   key: "noseWidthScale",  gain: 3.0 },
+  { re: /^idMouthWidth$/i,  key: "mouthWidthScale", gain: 3.0 },
+  { re: /^idForehead$/i,    key: "foreheadScale",   gain: 2.5 },
+  { re: /^idHeadWidth$/i,   key: "headWidthScale",  gain: 3.0 },
 ];
 
 function clamp01(v: number): number {

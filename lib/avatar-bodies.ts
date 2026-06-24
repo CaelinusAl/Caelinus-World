@@ -22,7 +22,10 @@
  *     korunur).
  */
 
-export type BodyGender = "feminine" | "masculine" | "neutral";
+// NOT: "masculine" (erkek beden / Faz C) kapsam dışı bırakıldı — şimdilik
+// iptal. Yeniden ele alınırsa union'a geri eklenir + erkek base body GLB'si
+// kütüphaneye girer.
+export type BodyGender = "feminine" | "neutral";
 
 export type BodyEntry = {
   /** Stable kimlik — localStorage'a yazılır, hiç değişmemeli. */
