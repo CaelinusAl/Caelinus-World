@@ -7,6 +7,9 @@ body {
   height: auto;
   overflow-x: hidden;
   overflow-y: auto;
+  /* Kalıcı kozmik taban (Bécane "Background_wrapper" mantığı): beyaz flash ve
+     sayfa-geçişi sırasında açılan ince bant olmasın diye body hep koyu kalır. */
+  background: var(--cae-black, #03060f);
 }
 
 body {
