@@ -84,6 +84,105 @@
   display: block;
 }
 
+/* ── CAROUSEL (modelli ↔ mankensiz) ──────────────────────────── */
+.pdp-car-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pdp-car-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+}
+/* İzole ürün görseli kırpılmamalı → contain + zemin */
+.pdp-image--contain {
+  object-fit: contain;
+  background: radial-gradient(120% 120% at 50% 35%, rgba(255, 255, 255, 0.06), rgba(10, 10, 18, 0.9));
+  padding: 6%;
+}
+.pdp-slide-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 4;
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f4ecff;
+  background: rgba(10, 10, 18, 0.55);
+  border: 1px solid rgba(220, 200, 255, 0.18);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.pdp-car-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(10, 10, 18, 0.5);
+  border: 1px solid rgba(220, 200, 255, 0.22);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.pdp-car-arrow:hover {
+  background: rgba(40, 30, 70, 0.75);
+}
+.pdp-car-arrow.left {
+  left: 10px;
+}
+.pdp-car-arrow.right {
+  right: 10px;
+}
+.pdp-car-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.pdp-car-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.pdp-car-dot.is-on {
+  background: #fff;
+  transform: scale(1.2);
+}
+/* Mobilde dokunma hedefleri biraz daha büyük */
+@media (max-width: 640px) {
+  .pdp-car-arrow {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdp-car-track {
+    transition: none;
+  }
+}
+
 /* "Hikâyeyi Yaşa" — görselin yerinde canlanan video */
 .pdp-video {
   position: absolute;
