@@ -316,7 +316,7 @@
 }
 /* iç sarmal — referanstaki gibi ortalı, ferah */
 .shop-lineup-inner {
-  max-width: 1320px;
+  max-width: 1500px;
   margin: 0 auto;
 }
 .shop-lineup-head {
@@ -340,7 +340,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: clamp(0.2rem, 1vw, 0.9rem);
+  gap: clamp(0.15rem, 0.6vw, 0.6rem);
   padding: 0.5rem 0 0.25rem;
 }
 .shop-lineup-fig {
@@ -358,10 +358,11 @@
   transform: translateY(-8px);
 }
 .shop-lineup-img {
-  /* giriş sahnesi → büyük + tam boy: yükseklik kolona göre ölçeklenir */
-  height: clamp(240px, 27vw, 420px);
-  max-width: 100%;
-  width: auto;
+  /* Cutout'lar alpha sınırına kırpıldı (yan boşluk yok) → figür kolonu
+     tam doldurur; boy genişliğe göre otomatik, üstte boş bant kalmaz. */
+  width: 100%;
+  height: auto;
+  max-height: clamp(280px, 40vw, 520px);
   display: block;
   object-fit: contain;
   object-position: bottom;
@@ -403,9 +404,7 @@
   }
   .shop-lineup-fig {
     flex: 0 0 auto;
-  }
-  .shop-lineup-img {
-    height: 280px;
+    width: 168px;
   }
 }
 
