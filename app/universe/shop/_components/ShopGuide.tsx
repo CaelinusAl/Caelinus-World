@@ -22,20 +22,6 @@ type GuideItem = {
 
 const GUIDE: GuideItem[] = [
   {
-    mode: "tryon",
-    icon: "🪞",
-    title: "Aynada Dene",
-    desc: "Parçaları AI avatarının üzerinde sanal olarak dene.",
-    cls: "shop-guide-card--tryon",
-  },
-  {
-    mode: "freq",
-    icon: "✶",
-    title: "Frekansını Giy",
-    desc: "Burcuna ve Solfeggio frekansına göre koleksiyonu gez.",
-    cls: "shop-guide-card--freq",
-  },
-  {
     mode: "ai",
     icon: "✦",
     title: "AI Kombin",

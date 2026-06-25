@@ -239,8 +239,8 @@
   transform: translateY(-8px);
 }
 .shop-lineup-img {
-  /* küçük + tam boy: yükseklik sınırlı, genişlik kolona göre küçülür */
-  height: clamp(150px, 17vw, 250px);
+  /* giriş sahnesi → büyük + tam boy: yükseklik kolona göre ölçeklenir */
+  height: clamp(240px, 27vw, 420px);
   max-width: 100%;
   width: auto;
   display: block;
@@ -286,7 +286,7 @@
     flex: 0 0 auto;
   }
   .shop-lineup-img {
-    height: 180px;
+    height: 280px;
   }
 }
 

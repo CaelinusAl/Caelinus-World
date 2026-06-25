@@ -20,7 +20,7 @@ type SceneState = {
 export const useSceneStore = create<SceneState>((set) => ({
   stageId: "beach",
   archetypeId: "cosmic",
-  activeMode: "tryon",
+  activeMode: "ai",
   activeCategory: "all",
   showCart: false,
 
