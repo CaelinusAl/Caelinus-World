@@ -163,6 +163,125 @@
 .shop-guide-card--ai    { --gc-accent: rgba(170, 140, 255, 0.46); }
 .shop-guide-card--live  { --gc-accent: rgba(232, 215, 163, 0.46); }
 
+/* ── 3 mor oval portal butonu (Aynaya Gir · AI Kombin · Bazaar & Canlı) ──
+   Editorial beyaz tema bunlara dokunmaz (yeni .shop-orb adı) → mor kalır. */
+.shop-orbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 72px);
+  margin-top: 8px;
+}
+
+.shop-orb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: clamp(210px, 23vw, 280px);
+  aspect-ratio: 0.82;
+  padding: 6% 13%;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 50%;
+  color: rgba(247, 241, 232, 0.95);
+  background: radial-gradient(
+    120% 120% at 50% 22%,
+    rgba(78, 56, 138, 0.74),
+    rgba(20, 14, 44, 0.84)
+  );
+  border: 1px solid rgba(202, 164, 255, 0.28);
+  box-shadow:
+    0 18px 50px rgba(20, 12, 48, 0.4),
+    0 0 44px rgba(140, 109, 255, 0.3),
+    inset 0 0 40px rgba(244, 217, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.45s var(--cae-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 0.45s ease, border-color 0.45s ease;
+}
+
+/* su üstünde duruyormuş yansıması */
+.shop-orb::after {
+  content: "";
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: -18px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(140, 109, 255, 0.32), transparent 78%);
+  filter: blur(6px);
+}
+
+.shop-orb:hover {
+  transform: translateY(-6px);
+  border-color: rgba(232, 215, 163, 0.5);
+  box-shadow:
+    0 24px 60px rgba(20, 12, 48, 0.46),
+    0 0 60px rgba(140, 109, 255, 0.44),
+    inset 0 0 44px rgba(232, 215, 163, 0.1);
+}
+
+.shop-orb.active {
+  border-color: rgba(232, 215, 163, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(232, 215, 163, 0.3),
+    0 24px 60px rgba(20, 12, 48, 0.46),
+    0 0 64px rgba(140, 109, 255, 0.5);
+}
+
+.shop-orb-icon {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--mg-soft-gold, #e8d7a3);
+  text-shadow: 0 0 16px rgba(232, 215, 163, 0.5);
+}
+
+.shop-orb-title {
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.shop-orb-desc {
+  max-width: 19ch;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(220, 210, 245, 0.72);
+}
+
+.shop-orb-go {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mg-soft-gold, #e8d7a3);
+}
+
+/* Aynaya Gir — ana giriş, altın vurgulu */
+.shop-orb--mirror {
+  background: radial-gradient(
+    120% 120% at 50% 20%,
+    rgba(98, 70, 162, 0.82),
+    rgba(24, 16, 52, 0.9)
+  );
+  border-color: rgba(232, 215, 163, 0.42);
+}
+
+@media (max-width: 760px) {
+  .shop-orb {
+    width: clamp(180px, 62vw, 250px);
+  }
+}
+
 @media (max-width: 880px) {
   .shop-guide-grid {
     grid-template-columns: repeat(2, 1fr);

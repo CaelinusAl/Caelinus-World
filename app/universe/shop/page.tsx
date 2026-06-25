@@ -9,7 +9,6 @@ import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
 import { productsExtended } from "@/data/products";
 import ShopGuide from "./_components/ShopGuide";
-import MirrorGate from "./_components/MirrorGate";
 import ProductSection from "./_components/ProductSection";
 import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
@@ -104,11 +103,9 @@ export default function ShopPage() {
         {/* RUNWAY — sayfa doğrudan 12 mankenin tam-boy, tam-genişlik dizisiyle açılır. */}
         <BikiniLineup />
 
-        {/* İçeride neler var? — mod seçici (tryon/freq/ai/live) rehber kartları. */}
+        {/* İçeride neler var? — Aynaya Gir + AI Kombin + Bazaar & Canlı
+            üç mor oval portal. (Eski MirrorGate + ritüel taşları kaldırıldı.) */}
         <ShopGuide />
-
-        {/* Aynanın kendisi: oval portal + su üstündeki 3 ritüel taşı. */}
-        <MirrorGate />
 
         <section className="shop-main">
           {/* 1. AVATAR STAGE — 3D avatar şimdilik kaldırıldı, alan boş bırakıldı.
