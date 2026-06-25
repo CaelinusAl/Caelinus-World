@@ -7,11 +7,9 @@ import { useSceneStore } from "@/stores/scene-store";
 import { useCartStore } from "@/stores/cart-store";
 import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
-import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import { productsExtended } from "@/data/products";
 import ShopGuide from "./_components/ShopGuide";
 import MirrorGate from "./_components/MirrorGate";
-import TryOnSection from "./_components/TryOnSection";
 import ProductSection from "./_components/ProductSection";
 import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
@@ -113,8 +111,8 @@ export default function ShopPage() {
         <MirrorGate />
 
         <section className="shop-main">
-          {/* 1. AVATAR STAGE — avatarlar yapımdayken gizli (placeholder gösterilmez) */}
-          {!AVATARS_IN_PRODUCTION && <TryOnSection />}
+          {/* 1. AVATAR STAGE — 3D avatar şimdilik kaldırıldı, alan boş bırakıldı.
+              Geri açmak için: {!AVATARS_IN_PRODUCTION && <TryOnSection />} */}
 
           {/* 2. VIRTUAL TRY-ON MODE */}
           <div className={`shop-section-panel ${activeMode === "tryon" ? "visible" : ""}`}>
