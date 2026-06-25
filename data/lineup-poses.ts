@@ -9,18 +9,18 @@
  * otomatik seçildi; istenirse buradan elle değiştirilebilir.
  */
 export const LINEUP_POSES: Record<string, string> = {
-  aries: "IMG_9121-trim.png",
-  taurus: "IMG_8924-trim.png",
-  gemini: "IMG_8922-trim.png",
-  cancer: "IMG_8926-trim.png",
-  leo: "IMG_8951-trim.png",
-  virgo: "IMG_9077-trim.png",
-  libra: "IMG_8914-trim.png",
-  scorpio: "IMG_9137-trim.png",
-  sagittarius: "IMG_8928-trim.png",
-  capricorn: "IMG_8930-trim.png",
-  aquarius: "IMG_8916-trim.png",
-  pisces: "IMG_8943-trim.png",
+  aries: "IMG_9121-trim.webp",
+  taurus: "IMG_8924-trim.webp",
+  gemini: "IMG_8922-trim.webp",
+  cancer: "IMG_8926-trim.webp",
+  leo: "IMG_8951-trim.webp",
+  virgo: "IMG_9077-trim.webp",
+  libra: "IMG_8914-trim.webp",
+  scorpio: "IMG_9137-trim.webp",
+  sagittarius: "IMG_8928-trim.webp",
+  capricorn: "IMG_8930-trim.webp",
+  aquarius: "IMG_8916-trim.webp",
+  pisces: "IMG_8943-trim.webp",
 };
 
 /** Lineup figürü için tam public path döndürür. */

@@ -36,8 +36,9 @@ export default function BikiniLineup() {
                   src={src}
                   alt={p.name}
                   className="shop-lineup-img"
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
+                  fetchPriority="high"
                 />
                 <span className="shop-lineup-meta">
                   <span className="shop-lineup-name">{p.name}</span>
