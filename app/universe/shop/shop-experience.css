@@ -512,3 +512,75 @@
 .shop-page .shop-whisper {
   color: var(--ed-grey);
 }
+
+/* ════════════════════ OKUNABİLİRLİK KATMANI ════════════════════
+   Arka plan beyaza çevrildiği için, koyu zemine göre tasarlanmış içerik
+   panelleri (Stylist · AI Kombin · Canlı · Bazaar) okunmuyordu: yüzeyleri
+   saydam-koyu, yazıları açıktı → beyazda kayboluyordu.
+   Bu katman .shop-main içeriğini AÇIK yüzey + KOYU MOR yazıya çeker.
+   .shop-orbs (mor oval butonlar) .shop-guide altında olduğu için ETKİLENMEZ. */
+.shop-page {
+  --ink: #2a1750;          /* ana koyu mor (başlık/metin) */
+  --ink-soft: #5b4a86;     /* ikincil mor (açıklama) */
+  --ink-faint: #8678ad;    /* en silik mor */
+  --surface: #ffffff;      /* açık kart yüzeyi */
+  --surface-line: #e4def2; /* ince leylak çizgi */
+}
+
+/* guide / designers / nav editorial tokenlarını da mora çek */
+.shop-page {
+  --ed-black: #2a1750;
+  --ed-hover: #5b4a86;
+  --ed-grey: #8678ad;
+}
+
+/* ── Panel & kart yüzeyleri: saydam-koyu → açık okunur ── */
+.shop-page :is(
+  .stylist-panel, .stylist-tab, .stylist-chip, .stylist-intent-input,
+  .stylist-item, .stylist-look, .stylist-empty,
+  .shop-products-panel, .shop-product-card, .shop-zodiac-card,
+  .shop-weekly-card, .shop-outfit-panel, .shop-mini-cart,
+  .bazaar-card
+) {
+  background: var(--surface);
+  border-color: var(--surface-line);
+  color: var(--ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── Tüm panel yazıları koyu mor ── */
+.shop-page .shop-main :is(
+  h1, h2, h3, h4, h5, p, span, li, a, small, strong, em, label, div,
+  input, textarea, button
+) {
+  color: var(--ink);
+}
+
+/* ── İkincil/açıklama metinleri biraz daha açık mor (hiyerarşi) ── */
+.shop-page .shop-main :is(
+  .stylist-kicker, .stylist-sub, .stylist-tab-hint, .stylist-look-narr,
+  .stylist-item-rationale, .stylist-look-slot, .shop-ai-kicker,
+  .shop-ai-subtitle, .bazaar-room-tagline, .shop-product-designer,
+  .shop-cart-item-qty
+) {
+  color: var(--ink-soft);
+}
+
+/* ── Aksiyon butonları: dolu koyu mor zemin + beyaz yazı (net CTA) ── */
+.shop-page .shop-main :is(
+  .stylist-look-cta, .stylist-item-btn, .stylist-intent-btn,
+  .shop-checkout-btn, .shop-cart-btn, .shop-weekly-apply, .bazaar-hero-cta
+) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.shop-page .shop-main :is(
+  .stylist-look-cta, .stylist-item-btn, .stylist-intent-btn,
+  .shop-checkout-btn, .shop-cart-btn, .shop-weekly-apply, .bazaar-hero-cta
+):hover {
+  background: var(--ink-soft);
+  border-color: var(--ink-soft);
+  color: #fff;
+}
