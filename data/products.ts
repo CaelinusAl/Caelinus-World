@@ -53,27 +53,9 @@ export const products: Product[] = [
   { id: "b10", name: "Capricorn — Stone Siren",  brand: "Caelinus", designer: "Celine River", category: "bikini", price: "$260", image: "/play/bikinis/capricorn.png",   frequency: "963 Hz", zodiac: "capricorn",   story: "Dagin zirvesindeki siren. Kararliligin luks hali." },
   { id: "b11", name: "Aquarius — Star Current",  brand: "Caelinus", designer: "Celine River", category: "bikini", price: "$240", image: "/play/bikinis/aquarius.png",    frequency: "963 Hz", zodiac: "aquarius",    story: "Yildiz akintisinda yuzmek. Gelecegin frekansi." },
   { id: "b12", name: "Pisces — Dream Tide",      brand: "Caelinus", designer: "Celine River", category: "bikini", price: "$220", image: "/play/bikinis/pisces.png",      frequency: "852 Hz", zodiac: "pisces",      story: "Ruya dalgasinda suzulmek. Suyun en derin sarkisi." },
-
-  // ═══════════════════════ PAREO ═══════════════════════
-  { id: "pr1", name: "Golden Nebula Wrap",  brand: "Caelinus", designer: "Celine River", category: "pareo", price: "$120", image: "/play/bikinis/leo.png",    frequency: "432 Hz", story: "Nebula gibi sarmalayan, ruzgarla dans eden kumas." },
-  { id: "pr2", name: "Gaia Silk Pareo",     brand: "Caelinus", designer: "Celine River", category: "pareo", price: "$140", image: "/play/bikinis/taurus.png", frequency: "528 Hz", story: "Topragin ipek hali. Gaia'nin dokunusu bedeninizde." },
-  { id: "pr3", name: "Moonlight Drape",     brand: "Caelinus", designer: "Celine River", category: "pareo", price: "$130", image: "/play/bikinis/pisces.png", frequency: "639 Hz", story: "Ay isigini giyinmek. Yumusak, akiskan, kutsal." },
-
-  // ═══════════════════════ BAG ═══════════════════════
-  { id: "bg1", name: "Cosmos Clutch",  brand: "Caelinus", designer: "Celine River", category: "bag", price: "$180", image: "/play/bikinis/scorpio.png",   frequency: "963 Hz", story: "Evrenin sirrini tasiyan el cantasi." },
-  { id: "bg2", name: "Eclipse Tote",   brand: "Caelinus", designer: "Celine River", category: "bag", price: "$280", image: "/play/bikinis/capricorn.png", frequency: "741 Hz", story: "Gunes tutulmasinin golgesinde dogan zarif siluet." },
-  { id: "bg3", name: "Stardust Mini",  brand: "Caelinus", designer: "Celine River", category: "bag", price: "$160", image: "/play/bikinis/gemini.png",    frequency: "528 Hz", story: "Yildiz tozuyla kapli minimalist siklik." },
-
-  // ═══════════════════════ HEELS ═══════════════════════
-  { id: "h1", name: "Venus Stiletto",   brand: "Caelinus", designer: "Celine River", category: "heels", price: "$320", image: "/play/bikinis/libra.png",    frequency: "639 Hz", story: "Venus'un yeryuzundeki yansimasi. Adimlarin rituel." },
-  { id: "h2", name: "Celestial Mule",   brand: "Caelinus", designer: "Celine River", category: "heels", price: "$240", image: "/play/bikinis/virgo.png",    frequency: "852 Hz", story: "Goksel yuruyus. Her adim bir meditasyon." },
-  { id: "h3", name: "Aurora Sandal",    brand: "Caelinus", designer: "Celine River", category: "heels", price: "$200", image: "/play/bikinis/aquarius.png", frequency: "396 Hz", story: "Kuzey isiklarinin dans ettigi zarif kayislar." },
-
-  // ═══════════════════════ JEWELRY ═══════════════════════
-  { id: "j1", name: "Frequency Pendant", brand: "Caelinus", designer: "Celine River", category: "jewelry", price: "$90",  image: "/play/bikinis/cancer.png",       frequency: "432 Hz", story: "Frekansini boynunda tasi. Titresimin senin." },
-  { id: "j2", name: "Zodiac Chain",      brand: "Caelinus", designer: "Celine River", category: "jewelry", price: "$110", image: "/play/bikinis/sagittarius.png", frequency: "528 Hz", story: "12 burcun enerjisi tek bir zincirde bulusuyor." },
-  { id: "j3", name: "Moon Ring",         brand: "Caelinus", designer: "Celine River", category: "jewelry", price: "$75",  image: "/play/bikinis/cancer.png",       frequency: "639 Hz", story: "Ay'in parmigindaki yansimasi. Evrenle basin." },
-  { id: "j4", name: "Crystal Ear Cuff",  brand: "Caelinus", designer: "Celine River", category: "jewelry", price: "$65",  image: "/play/bikinis/aries.png",        frequency: "963 Hz", story: "Kristalin frekansi kulaginda. Evreni duy." },
+  // NOT: Caelinus yalnizca bikini satar. Pareo/canta/topuklu/taki SKU'lari
+  // (gercek urun fotografi olmadigi, bikini gorsellerini tekrar kullandiklari
+  // icin) 2026-06 itibariyla katalogdan kaldirildi.
 ];
 
 /* ═══════════════════════════════════════════════════════════════

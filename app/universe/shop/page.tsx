@@ -9,16 +9,14 @@ import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { loadAvatarConfig } from "@/lib/avatar-storage";
 import { AVATARS_IN_PRODUCTION } from "@/lib/avatar-bodies";
 import { productsExtended } from "@/data/products";
-import ShopHeader from "./_components/ShopHeader";
 import ShopGuide from "./_components/ShopGuide";
 import MirrorGate from "./_components/MirrorGate";
 import TryOnSection from "./_components/TryOnSection";
 import ProductSection from "./_components/ProductSection";
-import OutfitBuilder from "./_components/OutfitBuilder";
 import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
-import AvatarBadge from "./_components/AvatarBadge";
+import BikiniLineup from "./_components/BikiniLineup";
 import "./shop-experience.css";
 
 /**
@@ -105,12 +103,10 @@ export default function ShopPage() {
       </Suspense>
 
       <div className="shop-shell mirror-shell">
-        {/* MIRROR CONSOLE — aynanın sağ üst kontrol paneli (sticky). */}
-        <AvatarBadge />
+        {/* RUNWAY — sayfa doğrudan 12 mankenin tam-boy, tam-genişlik dizisiyle açılır. */}
+        <BikiniLineup />
 
-        <ShopHeader />
-
-        {/* İçeride neler var? — ilk girişte yön bulma rehberi (mod seçici). */}
+        {/* İçeride neler var? — mod seçici (tryon/freq/ai/live) rehber kartları. */}
         <ShopGuide />
 
         {/* Aynanın kendisi: oval portal + su üstündeki 3 ritüel taşı. */}
@@ -123,7 +119,6 @@ export default function ShopPage() {
           {/* 2. VIRTUAL TRY-ON MODE */}
           <div className={`shop-section-panel ${activeMode === "tryon" ? "visible" : ""}`}>
             <ProductSection />
-            <OutfitBuilder />
           </div>
 
           {/* 3. AI KOMBIN MODE — Faz 4: catalog-bound stylist + haftalık kombinler */}

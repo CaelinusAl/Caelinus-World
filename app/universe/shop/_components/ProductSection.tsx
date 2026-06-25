@@ -13,7 +13,7 @@
  * try-on, öneri motoru) hiç değişmeden korunur — sadece deneyim dönüşür.
  */
 
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useWardrobeStore } from "@/stores/wardrobe-store";
 import { useCartStore } from "@/stores/cart-store";
@@ -24,7 +24,6 @@ import {
   getTopRecommendedProducts,
 } from "@/lib/avatar-recommendations";
 import BazaarCard from "@/components/shop/BazaarCard";
-import BazaarShowcase from "@/components/shop/BazaarShowcase";
 import { useSceneStore } from "@/stores/scene-store";
 import type { ProductExtended } from "@/types/play";
 
@@ -106,7 +105,6 @@ const ROOMS: Room[] = [
 export default function ProductSection() {
   const setTryOnProduct = useWardrobeStore((s) => s.setTryOnProduct);
   const addToCart = useCartStore((s) => s.addToCart);
-  const shellRef = useRef<HTMLDivElement>(null);
 
   const avatarConfig = useMemo(() => loadAvatarConfig(), []);
 
@@ -125,45 +123,8 @@ export default function ProductSection() {
     useSceneStore.getState().setMode("tryon");
   };
 
-  const scrollToRoom = (id: string) => {
-    const root = shellRef.current;
-    if (!root) return;
-    const el = root.querySelector(`#${id}`);
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
-    <div className="bazaar" ref={shellRef}>
-      {/* ── Giriş alanı ───────────────────────────────────────── */}
-      <header className="bazaar-hero">
-        <span className="bazaar-hero-kicker">CAELINUS UNIVERSE</span>
-        <h2 className="bazaar-hero-title">Caelinus Bazaar</h2>
-        <p className="bazaar-hero-sub">Ürün değil, hikâyesi olan parçalar.</p>
-
-        {/* ── Ana vitrin: tüm burçların sahnede yürüdüğü video ── */}
-        <BazaarShowcase />
-
-        <button
-          className="bazaar-hero-cta"
-          onClick={() => scrollToRoom("selin-atelier")}
-        >
-          Atölye&apos;leri Keşfet ↓
-        </button>
-
-        <nav className="bazaar-nav" aria-label="Atölye odaları">
-          {ROOMS.map((r) => (
-            <button
-              key={r.id}
-              className="bazaar-nav-pill"
-              onClick={() => scrollToRoom(r.id)}
-            >
-              <span className="bazaar-nav-glyph">{r.glyph}</span>
-              {r.name}
-            </button>
-          ))}
-        </nav>
-      </header>
-
+    <div className="bazaar">
       {/* ── Sana özel vitrin ──────────────────────────────────── */}
       {sanaOnerilen.length > 0 && (
         <section className="bazaar-room bazaar-room--curated" aria-label="Sana özel">
@@ -198,30 +159,8 @@ export default function ProductSection() {
       {/* ── Atölye odaları ────────────────────────────────────── */}
       {ROOMS.map((room) => {
         if (room.kind === "atelier") {
-          return (
-            <section key={room.id} id={room.id} className="bazaar-room bazaar-room--portal">
-              <div className="bazaar-portal">
-                <div className="bazaar-portal-ring" aria-hidden="true" />
-                <span className="bazaar-portal-glyph">{room.glyph}</span>
-                <div className="bazaar-portal-body">
-                  <span className="bazaar-portal-kicker">Atölye · {room.designer}</span>
-                  <h3 className="bazaar-portal-name">{room.name}</h3>
-                  <p className="bazaar-portal-tagline">{room.tagline}</p>
-                  <div className="bazaar-portal-links">
-                    <button className="bazaar-room-link" onClick={() => scrollToRoom("zodiac-room")}>
-                      Zodiac Room →
-                    </button>
-                    <button className="bazaar-room-link" onClick={() => scrollToRoom("goddess-room")}>
-                      Goddess Room →
-                    </button>
-                    <button className="bazaar-room-link" onClick={() => scrollToRoom("ritual-room")}>
-                      Ritual Pieces →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-          );
+          // Atölye giriş kartı kaldırıldı — oda yalnızca ürün odalarını taşır.
+          return null;
         }
 
         if (room.kind === "guest") {

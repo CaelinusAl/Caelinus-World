@@ -178,3 +178,218 @@
     padding: 6px 12px;
   }
 }
+
+/* ───────────────────────── BIKINI LINEUP (Shop 1. bölüm) ─────────────────────────
+   Şeffaf manken cutout'larının açık zeminli, TAM GENİŞLİK editoryal "koleksiyon rafı".
+   Referans: 12 figür tek sırada, küçük, TEPEDEN TIRNAĞA tam boy, ferah aralıklı.
+   Her figür kendi PDP'sine link. Dar hero'dan çıkarıldı → kendi tam-genişlik bandı. */
+.shop-lineup {
+  margin: 0;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem) 1.5rem;
+  /* hero kaldırıldı → üstteki koyu zeminden kreme kısa, temiz geçiş */
+  background: linear-gradient(
+    to bottom,
+    rgba(244, 244, 242, 0) 0%,
+    #f4f4f2 6%,
+    #f4f4f2 100%
+  );
+  border-radius: 20px 20px 0 0;
+}
+/* iç sarmal — referanstaki gibi ortalı, ferah */
+.shop-lineup-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.shop-lineup-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+.shop-lineup-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #111;
+}
+.shop-lineup-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111;
+}
+.shop-lineup-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(0.2rem, 1vw, 0.9rem);
+  padding: 0.5rem 0 0.25rem;
+}
+.shop-lineup-fig {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 1.4rem;
+  text-decoration: none;
+  transition: transform 0.35s ease;
+}
+.shop-lineup-fig:hover {
+  transform: translateY(-8px);
+}
+.shop-lineup-img {
+  /* küçük + tam boy: yükseklik sınırlı, genişlik kolona göre küçülür */
+  height: clamp(150px, 17vw, 250px);
+  max-width: 100%;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  object-position: bottom;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.12));
+}
+.shop-lineup-meta {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.shop-lineup-fig:hover .shop-lineup-meta {
+  opacity: 1;
+}
+.shop-lineup-name {
+  font-size: 0.7rem;
+  color: #111;
+  letter-spacing: 0.03em;
+}
+.shop-lineup-price {
+  font-size: 0.7rem;
+  color: #555;
+}
+/* dar ekran: 12 figür tek sırada sığmaz → yatay kaydırmalı şerit */
+@media (max-width: 720px) {
+  .shop-lineup-row {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+  .shop-lineup-fig {
+    flex: 0 0 auto;
+  }
+  .shop-lineup-img {
+    height: 180px;
+  }
+}
+
+/* ════════════════════════ SHOP EDITORIAL THEME ════════════════════════
+   Beğenilen referans siteden uyarlanan AÇIK editoryal dil. Tüm shop
+   sayfasını minimal beyaza çevirir; koyu "ayna" teması .shop-page altında
+   bu katmanla ezilir (iki-sınıf özgüllüğü → !important gerekmez).
+   Fontlar korunur — yalnızca renk/yüzey/boşluk dili değişir.
+   Tokenlar referanstaki --color-* / --gap / --grid-* değerlerinden alındı
+   (px'e sabitlendi; rem-ölçek hilesi mevcut kodla çakışacağından alınmadı). */
+.shop-page {
+  --ed-black: #0a0a0a;
+  --ed-grey: #b2b2b2;
+  --ed-divider: #e6e6e6;
+  --ed-off-white: #f6f6f6;
+  --ed-white: #fff;
+  --ed-hover: #666;
+  --ed-gutter: 20px;
+  --ed-margin: 30px;
+  --ed-gap: 40px;
+  --ed-radius: 24px;
+}
+
+/* ── frame: koyu zemin + atmosferi kapat, açığa çevir ── */
+.shop-page.mirror-page {
+  background: var(--ed-off-white);
+  color: var(--ed-black);
+}
+.shop-page .mirror-bg {
+  display: none;
+}
+
+/* ── ShopGuide: başlık + kartlar → beyaz, ince çizgili, minimal ── */
+.shop-page .shop-guide-title {
+  color: var(--ed-black);
+}
+.shop-page .shop-guide-sub {
+  color: var(--ed-hover);
+}
+.shop-page .shop-guide-card {
+  background: var(--ed-white);
+  border: 1px solid var(--ed-divider);
+  color: var(--ed-black);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.shop-page .shop-guide-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ed-black);
+  background: var(--ed-white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+.shop-page .shop-guide-card.active {
+  border-color: var(--ed-black);
+  background: var(--ed-white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+.shop-page .shop-guide-card-title {
+  color: var(--ed-black);
+}
+.shop-page .shop-guide-card-desc {
+  color: var(--ed-hover);
+}
+.shop-page .shop-guide-card-go {
+  color: var(--ed-black);
+}
+.shop-page .shop-guide-card-icon {
+  filter: none;
+}
+
+/* ── Designers CTA → açık kart, siyah buton ── */
+.shop-page .shop-designers-card {
+  background: var(--ed-white);
+  border: 1px solid var(--ed-divider);
+  backdrop-filter: none;
+  box-shadow: none;
+  color: var(--ed-black);
+}
+.shop-page .shop-designers-title {
+  color: var(--ed-black);
+}
+.shop-page .shop-designers-desc {
+  color: var(--ed-hover);
+}
+.shop-page .shop-designers-btn {
+  background: var(--ed-black);
+  border: 1px solid var(--ed-black);
+  color: var(--ed-white);
+}
+.shop-page .shop-designers-btn:hover {
+  background: var(--ed-hover);
+  border-color: var(--ed-hover);
+  box-shadow: none;
+}
+
+/* ── Alt nav → açık ── */
+.shop-page .shop-back {
+  background: var(--ed-white);
+  border: 1px solid var(--ed-divider);
+  color: var(--ed-black);
+  backdrop-filter: none;
+}
+.shop-page .shop-whisper {
+  color: var(--ed-grey);
+}
