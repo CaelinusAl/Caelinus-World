@@ -67,3 +67,12 @@ public/**/*.fbx
 # local Vercel project link dir
 .vercel
 .gstack/
+
+# Claude Code yerel ayarları
+.claude/
+
+# geliştirme notları + çalışma çıktıları (repoya girmez)
+_work/
+
+# shop lineup cutout geliştirme kalıntıları (trim/webp olanlar commit'li)
+public/products/_dev/
