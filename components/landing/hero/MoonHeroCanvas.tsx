@@ -20,13 +20,7 @@
 import { Suspense, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Cloud, Clouds } from "@react-three/drei";
-import {
-  EffectComposer,
-  Bloom,
-  ChromaticAberration,
-  Vignette,
-} from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 /* ───────────────────────── Marka renk DNA'sı ───────────────────────── */
@@ -91,16 +85,15 @@ const MOON_FRAG = /* glsl */ `
                mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),
                    mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
   }
-  float fbm(vec3 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }
+  float fbm(vec3 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }
 
   /* Ay yükseklik alanı: maria (koyu denizler) + kraterler */
   float height(vec3 p){
     float base = fbm(p*1.4);
     float maria = smoothstep(0.42, 0.62, fbm(p*0.7));      // geniş koyu havzalar
     float ridges = fbm(p*3.1);
-    float crater = pow(1.0 - abs(2.0*ridges-1.0), 5.0);    // krater kenar halkaları
-    float fine = fbm(p*7.0)*0.25;                          // ince doku
-    return base*0.6 + crater*0.5 - maria*0.35 + fine;
+    float crater = pow(1.0 - abs(2.0*ridges-1.0), 5.0);
+    return base*0.6 + crater*0.5 - maria*0.35;
   }
 
   void main(){
@@ -111,8 +104,8 @@ const MOON_FRAG = /* glsl */ `
     float e = 0.012;
     vec3 t1 = normalize(abs(vObjPos.y) < 0.99 ? cross(vObjPos, vec3(0,1,0)) : vec3(1,0,0));
     vec3 t2 = normalize(cross(vObjPos, t1));
-    float hx = height(p + t1*e);
-    float hy = height(p + t2*e);
+    float hx = h;
+    float hy = h;
     vec3 nObj = normalize(vObjPos);
     vec3 perturbed = normalize(nObj - (t1*(hx-h) + t2*(hy-h)) * 6.0);
     vec3 N = normalize(mat3(modelMatrix) * perturbed);
@@ -204,7 +197,7 @@ function Moon({
         onEnter();
       }}
     >
-      <sphereGeometry args={[1, 128, 128]} />
+      <sphereGeometry args={[1, 64, 64]} />
       <shaderMaterial
         ref={mat}
         vertexShader={MOON_VERT}
@@ -688,33 +681,18 @@ function CameraRig({ entering }: { entering: boolean }) {
 }
 
 /* ═════════════════════════ POST FX ═════════════════════════ */
-function PostFX({ entering }: { entering: boolean }) {
-  const caRef = useRef<any>(null);
-  const off = useRef(new THREE.Vector2(0, 0));
-  const amt = useRef(0);
-  useFrame((_s, delta) => {
-    amt.current += ((entering ? 1 : 0) - amt.current) * Math.min(1, delta * 2);
-    const o = amt.current * 0.004;
-    off.current.set(o, o);
-    if (caRef.current) caRef.current.offset = off.current;
-  });
+/* Tek Bloom geçişi — düşük bellek; ağır CA/Vignette geçişleri kaldırıldı
+   (GPU bellek baskısını ve sürücü reset riskini azaltır). */
+function PostFX() {
   return (
     <EffectComposer multisampling={0}>
       <Bloom
-        intensity={0.9}
-        luminanceThreshold={0.2}
-        luminanceSmoothing={0.4}
-        radius={0.75}
+        intensity={0.7}
+        luminanceThreshold={0.25}
+        luminanceSmoothing={0.45}
+        radius={0.6}
         mipmapBlur
       />
-      <ChromaticAberration
-        ref={caRef}
-        offset={off.current}
-        blendFunction={BlendFunction.NORMAL}
-        radialModulation={false}
-        modulationOffset={0}
-      />
-      <Vignette eskil={false} offset={0.28} darkness={0.72} />
     </EffectComposer>
   );
 }
@@ -766,26 +744,16 @@ function Scene({
 
       {/* Volumetrik bulutlar — alt katman, yavaş sürüklenir */}
       <group position={[0, -2.4, -3]}>
-        <Clouds material={THREE.MeshBasicMaterial} limit={40}>
+        <Clouds material={THREE.MeshBasicMaterial} limit={16}>
           <Cloud
             seed={2}
-            segments={26}
-            bounds={[10, 1.6, 3]}
-            volume={5}
-            color="#3a2d66"
-            opacity={0.22}
-            speed={0.08}
+            segments={12}
+            bounds={[11, 1.4, 3]}
+            volume={4}
+            color="#4a3a78"
+            opacity={0.16}
+            speed={0.06}
             fade={28}
-          />
-          <Cloud
-            seed={7}
-            segments={20}
-            bounds={[12, 1.2, 3]}
-            volume={6}
-            color="#7a5fd0"
-            opacity={0.12}
-            speed={0.05}
-            fade={30}
           />
         </Clouds>
       </group>
@@ -800,7 +768,7 @@ function Scene({
       </MoonRig>
 
       <CameraRig entering={entering} />
-      <PostFX entering={entering} />
+      <PostFX />
     </>
   );
 }
@@ -809,14 +777,16 @@ function Scene({
 export default function MoonHeroCanvas({
   entering,
   onEnter,
+  onError,
 }: {
   entering: boolean;
   onEnter: () => void;
+  onError?: () => void;
 }) {
   return (
     <Canvas
       className="moon-hero-canvas"
-      dpr={[1, 1.8]}
+      dpr={[1, 1.4]}
       camera={{ fov: 42, near: 0.1, far: 120, position: [0, 0, 5] }}
       gl={{
         antialias: true,
@@ -824,6 +794,19 @@ export default function MoonHeroCanvas({
         powerPreference: "high-performance",
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.05,
+        failIfMajorPerformanceCaveat: false,
+      }}
+      onCreated={({ gl }) => {
+        // GPU context kaybında (TDR / bellek) sayfayı çökertmek yerine
+        // statik CSS fallback'e düş.
+        gl.domElement.addEventListener(
+          "webglcontextlost",
+          (e) => {
+            e.preventDefault();
+            onError?.();
+          },
+          { once: true },
+        );
       }}
     >
       <Suspense fallback={null}>

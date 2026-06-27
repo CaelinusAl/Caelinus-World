@@ -40,6 +40,40 @@
   height: 100% !important;
 }
 
+/* Statik fallback ay — WebGL yok / GPU çökmesi durumunda (tıklanabilir) */
+.caelinus-fallback-moon {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: clamp(180px, 34vmin, 460px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 38% 34%, #fbf6ee 0%, #d9d2c4 38%, #9a93a8 66%, #4a4566 100%);
+  box-shadow:
+    inset -22px -18px 60px rgba(20, 14, 40, 0.7),
+    inset 14px 12px 40px rgba(255, 248, 230, 0.25),
+    0 0 50px rgba(143, 108, 255, 0.5),
+    0 0 130px rgba(201, 164, 92, 0.22);
+  animation: fbMoonBreath 12s ease-in-out infinite;
+}
+.caelinus-fallback-moon::before {
+  content: "";
+  position: absolute;
+  inset: -16%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(216, 183, 255, 0.28), transparent 62%);
+  filter: blur(12px);
+  z-index: -1;
+}
+@keyframes fbMoonBreath {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.02); }
+}
+
 /* z2 — kontrast scrim (üst hafif koyu + alt metin için degrade) */
 .caelinus-scrim {
   position: absolute;

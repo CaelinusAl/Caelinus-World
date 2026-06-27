@@ -10,12 +10,21 @@
  *   • eşikten geçiş: ay tık / CTA tık → kamera aya uçar, enerji halkaları,
  *     beyaza fade → /universe.
  *
- * 3D katman next/dynamic ssr:false ile tembel yüklenir (ağır three bundle ilk
- * boyamayı bloklamaz). reduced-motion'da geçiş anında yönlendirir.
+ * SAĞLAMLIK: WebGL yoksa / bağlam kaybolursa / canvas hata verirse 3D katman
+ * yerine zarif bir CSS ay fallback'i gösterilir — sayfa ASLA çökmez (tarayıcı
+ * "This page couldn't load" GPU reset ekranı yerine her zaman içerik görünür).
+ * 3D katman next/dynamic ssr:false ile tembel yüklenir.
  */
 
 import dynamic from "next/dynamic";
-import { useCallback, useRef, useState } from "react";
+import {
+  Component,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { prefersReducedMotion } from "@/lib/anime/reduced-motion";
 import LivingLogo from "@/components/landing/LivingLogo";
@@ -26,10 +35,49 @@ const MoonHeroCanvas = dynamic(
   { ssr: false },
 );
 
+/* WebGL yeteneği — bir kez, senkron. Başarısızsa 3D hiç denenmez. */
+function detectWebGL(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const c = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (c.getContext("webgl2") || c.getContext("webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+/* Canvas içindeki herhangi bir JS hatasını yakalar → fallback'e düşer. */
+class CanvasBoundary extends Component<
+  { onError: () => void; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
 export default function CaelinusEntryScene() {
   const router = useRouter();
   const [entering, setEntering] = useState(false);
+  const [use3D, setUse3D] = useState(false);
   const enteringRef = useRef(false);
+
+  // Mount sonrası yeteneği ölç (SSR'da çalışmaz). Başarılıysa 3D'yi aç.
+  useEffect(() => {
+    if (detectWebGL()) setUse3D(true);
+  }, []);
+
+  const failTo2D = useCallback(() => setUse3D(false), []);
 
   const enterUniverse = useCallback(() => {
     if (enteringRef.current) return;
@@ -46,9 +94,25 @@ export default function CaelinusEntryScene() {
 
   return (
     <section className={`caelinus-entry${entering ? " is-entering" : ""}`}>
-      {/* z0 — yaşayan 3D gökyüzü + ay portalı */}
+      {/* z0 — yaşayan 3D gökyüzü + ay portalı (yetenek varsa) */}
       <div className="caelinus-canvas-layer" aria-hidden="true">
-        <MoonHeroCanvas entering={entering} onEnter={enterUniverse} />
+        {use3D ? (
+          <CanvasBoundary onError={failTo2D}>
+            <MoonHeroCanvas
+              entering={entering}
+              onEnter={enterUniverse}
+              onError={failTo2D}
+            />
+          </CanvasBoundary>
+        ) : (
+          /* Statik fallback — WebGL yok / çökme: CSS ay + hâle (tıklanabilir) */
+          <button
+            type="button"
+            className="caelinus-fallback-moon"
+            aria-label="Caelinus evrenine gir"
+            onClick={enterUniverse}
+          />
+        )}
       </div>
 
       {/* z2 — atmosferik scrim: alt metin için kontrast */}

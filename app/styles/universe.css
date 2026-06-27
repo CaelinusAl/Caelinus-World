@@ -299,6 +299,65 @@
   opacity: 0.7;
 }
 
+/* ── Fallback (WebGL yok / GPU çökmesi) ── */
+.uv-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 40%, #15123a, #02030a 70%);
+  color: #e9e3f5;
+}
+.uv-fallback-orb {
+  width: clamp(120px, 26vmin, 220px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 34%, #c9b6ff 0%, #6f5ad6 50%, #241c52 100%);
+  box-shadow: 0 0 60px rgba(154, 125, 255, 0.5), inset -16px -12px 50px rgba(10, 6, 30, 0.7);
+  animation: uvSpin 60s linear infinite;
+}
+.uv-fallback h2 {
+  margin: 0;
+  font-family: var(--cae-font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 500;
+}
+.uv-fallback p {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: rgba(220, 214, 240, 0.66);
+}
+.uv-fallback-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.uv-fallback-nav button {
+  background: rgba(18, 16, 38, 0.5);
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: transform 0.4s var(--slx-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.uv-fallback-nav button:hover {
+  transform: translateY(-2px);
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .uv-brand-sub { display: none; }

@@ -28,13 +28,7 @@ import {
 import dynamic from "next/dynamic";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Sparkles, Float } from "@react-three/drei";
-import {
-  EffectComposer,
-  Bloom,
-  ChromaticAberration,
-  Vignette,
-} from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { useRouter } from "next/navigation";
 import { DISTRICTS, type District } from "@/components/universe/districts";
@@ -52,7 +46,7 @@ const NOISE = /* glsl */ `
   float vnoise(vec3 x){ vec3 i=floor(x),f=fract(x); f=f*f*(3.0-2.0*f);
    return mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
               mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z); }
-  float fbm(vec3 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }
+  float fbm(vec3 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }
 `;
 
 /* Paylaşılan durum referansları (context yerine ucuz ref geçişi). */
@@ -381,14 +375,9 @@ const PLANET_FRAG = /* glsl */ `
   void main(){
     vec3 op = normalize(vObjPos);
     float n = terrain(op);
-    // hafif kabartma normal
-    float e = 0.02;
-    vec3 t1 = normalize(abs(op.y)<0.99 ? cross(op, vec3(0,1,0)) : vec3(1,0,0));
-    vec3 t2 = normalize(cross(op, t1));
-    float hx = terrain(op + t1*e);
-    float hy = terrain(op + t2*e);
-    vec3 perturbed = normalize(op - (t1*(hx-n)+t2*(hy-n))*4.0);
-    vec3 N = normalize(mat3(modelMatrix)*perturbed);
+    // GPU-dostu: pixel başına tek terrain çağrısı; kabartma yerine geometrik
+    // normal (terminatör korunur, kraterler albedo'da okunur).
+    vec3 N = normalize(vWorldNormal);
 
     vec3 col = mix(uDeep, uBase, smoothstep(0.34,0.55,n));
     col = mix(col, uHi, smoothstep(0.62,0.84,n));
@@ -1021,31 +1010,18 @@ function CameraController({
 }
 
 /* ════════════════════════════ POST FX ════════════════════════════ */
-function PostFX({ shared }: { shared: Shared }) {
-  const caRef = useRef<any>(null);
-  const off = useMemo(() => new THREE.Vector2(0, 0), []);
-  useFrame(() => {
-    const w = shared.warp.value;
-    off.set(w * 0.006, w * 0.006);
-    if (caRef.current) caRef.current.offset = off;
-  });
+/* Bloom + Vignette — düşük bellek (MSAA kapalı, CA geçişi kaldırıldı). */
+function PostFX() {
   return (
-    <EffectComposer multisampling={2}>
+    <EffectComposer multisampling={0}>
       <Bloom
-        intensity={1.05}
-        luminanceThreshold={0.32}
+        intensity={0.9}
+        luminanceThreshold={0.3}
         luminanceSmoothing={0.5}
-        radius={0.8}
+        radius={0.7}
         mipmapBlur
       />
-      <ChromaticAberration
-        ref={caRef}
-        offset={off}
-        blendFunction={BlendFunction.NORMAL}
-        radialModulation={false}
-        modulationOffset={0}
-      />
-      <Vignette eskil={false} offset={0.26} darkness={0.78} />
+      <Vignette eskil={false} offset={0.28} darkness={0.7} />
     </EffectComposer>
   );
 }
@@ -1103,9 +1079,23 @@ function Scene({
 
       <WarpStreaks shared={shared} />
       <CameraController shared={shared} phase={phase} />
-      <PostFX shared={shared} />
+      <PostFX />
     </>
   );
+}
+
+/* WebGL yeteneği — başarısızsa ağır sahne hiç kurulmaz (çökme yerine fallback). */
+function detectWebGL(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const c = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (c.getContext("webgl2") || c.getContext("webgl"))
+    );
+  } catch {
+    return false;
+  }
 }
 
 /* ════════════════════════════ ROOT ════════════════════════════ */
@@ -1116,7 +1106,15 @@ export default function CaelinusUniverseScene() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "warp">("idle");
+  const [webglOk, setWebglOk] = useState(true);
+  const [crashed, setCrashed] = useState(false);
   const selectingRef = useRef(false);
+
+  useEffect(() => {
+    if (!detectWebGL()) setWebglOk(false);
+  }, []);
+
+  const live = webglOk && !crashed;
 
   const shared = useMemo<Shared>(
     () => ({ positions: {}, warp: { value: 0 }, selectedId: null }),
@@ -1157,30 +1155,62 @@ export default function CaelinusUniverseScene() {
   return (
     <div className={`uv-root${phase === "warp" ? " is-warping" : ""}`}>
       <div className="uv-canvas-wrap">
-        <Canvas
-          dpr={[1, 1.6]}
-          camera={{ fov: 55, near: 0.1, far: 600, position: [0, 6, -46] }}
-          gl={{
-            antialias: true,
-            alpha: false,
-            powerPreference: "high-performance",
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 0.9,
-          }}
-          onCreated={() => setReady(true)}
-        >
-          <color attach="background" args={["#02030a"]} />
-          <Suspense fallback={null}>
-            <Scene
-              shared={shared}
-              hoveredId={hoveredId}
-              selectedId={selectedId}
-              phase={phase}
-              onHover={handleHover}
-              onSelect={handleSelect}
-            />
-          </Suspense>
-        </Canvas>
+        {live ? (
+          <Canvas
+            dpr={[1, 1.4]}
+            camera={{ fov: 55, near: 0.1, far: 600, position: [0, 6, -46] }}
+            gl={{
+              antialias: true,
+              alpha: false,
+              powerPreference: "high-performance",
+              toneMapping: THREE.ACESFilmicToneMapping,
+              toneMappingExposure: 0.9,
+              failIfMajorPerformanceCaveat: false,
+            }}
+            onCreated={({ gl }) => {
+              setReady(true);
+              gl.domElement.addEventListener(
+                "webglcontextlost",
+                (e) => {
+                  e.preventDefault();
+                  setCrashed(true);
+                },
+                { once: true },
+              );
+            }}
+          >
+            <color attach="background" args={["#02030a"]} />
+            <Suspense fallback={null}>
+              <Scene
+                shared={shared}
+                hoveredId={hoveredId}
+                selectedId={selectedId}
+                phase={phase}
+                onHover={handleHover}
+                onSelect={handleSelect}
+              />
+            </Suspense>
+          </Canvas>
+        ) : (
+          /* Fallback — 3B yoksa kullanıcı yine de bölgelere geçebilsin */
+          <div className="uv-fallback">
+            <div className="uv-fallback-orb" />
+            <h2>Caelinus Evreni</h2>
+            <p>Bu cihazda 3B sahne gösterilemedi — bölgelere doğrudan geç.</p>
+            <div className="uv-fallback-nav">
+              {DISTRICTS.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  style={{ borderColor: d.accent, color: d.accent }}
+                  onClick={() => router.push(d.href)}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <UniverseHUD
@@ -1195,7 +1225,7 @@ export default function CaelinusUniverseScene() {
 
       <div className="uv-warp-flash" aria-hidden="true" />
 
-      {!ready && (
+      {live && !ready && (
         <div className="uv-loading">
           <div className="ring" />
           <div className="label">Caelinus Evreni Açılıyor</div>
