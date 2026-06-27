@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSceneStore } from "@/stores/scene-store";
@@ -14,7 +14,12 @@ import AiKombinPanel from "./_components/AiKombinPanel";
 import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
 import BikiniLineup from "./_components/BikiniLineup";
+import ShopLuxeHeader from "./_components/ShopLuxeHeader";
+import ShopEditorialHero from "./_components/ShopEditorialHero";
+import ShopFooter from "./_components/ShopFooter";
+import { useReveal } from "./_components/useReveal";
 import "./shop-experience.css";
+import "./shop-luxe.css";
 
 /**
  * TryOnLauncher — PDP'den (`/universe/shop/urun/<id>`) gelen
@@ -64,6 +69,8 @@ function TryOnLauncher() {
 
 export default function ShopPage() {
   const activeMode = useSceneStore((s) => s.activeMode);
+  const mainRef = useRef<HTMLElement>(null);
+  useReveal(mainRef);
 
   useEffect(() => {
     useCartStore.getState().hydrate();
@@ -71,7 +78,7 @@ export default function ShopPage() {
   }, []);
 
   return (
-    <main className="shop-page mirror-page">
+    <main className="shop-page mirror-page" ref={mainRef}>
       {/* MIRROR GATE atmosferi — eski shop/merdiven videosu kaldırıldı.
           Karanlık yansıtıcı su zemini, sütun silüetleri, mor ay,
           altın partiküller ve hafif sis. Tamamı CSS katmanı. */}
@@ -95,19 +102,29 @@ export default function ShopPage() {
         <div className="mirror-water" />
       </div>
 
+      {/* LÜKS STICKY CAM HEADER */}
+      <ShopLuxeHeader />
+
       <Suspense fallback={null}>
         <TryOnLauncher />
       </Suspense>
 
+      {/* SİNEMATİK EDİTORYAL HERO */}
+      <ShopEditorialHero />
+
       <div className="shop-shell mirror-shell">
         {/* RUNWAY — sayfa doğrudan 12 mankenin tam-boy, tam-genişlik dizisiyle açılır. */}
-        <BikiniLineup />
+        <div className="slx-reveal">
+          <BikiniLineup />
+        </div>
 
         {/* İçeride neler var? — Aynaya Gir + AI Kombin + Bazaar & Canlı
             üç mor oval portal. (Eski MirrorGate + ritüel taşları kaldırıldı.) */}
-        <ShopGuide />
+        <div className="slx-reveal">
+          <ShopGuide />
+        </div>
 
-        <section className="shop-main">
+        <section className="shop-main slx-reveal">
           {/* 1. AVATAR STAGE — 3D avatar şimdilik kaldırıldı, alan boş bırakıldı.
               Geri açmak için: {!AVATARS_IN_PRODUCTION && <TryOnSection />} */}
 
@@ -133,26 +150,38 @@ export default function ShopPage() {
           </div>
         </section>
 
-        {/* DESIGNERS CTA */}
-        <section className="shop-designers-cta">
-          <div className="shop-designers-card">
-            <h2 className="shop-designers-title">Tasarimci misin?</h2>
-            <p className="shop-designers-desc">
-              Hikayeli urunlerini Caelinus evreninde sat. AI avatar mankenlerde sergilensin,
-              frekans eslesmesiyle dogru musteriye ulassin.
+        {/* DESIGNERS — editoryal işe alım kampanyası */}
+        <section className="shoplux-designer slx-reveal" aria-label="Tasarımcı Programı">
+          <div className="shoplux-designer-portrait">
+            <span className="cap">Caelinus Atelier · Frekans Evi</span>
+          </div>
+          <div>
+            <p className="shoplux-eyebrow">Tasarımcı Programı</p>
+            <h2>Hikâyeni evrene dok.</h2>
+            <p>
+              Parçaların AI avatar mankenlerde sergilensin, Solfeggio frekansıyla
+              doğru ruha ulaşsın. Caelinus, bağımsız tasarımcıları kozmik bir
+              vitrine taşır — koleksiyonun bir ritüel olsun.
             </p>
-            <Link href="/designers" className="shop-designers-btn">
-              ✦ Basvuru Yap
+            <ul className="shoplux-timeline">
+              <li>Başvur — koleksiyonunu ve frekansını paylaş.</li>
+              <li>Küratörlük — Caelinus ekibiyle hikâyeni dok.</li>
+              <li>3D Vitrin — parçaların avatarlarda canlansın.</li>
+              <li>Sat — evren çapında doğru müşteriye ulaş.</li>
+            </ul>
+            <Link
+              href="/designers"
+              className="slx-btn slx-btn-primary"
+              style={{ display: "inline-block", marginTop: "26px" }}
+            >
+              ✦ Başvuru Yap
             </Link>
           </div>
         </section>
-
-        {/* BOTTOM NAV */}
-        <div className="shop-bottom">
-          <Link href="/universe" className="shop-back">← Evrene Don</Link>
-          <span className="shop-whisper">Frekansini giy, evrenle dans et.</span>
-        </div>
       </div>
+
+      {/* LÜKS FOOTER */}
+      <ShopFooter />
     </main>
   );
 }
