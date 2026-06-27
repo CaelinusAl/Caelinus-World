@@ -136,6 +136,44 @@ function DoubleClickReset() {
   return null;
 }
 
+/**
+ * Kıyafet değişince kamerayı kısa süre hafifçe yakınlaştırıp geri alır
+ * (~%7 dolly, 0.5s) — "outfit avatara yerleşti" lüks vurgusu. Bakış
+ * yönünü korur (yalnızca mesafeyi oynatır), kullanıcı hangi açıdaysa
+ * oradan zoom yapar.
+ */
+function OutfitZoomPulse({ trigger }: { trigger: string | null }) {
+  const camera = useThree((s) => s.camera);
+  const controls = useThree((s) => s.controls) as
+    | { target: THREE.Vector3; update: () => void }
+    | null;
+  const anim = useRef<{ t: number; dir0: THREE.Vector3 | null } | null>(null);
+  const first = useRef(true);
+
+  useEffect(() => {
+    // İlk yüklemedeki başlangıç kıyafetinde zoom yapma.
+    if (first.current) { first.current = false; return; }
+    if (!trigger) return;
+    anim.current = { t: 0, dir0: null };
+  }, [trigger]);
+
+  useFrame((_, delta) => {
+    const a = anim.current;
+    if (!a || !controls) return;
+    if (!a.dir0) a.dir0 = camera.position.clone().sub(controls.target);
+    a.t += delta;
+    const T = 0.5;
+    const p = Math.min(a.t / T, 1);
+    // Üçgen ease: p=0.4'te en yakın (%7), p=1'de geri.
+    const amt = p < 0.4 ? p / 0.4 : 1 - (p - 0.4) / 0.6;
+    const factor = 1 - 0.07 * amt;
+    camera.position.copy(controls.target).add(a.dir0.clone().multiplyScalar(factor));
+    controls.update();
+    if (p >= 1) anim.current = null;
+  });
+  return null;
+}
+
 export default function AvatarConfigurator({
   config,
   avatarUrl = null,
@@ -303,6 +341,7 @@ export default function AvatarConfigurator({
             makeDefault
           />
           <DoubleClickReset />
+          <OutfitZoomPulse trigger={outfitBindings[0]?.glbUrl ?? null} />
         </Suspense>
       </Canvas>
     </div>

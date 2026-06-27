@@ -30499,6 +30499,24 @@ div.stage-card {
     0 24px 60px rgba(0, 0, 0, 0.5),
     0 0 0 2px rgba(241, 213, 143, 0.55),
     0 0 28px rgba(241, 213, 143, 0.25);
+  /* Seçildiği anda tek seferlik pop + altın parıltı (lüks etkileşim) */
+  animation: avcfg-select-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes avcfg-select-pop {
+  0% {
+    transform: translateY(-3px) scale(1);
+  }
+  45% {
+    transform: translateY(-6px) scale(1.045);
+    box-shadow:
+      0 30px 72px rgba(0, 0, 0, 0.55),
+      0 0 0 2px rgba(241, 213, 143, 0.95),
+      0 0 46px rgba(241, 213, 143, 0.5);
+  }
+  100% {
+    transform: translateY(-3px) scale(1);
+  }
 }
 
 .avcfg-card-media {

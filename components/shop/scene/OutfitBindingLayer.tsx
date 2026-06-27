@@ -81,6 +81,12 @@ export default function OutfitBindingLayer({
   const axesRef = useRef<THREE.AxesHelper | null>(null);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
 
+  // ── 250ms fade-in — kıyafet avatara yumuşakça "giyer" (lüks hissi) ──
+  const FADE_DUR = 0.25;
+  const fadeRef = useRef<
+    { t: number; mats: { mat: THREE.Material; opacity: number; transparent: boolean }[] } | null
+  >(null);
+
   const reportStatus = useCallback(
     (s: OutfitBindingStatus) => {
       setStatus(s);
@@ -255,7 +261,7 @@ export default function OutfitBindingLayer({
     //   • earring/bracelet → 0.05–0.06
     const TARGET_FRAC = config.targetFraction ?? 0.40;
     const ratio = worldMax > 0.001 && avatarH > 0.001 ? worldMax / avatarH : 1;
-    let sf = (avatarH * TARGET_FRAC) / Math.max(worldMax, 0.001);
+    const sf = (avatarH * TARGET_FRAC) / Math.max(worldMax, 0.001);
 
     // Defansif: avatar/garment ölçümü dejenere ise (NaN/Infinity)
     // gizle — sahneye dev boyutta yüzmesin.
@@ -320,6 +326,25 @@ export default function OutfitBindingLayer({
       }
       o.material.needsUpdate = true;
     });
+
+    // ── 250ms fade-in setup — tüm materyalleri opaklık 0'a al, useFrame
+    //    bunları 1'e doğru animasyonlar (easeOut). Materyaller paylaşımlı
+    //    olabilir → tekilleştir. ──
+    const fadeMats: { mat: THREE.Material; opacity: number; transparent: boolean }[] = [];
+    const seenMats = new Set<THREE.Material>();
+    outfitScene.traverse((o) => {
+      if (!(o instanceof THREE.Mesh)) return;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach((m) => {
+        if (!m || seenMats.has(m)) return;
+        seenMats.add(m);
+        fadeMats.push({ mat: m, opacity: m.opacity, transparent: m.transparent });
+        m.transparent = true;
+        m.opacity = 0;
+        m.needsUpdate = true;
+      });
+    });
+    fadeRef.current = fadeMats.length ? { t: 0, mats: fadeMats } : null;
 
     // ── console report ──
     console.info(
@@ -402,6 +427,23 @@ export default function OutfitBindingLayer({
   useFrame((_, delta) => {
     mixerRef.current?.update(delta);
     boxHelperRef.current?.update();
+
+    // ── fade-in sürücüsü ──
+    const f = fadeRef.current;
+    if (f) {
+      f.t += delta;
+      const p = Math.min(f.t / FADE_DUR, 1);
+      const eased = p * (2 - p); // easeOutQuad
+      for (const e of f.mats) e.mat.opacity = e.opacity * eased;
+      if (p >= 1) {
+        for (const e of f.mats) {
+          e.mat.opacity = e.opacity;
+          e.mat.transparent = e.transparent;
+          e.mat.needsUpdate = true;
+        }
+        fadeRef.current = null;
+      }
+    }
   });
 
   /* ═══════════════════════════════════════════
