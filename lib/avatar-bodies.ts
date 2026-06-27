@@ -196,6 +196,34 @@ export function isCaelinusBodyUrl(url: string | null | undefined): boolean {
   return (match.pipeline ?? "caelinus") === "caelinus";
 }
 
+/**
+ * Bu GLB **baked photoreal / statik** bir avatar mı? (örn. PBR ve Shaded
+ * sürümler — tek mesh, rig YOK, mayo/saç/takı dokuya pişirilmiş.)
+ *
+ * Bu bedenlerde gövde-ölçü (boy/kilo/bust/hip) deform pipeline'ı (özellikle
+ * vertex-rebuild kolu) ÇALIŞTIRILMAMALIDIR: deform, vertex'leri Y-bandına göre
+ * farklı XZ ölçekleriyle ve geometri yerel orijinine göre yeniden inşa eder.
+ * Riglenebilir kendi bedenlerimizde anlamlı, ama photoreal tek-mesh bir figürde
+ * kollar/ayaklar/kafa orijinden uzak olduğu için yana kayar ve band sınırlarında
+ * geometri kırılır ("kol/ayak/kafa kayması" bug'ı). Uniform boy ölçeği güvenli
+ * olduğundan ModelAvatar onu yine uygular; yalnızca geometriyi bozan deform atlanır.
+ *
+ * Kararı registry verir — `pipeline:"external"` VEYA `animationCompat:"static"`
+ * işaretli her kayıt photoreal/statik sayılır. Kayıtta olmayan (bilinmeyen) URL
+ * için `false` döner: muse gibi skinned bedenlerin bone-deform davranışı korunsun.
+ */
+export function isStaticPhotorealBodyUrl(
+  url: string | null | undefined,
+): boolean {
+  if (!url) return false;
+  const match = CAELINUS_BODY_LIBRARY.find((b) => b.url === url);
+  if (!match) return false;
+  return (
+    (match.pipeline ?? "caelinus") === "external" ||
+    match.animationCompat === "static"
+  );
+}
+
 export function getBody(id: string | null | undefined): BodyEntry {
   if (CAELINUS_BODY_LIBRARY.length === 0) return IN_PRODUCTION_BODY;
   if (!id) {

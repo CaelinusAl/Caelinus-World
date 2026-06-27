@@ -12,7 +12,11 @@ import type { AvatarFaceDeformConfig, ModelCapabilities, MorphTargetMapping } fr
 import { IDENTITY_DEFORM, applyFaceDeform, clearFaceDeformBase } from "@/lib/face";
 import { inspectModel } from "@/lib/face/model-inspector";
 import { buildMorphTargetMapping } from "@/lib/face/morph-targets";
-import { getHairUrlForModelUrl, isCaelinusBodyUrl } from "@/lib/avatar-bodies";
+import {
+  getHairUrlForModelUrl,
+  isCaelinusBodyUrl,
+  isStaticPhotorealBodyUrl,
+} from "@/lib/avatar-bodies";
 import { AvatarFaceTexture } from "./AvatarFaceTexture";
 
 type Props = {
@@ -622,7 +626,28 @@ export default function ModelAvatar({
   }, [scene, cfg.height]);
 
   // 2) Body deform + face deform (strategy-aware)
+  //
+  // ⚠ Baked photoreal / statik avatarlarda (PBR & Shaded — tek mesh, rig YOK,
+  // mayo/saç/takı dokuya pişirilmiş) gövde-ölçü deform pipeline'ı ATLANIR.
+  // Vertex-rebuild kolu, vertex'leri Y-bandına göre farklı XZ ölçekleriyle ve
+  // geometri yerel orijinine göre yeniden inşa eder; orijinden uzaktaki kollar/
+  // ayaklar/kafa yana kayar ve band sınırlarında geometri kırılır. Uniform boy
+  // ölçeği (efekt #1) zaten güvenli biçimde uygulanıyor; sadece geometriyi bozan
+  // bu adım, registry'de external/static işaretli photoreal bedenlerde devre dışı.
+  const isStaticPhotoreal = useMemo(
+    () => isStaticPhotorealBodyUrl(url),
+    [url],
+  );
   useEffect(() => {
+    if (isStaticPhotoreal) {
+      if (process.env.NODE_ENV === "development") {
+        console.info(
+          "[ModelAvatar] body/face deform atlandı — baked photoreal/statik avatar " +
+            "(geometri korunuyor; kol/ayak/kafa kayması önlendi).",
+        );
+      }
+      return;
+    }
     try {
       const result = applyBodyDeformation(scene, cfg);
 
@@ -677,7 +702,7 @@ export default function ModelAvatar({
     } catch (e) {
       console.warn("[ModelAvatar] deform pipeline error:", e);
     }
-  }, [scene, cfg, faceDeform]);
+  }, [scene, cfg, faceDeform, isStaticPhotoreal]);
 
   // 3) Materials
   //
