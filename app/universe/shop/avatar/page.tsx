@@ -280,37 +280,13 @@ export default function AvatarPage() {
         </section>
 
         <section className="avcfg-game-layout" aria-label="Avatar deneyimi">
-          <div className="avcfg-stage-panel">
-            <div className="avcfg-stage-hud" aria-hidden="true">
-              <span>Mirror Room</span>
-              <span>{faceApplied ? "Face synced" : "Face optional"}</span>
-              <span>
-                {selectedProduct?.outfitGlb
-                  ? outfitStatus === "ready"
-                    ? "Outfit active"
-                    : "Outfit loading"
-                  : "Preview only"}
-              </span>
-            </div>
-
-            <nav className="avcfg-radial-tools" aria-label="Avatar bolumleri">
-              {SHOP_CATEGORY_ORDER.map((category) => {
-                const item = CATEGORY_LABELS[category];
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    className={`avcfg-tool-orb ${activeCategory === category ? "is-active" : ""}`}
-                    onClick={() => setActiveCategory(category)}
-                    title={item.label}
-                    aria-label={item.label}
-                  >
-                    <span className={`avcfg-tool-icon avcfg-tool-icon--${item.icon}`} />
-                  </button>
-                );
-              })}
-            </nav>
-
+          {/* 3D AVATAR KUTUSU — yalnızca avatar sahnesini içerir. Üstteki
+              durum yazıları (Mirror Room / Face / Preview) ve sağ kenardaki
+              radial kategori orb'ları kaldırıldı; kategori seçimi sağ
+              envanter panelindeki sekmelerde zaten var. Kutu tamamen
+              avatara ait, başka hiçbir öğe taşımaz. */}
+          <div className="avcfg-stage-col">
+            <div className="avcfg-stage-panel">
             <Suspense
               fallback={
                 <div className="avcfg-canvas ux-canvas-loading">
@@ -342,7 +318,10 @@ export default function AvatarPage() {
                 onOutfitStatus={(status) => setOutfitStatus(status.state)}
               />
             </Suspense>
+            </div>
 
+            {/* Kaydet / Shop'a dön — artık avatar kutusunun DIŞINDA,
+                sahnenin hemen altında (kutu sadece avatarı içersin diye). */}
             <div className="avcfg-save-bar">
               <button
                 className={`avcfg-save-btn ${saved ? "saved" : ""}`}
@@ -475,9 +454,11 @@ export default function AvatarPage() {
         </section>
 
         <section className="avcfg-studio-drawer" aria-label="Avatar stüdyo ayarları">
-          <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
+          {/* Bedenini Seç + Selfie Yükle — aynı bölümde yan yana iki sütun
+              (mobilde <1120px alt alta yığılır). */}
+          <div className="avcfg-studio-grid">
+            <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
 
-          <div className="avcfg-studio-grid avcfg-studio-grid--single">
             <div className="face-section avcfg-face-card">
               <FaceUpload onUploaded={handleFaceUploaded} />
 

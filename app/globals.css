@@ -30212,15 +30212,18 @@ div.stage-card {
   -webkit-backdrop-filter: blur(18px);
 }
 
+/* Avatar kutusu + altındaki kaydet/dön çubuğunu taşıyan sol sütun.
+   (Grid'in 1. hücresi.) Panel ile çubuğu dikey yığar. */
+.avcfg-stage-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-self: start;
+}
+
 .avcfg-stage-panel {
   overflow: hidden;
   min-height: 600px;
-  /* Grid `align-items: stretch` envanter paneli uzadıkça stage panelini de
-     o yüksekliğe geriyordu; içteki canvas ise sabit (≤720px) kaldığından
-     altta ölü, boş ızgaralı bir bant oluşuyordu. `align-self: start` ile
-     stage paneli yalnızca canvas içeriği kadar yükselir — 3D sahneye
-     (canvas yüksekliği/kamera) dokunmadan boşluk kapanır. */
-  align-self: start;
 }
 
 .avcfg-stage-panel::before {
@@ -30734,7 +30737,9 @@ div.stage-card {
 }
 
 .avcfg-studio-drawer .body-picker {
-  margin: 0 0 18px;
+  /* Beden seçici artık selfie kartıyla yan yana (avcfg-studio-grid sütunu);
+     dikey yığın için verilen alt boşluk kaldırıldı. */
+  margin: 0;
 }
 
 .avcfg-studio-grid {
