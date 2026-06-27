@@ -62,10 +62,10 @@ export default function ShopGuide() {
         <Link
           href="/universe/shop/avatar"
           className="shop-orb shop-orb--mirror"
-          aria-label="Aynaya gir — avatar bedenini oluştur"
+          aria-label="Avatar oluştur — avatar bedenini doğur"
         >
           <span className="shop-orb-icon" aria-hidden="true">◍</span>
-          <span className="shop-orb-title">Aynaya Gir</span>
+          <span className="shop-orb-title">Avatar Oluştur</span>
           <span className="shop-orb-desc">
             Selfie&apos;ni yükle, frekansını seç, avatar bedenini doğur.
           </span>

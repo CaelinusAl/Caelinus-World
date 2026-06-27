@@ -65,7 +65,7 @@ export default function AvatarBadge() {
           ))}
         </ol>
         <Link href="/universe/shop/avatar" className="mirror-console-cta">
-          ◍ Aynaya Gir
+          ◍ Avatar Oluştur
         </Link>
       </aside>
     );
