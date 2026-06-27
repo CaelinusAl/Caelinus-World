@@ -14,7 +14,10 @@ const NAV_ITEMS = [
   { href: "/manifesto", label: "Manifesto" },
 ];
 
-const HIDDEN_PATHS = ["/", "/universe", "/onboarding"];
+// `/universe/shop` kendi lüks başlığını (ShopLuxeHeader) taşır — global TopBar
+// orada gizlenir ki çift başlık olmasın. Alt sayfalar (checkout, urun/…) hâlâ
+// TopBar kullanır.
+const HIDDEN_PATHS = ["/", "/universe", "/onboarding", "/universe/shop"];
 
 export default function TopBar() {
   const pathname = usePathname() ?? "/";

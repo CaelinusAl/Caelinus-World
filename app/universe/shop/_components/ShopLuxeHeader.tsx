@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCartCount } from "@/stores/cart-store";
 import { useLangStore } from "@/stores/lang-store";
+import FrequencyBadge from "@/components/layout/FrequencyBadge";
 
 const NAV = [
   { href: "/universe/shop", label: "Bazaar", active: true },
@@ -88,6 +89,11 @@ export default function ShopLuxeHeader() {
       </nav>
 
       <div className="shoplux-actions">
+        {/* Eski global TopBar'dan taşınan "Frekansını Bul" rozeti — profil
+            yoksa CTA, varsa akort durumunu (Hz) gösterir. */}
+        <span className="slx-freq slx-hide-sm">
+          <FrequencyBadge lang={lang} />
+        </span>
         <button type="button" className="slx-icon slx-hide-sm" aria-label="Ara">
           <Icon d={PATHS.search} />
         </button>

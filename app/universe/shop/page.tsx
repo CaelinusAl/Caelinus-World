@@ -15,7 +15,6 @@ import StylistPanel from "./_components/StylistPanel";
 import LiveShoppingPanel from "./_components/LiveShoppingPanel";
 import BikiniLineup from "./_components/BikiniLineup";
 import ShopLuxeHeader from "./_components/ShopLuxeHeader";
-import ShopEditorialHero from "./_components/ShopEditorialHero";
 import ShopFooter from "./_components/ShopFooter";
 import { useReveal } from "./_components/useReveal";
 import "./shop-experience.css";
@@ -109,14 +108,13 @@ export default function ShopPage() {
         <TryOnLauncher />
       </Suspense>
 
-      {/* SİNEMATİK EDİTORYAL HERO */}
-      <ShopEditorialHero />
-
+      {/* HERO kaldırıldı — sayfa doğrudan 12 mankenin (BikiniLineup) tam-boy
+          dizisiyle açılsın; mankenler eager/fetchPriority="high" ile anında yüklenir. */}
       <div className="shop-shell mirror-shell">
-        {/* RUNWAY — sayfa doğrudan 12 mankenin tam-boy, tam-genişlik dizisiyle açılır. */}
-        <div className="slx-reveal">
-          <BikiniLineup />
-        </div>
+        {/* RUNWAY — sayfa doğrudan 12 mankenin tam-boy, tam-genişlik dizisiyle açılır.
+            İlk ekran içeriği olduğu için slx-reveal (JS fade-in) UYGULANMAZ:
+            mankenler beklemeden, anında görünür. */}
+        <BikiniLineup />
 
         {/* İçeride neler var? — Aynaya Gir + AI Kombin + Bazaar & Canlı
             üç mor oval portal. (Eski MirrorGate + ritüel taşları kaldırıldı.) */}
