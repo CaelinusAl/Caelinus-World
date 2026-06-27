@@ -30458,6 +30458,15 @@ div.stage-card {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   padding: 0 20px 20px;
+  /* Flexbox tuzağı: bir flex item'ın varsayılan `min-height: auto`
+     değeri, onu içeriğinden (tüm ürün kartları) küçültmeyi engeller →
+     `overflow-y: auto` scroll ETMEZ, grid tam boyuna uzar. Bu da envanter
+     panelini → satırı → stage panelini gererek avatarın altında boş bir
+     ızgaralı bant bırakıyordu. `flex: 1` + `min-height: 0` ile grid kalan
+     alana sığar ve İÇERİDE kayar; satır canvas yüksekliğinde (≤720px)
+     sabit kalır, boşluk kapanır. (3D sahneye dokunulmaz.) */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
