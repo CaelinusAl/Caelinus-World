@@ -30215,6 +30215,12 @@ div.stage-card {
 .avcfg-stage-panel {
   overflow: hidden;
   min-height: 600px;
+  /* Grid `align-items: stretch` envanter paneli uzadıkça stage panelini de
+     o yüksekliğe geriyordu; içteki canvas ise sabit (≤720px) kaldığından
+     altta ölü, boş ızgaralı bir bant oluşuyordu. `align-self: start` ile
+     stage paneli yalnızca canvas içeriği kadar yükselir — 3D sahneye
+     (canvas yüksekliği/kamera) dokunmadan boşluk kapanır. */
+  align-self: start;
 }
 
 .avcfg-stage-panel::before {
