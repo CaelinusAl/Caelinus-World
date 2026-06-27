@@ -93,6 +93,56 @@ export type BodyEntry = {
  */
 export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
   {
+    // ── Yeni teslim edilen PBR avatar (caelinusai) — varsayılan beden ──
+    // base_basic_pbr.glb: tek mesh, gömülü PBR texture seti
+    // (diffuse + metallic/roughness + normal). 1.72 m, Y-up, ayaklar Y=0,
+    // X/Z merkezli — runtime center/scale/frame ile mükemmel oturur.
+    //
+    // ÖNEMLİ: Bu GLB STATIK (skin/rig YOK, animasyon YOK). Bu yüzden:
+    //   • pipeline:"external" → ModelAvatar kendi PBR materyallerini KORUR
+    //     (ten-tonu override'ı uygulanmaz, foto-gerçek doku bozulmaz).
+    //   • supportsSkinToneOverride:false → skin-tone slider no-op.
+    //   • animationCompat:"static" → catwalk retarget no-op; avatar
+    //     modellendiği pozda durur, wrapper'ın idle nefes/sway'i canlılık verir.
+    //   • preDressed:false → base body; try-on garment binding açık kalır.
+    id: "caelinus-pbr-v1",
+    label: "Caelinus · PBR",
+    tagline:
+      "caelinusai PBR avatar — gerçek fiziksel-bazlı materyaller, gömülü " +
+      "diffuse/metalik/normal doku seti. Yeni varsayılan beden.",
+    url: "/models/caelinus-avatar-pbr.glb",
+    preview: "/models/previews/caelinus-pbr.png",
+    isDefault: true,
+    isPersonal: true,
+    gender: "feminine",
+    vibe: "PBR — ışıkla yıkanan gerçekçi yüzey",
+    baseHeightM: 1.72,
+    // Kendi PBR doku seti var → ten-tonu override edilmez (doku korunur).
+    supportsSkinToneOverride: false,
+    animationCompat: "static",
+    // Dışarıdan teslim, kendi materyalleriyle korunur.
+    pipeline: "external",
+  },
+  {
+    // ── Fallback / karşılaştırma sürümü — shaded (baked emissive) ──
+    // base_basic_shaded.glb: tek emissive texture; ışıktan bağımsız sabit
+    // görünüm. PBR ile yan yana karşılaştırma için kütüphanede tutulur.
+    id: "caelinus-shaded-v1",
+    label: "Caelinus · Shaded",
+    tagline:
+      "caelinusai shaded avatar — baked emissive sürüm; PBR ile " +
+      "karşılaştırma/fallback için.",
+    url: "/models/caelinus-avatar-shaded.glb",
+    preview: "/models/previews/caelinus-shaded.png",
+    isPersonal: true,
+    gender: "feminine",
+    vibe: "Shaded — sabit, ışıktan bağımsız doku",
+    baseHeightM: 1.72,
+    supportsSkinToneOverride: false,
+    animationCompat: "static",
+    pipeline: "external",
+  },
+  {
     id: "selin-v1",
     label: "Selin",
     tagline:
@@ -100,7 +150,6 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
       "ifadeleriyle sıfırdan dokunan ilk Caelinus bedeni.",
     url: "/models/caelinus-body-base-fem.glb",
     hairUrl: "/models/hair/hair-long-wave.glb",
-    isDefault: true,
     isPersonal: true,
     gender: "feminine",
     vibe: "Ay",
@@ -134,7 +183,7 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
 /** Kütüphane boşken true — UI 3D yerine "yapımda" placeholder gösterir. */
 export const AVATARS_IN_PRODUCTION = CAELINUS_BODY_LIBRARY.length === 0;
 
-export const DEFAULT_BODY_ID = "selin-v1";
+export const DEFAULT_BODY_ID = "caelinus-pbr-v1";
 
 /**
  * Kütüphane boşken döndürülen güvenli sentinel — `.url` "" olduğundan

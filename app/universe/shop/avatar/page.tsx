@@ -81,6 +81,21 @@ export default function AvatarPage() {
     useState<ProductExtended["category"]>("bikini");
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [outfitStatus, setOutfitStatus] = useState<string>("idle");
+  // Wishlist — kalıcı favoriler (localStorage). Kart üstündeki kalp
+  // butonu buraya yazar; seçimden bağımsızdır.
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const toggleFavorite = useCallback((id: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        localStorage.setItem("caelinus_wishlist", JSON.stringify([...next]));
+      } catch { /* quota */ }
+      return next;
+    });
+  }, []);
 
   const avatarProducts = useMemo(
     () => sortProductsForAvatar(productsExtended),
@@ -142,6 +157,12 @@ export default function AvatarPage() {
     // Body library — kullanıcı önceden hangi mesh'i seçmişse onu yükle
     const storedBodyId = loadAvatarBodyId();
     if (storedBodyId) setBodyId(storedBodyId);
+
+    // Wishlist'i geri yükle
+    try {
+      const storedWish = localStorage.getItem("caelinus_wishlist");
+      if (storedWish) setFavorites(new Set(JSON.parse(storedWish) as string[]));
+    } catch { /* corrupted storage */ }
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -379,23 +400,55 @@ export default function AvatarPage() {
             </div>
 
             <div className="avcfg-product-grid">
-              {visibleProducts.map((product) => (
-                <button
-                  type="button"
-                  key={product.id}
-                  className={`avcfg-product-card ${selectedProduct?.id === product.id ? "is-selected" : ""}`}
-                  onClick={() => setSelectedProductId(product.id)}
-                >
-                  <img src={product.image} alt={product.name} />
-                  <span className="avcfg-product-fav" aria-hidden="true">
-                    {product.outfitGlb ? "3D" : "V"}
-                  </span>
-                  <span className="avcfg-product-meta">
-                    <span>{product.zodiac ?? product.category}</span>
-                    <strong>{product.price}</strong>
-                  </span>
-                </button>
-              ))}
+              {visibleProducts.map((product) => {
+                const isFav = favorites.has(product.id);
+                return (
+                  <button
+                    type="button"
+                    key={product.id}
+                    className={`avcfg-product-card ${selectedProduct?.id === product.id ? "is-selected" : ""}`}
+                    onClick={() => setSelectedProductId(product.id)}
+                  >
+                    <span className="avcfg-card-media">
+                      <img src={product.image} alt={product.name} loading="lazy" />
+                    </span>
+
+                    <span className="avcfg-card-badges" aria-hidden="true">
+                      {product.outfitGlb ? (
+                        <span className="avcfg-badge avcfg-badge--3d">3D</span>
+                      ) : (
+                        <span className="avcfg-badge avcfg-badge--virtual">Virtual</span>
+                      )}
+                    </span>
+
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      aria-label={isFav ? "Favorilerden çıkar" : "Favorilere ekle"}
+                      aria-pressed={isFav}
+                      className={`avcfg-card-wish ${isFav ? "is-active" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(product.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFavorite(product.id);
+                        }
+                      }}
+                    >
+                      {isFav ? "♥" : "♡"}
+                    </span>
+
+                    <span className="avcfg-product-meta">
+                      <span className="avcfg-card-cat">{product.zodiac ?? product.category}</span>
+                      <strong className="avcfg-card-price">{product.price}</strong>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {selectedProduct && (

@@ -30188,10 +30188,12 @@ div.stage-card {
 /* Avatar shop room: stage + wardrobe inventory */
 .avcfg-game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  /* Sahne (avatar) panelini genişlettik — avatar viewport'un ~%75'ini
+     kaplasın; envanter paneli daralıp daha rafine kalsın. */
+  grid-template-columns: minmax(0, 2.85fr) minmax(300px, 1fr);
   gap: clamp(16px, 2vw, 28px);
   align-items: stretch;
-  min-height: min(760px, calc(100svh - 170px));
+  min-height: min(820px, calc(100svh - 150px));
 }
 
 .avcfg-stage-panel,
@@ -30212,7 +30214,7 @@ div.stage-card {
 
 .avcfg-stage-panel {
   overflow: hidden;
-  min-height: 640px;
+  min-height: 720px;
 }
 
 .avcfg-stage-panel::before {
@@ -30246,13 +30248,13 @@ div.stage-card {
 
 .avcfg-stage-panel .avcfg-canvas {
   width: 100%;
-  min-height: 640px;
-  height: min(760px, calc(100svh - 190px));
+  min-height: 720px;
+  height: min(840px, calc(100svh - 160px));
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(circle at 50% 36%, rgba(255, 246, 226, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(245, 235, 220, 0.08), rgba(13, 12, 26, 0.84));
+    radial-gradient(circle at 50% 32%, rgba(255, 246, 226, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(245, 235, 220, 0.05), rgba(5, 5, 11, 0.92));
   box-shadow: none;
 }
 
@@ -30382,7 +30384,7 @@ div.stage-card {
 .avcfg-inventory-panel {
   display: flex;
   flex-direction: column;
-  min-height: 640px;
+  min-height: 720px;
   overflow: hidden;
 }
 
@@ -30446,9 +30448,10 @@ div.stage-card {
 
 .avcfg-product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  padding: 0 18px 18px;
+  /* Daha büyük kartlar — 2 kolon, geniş nefes alanı (DressX hissi). */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 20px 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -30457,68 +30460,185 @@ div.stage-card {
 .avcfg-product-card {
   position: relative;
   display: block;
-  aspect-ratio: 0.78;
+  aspect-ratio: 0.74;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  /* Yuvarlatılmış köşeler + glassmorphism */
+  border-radius: 20px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
+    rgba(10, 9, 20, 0.5);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  /* Premium çok katmanlı gölge */
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  will-change: transform;
 }
 
-.avcfg-product-card:hover,
+.avcfg-product-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(232, 215, 163, 0.6);
+  box-shadow:
+    0 30px 64px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(232, 215, 163, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
 .avcfg-product-card.is-selected {
-  transform: translateY(-2px);
-  border-color: rgba(120, 218, 135, 0.88);
-  box-shadow: 0 0 0 2px rgba(120, 218, 135, 0.18);
+  transform: translateY(-3px);
+  border-color: rgba(241, 213, 143, 0.95);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(241, 213, 143, 0.55),
+    0 0 28px rgba(241, 213, 143, 0.25);
 }
 
-.avcfg-product-card img {
+.avcfg-card-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.avcfg-card-media img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.avcfg-product-card:hover .avcfg-card-media img {
+  transform: scale(1.08);
 }
 
 .avcfg-product-card::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
-  height: 46%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.58), transparent);
+  height: 52%;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+  pointer-events: none;
 }
 
-.avcfg-product-fav {
+/* ── Badges (3D / Virtual) ── */
+.avcfg-card-badges {
   position: absolute;
-  top: 7px;
-  left: 7px;
-  z-index: 2;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+}
+
+.avcfg-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.avcfg-badge--3d {
+  color: #0c1a12;
+  background: linear-gradient(135deg, #9af2b4, #5fd88a);
+  box-shadow: 0 4px 14px rgba(95, 216, 138, 0.4);
+}
+
+.avcfg-badge--virtual {
+  color: rgba(247, 241, 232, 0.95);
+  background: rgba(139, 111, 255, 0.32);
+  border: 1px solid rgba(167, 131, 253, 0.6);
+}
+
+/* ── Wishlist / favorite (heart) ── */
+.avcfg-card-wish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 10px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.38);
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(12, 10, 22, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.avcfg-card-wish:hover {
+  transform: scale(1.12);
+  background: rgba(12, 10, 22, 0.62);
+}
+
+.avcfg-card-wish.is-active {
+  color: #ff6b8b;
+  border-color: rgba(255, 107, 139, 0.7);
+  background: rgba(255, 107, 139, 0.16);
+  animation: avcfg-wish-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes avcfg-wish-pop {
+  0% { transform: scale(0.8); }
+  55% { transform: scale(1.25); }
+  100% { transform: scale(1); }
 }
 
 .avcfg-product-meta {
   position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  z-index: 2;
+  left: 14px;
+  right: 14px;
+  bottom: 13px;
+  z-index: 3;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.92);
+}
+
+.avcfg-card-cat {
+  color: rgba(247, 241, 232, 0.78);
   font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+/* Price badge — premium cam pill */
+.avcfg-card-price {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-family: var(--cae-font-serif, serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: #20180d;
+  background: linear-gradient(135deg, #f1d58f, #f7f1e8);
+  box-shadow: 0 4px 14px rgba(241, 213, 143, 0.32);
 }
 
 .avcfg-selected-product {
@@ -30609,14 +30729,16 @@ div.stage-card {
   }
 
   .avcfg-product-grid {
-    grid-template-columns: repeat(6, minmax(118px, 1fr));
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: minmax(168px, 1fr);
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 20px;
   }
 
   .avcfg-product-card {
-    min-width: 118px;
+    min-width: 168px;
   }
 
   .avcfg-studio-grid {
@@ -30673,7 +30795,7 @@ div.stage-card {
   }
 
   .avcfg-product-grid {
-    grid-template-columns: repeat(6, minmax(104px, 1fr));
+    grid-auto-columns: minmax(150px, 1fr);
     padding-left: 12px;
     padding-right: 12px;
   }
