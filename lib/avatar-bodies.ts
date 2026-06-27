@@ -142,42 +142,10 @@ export const CAELINUS_BODY_LIBRARY: BodyEntry[] = [
     animationCompat: "static",
     pipeline: "external",
   },
-  {
-    id: "selin-v1",
-    label: "Selin",
-    tagline:
-      "Ayın ilk hâli — feminen base body, Mixamo rig ve ARKit yüz " +
-      "ifadeleriyle sıfırdan dokunan ilk Caelinus bedeni.",
-    url: "/models/caelinus-body-base-fem.glb",
-    hairUrl: "/models/hair/hair-long-wave.glb",
-    isPersonal: true,
-    gender: "feminine",
-    vibe: "Ay",
-    baseHeightM: 1.69,
-    // Canonical Caelinus body: runtime skin material tint is supported.
-    supportsSkinToneOverride: true,
-    animationCompat: "mixamo",
-    pipeline: "caelinus",
-  },
-  {
-    id: "caelinus-muse",
-    label: "Caelinus · İlham",
-    tagline:
-      "Kumral dalgalı saç + oturmuş bikini — catwalk'a hazır tam donanımlı beden",
-    url: "/models/caelinus_avatar_hair.glb",
-    preview: "/models/previews/caelinus-muse.png",
-    isPersonal: true,
-    gender: "feminine",
-    vibe: "İlham — saçı rüzgârda, duruşu hikâyede",
-    baseHeightM: 1.687,
-    // Kendi PBR body texture'ı var; ten rengi mesh'in materyalinden gelir.
-    supportsSkinToneOverride: false,
-    // Zaten bikinili geliyor — shop try-on'da garment binding'i atla
-    // (çift bikini çakışmasını önler).
-    preDressed: true,
-    animationCompat: "mixamo",
-    pipeline: "caelinus",
-  },
+  // NOT: "Selin" (selin-v1) ve "Caelinus · İlham" (caelinus-muse) bedenleri
+  // beden seçiciden kaldırıldı. GLB dosyaları /public/models altında
+  // duruyor (diğer sahneler fallback olarak kullanabilir); yalnızca bu
+  // kütüphane kaydından çıkarıldılar.
 ];
 
 /** Kütüphane boşken true — UI 3D yerine "yapımda" placeholder gösterir. */
