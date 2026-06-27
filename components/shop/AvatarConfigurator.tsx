@@ -24,10 +24,12 @@ import OutfitBindingLayer, { type OutfitBindingStatus } from "./scene/OutfitBind
 const DEFAULT_MODEL_PATH = "/models/caelinus-avatar-pbr.glb";
 
 // Kamera ev konumu — double-click reset bu değerlere yumuşak döner.
-// Avatar BASE_HEIGHT≈2.8 birime ölçeklenir (ModelAvatar). z=7.4 + fov=30
-// avatarı viewport'un ~%75'ini kaplayacak şekilde çerçeveler.
-const HOME_POS = new THREE.Vector3(0, 1.35, 7.4);
-const HOME_TARGET = new THREE.Vector3(0, 1.35, 0);
+// Avatar BASE_HEIGHT≈2.8 birime ölçeklenir (ModelAvatar). Hedef avatar
+// merkezinde (y≈1.4) + fov=26 ile avatar kareyi DOLDURUR: ayaklar alta,
+// baş üste yakın; altta-üstte boş zemin/gökyüzü kalmaz.
+const CAMERA_FOV = 26;
+const HOME_POS = new THREE.Vector3(0, 1.4, 7.4);
+const HOME_TARGET = new THREE.Vector3(0, 1.4, 0);
 
 type Props = {
   config: AvatarConfig;
@@ -173,7 +175,7 @@ export default function AvatarConfigurator({
           toneMappingExposure: 1.05,
           powerPreference: "high-performance",
         }}
-        camera={{ position: [HOME_POS.x, HOME_POS.y, HOME_POS.z], fov: 30 }}
+        camera={{ position: [HOME_POS.x, HOME_POS.y, HOME_POS.z], fov: CAMERA_FOV }}
       >
         <Suspense fallback={null}>
           {/* Koyu sinematik arka plan + çok hafif sis (derinlik) */}
@@ -294,9 +296,9 @@ export default function AvatarConfigurator({
             rotateSpeed={0.85}
             zoomSpeed={0.7}
             minDistance={4}
-            maxDistance={13}
+            maxDistance={12}
             minPolarAngle={Math.PI / 3}
-            maxPolarAngle={Math.PI / 1.7}
+            maxPolarAngle={Math.PI / 1.9}
             target={[HOME_TARGET.x, HOME_TARGET.y, HOME_TARGET.z]}
             makeDefault
           />

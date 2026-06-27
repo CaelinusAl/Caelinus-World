@@ -30193,7 +30193,7 @@ div.stage-card {
   grid-template-columns: minmax(0, 2.85fr) minmax(300px, 1fr);
   gap: clamp(16px, 2vw, 28px);
   align-items: stretch;
-  min-height: min(820px, calc(100svh - 150px));
+  min-height: min(720px, calc(100svh - 180px));
 }
 
 .avcfg-stage-panel,
@@ -30214,7 +30214,7 @@ div.stage-card {
 
 .avcfg-stage-panel {
   overflow: hidden;
-  min-height: 720px;
+  min-height: 600px;
 }
 
 .avcfg-stage-panel::before {
@@ -30248,8 +30248,8 @@ div.stage-card {
 
 .avcfg-stage-panel .avcfg-canvas {
   width: 100%;
-  min-height: 720px;
-  height: min(840px, calc(100svh - 160px));
+  min-height: 600px;
+  height: min(720px, calc(100svh - 190px));
   border: 0;
   border-radius: 0;
   background:
@@ -30384,7 +30384,7 @@ div.stage-card {
 .avcfg-inventory-panel {
   display: flex;
   flex-direction: column;
-  min-height: 720px;
+  min-height: 600px;
   overflow: hidden;
 }
 
