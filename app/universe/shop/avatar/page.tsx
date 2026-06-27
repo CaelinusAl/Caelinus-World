@@ -19,7 +19,6 @@ import {
 } from "@/lib/avatar-bodies";
 import {
   productsExtended,
-  SHOP_CATEGORY_ORDER,
   sortProductsForAvatar,
 } from "@/data/products";
 import BodyPicker from "@/components/shop/BodyPicker";
@@ -53,6 +52,19 @@ const CATEGORY_LABELS: Record<ProductExtended["category"], { label: string; shor
   heels: { label: "Ayakkabi", short: "Shoe", icon: "heel" },
   jewelry: { label: "Mucevher", short: "Gem", icon: "gem" },
 };
+
+// Sekme sırası — "heels" (Shoe) sekmesi tamamen kaldırıldı.
+const AVATAR_TAB_ORDER: ProductExtended["category"][] = [
+  "bikini",
+  "pareo",
+  "bag",
+  "jewelry",
+];
+
+// Caelinus yalnızca bikini satıyor; 12 parça tek sekmede alt alta yığılmasın
+// diye görsel olarak Look / Wrap / Bag sekmelerine 4'erli dağıtılır.
+const BIKINI_FILL_TABS: ProductExtended["category"][] = ["bikini", "pareo", "bag"];
+const MAX_PER_TAB = 4;
 
 export default function AvatarPage() {
   const [config, setConfig] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -99,9 +111,23 @@ export default function AvatarPage() {
     () => sortProductsForAvatar(productsExtended),
     [],
   );
+  // Bikinileri Look/Wrap/Bag sekmelerine 4'erli böl — her sekme en fazla
+  // MAX_PER_TAB ürün gösterir, alt alta uzun bir liste oluşmaz.
+  const productBuckets = useMemo(() => {
+    const map = new Map<ProductExtended["category"], ProductExtended[]>();
+    AVATAR_TAB_ORDER.forEach((c) => map.set(c, []));
+    avatarProducts.forEach((product, i) => {
+      const idx = Math.min(
+        Math.floor(i / MAX_PER_TAB),
+        BIKINI_FILL_TABS.length - 1,
+      );
+      map.get(BIKINI_FILL_TABS[idx])!.push(product);
+    });
+    return map;
+  }, [avatarProducts]);
   const visibleProducts = useMemo(
-    () => avatarProducts.filter((product) => product.category === activeCategory),
-    [activeCategory, avatarProducts],
+    () => productBuckets.get(activeCategory) ?? [],
+    [activeCategory, productBuckets],
   );
   const selectedProduct = useMemo(() => {
     // Kullanıcı bir ürün seçtiyse onu göster.
@@ -347,7 +373,7 @@ export default function AvatarPage() {
             </div>
 
             <div className="avcfg-category-tabs" role="tablist" aria-label="Urun kategorileri">
-              {SHOP_CATEGORY_ORDER.map((category) => {
+              {AVATAR_TAB_ORDER.map((category) => {
                 const item = CATEGORY_LABELS[category];
                 return (
                   <button
