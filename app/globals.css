@@ -30710,6 +30710,13 @@ div.stage-card {
   gap: 18px;
 }
 
+/* Beden ölçü slider'ları kaldırıldı — geriye yalnızca yüz yükleme kartı
+   kaldı; tek, ortalanmış sütun olarak göster. */
+.avcfg-studio-grid--single {
+  grid-template-columns: minmax(0, 560px);
+  justify-content: center;
+}
+
 .avcfg-face-card {
   margin: 0;
 }

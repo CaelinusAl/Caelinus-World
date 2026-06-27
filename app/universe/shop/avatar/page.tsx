@@ -22,7 +22,6 @@ import {
   SHOP_CATEGORY_ORDER,
   sortProductsForAvatar,
 } from "@/data/products";
-import AvatarSliders from "@/components/shop/AvatarSliders";
 import BodyPicker from "@/components/shop/BodyPicker";
 import AvatarsInProduction from "@/components/avatar/AvatarsInProduction";
 import { FaceUpload } from "@/components/shop/FaceUpload";
@@ -58,7 +57,6 @@ const CATEGORY_LABELS: Record<ProductExtended["category"], { label: string; shor
 export default function AvatarPage() {
   const [config, setConfig] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [saved, setSaved] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   const [, setFaceUpload] = useState<FaceUploadResult | null>(null);
   const [faceBlobUrl, setFaceBlobUrl] = useState<string | null>(null);
@@ -140,7 +138,6 @@ export default function AvatarPage() {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setConfig(loadAvatarConfig());
-    setLoaded(true);
 
     const storedTex = localStorage.getItem(FACE_KEY);
     if (storedTex) {
@@ -171,16 +168,6 @@ export default function AvatarPage() {
     saveAvatarBodyId(newBodyId);
     // body değiştiği için diğer sahneler (TryOnSection) bilsin
     notifyAvatarConfigChanged();
-  }, []);
-
-  const handleChange = useCallback((cfg: AvatarConfig) => {
-    setConfig(cfg);
-    setSaved(false);
-  }, []);
-
-  const handleReset = useCallback(() => {
-    setConfig(DEFAULT_AVATAR);
-    setSaved(false);
   }, []);
 
   const handleSave = useCallback(() => {
@@ -490,24 +477,7 @@ export default function AvatarPage() {
         <section className="avcfg-studio-drawer" aria-label="Avatar stüdyo ayarları">
           <BodyPicker selectedId={bodyId} onSelect={handleBodySelect} />
 
-          <div className="avcfg-studio-grid">
-            <div className="avcfg-left-col">
-              {loaded ? (
-                <AvatarSliders
-                  config={config}
-                  onChange={handleChange}
-                  onReset={handleReset}
-                />
-              ) : (
-                <div className="ux-skeleton-panel">
-                  <div className="ux-skeleton-line w60" />
-                  <div className="ux-skeleton-line w100" />
-                  <div className="ux-skeleton-line w80" />
-                  <div className="ux-skeleton-line w100" />
-                </div>
-              )}
-            </div>
-
+          <div className="avcfg-studio-grid avcfg-studio-grid--single">
             <div className="face-section avcfg-face-card">
               <FaceUpload onUploaded={handleFaceUploaded} />
 
