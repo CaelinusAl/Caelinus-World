@@ -3,7 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const HIDDEN_PATHS = ["/"];
+// Tam-ekran immersive 3B sahneler: kökleri `position: fixed/absolute` olduğu
+// için içerik normal akışta 0 yükseklik kaplar; global footer akışta hemen
+// onların ardına düşüp sayfanın EN ÜSTÜNE çöker (TopBar'ın üstüne biner).
+// Scroll'suz tek-ekran sahneler olduğu için footer'ın oturacağı bir "dip"
+// yok — ana sayfa ("/") gibi bu sayfalarda da footer gösterilmez.
+//   /universe            → CaelinusUniverseScene (ana meydan)
+//   /universe/dunya      → .dw-root (Dünya sahnesi)
+//   /universe/gaia/dunya → .sr-page (Gaia Dünya)
+//   /universe/gaia/sahne → .gsahne-root (Gaia sahnesi)
+//   /showroom            → .sr-page (5D salon)
+//   /vr                  → .vr-gate (VR kapısı)
+const HIDDEN_PATHS = [
+  "/",
+  "/universe",
+  "/universe/dunya",
+  "/universe/gaia/dunya",
+  "/universe/gaia/sahne",
+  "/showroom",
+  "/vr",
+];
 
 export default function Footer() {
   const pathname = usePathname() ?? "/";
