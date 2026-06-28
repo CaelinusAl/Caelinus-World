@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "./styles/tokens.css";
 
+/* Samsung Internet / Android dark-mode'a "site zaten koyu temalı, otomatik
+   karartma uygulama" sinyali. <meta color-scheme> ile birlikte çalışır;
+   WebGL/3D render katmanına dokunmaz. */
+:root {
+  color-scheme: dark;
+}
+
 html,
 body {
   min-height: 100%;

@@ -129,6 +129,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: "#03060f",
+  // Site zaten koyu temalı. Bu sinyal olmadan Samsung Internet'in "Karanlık
+  // mod" otomatik karartma algoritması sayfayı (ve WebGL canvas'ı) griye
+  // çekip 3D avatarı koyu/gölgeli gösteriyor. "dark" diyerek tarayıcıya
+  // "zaten koyuyum, üzerime filtre uygulama" deriz — render'a dokunmaz.
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
