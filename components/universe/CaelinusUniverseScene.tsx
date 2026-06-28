@@ -1084,17 +1084,35 @@ function Scene({
   );
 }
 
-/* WebGL yeteneği — başarısızsa ağır sahne hiç kurulmaz (çökme yerine fallback). */
-function detectWebGL(): boolean {
-  if (typeof window === "undefined") return false;
+/* WebGL yeteneği + YAZILIM render tespiti.
+ *
+ * "ok"       → gerçek GPU, ağır sahne kurulur.
+ * "none"     → WebGL hiç yok, fallback.
+ * "software" → context kuruluyor AMA SwiftShader/llvmpipe/Microsoft Basic gibi
+ *              YAZILIM renderer'ı. Bu ağır custom-shader sahnesi yazılım
+ *              render'da boş/siyah çıkıyor (en sık: masaüstü Chrome'da donanım
+ *              hızlandırma KAPALI). Eski kod context kurulduğu için "var" sayıp
+ *              boş sahneyi gösteriyordu — bunun yerine gezilebilir fallback.
+ *
+ * Not: WEBGL_debug_renderer_info engelliyse renderer="" olur ve "ok" döneriz —
+ * yani yalnızca POZİTİF yazılım tespitinde düşürürüz (gerçek GPU'ları asla
+ * yanlışlıkla fallback'e atmayız; mobil yolu güvende). */
+type GLStatus = "ok" | "none" | "software";
+const SOFTWARE_RE = /swiftshader|llvmpipe|software|basic render|microsoft basic/i;
+function detectGL(): GLStatus {
+  if (typeof window === "undefined") return "none";
   try {
     const c = document.createElement("canvas");
-    return !!(
-      window.WebGLRenderingContext &&
-      (c.getContext("webgl2") || c.getContext("webgl"))
-    );
+    const gl = (c.getContext("webgl2") ||
+      c.getContext("webgl")) as WebGLRenderingContext | null;
+    if (!window.WebGLRenderingContext || !gl) return "none";
+    const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = dbg
+      ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "")
+      : "";
+    return SOFTWARE_RE.test(renderer) ? "software" : "ok";
   } catch {
-    return false;
+    return "none";
   }
 }
 
@@ -1106,15 +1124,15 @@ export default function CaelinusUniverseScene() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "warp">("idle");
-  const [webglOk, setWebglOk] = useState(true);
+  const [glStatus, setGlStatus] = useState<GLStatus>("ok");
   const [crashed, setCrashed] = useState(false);
   const selectingRef = useRef(false);
 
   useEffect(() => {
-    if (!detectWebGL()) setWebglOk(false);
+    setGlStatus(detectGL());
   }, []);
 
-  const live = webglOk && !crashed;
+  const live = glStatus === "ok" && !crashed;
 
   const shared = useMemo<Shared>(
     () => ({ positions: {}, warp: { value: 0 }, selectedId: null }),
@@ -1196,7 +1214,20 @@ export default function CaelinusUniverseScene() {
           <div className="uv-fallback">
             <div className="uv-fallback-orb" />
             <h2>Caelinus Evreni</h2>
-            <p>Bu cihazda 3B sahne gösterilemedi — bölgelere doğrudan geç.</p>
+            {glStatus === "software" ? (
+              <p>
+                Tarayıcıda donanım hızlandırma kapalı görünüyor, bu yüzden 3B
+                gezegen sahnesi yüklenemiyor. Chrome&apos;da{" "}
+                <strong>
+                  Ayarlar → Sistem → “Mümkün olduğunda grafik hızlandırmayı
+                  kullan”
+                </strong>{" "}
+                seçeneğini aç ve sayfayı yenile. Şimdilik bölgelere doğrudan
+                geçebilirsin.
+              </p>
+            ) : (
+              <p>Bu cihazda 3B sahne gösterilemedi — bölgelere doğrudan geç.</p>
+            )}
             <div className="uv-fallback-nav">
               {DISTRICTS.map((d) => (
                 <button
