@@ -44,8 +44,8 @@ function Backdrop() {
   }, []);
   if (!tex) return null;
   return (
-    <mesh position={[0, 11, -42]}>
-      <planeGeometry args={[150, 84]} />
+    <mesh position={[0, 5, -40]}>
+      <planeGeometry args={[178, 100]} />
       <meshBasicMaterial map={tex} toneMapped={false} depthWrite={false} fog={false} />
     </mesh>
   );
@@ -58,8 +58,8 @@ function Scene({ onActive }: { onActive: (s: StoneData | null) => void }) {
     onActive(STONES.find((s) => s.id === activeId) ?? null);
   }, [activeId, onActive]);
 
-  let camTo: [number, number, number] = [0, 1.8, 9.5];
-  let lookTo: [number, number, number] = [0, 1.1, -5];
+  let camTo: [number, number, number] = [0, 2.3, 9.5];
+  let lookTo: [number, number, number] = [0, 2.7, -8];
   const s = STONES.find((x) => x.id === activeId);
   if (s) {
     camTo = [s.position[0] * 0.62, 1.55, s.position[2] + 3.4];
@@ -69,7 +69,7 @@ function Scene({ onActive }: { onActive: (s: StoneData | null) => void }) {
   return (
     <>
       <color attach="background" args={["#070b11"]} />
-      <fog attach="fog" args={["#0a121c", 12, 50]} />
+      <fog attach="fog" args={["#0a121c", 16, 62]} />
 
       <ambientLight intensity={0.7} />
       <hemisphereLight args={["#9fb8d8", "#0a0f16", 0.6]} />
