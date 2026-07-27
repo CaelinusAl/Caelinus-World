@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
 
 import { absoluteUrl } from "@/lib/i18n/locale";
 import { getLocale } from "@/lib/i18n/server";
+import { PUBLIC_HOSTS, PUBLIC_ORIGINS } from "@/lib/public-domains";
 
 /**
  * Caelinus robots.txt — emitted at `/robots.txt` on every host.
@@ -16,6 +18,19 @@ import { getLocale } from "@/lib/i18n/server";
  */
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
+  const requestHost = (await headers()).get("host")?.split(":")[0].toLowerCase();
+  if (requestHost === PUBLIC_HOSTS.codex) {
+    return {
+      rules: [{
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/api/", "/auth/"],
+      }],
+      sitemap: `${PUBLIC_ORIGINS.codex}/sitemap.xml`,
+      host: `${PUBLIC_ORIGINS.codex}/`,
+    };
+  }
+
   const locale = await getLocale();
   const sitemapUrl = absoluteUrl(locale, "/sitemap.xml");
   const host = absoluteUrl(locale, "/");

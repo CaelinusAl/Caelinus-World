@@ -1,0 +1,1071 @@
+{
+  "schemaVersion": "image-assets.production.v1",
+  "generatedAt": "2026-07-27T15:12:12.081Z",
+  "provider": "vercel-blob",
+  "access": "public",
+  "cover": {
+    "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/cover.png",
+    "bytes": 3202935,
+    "contentType": "image/png",
+    "sha256": "dd05bf55c71ff86fcad38fa667c8e17b7c9df9ee0dd4676de785115e85cd0102"
+  },
+  "pages": [
+    {
+      "assetId": "IMG-CAEL-0001",
+      "pageNumber": 1,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0001.png",
+      "bytes": 2379825,
+      "contentType": "image/png",
+      "sha256": "961154f5ae5777cf90f9c825e86685f771d48d669f550c68b64900c171c8d1ce"
+    },
+    {
+      "assetId": "IMG-CAEL-0002",
+      "pageNumber": 2,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0002.png",
+      "bytes": 2648309,
+      "contentType": "image/png",
+      "sha256": "607101da0f8d09ded6bdf56f6bb85fd63dfec497c1c9afd902d6d687dcf308c5"
+    },
+    {
+      "assetId": "IMG-CAEL-0003",
+      "pageNumber": 3,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0003.png",
+      "bytes": 2710336,
+      "contentType": "image/png",
+      "sha256": "68be2073aef508e99916691ddd316bbbf6adce5e848f99fd5296ef1f10c1a7cc"
+    },
+    {
+      "assetId": "IMG-CAEL-0004",
+      "pageNumber": 4,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/cover.png",
+      "bytes": 3202935,
+      "contentType": "image/png",
+      "sha256": "dd05bf55c71ff86fcad38fa667c8e17b7c9df9ee0dd4676de785115e85cd0102",
+      "aliasOf": "cover"
+    },
+    {
+      "assetId": "IMG-CAEL-0005",
+      "pageNumber": 5,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0005.png",
+      "bytes": 2721900,
+      "contentType": "image/png",
+      "sha256": "a62574e120683e39f8df487ed8de2bea9b310e2c956f1b09d39b4748e6e7ebf5"
+    },
+    {
+      "assetId": "IMG-CAEL-0006",
+      "pageNumber": 6,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0006.png",
+      "bytes": 2357625,
+      "contentType": "image/png",
+      "sha256": "d8a5557558a21a2be15cacafe1031fed9ce88e6c42d9f366f9d6336ebeaa8e46"
+    },
+    {
+      "assetId": "IMG-CAEL-0007",
+      "pageNumber": 7,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0007.png",
+      "bytes": 2502680,
+      "contentType": "image/png",
+      "sha256": "81b65166a81ab1c59c6c6e83fb0fc6c0c8582ede09fd4ba6815bd6a71792d369"
+    },
+    {
+      "assetId": "IMG-CAEL-0008",
+      "pageNumber": 8,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0008.png",
+      "bytes": 2558776,
+      "contentType": "image/png",
+      "sha256": "65b4abb16c1fe932a1e6a5058a3036f72862693e58c9d4039bf31b2a0abf6a1c"
+    },
+    {
+      "assetId": "IMG-CAEL-0009",
+      "pageNumber": 9,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0009.png",
+      "bytes": 2747963,
+      "contentType": "image/png",
+      "sha256": "c748bffb34ceec4caf73502ef571b4f581ffb157aaeaf29c6e651619d9d6e20c"
+    },
+    {
+      "assetId": "IMG-CAEL-0010",
+      "pageNumber": 10,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0010.png",
+      "bytes": 2770690,
+      "contentType": "image/png",
+      "sha256": "76f5f05df79ede4af9c6f8c57c7c900baff3dfc2c586a3826b05285b5a7dff25"
+    },
+    {
+      "assetId": "IMG-CAEL-0011",
+      "pageNumber": 11,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0011.png",
+      "bytes": 2564319,
+      "contentType": "image/png",
+      "sha256": "e723a900909f35e8f79b026998815c8e3c3012d4d4abb9947961d7226125ad1a"
+    },
+    {
+      "assetId": "IMG-CAEL-0012",
+      "pageNumber": 12,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0012.png",
+      "bytes": 2720046,
+      "contentType": "image/png",
+      "sha256": "649edeaf441f13d5e903c990b74d63f0764dc1911dd481eefbfacb4de1a72c70"
+    },
+    {
+      "assetId": "IMG-CAEL-0013",
+      "pageNumber": 13,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0013.png",
+      "bytes": 2802014,
+      "contentType": "image/png",
+      "sha256": "7c43c272880403236f5b85cc6bc2b3491ab4de275c08a282f6d024cb3a1171bf"
+    },
+    {
+      "assetId": "IMG-CAEL-0014",
+      "pageNumber": 14,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0014.png",
+      "bytes": 2521853,
+      "contentType": "image/png",
+      "sha256": "ade1042aa7f57998d1038c4beea83a089d2c38dfef5061bdb47969afa43c4535"
+    },
+    {
+      "assetId": "IMG-CAEL-0015",
+      "pageNumber": 15,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0015.png",
+      "bytes": 2626929,
+      "contentType": "image/png",
+      "sha256": "ee6cdc93d5f957ff333bb61fd901593fbc05298a404e56d2e4b6e302d5abb28b"
+    },
+    {
+      "assetId": "IMG-CAEL-0016",
+      "pageNumber": 16,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0016.png",
+      "bytes": 2466235,
+      "contentType": "image/png",
+      "sha256": "901bed534f7c7f82d23fa33e431c824295a6efe7e93d54d132afc476b24eef9c"
+    },
+    {
+      "assetId": "IMG-CAEL-0017",
+      "pageNumber": 17,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0017.png",
+      "bytes": 2592415,
+      "contentType": "image/png",
+      "sha256": "f0ae256d9008bff206a36fb327e9a1a0ab510fc9bb6032bfa400d6b4b1425950"
+    },
+    {
+      "assetId": "IMG-CAEL-0018",
+      "pageNumber": 18,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0018.png",
+      "bytes": 2206382,
+      "contentType": "image/png",
+      "sha256": "3ec7d86e18de0466ed9bfbfc641f5ea373eaae95579f99e5af76799903305424"
+    },
+    {
+      "assetId": "IMG-CAEL-0019",
+      "pageNumber": 19,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0019.png",
+      "bytes": 2972724,
+      "contentType": "image/png",
+      "sha256": "95875365459883c8014de4a966e18f12200d5b7a21d7cee19c40ae3de812eb95"
+    },
+    {
+      "assetId": "IMG-CAEL-0020",
+      "pageNumber": 20,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0020.png",
+      "bytes": 2415555,
+      "contentType": "image/png",
+      "sha256": "ba2786cc96d03a9f2e1f129bdd301c630885348bd1ea58ac105cb25be6beada4"
+    },
+    {
+      "assetId": "IMG-CAEL-0021",
+      "pageNumber": 21,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0021.png",
+      "bytes": 2901493,
+      "contentType": "image/png",
+      "sha256": "db3ec745985e9d5f961d363742150b51f8391fbb64624c33719c305757426dee"
+    },
+    {
+      "assetId": "IMG-CAEL-0022",
+      "pageNumber": 22,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0022.png",
+      "bytes": 2734129,
+      "contentType": "image/png",
+      "sha256": "e8b7358453a84c15ff5c586d60335eaf4464f30c00c544950844ada25b0ad501"
+    },
+    {
+      "assetId": "IMG-CAEL-0023",
+      "pageNumber": 23,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0023.png",
+      "bytes": 2642308,
+      "contentType": "image/png",
+      "sha256": "5f5dc86f2c2c02937b6fb4926c41ce6d4cc09f03c2dbd4180f02706cd39a9244"
+    },
+    {
+      "assetId": "IMG-CAEL-0024",
+      "pageNumber": 24,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0024.png",
+      "bytes": 2776981,
+      "contentType": "image/png",
+      "sha256": "48d8f7dd205c2c0c68835ea81fc99ffdf00c4a98b861b5654b9f942573b38eac"
+    },
+    {
+      "assetId": "IMG-CAEL-0025",
+      "pageNumber": 25,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0025.png",
+      "bytes": 2762827,
+      "contentType": "image/png",
+      "sha256": "7c1ec69d03cb0b607bf7eb9bee5e0ded2a3d96a62197cef910c647fb07e5448c"
+    },
+    {
+      "assetId": "IMG-CAEL-0026",
+      "pageNumber": 26,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0026.png",
+      "bytes": 2826445,
+      "contentType": "image/png",
+      "sha256": "ca259a1101e46e607b1b0b908f0f68206987df14d7cd21878c1709db80683579"
+    },
+    {
+      "assetId": "IMG-CAEL-0027",
+      "pageNumber": 27,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0027.png",
+      "bytes": 2830220,
+      "contentType": "image/png",
+      "sha256": "0f3147c54b7e3f704446a0024e6d8e10a55071f14055e1caac162da833f10d78"
+    },
+    {
+      "assetId": "IMG-CAEL-0028",
+      "pageNumber": 28,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0028.png",
+      "bytes": 2701075,
+      "contentType": "image/png",
+      "sha256": "cdb92fde1e2bd6aae257da37372ef089dcd72eefcab37c3ed8151430c49b0ab1"
+    },
+    {
+      "assetId": "IMG-CAEL-0029",
+      "pageNumber": 29,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0029.png",
+      "bytes": 2475400,
+      "contentType": "image/png",
+      "sha256": "09a76f4ef631cd5f199f5c9e68b425752a5850abb2b67ddcd85e75d442323ac6"
+    },
+    {
+      "assetId": "IMG-CAEL-0030",
+      "pageNumber": 30,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0030.png",
+      "bytes": 2471244,
+      "contentType": "image/png",
+      "sha256": "4a2565690685a5fcbc50284e03917d75d532431dead6d1e78d06dc9be768ef95"
+    },
+    {
+      "assetId": "IMG-CAEL-0031",
+      "pageNumber": 31,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0031.png",
+      "bytes": 2609910,
+      "contentType": "image/png",
+      "sha256": "03c34f31dce49328aa8571316687c5fc87457471607d5c10b94405be8aac091b"
+    },
+    {
+      "assetId": "IMG-CAEL-0032",
+      "pageNumber": 32,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0032.png",
+      "bytes": 2486297,
+      "contentType": "image/png",
+      "sha256": "0b9c1cecea40bff9e9f8faf864752535a6bc6d4113035b98e314f4e3a4590c94"
+    },
+    {
+      "assetId": "IMG-CAEL-0033",
+      "pageNumber": 33,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0033.png",
+      "bytes": 2810657,
+      "contentType": "image/png",
+      "sha256": "30927809837817324adaea05ca3a6c73acf59eb66fe213ef41a424b2fcd1c19b"
+    },
+    {
+      "assetId": "IMG-CAEL-0034",
+      "pageNumber": 34,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0034.png",
+      "bytes": 2824746,
+      "contentType": "image/png",
+      "sha256": "bdbc83d1ad98e6e3ba688807b9910b8af6d9d6c9158ff709415ed8dd5b565085"
+    },
+    {
+      "assetId": "IMG-CAEL-0035",
+      "pageNumber": 35,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0035.png",
+      "bytes": 2539269,
+      "contentType": "image/png",
+      "sha256": "bff0e537cfd021cb31b326c6f5e80e7a85abd12c1acbeadbc8169a0b17b17c6f"
+    },
+    {
+      "assetId": "IMG-CAEL-0036",
+      "pageNumber": 36,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0036.png",
+      "bytes": 2650974,
+      "contentType": "image/png",
+      "sha256": "990d31d1cb7e32ff257a368244928f908e7644271a4e3bd8a1652416439e96fa"
+    },
+    {
+      "assetId": "IMG-CAEL-0037",
+      "pageNumber": 37,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0037.png",
+      "bytes": 2703680,
+      "contentType": "image/png",
+      "sha256": "689169f8131a911755cf2bc63e6d687a01c30c0d7cd5706fcc73b08f80b0bbb7"
+    },
+    {
+      "assetId": "IMG-CAEL-0038",
+      "pageNumber": 38,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0038.png",
+      "bytes": 2506967,
+      "contentType": "image/png",
+      "sha256": "e7f2bce12a934f13095a41ed7f8c48e3ad83393bf45967b8d6eeac9111b64cff"
+    },
+    {
+      "assetId": "IMG-CAEL-0039",
+      "pageNumber": 39,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0039.png",
+      "bytes": 2810081,
+      "contentType": "image/png",
+      "sha256": "a7a3dca44e4e34275cd146bd3f4cff3216fc6c8329caa8b03435bdf162e9c6d1"
+    },
+    {
+      "assetId": "IMG-CAEL-0040",
+      "pageNumber": 40,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0040.png",
+      "bytes": 2779709,
+      "contentType": "image/png",
+      "sha256": "630567d4517480a14b74d3632fc7cce9047ebe72d935c30412f06881fa373ae7"
+    },
+    {
+      "assetId": "IMG-CAEL-0041",
+      "pageNumber": 41,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0041.png",
+      "bytes": 2770620,
+      "contentType": "image/png",
+      "sha256": "1d3e93aa8f0c8fb2c1ea6c5ea800cd924e4479fec8b2be27408ea6f4b7e866d4"
+    },
+    {
+      "assetId": "IMG-CAEL-0042",
+      "pageNumber": 42,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0042.png",
+      "bytes": 2772981,
+      "contentType": "image/png",
+      "sha256": "cfe84063d07e7445727d5a1277230512d8c3e96c7ade68d88410a6e1bb8dc8d8"
+    },
+    {
+      "assetId": "IMG-CAEL-0043",
+      "pageNumber": 43,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0043.png",
+      "bytes": 2858589,
+      "contentType": "image/png",
+      "sha256": "588d6acafa582a913d34d5a9fe5f0c7bde27f3e31bba6f401c3ccab09f7d4cdd"
+    },
+    {
+      "assetId": "IMG-CAEL-0044",
+      "pageNumber": 44,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0044.png",
+      "bytes": 2992553,
+      "contentType": "image/png",
+      "sha256": "6e326d172c52e0185af5b526de7ee7f613ea7249efede08335760ec225e41f8b"
+    },
+    {
+      "assetId": "IMG-CAEL-0045",
+      "pageNumber": 45,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0045.png",
+      "bytes": 2860109,
+      "contentType": "image/png",
+      "sha256": "69d66a941d553492ad8048e46e60e95bea24f22f7a347c278c63e9e93c66600b"
+    },
+    {
+      "assetId": "IMG-CAEL-0046",
+      "pageNumber": 46,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0046.png",
+      "bytes": 3282032,
+      "contentType": "image/png",
+      "sha256": "27de714c86f16c7def317fc1fb5cd1dd2b3055f9b5fc38cab12cb6a801633255"
+    },
+    {
+      "assetId": "IMG-CAEL-0047",
+      "pageNumber": 47,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0047.png",
+      "bytes": 3015819,
+      "contentType": "image/png",
+      "sha256": "47f4f343d94ec06cc6305d6bb84824435395e09f4f5508b56a6d9ace80d29d51"
+    },
+    {
+      "assetId": "IMG-CAEL-0048",
+      "pageNumber": 48,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0048.png",
+      "bytes": 2689685,
+      "contentType": "image/png",
+      "sha256": "9b54c5aeeeda04cb8eaaa754d496f4bda88f2bce82667297d9b117707fcfdb68"
+    },
+    {
+      "assetId": "IMG-CAEL-0049",
+      "pageNumber": 49,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0049.png",
+      "bytes": 2849017,
+      "contentType": "image/png",
+      "sha256": "a1c2e69c4c9f4ab23de9eba8a74dfeedcfc24194d35f659a7f2b730ab47b9f84"
+    },
+    {
+      "assetId": "IMG-CAEL-0050",
+      "pageNumber": 50,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0050.png",
+      "bytes": 2590670,
+      "contentType": "image/png",
+      "sha256": "f853a479eb2256b33c1294cf63c058cd64d46fa595d3d41489ff209ad735e7b6"
+    },
+    {
+      "assetId": "IMG-CAEL-0051",
+      "pageNumber": 51,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0051.png",
+      "bytes": 3138916,
+      "contentType": "image/png",
+      "sha256": "fb6964c7f046a2e579e84609f17520e777961129a74cb7ba903926891b7c2762"
+    },
+    {
+      "assetId": "IMG-CAEL-0052",
+      "pageNumber": 52,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0052.png",
+      "bytes": 2657141,
+      "contentType": "image/png",
+      "sha256": "057d827c09a9346d31af19498133fcab947b8252ca843c779a19422d89ada94f"
+    },
+    {
+      "assetId": "IMG-CAEL-0053",
+      "pageNumber": 53,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0053.png",
+      "bytes": 2793961,
+      "contentType": "image/png",
+      "sha256": "0aaeac4efffce8a0b9f69a7b3493776ea6514720e8212bcd381e0f96cb912bb0"
+    },
+    {
+      "assetId": "IMG-CAEL-0054",
+      "pageNumber": 54,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0054.png",
+      "bytes": 2605205,
+      "contentType": "image/png",
+      "sha256": "9c65ae7f0253dbe2eeba0abecf76c2374a9a510b2fbb99195e302d6fdeb3e21a"
+    },
+    {
+      "assetId": "IMG-CAEL-0055",
+      "pageNumber": 55,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0055.png",
+      "bytes": 2483178,
+      "contentType": "image/png",
+      "sha256": "4551b97a1879c0dda28fa1306dc7d255482fa3e74f88fd8c0ebd22b5f2651d6d"
+    },
+    {
+      "assetId": "IMG-CAEL-0056",
+      "pageNumber": 56,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0056.png",
+      "bytes": 2471901,
+      "contentType": "image/png",
+      "sha256": "d4475984f484228240750cccd71fce8d4c7096950636d44d93b62f979e874007"
+    },
+    {
+      "assetId": "IMG-CAEL-0057",
+      "pageNumber": 57,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0057.png",
+      "bytes": 2591402,
+      "contentType": "image/png",
+      "sha256": "b09c9223b1a694067f8e892c857d60f5eadd27d985a1b32a2b4c71bc7b589ade"
+    },
+    {
+      "assetId": "IMG-CAEL-0058",
+      "pageNumber": 58,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0058.png",
+      "bytes": 2578311,
+      "contentType": "image/png",
+      "sha256": "87d6a69adefcb5dee00af1907fae39a4d0ab221ed0dc120dc61cceb08c1c6192"
+    },
+    {
+      "assetId": "IMG-CAEL-0059",
+      "pageNumber": 59,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0059.png",
+      "bytes": 2501664,
+      "contentType": "image/png",
+      "sha256": "5563f024b13c42e8715bf84390186100f41689eae930a8ceeaaa8e273d16b636"
+    },
+    {
+      "assetId": "IMG-CAEL-0060",
+      "pageNumber": 60,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0060.png",
+      "bytes": 2442196,
+      "contentType": "image/png",
+      "sha256": "ef0b9668817d9af3e2cd9b2e0c4584135417bfa3194cb0fb8643a234f578062d"
+    },
+    {
+      "assetId": "IMG-CAEL-0061",
+      "pageNumber": 61,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0061.png",
+      "bytes": 2737059,
+      "contentType": "image/png",
+      "sha256": "f473981e0d2c1380fb12266561ade2fe67debf448be3b753defc351002f68690"
+    },
+    {
+      "assetId": "IMG-CAEL-0062",
+      "pageNumber": 62,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0062.png",
+      "bytes": 2548188,
+      "contentType": "image/png",
+      "sha256": "2aef3ef26def871aab90f54d2a600af808c6ca59b6e887e43062cb96185c6e57"
+    },
+    {
+      "assetId": "IMG-CAEL-0063",
+      "pageNumber": 63,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0063.png",
+      "bytes": 2654814,
+      "contentType": "image/png",
+      "sha256": "85cd40446b2b20262ed0677c58e8a7bff172372c20d65a19ef08e4f04dcc1218"
+    },
+    {
+      "assetId": "IMG-CAEL-0064",
+      "pageNumber": 64,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0064.png",
+      "bytes": 2478438,
+      "contentType": "image/png",
+      "sha256": "004d295ac0c77f65c01cc9f03980e46193075afd79c726cb9171eebaa039bc65"
+    },
+    {
+      "assetId": "IMG-CAEL-0065",
+      "pageNumber": 65,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0065.png",
+      "bytes": 2451854,
+      "contentType": "image/png",
+      "sha256": "ccf21ddc199cbfd42d8e3fc763bd4d1923c9d720d7e74ebe80a27c8d5fb9e646"
+    },
+    {
+      "assetId": "IMG-CAEL-0066",
+      "pageNumber": 66,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0066.png",
+      "bytes": 2576766,
+      "contentType": "image/png",
+      "sha256": "178a6810ca58ddbbd5f43348c3902c3f973b8469709588968044e12ae55f7063"
+    },
+    {
+      "assetId": "IMG-CAEL-0067",
+      "pageNumber": 67,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0067.png",
+      "bytes": 2543489,
+      "contentType": "image/png",
+      "sha256": "28dc92bd96f540429efb8580dbc2c69e71c307e37967d7a9721516aa9d8aebbe"
+    },
+    {
+      "assetId": "IMG-CAEL-0068",
+      "pageNumber": 68,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0068.png",
+      "bytes": 2521119,
+      "contentType": "image/png",
+      "sha256": "c217c5456c76137ca83ef7a08b76b9db441bcdab2f1713d3e2bc0475eb30c298"
+    },
+    {
+      "assetId": "IMG-CAEL-0069",
+      "pageNumber": 69,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0069.png",
+      "bytes": 2683646,
+      "contentType": "image/png",
+      "sha256": "91cd5ceb6fa2acee8e02d27a2b9bb31c8e0debe1db7ed64655b1adfd81110c4a"
+    },
+    {
+      "assetId": "IMG-CAEL-0070",
+      "pageNumber": 70,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0070.png",
+      "bytes": 2532251,
+      "contentType": "image/png",
+      "sha256": "9a2f7876a6b004f193fb90c0979f1b85b4804edbf8333225405eb663d4f6cd8a"
+    },
+    {
+      "assetId": "IMG-CAEL-0071",
+      "pageNumber": 71,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0071.png",
+      "bytes": 2805831,
+      "contentType": "image/png",
+      "sha256": "d640d0cbc4b84ee12ea3692779aa198a4040dd50d3eb490be4d563761178e36e"
+    },
+    {
+      "assetId": "IMG-CAEL-0072",
+      "pageNumber": 72,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0072.png",
+      "bytes": 2666562,
+      "contentType": "image/png",
+      "sha256": "f709560cf21bb33ca37945336082499a101e67fd25cb6bcb753c2467f953394e"
+    },
+    {
+      "assetId": "IMG-CAEL-0073",
+      "pageNumber": 73,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0073.png",
+      "bytes": 2475458,
+      "contentType": "image/png",
+      "sha256": "5a8d25a933fefc2b5b4d7c6d060208aa7c7c3029f49f11a206461f542c96fcde"
+    },
+    {
+      "assetId": "IMG-CAEL-0074",
+      "pageNumber": 74,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0074.png",
+      "bytes": 2587438,
+      "contentType": "image/png",
+      "sha256": "3e4530f7cde6d58cb51d312b627cbafdd1a957b3e9bc49c2e2b6b68e0eed4589"
+    },
+    {
+      "assetId": "IMG-CAEL-0075",
+      "pageNumber": 75,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0075.png",
+      "bytes": 2397637,
+      "contentType": "image/png",
+      "sha256": "a120016c71478c67f058d646ff52b5c28de25da9a034a8f32becc2997d30c7f4"
+    },
+    {
+      "assetId": "IMG-CAEL-0076",
+      "pageNumber": 76,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0076.png",
+      "bytes": 2415611,
+      "contentType": "image/png",
+      "sha256": "9f154aa8b8b3aff1b4b293598b72b05206272aa892c8e0292081e861a2e6e8c6"
+    },
+    {
+      "assetId": "IMG-CAEL-0077",
+      "pageNumber": 77,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0077.png",
+      "bytes": 2561335,
+      "contentType": "image/png",
+      "sha256": "c554504efd62dc8e08ce441b7d65a63298397815c7c2fbe5f679831b81711c3d"
+    },
+    {
+      "assetId": "IMG-CAEL-0078",
+      "pageNumber": 78,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0078.png",
+      "bytes": 2297829,
+      "contentType": "image/png",
+      "sha256": "309b19bd79df6541cb4f73c4da0c34915862ee2e83f155272ef720b0796b696d"
+    },
+    {
+      "assetId": "IMG-CAEL-0079",
+      "pageNumber": 79,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0079.png",
+      "bytes": 2443614,
+      "contentType": "image/png",
+      "sha256": "6522b650d60d0a0620bef4cfd839bce4026cc9357d9e8622fb5c957ab4817dcd"
+    },
+    {
+      "assetId": "IMG-CAEL-0080",
+      "pageNumber": 80,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0080.png",
+      "bytes": 2183605,
+      "contentType": "image/png",
+      "sha256": "0c4e382c4ae6256cd0c35070164e69644fc0056d5483016e479f4332411a18ff"
+    },
+    {
+      "assetId": "IMG-CAEL-0081",
+      "pageNumber": 81,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0081.png",
+      "bytes": 2187370,
+      "contentType": "image/png",
+      "sha256": "cefc290afa0fc4f454d126c8ac946fb4904b63caa597cba4b0133e83f619bd6e"
+    },
+    {
+      "assetId": "IMG-CAEL-0082",
+      "pageNumber": 82,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0082.png",
+      "bytes": 2159746,
+      "contentType": "image/png",
+      "sha256": "a7823d7a051223c1bcbd4b86a42dc710a2f202e81f623de8a4bf2e1e5084db2f"
+    },
+    {
+      "assetId": "IMG-CAEL-0083",
+      "pageNumber": 83,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0083.png",
+      "bytes": 2159746,
+      "contentType": "image/png",
+      "sha256": "a7823d7a051223c1bcbd4b86a42dc710a2f202e81f623de8a4bf2e1e5084db2f"
+    },
+    {
+      "assetId": "IMG-CAEL-0084",
+      "pageNumber": 84,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0084.png",
+      "bytes": 2229344,
+      "contentType": "image/png",
+      "sha256": "0a039b4b5d74fa6e3488a603a85fdc49ef50d0ee2adb8007f2e8d9b3bae99eba"
+    },
+    {
+      "assetId": "IMG-CAEL-0085",
+      "pageNumber": 85,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0085.png",
+      "bytes": 2495700,
+      "contentType": "image/png",
+      "sha256": "e69cf7d9fccf9ca181ce6a7c8bd367f49c14094557de82baf555b04b60b8375b"
+    },
+    {
+      "assetId": "IMG-CAEL-0086",
+      "pageNumber": 86,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0086.png",
+      "bytes": 2332895,
+      "contentType": "image/png",
+      "sha256": "42f563218accee92b82be6167fdcd9e56ca8e6326444d978f40814982fba6175"
+    },
+    {
+      "assetId": "IMG-CAEL-0087",
+      "pageNumber": 87,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0087.png",
+      "bytes": 2170215,
+      "contentType": "image/png",
+      "sha256": "dbe7e4255c8c5f20e44cb4ca2f319ad96ff0a40db9b90dd6b3274bead442a930"
+    },
+    {
+      "assetId": "IMG-CAEL-0088",
+      "pageNumber": 88,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0088.png",
+      "bytes": 2189632,
+      "contentType": "image/png",
+      "sha256": "3914b0c2ab8dd844674c8501b36fe7c03cddf3bfeeb1a39552c772339d9c1f45"
+    },
+    {
+      "assetId": "IMG-CAEL-0089",
+      "pageNumber": 89,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0089.png",
+      "bytes": 2150964,
+      "contentType": "image/png",
+      "sha256": "40e2244260297a49bfc8375f6e2f5c64338cc238444360e2ae5ca6063ae6f516"
+    },
+    {
+      "assetId": "IMG-CAEL-0090",
+      "pageNumber": 90,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0090.png",
+      "bytes": 2306361,
+      "contentType": "image/png",
+      "sha256": "30220f9f017463d83711ca8e3538c71a04d3aa22c0efed7ecc3759a9b49f5eba"
+    },
+    {
+      "assetId": "IMG-CAEL-0091",
+      "pageNumber": 91,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0091.png",
+      "bytes": 2527481,
+      "contentType": "image/png",
+      "sha256": "03a4e868bf3a66c8c3c4a217b76bf243f8cb344f0e5aa3a543e5981368ee127e"
+    },
+    {
+      "assetId": "IMG-CAEL-0092",
+      "pageNumber": 92,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0092.png",
+      "bytes": 2237837,
+      "contentType": "image/png",
+      "sha256": "4bd0750f0a0c57f49306f1ac5971a2f4c251feb10aba3b65f25febfbaf90bf03"
+    },
+    {
+      "assetId": "IMG-CAEL-0093",
+      "pageNumber": 93,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0093.png",
+      "bytes": 2613992,
+      "contentType": "image/png",
+      "sha256": "2d1aea990e5c265cfddac2c88c99b3ce7e3f890521163eec12801ee1471baf71"
+    },
+    {
+      "assetId": "IMG-CAEL-0094",
+      "pageNumber": 94,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0094.png",
+      "bytes": 2316049,
+      "contentType": "image/png",
+      "sha256": "0048c46bc18d336fc6be027649b2037a3758934dccdec24a537285576f8671ef"
+    },
+    {
+      "assetId": "IMG-CAEL-0095",
+      "pageNumber": 95,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0095.png",
+      "bytes": 2649912,
+      "contentType": "image/png",
+      "sha256": "870e72bf77db3fb56ff224312755fd47edc025223de8cfd461c3cdbef5a9748c"
+    },
+    {
+      "assetId": "IMG-CAEL-0096",
+      "pageNumber": 96,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0096.png",
+      "bytes": 2476693,
+      "contentType": "image/png",
+      "sha256": "f81826f0f57b665b0c235bcf5c5f60149fe7ce65314516d21206d1e9937cdb7d"
+    },
+    {
+      "assetId": "IMG-CAEL-0097",
+      "pageNumber": 97,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0097.png",
+      "bytes": 2441096,
+      "contentType": "image/png",
+      "sha256": "652086f60cf6ba335b9e47659e2804da9eee9368a44851f6c9a21a588f2b6cde"
+    },
+    {
+      "assetId": "IMG-CAEL-0098",
+      "pageNumber": 98,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0098.png",
+      "bytes": 2434033,
+      "contentType": "image/png",
+      "sha256": "b57188dcc3cff73be8f30b81844af49f8591dd532e3e554ecd9ae6c0a0e939ee"
+    },
+    {
+      "assetId": "IMG-CAEL-0099",
+      "pageNumber": 99,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0099.png",
+      "bytes": 2405106,
+      "contentType": "image/png",
+      "sha256": "aec4e55cb622428716eebded4b5b60e15355ff58bd87d896ee34b6800e873ce9"
+    },
+    {
+      "assetId": "IMG-CAEL-0100",
+      "pageNumber": 100,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0100.png",
+      "bytes": 2400675,
+      "contentType": "image/png",
+      "sha256": "90f48088045b64a33bebd3aa16134fd4ffc18e104c6bb031ed16a1f0dca7626a"
+    },
+    {
+      "assetId": "IMG-CAEL-0101",
+      "pageNumber": 101,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0101.png",
+      "bytes": 2410777,
+      "contentType": "image/png",
+      "sha256": "174dffe7ecbe13017bc1648b827ecab12f6923590814a500036271e76acf0d38"
+    },
+    {
+      "assetId": "IMG-CAEL-0102",
+      "pageNumber": 102,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0102.png",
+      "bytes": 2634691,
+      "contentType": "image/png",
+      "sha256": "6fe1f94523e951c1b25599ff44522cf5657ac13e6d47202b2beb4b5b7c63e004"
+    },
+    {
+      "assetId": "IMG-CAEL-0103",
+      "pageNumber": 103,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0103.png",
+      "bytes": 2429287,
+      "contentType": "image/png",
+      "sha256": "6f16ac00442d8d59ccedc4c339389c492fad8a9365e5fc9773d008d2b6fbe438"
+    },
+    {
+      "assetId": "IMG-CAEL-0104",
+      "pageNumber": 104,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0104.png",
+      "bytes": 2582920,
+      "contentType": "image/png",
+      "sha256": "98a760a789f562396d173551971146348e9f9177eefb889358ba274032c37a66"
+    },
+    {
+      "assetId": "IMG-CAEL-0105",
+      "pageNumber": 105,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0105.png",
+      "bytes": 2590571,
+      "contentType": "image/png",
+      "sha256": "9f16e2eaa6a0992b7557776763752f4f0e62ad38adb4647c2db71c994615e0fb"
+    },
+    {
+      "assetId": "IMG-CAEL-0106",
+      "pageNumber": 106,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0106.png",
+      "bytes": 2656815,
+      "contentType": "image/png",
+      "sha256": "8423d4d244c3fea8ba765624aa055594bdc0a6420a1a99b4514a2bff7b042502"
+    },
+    {
+      "assetId": "IMG-CAEL-0107",
+      "pageNumber": 107,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0107.png",
+      "bytes": 2701385,
+      "contentType": "image/png",
+      "sha256": "b50224218e36a4389fe343e88b94db713a4c6044c00f672bf8c511d881e1d4d0"
+    },
+    {
+      "assetId": "IMG-CAEL-0108",
+      "pageNumber": 108,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0108.png",
+      "bytes": 2352069,
+      "contentType": "image/png",
+      "sha256": "25b370f849a7d7f6a2c740b8c79d668794bf6c173fc605a0bcd45ce67f7e1dff"
+    },
+    {
+      "assetId": "IMG-CAEL-0109",
+      "pageNumber": 109,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0109.png",
+      "bytes": 2292784,
+      "contentType": "image/png",
+      "sha256": "ba03b90ed7eff412355570ed51e9b4564ace031df9f90ebf3d0f2b5ee4f3afe3"
+    },
+    {
+      "assetId": "IMG-CAEL-0110",
+      "pageNumber": 110,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0110.png",
+      "bytes": 3046200,
+      "contentType": "image/png",
+      "sha256": "8f10fd64cd7cdae9058491788d47474245a6fc34b911bec0cd8d3062c64b3bd3"
+    },
+    {
+      "assetId": "IMG-CAEL-0111",
+      "pageNumber": 111,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0111.png",
+      "bytes": 2744176,
+      "contentType": "image/png",
+      "sha256": "eaaf4fb2dc555f47819b8566c95e5261668de6f2767acb1bd7ee2ba7a740f65f"
+    },
+    {
+      "assetId": "IMG-CAEL-0112",
+      "pageNumber": 112,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0112.png",
+      "bytes": 2701385,
+      "contentType": "image/png",
+      "sha256": "b50224218e36a4389fe343e88b94db713a4c6044c00f672bf8c511d881e1d4d0"
+    },
+    {
+      "assetId": "IMG-CAEL-0113",
+      "pageNumber": 113,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0113.png",
+      "bytes": 2356403,
+      "contentType": "image/png",
+      "sha256": "ffe651b8bb903965479f42fbeb343c9f1df347c2a1cf962f0e7a24f7b84f2a0a"
+    },
+    {
+      "assetId": "IMG-CAEL-0114",
+      "pageNumber": 114,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0114.png",
+      "bytes": 2352080,
+      "contentType": "image/png",
+      "sha256": "e075ecf4054e6d55b6c9f1fdd2024552bbe5e7c9b2b68419dcb194d88695a39f"
+    },
+    {
+      "assetId": "IMG-CAEL-0115",
+      "pageNumber": 115,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0115.png",
+      "bytes": 2496974,
+      "contentType": "image/png",
+      "sha256": "73b6311591beeeb693bd0d88879374df5d937efc5802c50cacf3545563d37f8c"
+    },
+    {
+      "assetId": "IMG-CAEL-0116",
+      "pageNumber": 116,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0116.png",
+      "bytes": 2597991,
+      "contentType": "image/png",
+      "sha256": "d6c3c5ffc874f557097b002883e50a3527cf08e501cfc96e32526e863415361b"
+    },
+    {
+      "assetId": "IMG-CAEL-0117",
+      "pageNumber": 117,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0117.png",
+      "bytes": 2493953,
+      "contentType": "image/png",
+      "sha256": "721ec3cd3c385bc0e2ce891414ed769058b9680a1a0ec518175b98810c3b41f8"
+    },
+    {
+      "assetId": "IMG-CAEL-0118",
+      "pageNumber": 118,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0118.png",
+      "bytes": 2551663,
+      "contentType": "image/png",
+      "sha256": "4963f8c916118488cbdc329e5b330530713872a081523b7ba02b8d48a41ecafc"
+    },
+    {
+      "assetId": "IMG-CAEL-0119",
+      "pageNumber": 119,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0119.png",
+      "bytes": 2518984,
+      "contentType": "image/png",
+      "sha256": "0ae455fa064d9ba3724947d2669b6604c434eae31615070120d9ee225e7b4fe3"
+    },
+    {
+      "assetId": "IMG-CAEL-0120",
+      "pageNumber": 120,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0120.png",
+      "bytes": 2520571,
+      "contentType": "image/png",
+      "sha256": "8aa5a80507e670590b67ca0a6983ad7fb10e000421b677ca2dcae7a498a1c1f3"
+    },
+    {
+      "assetId": "IMG-CAEL-0121",
+      "pageNumber": 121,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0121.png",
+      "bytes": 2526158,
+      "contentType": "image/png",
+      "sha256": "b92f1be28321d79a71331bfa20b21bd0ed90e36a578e35e7a6d8fd517b2d5b32"
+    },
+    {
+      "assetId": "IMG-CAEL-0122",
+      "pageNumber": 122,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0122.png",
+      "bytes": 2517142,
+      "contentType": "image/png",
+      "sha256": "dc1a69c527d523c8ea88f21d243b6e9556e2d2452eb9b3f4a7642edde3530f8b"
+    },
+    {
+      "assetId": "IMG-CAEL-0123",
+      "pageNumber": 123,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0123.png",
+      "bytes": 2596736,
+      "contentType": "image/png",
+      "sha256": "9447033ac0419ea2e6fad9740b644604c19df9959c4731d81c6cc3d1a88e08af"
+    },
+    {
+      "assetId": "IMG-CAEL-0124",
+      "pageNumber": 124,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0124.png",
+      "bytes": 2499949,
+      "contentType": "image/png",
+      "sha256": "541b75a7a1ddcc87e060677fa209d19ccb318bf97f199030ba799d7ea894988c"
+    },
+    {
+      "assetId": "IMG-CAEL-0125",
+      "pageNumber": 125,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0125.png",
+      "bytes": 2581189,
+      "contentType": "image/png",
+      "sha256": "44d0d696851ef1f32bbc3e5f8da19b2b7021f1a027cef829aa7cb25cb13221ec"
+    },
+    {
+      "assetId": "IMG-CAEL-0126",
+      "pageNumber": 126,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0126.png",
+      "bytes": 2648711,
+      "contentType": "image/png",
+      "sha256": "d500ab66746b4d513ad5c6e2c8a64b4a4978db0164001c622bde8c0637ec6116"
+    },
+    {
+      "assetId": "IMG-CAEL-0127",
+      "pageNumber": 127,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0127.png",
+      "bytes": 2772624,
+      "contentType": "image/png",
+      "sha256": "a65045ef60db86d7473e4a394b58fa2867cf3a4bd8d5c12fda066a561c6c2ca5"
+    },
+    {
+      "assetId": "IMG-CAEL-0128",
+      "pageNumber": 128,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0128.png",
+      "bytes": 2772255,
+      "contentType": "image/png",
+      "sha256": "e46275da30a2555ac35be708218ac335074893c69ece25f8e326befca8c36642"
+    },
+    {
+      "assetId": "IMG-CAEL-0129",
+      "pageNumber": 129,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0129.png",
+      "bytes": 2764784,
+      "contentType": "image/png",
+      "sha256": "9fb8b5becb963c50d7b71471821cbe523093e9e79c0fa6cefe9f9827067c7bda"
+    },
+    {
+      "assetId": "IMG-CAEL-0130",
+      "pageNumber": 130,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0130.png",
+      "bytes": 2637025,
+      "contentType": "image/png",
+      "sha256": "5ea7a7785aa46b822d32ec9435e3a55828c464cf0eeb61623d40ffff42ce2163"
+    },
+    {
+      "assetId": "IMG-CAEL-0131",
+      "pageNumber": 131,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0131.png",
+      "bytes": 2988443,
+      "contentType": "image/png",
+      "sha256": "6b6fb5fce276dbf0986a50a87943b243047ac106c895a5d201ab27d77aa96289"
+    },
+    {
+      "assetId": "IMG-CAEL-0132",
+      "pageNumber": 132,
+      "url": "https://oddj5etdpuoppzxt.public.blob.vercel-storage.com/codex/v1/pages/IMG-CAEL-0132.png",
+      "bytes": 2633219,
+      "contentType": "image/png",
+      "sha256": "4d0f7d08c7bb4ffe2d148f09307d6a7efe1f0812b13db99486194a5c85860083"
+    }
+  ]
+}

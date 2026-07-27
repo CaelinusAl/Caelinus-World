@@ -1,0 +1,185 @@
+{
+  "duplicates": {
+    "duplicates": [
+      {
+        "count": 2,
+        "members": [
+          {
+            "volume": "Çiftçi — MESLEK 09",
+            "bible": "CN-03",
+            "sectionId": "ciftci-c2-70-living-farmer-legacy-engine",
+            "title": "LIVING FARMER LEGACY ENGINE"
+          },
+          {
+            "volume": "Çiftçi — MESLEK 09",
+            "bible": "CN-03",
+            "sectionId": "ciftci-c2-70-living-farmer-legacy-engine",
+            "title": "LIVING FARMER LEGACY ENGINE"
+          }
+        ]
+      }
+    ],
+    "boilerplate": []
+  },
+  "gaps": {
+    "gaps": [
+      {
+        "severity": "missing",
+        "bible": "CN-02",
+        "title": "World Bible",
+        "note": "Adana+81 il+Seyhan+Anadolu; Genesis'ten çıkarılacak"
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-05",
+        "title": "Economy Bible",
+        "note": "Kanonda tanımlı, henüz içerik yok."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-06",
+        "title": "Architecture Bible",
+        "note": "Kanonda tanımlı, henüz içerik yok."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-10",
+        "title": "Audio Bible",
+        "note": "yalnızca Art md.5 ilke"
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-11",
+        "title": "Cinematic Bible",
+        "note": "yalnızca Art md.4 ilke"
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-12",
+        "title": "UI/UX Codex",
+        "note": "Kanonda tanımlı, henüz içerik yok."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-13",
+        "title": "Unreal Implementation",
+        "note": "World Partition/PCG/Niagara dağınık"
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-14",
+        "title": "Historical Bible",
+        "note": "Kanonda tanımlı, henüz içerik yok."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-15",
+        "title": "Canon Decisions",
+        "note": "ilk-iz FROZEN, meslek numaralandırma, marker standardı vb."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-04.3",
+        "title": "Production · Gameplay",
+        "note": "Alt-cilt boş."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-04.4",
+        "title": "Production · Environment",
+        "note": "Alt-cilt boş."
+      },
+      {
+        "severity": "missing",
+        "bible": "CN-04.5",
+        "title": "Production · AI",
+        "note": "Alt-cilt boş."
+      },
+      {
+        "severity": "partial",
+        "bible": "CN-03",
+        "title": "Meslek: ÇİFTÇİ",
+        "note": "17/70 sayfa yazılı, 53 boş.",
+        "detail": {
+          "profession": "ÇİFTÇİ",
+          "pagesPresent": 17,
+          "pagesMax": 70,
+          "missingPageCount": 53,
+          "missingPagesSample": [
+            3,
+            6,
+            7,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ]
+        }
+      },
+      {
+        "severity": "partial",
+        "bible": "CN-03",
+        "title": "Meslek: FIRINCI",
+        "note": "78/464 sayfa yazılı, 386 boş.",
+        "detail": {
+          "profession": "FIRINCI",
+          "pagesPresent": 78,
+          "pagesMax": 464,
+          "missingPageCount": 386,
+          "missingPagesSample": [
+            5,
+            8,
+            10,
+            11,
+            12,
+            14,
+            15,
+            16,
+            17,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            28,
+            29,
+            31,
+            32,
+            33,
+            35,
+            36
+          ]
+        }
+      },
+      {
+        "severity": "thin",
+        "bible": "CN-04.1",
+        "title": "Production · NPC",
+        "note": "Yalnızca 1 bölüm — genişletilebilir."
+      }
+    ]
+  },
+  "meta": {
+    "generatedAt": "2026-07-27T12:41:58.329Z"
+  }
+}

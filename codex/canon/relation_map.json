@@ -1,0 +1,1029 @@
+{
+  "generatedAt": "2026-07-27",
+  "layers": [
+    "Content (entity)",
+    "Meslekler",
+    "NPC",
+    "Craft",
+    "Quest",
+    "Ekonomi",
+    "Şehir",
+    "Festival",
+    "Animation",
+    "Sound / VO",
+    "Concept Art",
+    "Image Vault",
+    "Gameplay",
+    "Blueprint",
+    "Unreal Asset"
+  ],
+  "chains": [
+    {
+      "id": "pamuk",
+      "label": "Pamuk → Anadolu",
+      "nodes": [
+        {
+          "name": "Pamuk",
+          "hits": 1,
+          "status": "ORPHANED"
+        },
+        {
+          "name": "Çiftçi",
+          "hits": 60,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Dokumacı",
+          "hits": 4,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Boyacı",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "Terzi",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "Pazar",
+          "hits": 18,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Festival",
+          "hits": 49,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Ekonomi",
+          "hits": 34,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Anadolu",
+          "hits": 59,
+          "status": "PRESENT"
+        }
+      ]
+    },
+    {
+      "id": "ekmek",
+      "label": "Buğday → Ekonomi",
+      "nodes": [
+        {
+          "name": "Tohum",
+          "hits": 64,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Buğday",
+          "hits": 50,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Çiftçi",
+          "hits": 60,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Değirmenci",
+          "hits": 14,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Fırıncı",
+          "hits": 120,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Ekmek",
+          "hits": 220,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Pazar",
+          "hits": 18,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Han",
+          "hits": 1,
+          "status": "ORPHANED"
+        },
+        {
+          "name": "Festival",
+          "hits": 49,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Ekonomi",
+          "hits": 34,
+          "status": "PRESENT"
+        }
+      ]
+    },
+    {
+      "id": "maden",
+      "label": "Maden → Savunma",
+      "nodes": [
+        {
+          "name": "Maden",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "Madenci",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "Demirci",
+          "hits": 7,
+          "status": "PRESENT"
+        },
+        {
+          "name": "Silah Ustası",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "İnşaat",
+          "hits": 0,
+          "status": "MISSING"
+        },
+        {
+          "name": "Savunma",
+          "hits": 0,
+          "status": "MISSING"
+        }
+      ]
+    }
+  ],
+  "verticals": [
+    {
+      "node": "Çiftçi",
+      "layers": [
+        {
+          "layer": "Content (entity)",
+          "status": "HAVE",
+          "n": null
+        },
+        {
+          "layer": "Meslekler",
+          "status": "PARTIAL",
+          "n": 904
+        },
+        {
+          "layer": "NPC",
+          "status": "PARTIAL",
+          "n": 313
+        },
+        {
+          "layer": "Craft",
+          "status": "PARTIAL",
+          "n": 38
+        },
+        {
+          "layer": "Quest",
+          "status": "PARTIAL",
+          "n": 26
+        },
+        {
+          "layer": "Ekonomi",
+          "status": "PARTIAL",
+          "n": 97
+        },
+        {
+          "layer": "Şehir",
+          "status": "PARTIAL",
+          "n": 236
+        },
+        {
+          "layer": "Festival",
+          "status": "PARTIAL",
+          "n": 58
+        },
+        {
+          "layer": "Animation",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Sound / VO",
+          "status": "PARTIAL",
+          "n": 6
+        },
+        {
+          "layer": "Concept Art",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Image Vault",
+          "status": "UNLINKED",
+          "n": 132
+        },
+        {
+          "layer": "Gameplay",
+          "status": "PARTIAL",
+          "n": 718
+        },
+        {
+          "layer": "Blueprint",
+          "status": "PARTIAL",
+          "n": 2
+        },
+        {
+          "layer": "Unreal Asset",
+          "status": "PARTIAL",
+          "n": 120
+        }
+      ]
+    },
+    {
+      "node": "Fırıncı",
+      "layers": [
+        {
+          "layer": "Content (entity)",
+          "status": "HAVE",
+          "n": null
+        },
+        {
+          "layer": "Meslekler",
+          "status": "PARTIAL",
+          "n": 904
+        },
+        {
+          "layer": "NPC",
+          "status": "PARTIAL",
+          "n": 313
+        },
+        {
+          "layer": "Craft",
+          "status": "PARTIAL",
+          "n": 38
+        },
+        {
+          "layer": "Quest",
+          "status": "PARTIAL",
+          "n": 26
+        },
+        {
+          "layer": "Ekonomi",
+          "status": "PARTIAL",
+          "n": 97
+        },
+        {
+          "layer": "Şehir",
+          "status": "PARTIAL",
+          "n": 236
+        },
+        {
+          "layer": "Festival",
+          "status": "PARTIAL",
+          "n": 58
+        },
+        {
+          "layer": "Animation",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Sound / VO",
+          "status": "PARTIAL",
+          "n": 6
+        },
+        {
+          "layer": "Concept Art",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Image Vault",
+          "status": "UNLINKED",
+          "n": 132
+        },
+        {
+          "layer": "Gameplay",
+          "status": "PARTIAL",
+          "n": 718
+        },
+        {
+          "layer": "Blueprint",
+          "status": "PARTIAL",
+          "n": 2
+        },
+        {
+          "layer": "Unreal Asset",
+          "status": "PARTIAL",
+          "n": 120
+        }
+      ]
+    },
+    {
+      "node": "Pamuk",
+      "layers": [
+        {
+          "layer": "Content (entity)",
+          "status": "HAVE",
+          "n": null
+        },
+        {
+          "layer": "Meslekler",
+          "status": "PARTIAL",
+          "n": 904
+        },
+        {
+          "layer": "NPC",
+          "status": "PARTIAL",
+          "n": 313
+        },
+        {
+          "layer": "Craft",
+          "status": "PARTIAL",
+          "n": 38
+        },
+        {
+          "layer": "Quest",
+          "status": "PARTIAL",
+          "n": 26
+        },
+        {
+          "layer": "Ekonomi",
+          "status": "PARTIAL",
+          "n": 97
+        },
+        {
+          "layer": "Şehir",
+          "status": "PARTIAL",
+          "n": 236
+        },
+        {
+          "layer": "Festival",
+          "status": "PARTIAL",
+          "n": 58
+        },
+        {
+          "layer": "Animation",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Sound / VO",
+          "status": "PARTIAL",
+          "n": 6
+        },
+        {
+          "layer": "Concept Art",
+          "status": "PARTIAL",
+          "n": 4
+        },
+        {
+          "layer": "Image Vault",
+          "status": "UNLINKED",
+          "n": 132
+        },
+        {
+          "layer": "Gameplay",
+          "status": "PARTIAL",
+          "n": 718
+        },
+        {
+          "layer": "Blueprint",
+          "status": "PARTIAL",
+          "n": 2
+        },
+        {
+          "layer": "Unreal Asset",
+          "status": "PARTIAL",
+          "n": 120
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "c:pamuk",
+      "label": "Pamuk",
+      "type": "content",
+      "status": "ORPHANED"
+    },
+    {
+      "id": "c:ciftci",
+      "label": "Çiftçi",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:dokumaci",
+      "label": "Dokumacı",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:boyaci",
+      "label": "Boyacı",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:terzi",
+      "label": "Terzi",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:pazar",
+      "label": "Pazar",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:festival",
+      "label": "Festival",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:ekonomi",
+      "label": "Ekonomi",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:anadolu",
+      "label": "Anadolu",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:tohum",
+      "label": "Tohum",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:bugday",
+      "label": "Buğday",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:degirmenci",
+      "label": "Değirmenci",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:firinci",
+      "label": "Fırıncı",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:ekmek",
+      "label": "Ekmek",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:han",
+      "label": "Han",
+      "type": "content",
+      "status": "ORPHANED"
+    },
+    {
+      "id": "c:maden",
+      "label": "Maden",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:madenci",
+      "label": "Madenci",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:demirci",
+      "label": "Demirci",
+      "type": "content",
+      "status": "PRESENT"
+    },
+    {
+      "id": "c:silah ustasi",
+      "label": "Silah Ustası",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:insaat",
+      "label": "İnşaat",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "c:savunma",
+      "label": "Savunma",
+      "type": "content",
+      "status": "MISSING"
+    },
+    {
+      "id": "l:content",
+      "label": "Content (entity)",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:meslek",
+      "label": "Meslekler",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:npc",
+      "label": "NPC",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:craft",
+      "label": "Craft",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:quest",
+      "label": "Quest",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:economy",
+      "label": "Ekonomi",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:city",
+      "label": "Şehir",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:festival",
+      "label": "Festival",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:animation",
+      "label": "Animation",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:sound",
+      "label": "Sound / VO",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:art",
+      "label": "Concept Art",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:image",
+      "label": "Image Vault",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:gameplay",
+      "label": "Gameplay",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:blueprint",
+      "label": "Blueprint",
+      "type": "layer",
+      "status": null
+    },
+    {
+      "id": "l:unreal",
+      "label": "Unreal Asset",
+      "type": "layer",
+      "status": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "c:pamuk",
+      "to": "c:ciftci",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "c:dokumaci",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:dokumaci",
+      "to": "c:boyaci",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:boyaci",
+      "to": "c:terzi",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:terzi",
+      "to": "c:pazar",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:pazar",
+      "to": "c:festival",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:festival",
+      "to": "c:ekonomi",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:ekonomi",
+      "to": "c:anadolu",
+      "type": "chain",
+      "chain": "pamuk"
+    },
+    {
+      "from": "c:tohum",
+      "to": "c:bugday",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:bugday",
+      "to": "c:ciftci",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "c:degirmenci",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:degirmenci",
+      "to": "c:firinci",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:firinci",
+      "to": "c:ekmek",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:ekmek",
+      "to": "c:pazar",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:pazar",
+      "to": "c:han",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:han",
+      "to": "c:festival",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:festival",
+      "to": "c:ekonomi",
+      "type": "chain",
+      "chain": "ekmek"
+    },
+    {
+      "from": "c:maden",
+      "to": "c:madenci",
+      "type": "chain",
+      "chain": "maden"
+    },
+    {
+      "from": "c:madenci",
+      "to": "c:demirci",
+      "type": "chain",
+      "chain": "maden"
+    },
+    {
+      "from": "c:demirci",
+      "to": "c:silah ustasi",
+      "type": "chain",
+      "chain": "maden"
+    },
+    {
+      "from": "c:silah ustasi",
+      "to": "c:insaat",
+      "type": "chain",
+      "chain": "maden"
+    },
+    {
+      "from": "c:insaat",
+      "to": "c:savunma",
+      "type": "chain",
+      "chain": "maden"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:content",
+      "type": "aspect",
+      "status": "HAVE"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:meslek",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:npc",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:craft",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:quest",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:economy",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:city",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:festival",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:animation",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:sound",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:art",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:image",
+      "type": "aspect",
+      "status": "UNLINKED"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:gameplay",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:blueprint",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:ciftci",
+      "to": "l:unreal",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:content",
+      "type": "aspect",
+      "status": "HAVE"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:meslek",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:npc",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:craft",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:quest",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:economy",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:city",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:festival",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:animation",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:sound",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:art",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:image",
+      "type": "aspect",
+      "status": "UNLINKED"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:gameplay",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:blueprint",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:firinci",
+      "to": "l:unreal",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:content",
+      "type": "aspect",
+      "status": "HAVE"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:meslek",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:npc",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:craft",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:quest",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:economy",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:city",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:festival",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:animation",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:sound",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:art",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:image",
+      "type": "aspect",
+      "status": "UNLINKED"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:gameplay",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:blueprint",
+      "type": "aspect",
+      "status": "PARTIAL"
+    },
+    {
+      "from": "c:pamuk",
+      "to": "l:unreal",
+      "type": "aspect",
+      "status": "PARTIAL"
+    }
+  ]
+}

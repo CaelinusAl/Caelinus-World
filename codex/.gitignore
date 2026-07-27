@@ -1,0 +1,18 @@
+# CAELINUS CODEX — .gitignore
+# Images (~330MB) stay OUT of git. Motor reads them from a local path
+# (config: ASSET_DIR / env CODEX_ASSET_DIR). Same-machine local reference.
+sources/asset/
+assets_local/
+
+# Frozen backup: keep the text-source copies + checksums, but never the
+# hashed heavy assets (they're referenced by checksum only, not stored).
+_freeze/**/asset/
+
+# Node / OS cruft
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# NOTE: data/*.json IS committed on purpose — it is the product / data contract
+# Cursor consumes. Regenerate any time with: node engine/build.mjs

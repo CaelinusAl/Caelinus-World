@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caelinus.ai/schema/image-similarity-graph.v1.schema.json",
+  "title": "Caelinus Image Similarity Graph v1",
+  "description": "Non-canonical local image similarity index.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "graphType",
+    "generatedAt",
+    "productionIntegration",
+    "canonicalIsolation",
+    "sourceManifest",
+    "algorithms",
+    "nodeCount",
+    "edgeCount",
+    "nodes",
+    "edges",
+    "statistics"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "graphType": { "const": "visual_similarity" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "productionIntegration": { "const": "blocked_pending_approval" },
+    "canonicalIsolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalRelationshipsIncluded",
+        "canonicalMetadataModified",
+        "humanApprovalRequired"
+      ],
+      "properties": {
+        "canonicalRelationshipsIncluded": { "const": false },
+        "canonicalMetadataModified": { "const": false },
+        "humanApprovalRequired": { "const": true }
+      }
+    },
+    "sourceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "contentSha256", "assetDirectory", "assetCount"],
+      "properties": {
+        "file": { "const": "codex/data/images.json" },
+        "contentSha256": { "$ref": "#/$defs/sha256" },
+        "assetDirectory": { "type": "string", "minLength": 1 },
+        "assetCount": { "const": 132 }
+      }
+    },
+    "algorithms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pHash", "color_layout"],
+      "properties": {
+        "pHash": { "$ref": "#/$defs/algorithmConfig" },
+        "color_layout": { "$ref": "#/$defs/algorithmConfig" }
+      }
+    },
+    "nodeCount": { "const": 132 },
+    "edgeCount": { "type": "integer", "minimum": 2 },
+    "nodes": {
+      "type": "array",
+      "minItems": 132,
+      "maxItems": 132,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairsEvaluated",
+        "edgesByAlgorithm",
+        "scoreByAlgorithm",
+        "nodesWithNeighbors",
+        "possibleDuplicatePairs"
+      ],
+      "properties": {
+        "pairsEvaluated": { "const": 8646 },
+        "edgesByAlgorithm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pHash", "color_layout"],
+          "properties": {
+            "pHash": { "type": "integer", "minimum": 1 },
+            "color_layout": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "scoreByAlgorithm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pHash", "color_layout"],
+          "properties": {
+            "pHash": { "$ref": "#/$defs/scoreSummary" },
+            "color_layout": { "$ref": "#/$defs/scoreSummary" }
+          }
+        },
+        "nodesWithNeighbors": { "const": 132 },
+        "possibleDuplicatePairs": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "algorithmConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "descriptor", "topK", "minimumScore"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "descriptor": { "type": "string", "minLength": 1 },
+        "topK": { "type": "integer", "minimum": 1 },
+        "minimumScore": { "$ref": "#/$defs/score" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodeId",
+        "assetId",
+        "legacyManifestId",
+        "fileName",
+        "sha256",
+        "width",
+        "height",
+        "descriptors"
+      ],
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "pattern": "^similarity:IMG-CAEL-[0-9]{4}$"
+        },
+        "assetId": {
+          "type": "string",
+          "pattern": "^IMG-CAEL-[0-9]{4}$"
+        },
+        "legacyManifestId": {
+          "type": "string",
+          "pattern": "^img-[0-9]{3}$"
+        },
+        "fileName": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "descriptors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pHash", "colorLayout"],
+          "properties": {
+            "pHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{16}$"
+            },
+            "colorLayout": {
+              "type": "array",
+              "minItems": 48,
+              "maxItems": 48,
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edgeId",
+        "source",
+        "target",
+        "similarityScore",
+        "algorithm",
+        "confidence",
+        "createdAt",
+        "verificationState",
+        "canonical",
+        "discoveredBy"
+      ],
+      "properties": {
+        "edgeId": {
+          "type": "string",
+          "pattern": "^sim-[a-f0-9]{20}$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^similarity:IMG-CAEL-[0-9]{4}$"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^similarity:IMG-CAEL-[0-9]{4}$"
+        },
+        "similarityScore": { "$ref": "#/$defs/score" },
+        "algorithm": {
+          "type": "string",
+          "enum": ["pHash", "color_layout"]
+        },
+        "confidence": { "$ref": "#/$defs/score" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "verificationState": { "const": "analyzed" },
+        "canonical": { "const": false },
+        "discoveredBy": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^IMG-CAEL-[0-9]{4}$"
+          }
+        }
+      }
+    },
+    "scoreSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum", "mean", "median"],
+      "properties": {
+        "minimum": { "$ref": "#/$defs/score" },
+        "maximum": { "$ref": "#/$defs/score" },
+        "mean": { "$ref": "#/$defs/score" },
+        "median": { "$ref": "#/$defs/score" }
+      }
+    }
+  }
+}

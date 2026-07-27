@@ -1,0 +1,39 @@
+{
+  "version": "2.0",
+  "frozen": "2026-07-27",
+  "note": "Machine mirror of CANON_MANIFEST.md v2.0. Selin/Aura own the tree. 16 cilts. Keep in sync.",
+  "bibles": [
+    { "id": "CN-00", "name": "Genesis",                  "status": "PRESENT",   "sources": ["CAELINUS-genesis.txt"] },
+    { "id": "CN-01", "name": "Founder Vision",           "status": "PRESENT",   "sources": ["FOUNDER DATA ROOM.txt"], "note": "Founder Letter + One Law + Covenant" },
+    { "id": "CN-02", "name": "World Bible",              "status": "SCATTERED", "sources": ["CAELINUS-genesis.txt"], "note": "Adana+81 il+Seyhan+Anadolu; Genesis'ten çıkarılacak" },
+    { "id": "CN-03", "name": "Living Civilization",      "status": "PARTIAL",   "sources": ["CAELINUS PRODUCTION BIBLE.txt", "CAELINUS PRODUCTION BIBLE-MESLEKLER.txt"], "note": "Meslek rosteri: Çiftçi(09), Fırıncı(10). Sayfaları cilt etiketiyle diğer bible'lara dağılır." },
+    { "id": "CN-04", "name": "Production Bible",         "status": "PARTIAL",   "sources": [], "children": [
+      { "id": "CN-04.1", "name": "NPC",         "status": "PARTIAL", "cilt": "NPC BIBLE" },
+      { "id": "CN-04.2", "name": "Engineering", "status": "PARTIAL", "cilt": "ENGINEERING BIBLE" },
+      { "id": "CN-04.3", "name": "Gameplay",    "status": "SCATTERED" },
+      { "id": "CN-04.4", "name": "Environment", "status": "PARTIAL" },
+      { "id": "CN-04.5", "name": "AI",          "status": "PARTIAL" }
+    ] },
+    { "id": "CN-05", "name": "Economy Bible",            "status": "SCATTERED", "sources": ["CAELINUS-genesis.txt", "CAELINUS PRODUCTION BIBLE-MESLEKLER.txt"] },
+    { "id": "CN-06", "name": "Architecture Bible",       "status": "MISSING",   "sources": [] },
+    { "id": "CN-07", "name": "Mastery Bible",            "status": "PARTIAL",   "sources": ["CAELINUS PRODUCTION BIBLE-MESLEKLER.txt"], "cilt": "USTALIK SİSTEMLERİ", "note": "Tüm meslekler kullanır (Demirci, Marangoz, Çömlekçi, Terzi...)" },
+    { "id": "CN-08", "name": "Civilization Design Bible","status": "PARTIAL",   "sources": ["CAELINUS PRODUCTION BIBLE-MESLEKLER.txt"], "cilt": "CIVILIZATION DESIGN BIBLE", "note": "Cross-profession medeniyet tasarım sistemi" },
+    { "id": "CN-09", "name": "Art Direction Bible",      "status": "PRESENT",   "sources": ["CAELINUS ART BIBLE 001.txt"] },
+    { "id": "CN-10", "name": "Audio Bible",              "status": "MISSING",   "sources": [], "note": "yalnızca Art md.5 ilke" },
+    { "id": "CN-11", "name": "Cinematic Bible",          "status": "MISSING",   "sources": [], "note": "yalnızca Art md.4 ilke" },
+    { "id": "CN-12", "name": "UI/UX Codex",              "status": "MISSING",   "sources": [] },
+    { "id": "CN-13", "name": "Unreal Implementation",    "status": "SCATTERED", "sources": ["CAELINUS PRODUCTION BIBLE.txt"], "note": "World Partition/PCG/Niagara dağınık" },
+    { "id": "CN-14", "name": "Historical Bible",         "status": "SCATTERED", "sources": [] },
+    { "id": "CN-15", "name": "Canon Decisions",          "status": "PARTIAL",   "sources": [], "note": "ilk-iz FROZEN, meslek numaralandırma, marker standardı vb." }
+  ],
+  "ciltToCanon": {
+    "NPC BIBLE": "CN-04.1",
+    "ENGINEERING BIBLE": "CN-04.2",
+    "CIVILIZATION DESIGN BIBLE": "CN-08",
+    "USTALIK SİSTEMLERİ": "CN-07"
+  },
+  "professions": [
+    { "no": 9,  "name": "Çiftçi",  "file": "CAELINUS PRODUCTION BIBLE.txt",          "cilts": ["NPC BIBLE", "ENGINEERING BIBLE"] },
+    { "no": 10, "name": "Fırıncı", "file": "CAELINUS PRODUCTION BIBLE-MESLEKLER.txt", "cilts": ["CIVILIZATION DESIGN BIBLE", "USTALIK SİSTEMLERİ"] }
+  ]
+}

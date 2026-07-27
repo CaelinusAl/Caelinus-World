@@ -55,6 +55,14 @@ import {
   localeFromCountry,
   localeFromHost,
 } from "@/lib/i18n/locale";
+import {
+  codexUrl,
+  isCodexPresentationHost,
+  isUniversePresentationHost,
+  LOCAL_PUBLIC_HOSTS,
+  PUBLIC_HOSTS,
+  PUBLIC_ORIGINS,
+} from "@/lib/public-domains";
 
 const LOCALE_HEADER = "x-caelinus-locale";
 const PROTECTED_PREFIXES = ["/atelier/dashboard", "/atelier/admin"];
@@ -84,8 +92,60 @@ export async function proxy(request: NextRequest) {
   // Always resolve the locale up-front so we can inject the header
   // even on paths we end up short-circuiting.
   const currentLocale = localeFromHost(host);
+  const cleanHost = host.split(":")[0].toLowerCase();
 
-  // === 1. Static / internal short-circuit (locale header only) ===
+  // === 1. Public entrance routing ===
+  // Both domains resolve to this deployment. Rewrites change presentation,
+  // never the API/data boundary or the URL visible to the visitor.
+  if (cleanHost === `www.${PUBLIC_HOSTS.codex}`) {
+    const canonical = request.nextUrl.clone();
+    canonical.host = PUBLIC_HOSTS.codex;
+    canonical.protocol = "https";
+    return NextResponse.redirect(canonical, 308);
+  }
+
+  if (isCodexPresentationHost(cleanHost)) {
+    if (pathname === "/archive") {
+      if (cleanHost === LOCAL_PUBLIC_HOSTS.codex) {
+        const canonical = request.nextUrl.clone();
+        canonical.pathname = "/";
+        return NextResponse.redirect(canonical, 308);
+      }
+      const canonical = new URL("/", PUBLIC_ORIGINS.codex);
+      canonical.search = search;
+      return NextResponse.redirect(canonical, 308);
+    }
+    if (pathname === "/") {
+      const destination = request.nextUrl.clone();
+      destination.pathname = "/archive";
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set(LOCALE_HEADER, currentLocale);
+      requestHeaders.set("x-caelinus-surface", "codex");
+      return NextResponse.rewrite(destination, {
+        request: { headers: requestHeaders },
+      });
+    }
+  }
+
+  if (
+    isUniversePresentationHost(cleanHost) &&
+    pathname === "/archive"
+  ) {
+    if (cleanHost === LOCAL_PUBLIC_HOSTS.universe) {
+      const localTemple = request.nextUrl.clone();
+      localTemple.hostname = LOCAL_PUBLIC_HOSTS.codex;
+      localTemple.pathname = "/";
+      localTemple.searchParams.set("from", "caelinus");
+      return NextResponse.redirect(localTemple, 308);
+    }
+    const canonical = new URL(codexUrl("caelinus"));
+    for (const [key, value] of request.nextUrl.searchParams) {
+      if (key !== "from") canonical.searchParams.append(key, value);
+    }
+    return NextResponse.redirect(canonical, 308);
+  }
+
+  // === 2. Static / internal short-circuit (locale header only) ===
   // Bypass auth + GeoIP for static and API paths.
   if (isStaticOrInternal(pathname)) {
     const requestHeaders = new Headers(request.headers);
@@ -93,7 +153,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // === 2. Bots see host-derived locale, no GeoIP, no auth refresh ===
+  // === 3. Bots see host-derived locale, no GeoIP, no auth refresh ===
   // Cookies are a human-only signal; bots always get the canonical
   // version of whichever subdomain they crawled.
   if (isBotUserAgent(request.headers.get("user-agent"))) {
@@ -102,7 +162,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // === 3. GeoIP / cookie-driven locale redirect ===
+  // === 4. GeoIP / cookie-driven locale redirect ===
   // Manual override wins over GeoIP. If the user previously toggled,
   // we respect their choice forever (well, 1 year — see LOCALE_COOKIE).
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -136,7 +196,6 @@ export async function proxy(request: NextRequest) {
   const country = request.headers.get("x-vercel-ip-country");
   const envTR = process.env.NEXT_PUBLIC_SITE_HOST_TR?.toLowerCase();
   const envEN = process.env.NEXT_PUBLIC_SITE_HOST_EN?.toLowerCase();
-  const cleanHost = host.split(":")[0].toLowerCase();
   const onConfiguredHost =
     !!envTR && !!envEN && (cleanHost === envTR || cleanHost === envEN);
 
@@ -162,7 +221,7 @@ export async function proxy(request: NextRequest) {
     // No alternate host (preview URL etc) → fall through to auth pass.
   }
 
-  // === 4. Supabase session refresh + protected-route gate ===
+  // === 5. Supabase session refresh + protected-route gate ===
   // Build the request headers once with the resolved locale so every
   // subsequent NextResponse.next() carries it.
   const requestHeaders = new Headers(request.headers);

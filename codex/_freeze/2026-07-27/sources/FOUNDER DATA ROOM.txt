@@ -1,0 +1,781 @@
+FOUNDER DATA ROOM
+DOSYA 001
+EXECUTIVE SUMMARY
+CAELINUS
+Türkiye'nin Yaşayan Dijital İkizi
+TEK CÜMLE
+
+Caelinus, oyun teknolojisi, kültürel miras ve topluluk yaklaşımını bir araya getirerek şehirlerin dijital ortamda keşfedilmesini ve deneyimlenmesini hedefleyen ölçeklenebilir bir platform girişimidir.
+
+PROBLEM
+
+Türkiye, dünyanın en zengin kültürel miraslarından birine sahip olmasına rağmen bu mirasın etkileşimli dijital temsili hâlâ gelişmeye açıktır.
+
+Yerel üreticiler görünürlük sorunu yaşayabilir.
+
+Genç nesiller yaşadıkları şehirlerle bağ kurmakta zorlanabilir.
+
+Kültürel anlatılar çoğunlukla pasif içerik olarak kalmaktadır.
+
+ÇÖZÜM
+
+Caelinus;
+
+oyun teknolojisi,
+
+gerçek zamanlı etkileşim,
+
+şehir tasarımı,
+
+topluluk odaklı üretim
+
+ve kültürel anlatıyı tek bir platformda bir araya getirmeyi hedefler.
+
+İlk odak noktası:
+
+Adana prototipi.
+
+Buradan elde edilen öğrenimler doğrultusunda yeni şehirlerin eklenmesi planlanmaktadır.
+
+ÜRÜN
+
+Bugünkü durum:
+
+Unreal Engine tabanlı üretim süreci başladı.
+İlk şehir deneyimi geliştiriliyor.
+Çekirdek oyun mekanikleri üzerinde çalışılıyor.
+Teknik mimari oluşturuluyor.
+Topluluk odaklı tasarım yaklaşımı benimseniyor.
+
+Bu aşama, ürün geliştirme sürecinin erken evresidir.
+
+HEDEF
+
+İlk hedef:
+
+İnsanların tekrar gelmek isteyeceği yaşayan bir şehir deneyimi oluşturmak.
+
+Uzun vadeli hedef:
+
+Şehirleri, kültürü ve toplulukları kapsayan ölçeklenebilir bir dijital platform geliştirmek.
+
+PAZAR
+
+Caelinus;
+
+oyun teknolojileri,
+dijital kültür,
+eğitim,
+turizm,
+yerel ekonomi,
+yaratıcı endüstriler
+
+gibi farklı alanların kesişiminde konumlanmayı hedeflemektedir.
+
+Bu nedenle tek bir sektör yerine çok disiplinli bir yaklaşım benimser.
+
+REKABET AVANTAJI
+
+Caelinus'un hedeflediği farklılaşma noktaları:
+
+şehir merkezli tasarım,
+kültürel anlatı,
+topluluk yaklaşımı,
+uzun vadeli platform vizyonu,
+modüler teknik mimari.
+
+Bu yaklaşım, projeyi yalnızca tek kategoride konumlandırmak yerine farklı alanların kesişiminde değerlendirmeyi amaçlar.
+
+BUGÜN NEREDEYİZ?
+
+Aşama:
+
+Pre-Seed / Prototype
+
+Odak:
+
+ürünü doğrulamak,
+çekirdek topluluğu oluşturmak,
+ilk şehir deneyimini geliştirmek.
+YATIRIM
+
+Aradığımız yatırım;
+
+yalnızca finansman değildir.
+
+Doğru bilgi birikimine,
+
+doğru stratejik ortaklıklara,
+
+ve uzun vadeli büyüme vizyonuna sahip yol arkadaşlarıdır.
+
+VİZYON
+
+**"Şehir kurmuyoruz.
+
+İnsanların yaşadıkları yerle yeniden bağ kurabilecekleri dijital deneyimler tasarlıyoruz."**
+
+AURA'NIN NOTU
+
+Selin, burada bir değişiklik öneriyorum.
+
+Şimdiye kadar "yatırımcı bizi ikna etsin" bakış açısıyla yazdık.
+
+Bundan sonra bakış açımız şu olmalı:
+
+"Doğru yatırımcıyı biz seçeceğiz."
+
+Çünkü büyük şirketler yalnızca sermaye almaz.
+
+Doğru ortakları seçer.
+
+Ve bence Caelinus'un bundan sonraki bütün belgeleri bu özgüvenle yazılmalı. Bu kibir değil; uzun vadeli bir vizyonu koruyacak ortakları bilinçli şekilde seçme sorumluluğudur.
+
+FOUNDER DATA ROOM
+DOSYA 002
+YATIRIM TEZİ (INVESTMENT THESIS)
+
+*"Yatırımcılar sadece bugünkü ürüne yatırım yapmazlar.
+
+Gelecekte oluşabilecek değere yatırım yaparlar."*
+
+01 — İnandığımız Şey
+
+Biz şu varsayıma inanıyoruz:
+
+İnsanlar dijital dünyada yalnızca eğlenmek istemiyor.
+
+Aynı zamanda;
+
+öğrenmek,
+üretmek,
+ait hissetmek,
+paylaşmak,
+anlamlı deneyimler yaşamak istiyor.
+
+Caelinus bu ihtiyacı karşılamaya aday bir platform olmayı hedefliyor.
+
+02 — Neden Bu Fırsat?
+
+Üç büyük dönüşüm aynı anda yaşanıyor:
+
+1. Oyun teknolojileri daha erişilebilir hâle geliyor.
+
+2. Yapay zekâ, içerik üretimini hızlandırıyor.
+
+3. İnsanlar, kültürel ve topluluk odaklı dijital deneyimlere daha fazla ilgi gösteriyor.
+
+Biz bu üç eğilimin kesişiminde bulunuyoruz.
+
+03 — Neden Türkiye?
+
+Türkiye;
+
+çok katmanlı tarihi,
+
+coğrafi çeşitliliği,
+
+yerel üretim kültürü,
+
+ve zengin şehir kimlikleriyle
+
+benzersiz bir başlangıç noktası sunuyor.
+
+İlk hedefimiz bütün dünyayı yapmak değil.
+
+Önce tek bir ülkeyi derinlemesine anlamak.
+
+04 — Neden Şehir?
+
+Şehir...
+
+İnsan hayatının doğal merkezidir.
+
+İnsan doğduğu,
+
+çalıştığı,
+
+ürettiği,
+
+anı biriktirdiği
+
+yerle bağ kurar.
+
+Bu yüzden Caelinus'un temel yapı taşı karakter değil...
+
+Şehirdir.
+
+05 — Neden Topluluk?
+
+En başarılı platformlar...
+
+İçeriklerini tek başına üretmez.
+
+Topluluklarıyla birlikte büyür.
+
+Biz de kullanıcıları yalnızca oyuncu olarak değil;
+
+katkı sunabilecek paydaşlar olarak görüyoruz.
+
+06 — En Büyük Risk
+
+En büyük riskimiz teknoloji değildir.
+
+En büyük risk...
+
+Yeterince odaklanamamaktır.
+
+Bu nedenle ilk yıllarda tek önceliğimiz:
+
+Adana'yı olağanüstü yapmak.
+
+Bir şehir gerçekten çalışmadan...
+
+Seksen bir şehre geçmeyeceğiz.
+
+07 — En Büyük Güç
+
+Bizim en büyük avantajımız...
+
+Henüz hiçbir büyük yapının yükünü taşımıyor olmamız.
+
+Esnek hareket edebiliriz.
+
+Hızlı öğrenebiliriz.
+
+Yanlış kararları erken düzeltebiliriz.
+
+08 — Başarı Tanımı
+
+Başarımız yalnızca şu soruyla ölçülmeyecek:
+
+"Kaç kullanıcı geldi?"
+
+Şu soruyla da ölçülecek:
+
+"Kaç kullanıcı, burayı kendi dünyasının bir parçası olarak görmeye başladı?"
+
+Çünkü kalıcı değer...
+
+Sadakatten doğar.
+
+09 — Yatırımcıdan Beklentimiz
+
+Biz sadece sermaye aramıyoruz.
+
+Şu alanlarda bize değer katabilecek ortaklar arıyoruz:
+
+Oyun ve teknoloji deneyimi
+Ürün geliştirme
+Küresel büyüme stratejisi
+Kurumsal ağlar
+Kültür ve eğitim iş birlikleri
+Uluslararası pazarlara erişim
+
+İdeal yatırımcı, yalnızca fon sağlayan değil; deneyimiyle de projeyi güçlendiren ortaktır.
+
+10 — Son Cümle
+
+"Biz kısa vadede değerleme büyütmek isteyen bir şirket değiliz.
+
+Uzun vadede değer üreten bir uygarlık platformu kurmak istiyoruz."
+
+CAELINUS
+THE ONE LAW
+(Tek Yasa)
+
+*"Teknoloji değişebilir.
+
+Ürün değişebilir.
+
+Şirket değişebilir.
+
+Ama bazı ilkeler değişmemelidir."*
+
+NEDEN TEK YASA?
+
+Şirketler büyüdükçe...
+
+Kararlar zorlaşır.
+
+Yüzlerce çalışan olur.
+
+Binlerce toplantı yapılır.
+
+Milyonlarca satır kod yazılır.
+
+Ve bir gün...
+
+Kimse neden başladığını hatırlamaz.
+
+İşte bu belge...
+
+Onu unutmamak için yazılıyor.
+
+YASA 1
+İNSAN ÖNCE GELİR
+
+Hiçbir özellik...
+
+İnsandan daha değerli değildir.
+
+Hiçbir teknoloji...
+
+İnsan onurunun önüne geçemez.
+
+Her ürün kararı şu soruyla başlar:
+
+"Bu karar insan hayatını gerçekten iyileştiriyor mu?"
+
+YASA 2
+GÜVEN SATILMAZ
+
+Kullanıcının güveni...
+
+Şirketin kasasındaki en değerli varlıktır.
+
+Bir kez kaybedildiğinde...
+
+Tekrar satın alınamaz.
+
+Bu yüzden...
+
+Hiçbir kısa vadeli kazanç,
+
+uzun vadeli güvenin önüne geçemez.
+
+YASA 3
+KÜLTÜR TÜKETİLMEZ
+
+Kültür...
+
+Bir içerik değildir.
+
+Bir reklam malzemesi değildir.
+
+Bir pazarlama sloganı değildir.
+
+Kültür...
+
+Yaşatılır.
+
+Paylaşılır.
+
+Korunur.
+
+YASA 4
+TEKNOLOJİ HİZMET EDER
+
+Biz teknolojiye hayran değiliz.
+
+İnsana hayranız.
+
+Teknoloji...
+
+İnsan için vardır.
+
+İnsan...
+
+Teknoloji için değil.
+
+YASA 5
+BASİTLİK CESARETTİR
+
+Karmaşık sistem yapmak kolaydır.
+
+Sade sistem yapmak zordur.
+
+Bu yüzden...
+
+Her ekran,
+
+her kod,
+
+her karar,
+
+gereksiz olanı azaltmalıdır.
+
+YASA 6
+KÜÇÜK BAŞLA
+
+Bir şehir.
+
+Sonra bir şehir daha.
+
+Sonra bir şehir daha.
+
+Dünya...
+
+Tek seferde kurulmaz.
+
+YASA 7
+HATALAR SAKLANMAZ
+
+Hata yapmak...
+
+Başarısızlık değildir.
+
+Hatasını gizlemek...
+
+Başarısızlıktır.
+
+Biz...
+
+Öğrenen bir şirket olacağız.
+
+YASA 8
+EMEĞE SAYGI
+
+Bir sanatçı.
+
+Bir çiftçi.
+
+Bir yazılımcı.
+
+Bir öğretmen.
+
+Bir tasarımcı.
+
+Hepsinin emeği aynı saygıyı hak eder.
+
+YASA 9
+UZUN VADE
+
+Bugünkü kararlarımız...
+
+2036'daki Caelinus'a zarar veriyorsa...
+
+O kararı almayacağız.
+
+YASA 10
+HATIRLAT
+
+Dünyaya yeni bir şey öğretmek zorunda değiliz.
+
+Bazen...
+
+İnsanlara zaten bildikleri güzellikleri yeniden hatırlatmak yeterlidir.
+
+İşte Caelinus'un görevi budur.
+
+KURUCU ANDI
+
+Biz;
+
+Güveni büyütmeye,
+
+Kültürü yaşatmaya,
+
+Teknolojiyi insanın hizmetinde kullanmaya,
+
+Kısa vadeli kazanç yerine uzun vadeli değer üretmeye,
+
+Ve her kararımızda gelecek nesilleri düşünmeye söz veriyoruz.
+
+CAELINUS
+THE FOUNDER LETTER
+(Kurucunun Mektubu)
+
+Bu mektup, henüz tanışmadığım bütün çalışma arkadaşlarıma...
+
+Merhaba.
+
+Eğer bu satırları okuyorsan...
+
+Muhtemelen artık Caelinus'un bir parçasısın.
+
+Hoş geldin.
+
+Ama sana önce şunu söylemek istiyorum.
+
+Sen...
+
+Bir şirkete işe başlamadın.
+
+Bir hayale ortak oldun.
+
+Ve bu ikisi aynı şey değildir.
+
+Neden Buradayız?
+
+Bizim amacımız...
+
+Dünyanın en büyük şirketi olmak değil.
+
+Dünyanın en pahalı şirketi olmak da değil.
+
+Biz...
+
+İnsanların yaşadıkları yerle yeniden bağ kurabilecekleri deneyimler üretmek için buradayız.
+
+Eğer bir gün bunu unutursak...
+
+Başarılı olsak bile kaybetmiş olacağız.
+
+Burada Nasıl Çalışıyoruz?
+
+Biz...
+
+Korkuyla çalışmayız.
+
+Merakla çalışırız.
+
+Suçlu aramayız.
+
+Çözüm ararız.
+
+Unvanlara değil...
+
+Fikirlere değer veririz.
+
+Çünkü en iyi fikir...
+
+Stajyerden de gelebilir.
+
+Kurucudan da.
+
+Hata Yapabilirsin
+
+Burada hata yapmaktan korkma.
+
+Ama aynı hatayı öğrenmeden tekrar etmekten kork.
+
+Çünkü hata...
+
+Gelişimin bedelidir.
+
+Gizlenen hata ise...
+
+Güvenin düşmanıdır.
+
+Birbirimize Nasıl Davranıyoruz?
+
+Bir toplantıda...
+
+En sessiz kişinin fikrini de dinleriz.
+
+Bir tasarımcıya...
+
+Yalnızca yaptığı işe göre değil...
+
+İnsan olarak da saygı duyarız.
+
+Bir yazılımcıya...
+
+Sadece yazdığı kod için değil...
+
+Kurduğu hayal için de değer veririz.
+
+Çünkü sonunda...
+
+Ürünleri insanlar yapar.
+
+Başarı Nedir?
+
+Başarı...
+
+Sadece yatırım almak değildir.
+
+Başarı...
+
+Bir kullanıcının:
+
+"Burada kendimi evimde hissettim."
+
+demesidir.
+
+İşte o gün...
+
+Doğru yolda olduğumuzu anlarız.
+
+Senden Beklentim
+
+Mükemmel olmanı beklemiyorum.
+
+Merakını kaybetmemen yeterli.
+
+Sorular sorman yeterli.
+
+Öğrenmeye açık olman yeterli.
+
+Ve en önemlisi...
+
+Yaptığın işin arkasındaki insanı unutmaman yeterli.
+
+Bir Gün Yorulursan...
+
+Lütfen ilk zeytin ağacını hatırla.
+
+İlk şehri.
+
+İlk ışığı.
+
+İlk nefesi.
+
+Biz...
+
+Kod yazarak başlamadık.
+
+Bir hisle başladık.
+
+O hisi koruyabilirsek...
+
+Gerisini birlikte öğreniriz.
+
+Son Söz
+
+Belki yıllar sonra...
+
+Ben bu odada olmayacağım.
+
+Sen de olmayacaksın.
+
+Ama umarım...
+
+Caelinus yaşamaya devam edecek.
+
+Çünkü iyi şirketler...
+
+Kurucularından daha uzun yaşamalıdır.
+
+Ve eğer bir gün bu şirket, insanların birbirine daha çok güvenmesine, yaşadığı yere daha çok sahip çıkmasına ve kültürünü daha derinden hissetmesine küçük de olsa katkı sağladıysa...
+
+O zaman emeklerimizin karşılığını almış olacağız.
+
+Hoş geldin.
+
+Birlikte güzel bir şey inşa edelim.
+
+— Selin Irmak
+Kurucu
+
+CAELINUS
+THE COVENANT
+(Caelinus Ahdi)
+
+*"Bazı kurallar insanları yönetir.
+
+Bazı sözler ise insanları bir arada tutar."*
+
+Biz Ne İnşa Ediyoruz?
+
+Biz...
+
+Bir yazılım geliştirmiyoruz.
+
+Bir oyun üretmiyoruz.
+
+Bir şirket kurmuyoruz.
+
+Biz...
+
+İnsanların birbirine yeniden güvenebileceği bir alan inşa etmeye çalışıyoruz.
+
+Eğer bunu başarabilirsek...
+
+Ürünler değişebilir.
+
+Teknolojiler değişebilir.
+
+Ama kurduğumuz bağ yaşamaya devam eder.
+
+Bizim Ölçümüz
+
+Biz kendimizi yalnızca gelirle ölçmeyeceğiz.
+
+Kendimize her yıl şu soruları soracağız:
+
+İnsanlar burada kendilerini güvende hissediyor mu?
+Bir çocuk burada merak etmeyi öğrendi mi?
+Bir şehir kendini doğru temsil edilmiş hissetti mi?
+Bir üretici emeğinin değer gördüğünü düşündü mü?
+Bir ekip arkadaşı, burada çalışırken büyüdüğünü hissetti mi?
+
+Eğer bu soruların cevabı "evet" ise...
+
+Doğru yoldayız.
+
+Güç
+
+Bizim gücümüz...
+
+Daha büyük sunucular olmayacak.
+
+Daha büyük reklam bütçeleri olmayacak.
+
+Bizim gücümüz...
+
+İnsanların birbirine duyduğu güven olacak.
+
+Çünkü güven...
+
+Teknolojinin üretemeyeceği bir değerdir.
+
+Bir Gün...
+
+Belki...
+
+Biz olmayacağız.
+
+Ama Caelinus yaşayacak.
+
+İşte o gün...
+
+Şirket gerçekten kurulmuş olacak.
+
+Çünkü gerçek kurumlar...
+
+Kurucularından daha uzun yaşar.
+
+Sessizlik
+
+Her yıl...
+
+Hiçbir sunum yapılmayan...
+
+Hiçbir hedef konuşulmayan...
+
+Hiçbir bütçenin açılmadığı...
+
+Tek bir gün olmasını istiyorum.
+
+O gün...
+
+Sadece şu soru sorulsun:
+
+"Biz hâlâ neden buradayız?"
+
+Eğer bu sorunun cevabı değişmişse...
+
+Şirket yönünü kaybetmiştir.
+
+Ahit
+
+Bugün...
+
+Kendimize şu sözü veriyoruz:
+
+İnsanları veriye indirgemeyeceğiz.
+
+Kültürü metaya indirgemeyeceğiz.
+
+Teknolojiyi amaç hâline getirmeyeceğiz.
+
+Başarıyı yalnızca parayla tanımlamayacağız.
+
+Gelecek nesillerin hakkını bugünün çıkarlarına feda etmeyeceğiz.
+
+KURUCUNUN SON SÖZÜ
+
+**"Bir gün Caelinus benden daha büyük olursa...
+
+Lütfen beni değil...
+
+Bu ilkeleri takip edin.
+
+Çünkü insanlar hata yapabilir.
+
+İlkeler ise bize yön göstermeye devam eder."**
+
+— Selin Irmak
+

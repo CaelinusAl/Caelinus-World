@@ -1,0 +1,655 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caelinus.ai/schema/image-asset.v2.schema.json",
+  "title": "Caelinus Image Intelligence v2 Pilot",
+  "description": "Versioned, review-gated image knowledge assets. This contract is separate from data/images.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "migrationVersion",
+    "sourceContract",
+    "legacyContract",
+    "generatedAt",
+    "productionIntegration",
+    "assetCount",
+    "assets"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "2.0.0"
+    },
+    "migrationVersion": {
+      "const": "vision-pilot-v1-to-v2.0.0"
+    },
+    "sourceContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "schemaVersion", "sha256"],
+      "properties": {
+        "file": { "const": "codex/data/vision-pilot.json" },
+        "schemaVersion": { "const": "1.0.0-pilot" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "legacyContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "fileSha256AtMigration",
+        "contentSha256AtMigration",
+        "total",
+        "analyzed",
+        "modifiedByMigration"
+      ],
+      "properties": {
+        "file": { "const": "codex/data/images.json" },
+        "fileSha256AtMigration": { "$ref": "#/$defs/sha256" },
+        "contentSha256AtMigration": { "$ref": "#/$defs/sha256" },
+        "total": { "const": 132 },
+        "analyzed": { "const": 0 },
+        "modifiedByMigration": { "const": false }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "productionIntegration": {
+      "const": "blocked_pending_approval"
+    },
+    "assetCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/imageAsset" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "verificationState": {
+      "type": "string",
+      "enum": ["analyzed", "reviewed", "verified", "rejected"]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "localizedText": {
+      "type": "object",
+      "description": "BCP-47 language code to text. Turkish is required for v2 pilot.",
+      "required": ["tr"],
+      "properties": {
+        "tr": { "type": "string" }
+      },
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "localizedTerms": {
+      "type": "object",
+      "description": "BCP-47 language code to normalized search terms.",
+      "required": ["tr"],
+      "properties": {
+        "tr": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 },
+        "uniqueItems": true
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "origin"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "origin": {
+          "type": "string",
+          "enum": ["visual", "ocr", "canon_candidate", "editorial"]
+        }
+      }
+    },
+    "relationCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationId",
+        "relationType",
+        "targetId",
+        "label",
+        "evidence",
+        "confidence",
+        "verificationState",
+        "source"
+      ],
+      "properties": {
+        "relationId": {
+          "type": "string",
+          "pattern": "^rel-[a-f0-9]{16}$"
+        },
+        "relationType": {
+          "type": "string",
+          "enum": [
+            "bible",
+            "volume",
+            "chapter",
+            "page",
+            "npc",
+            "profession",
+            "gameplay_system",
+            "economy",
+            "quest",
+            "production_chain",
+            "unreal_asset",
+            "concept_art",
+            "related_image",
+            "entity",
+            "cross_reference"
+          ]
+        },
+        "targetId": { "type": ["string", "null"] },
+        "label": { "type": "string", "minLength": 1 },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "minItems": 1
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "verificationState": { "$ref": "#/$defs/verificationState" },
+        "source": {
+          "type": "string",
+          "enum": ["ai", "editorial", "canon"]
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "visualFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "evidence", "confidence", "verificationState"],
+      "properties": {
+        "value": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "verificationState": { "$ref": "#/$defs/verificationState" }
+      }
+    },
+    "imageAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "rawAi",
+        "candidateMetadata",
+        "canonicalMetadata",
+        "semanticLayer",
+        "quality",
+        "indexing",
+        "migration"
+      ],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "rawAi": { "$ref": "#/$defs/rawAi" },
+        "candidateMetadata": { "$ref": "#/$defs/candidateMetadata" },
+        "canonicalMetadata": { "$ref": "#/$defs/canonicalMetadata" },
+        "semanticLayer": { "$ref": "#/$defs/semanticLayer" },
+        "quality": { "$ref": "#/$defs/quality" },
+        "indexing": { "$ref": "#/$defs/indexing" },
+        "migration": { "$ref": "#/$defs/migration" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "legacyManifestId",
+        "fileName",
+        "source",
+        "creationDate",
+        "creationDateSource",
+        "resolution",
+        "aspectRatio",
+        "format",
+        "bytes",
+        "sha256"
+      ],
+      "properties": {
+        "assetId": {
+          "type": "string",
+          "pattern": "^IMG-CAEL-[0-9]{4}$"
+        },
+        "legacyManifestId": {
+          "type": "string",
+          "pattern": "^img-[0-9]{3}$"
+        },
+        "fileName": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "path", "originalFilePreserved"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["local_archive", "import", "generated", "unknown"]
+            },
+            "path": { "type": "string", "minLength": 1 },
+            "originalFilePreserved": { "const": true }
+          }
+        },
+        "creationDate": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "creationDateSource": {
+          "type": "string",
+          "enum": ["filename", "filesystem", "embedded_metadata", "unknown"]
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "aspectRatio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decimal", "label", "orientation"],
+          "properties": {
+            "decimal": { "type": "number", "exclusiveMinimum": 0 },
+            "label": { "type": "string", "minLength": 1 },
+            "orientation": {
+              "type": "string",
+              "enum": ["landscape", "portrait", "square"]
+            }
+          }
+        },
+        "format": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "rawAi": {
+      "type": "object",
+      "description": "Immutable source AI payload. Editorial tools must never overwrite output.",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model",
+        "promptVersion",
+        "analyzedAt",
+        "usage",
+        "output"
+      ],
+      "properties": {
+        "provider": { "const": "openai" },
+        "model": { "type": "string", "minLength": 1 },
+        "promptVersion": { "type": "string", "minLength": 1 },
+        "analyzedAt": { "type": "string", "format": "date-time" },
+        "usage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inputTokens", "outputTokens", "totalTokens"],
+          "properties": {
+            "inputTokens": { "type": "integer", "minimum": 0 },
+            "outputTokens": { "type": "integer", "minimum": 0 },
+            "totalTokens": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "output": {
+          "type": "object",
+          "description": "Lossless complete v1 record payload retained for provenance and rollback."
+        }
+      }
+    },
+    "candidateMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verificationState",
+        "title",
+        "detailedVisualDescription",
+        "artisticStyle",
+        "composition",
+        "lighting",
+        "colorPalette",
+        "mood",
+        "environment",
+        "materials",
+        "cameraAngle",
+        "symbolicObjects",
+        "visibleText",
+        "relations"
+      ],
+      "properties": {
+        "verificationState": { "const": "analyzed" },
+        "title": { "$ref": "#/$defs/localizedText" },
+        "detailedVisualDescription": { "$ref": "#/$defs/localizedText" },
+        "artisticStyle": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "composition": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "lighting": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "colorPalette": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "mood": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "environment": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "materials": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "cameraAngle": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "symbolicObjects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/visualFacet" }
+        },
+        "visibleText": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "location", "confidence", "verificationState"],
+            "properties": {
+              "text": { "type": "string" },
+              "location": { "type": "string" },
+              "confidence": { "$ref": "#/$defs/confidence" },
+              "verificationState": { "const": "analyzed" }
+            }
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relationCandidate" }
+        }
+      }
+    },
+    "canonicalMetadata": {
+      "type": "object",
+      "description": "Human-controlled canonical layer. Empty during automated migration.",
+      "additionalProperties": false,
+      "required": [
+        "verificationState",
+        "reviewedBy",
+        "reviewedAt",
+        "verifiedBy",
+        "verifiedAt",
+        "claims",
+        "editorialNotes"
+      ],
+      "properties": {
+        "verificationState": { "$ref": "#/$defs/verificationState" },
+        "reviewedBy": { "type": ["string", "null"] },
+        "reviewedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "verifiedBy": { "type": ["string", "null"] },
+        "verifiedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "claims": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relationCandidate" }
+        },
+        "editorialNotes": { "type": "array", "items": { "type": "string" } }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "verificationState": { "const": "verified" } },
+            "required": ["verificationState"]
+          },
+          "then": {
+            "properties": {
+              "verifiedBy": { "type": "string", "minLength": 1 },
+              "verifiedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      ]
+    },
+    "semanticLayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keywords",
+        "searchTerms",
+        "synonyms",
+        "relatedEntities",
+        "crossReferences"
+      ],
+      "properties": {
+        "keywords": { "$ref": "#/$defs/localizedTerms" },
+        "searchTerms": { "$ref": "#/$defs/localizedTerms" },
+        "synonyms": { "$ref": "#/$defs/localizedTerms" },
+        "relatedEntities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relationCandidate" }
+        },
+        "crossReferences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relationCandidate" }
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verificationStatus",
+        "overallConfidence",
+        "fieldConfidence",
+        "uncertainties",
+        "missingFields",
+        "missingRelations",
+        "duplicateCandidates"
+      ],
+      "properties": {
+        "verificationStatus": { "const": "analyzed" },
+        "overallConfidence": { "$ref": "#/$defs/confidence" },
+        "fieldConfidence": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/confidence" }
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "missingFields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "artisticStyle",
+              "composition",
+              "lighting",
+              "colorPalette",
+              "mood",
+              "environment",
+              "materials",
+              "cameraAngle",
+              "symbolicObjects",
+              "searchTerms",
+              "synonyms"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "missingRelations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "bible",
+              "volume",
+              "chapter",
+              "page",
+              "npc",
+              "profession",
+              "gameplay_system",
+              "economy",
+              "quest",
+              "production_chain",
+              "unreal_asset",
+              "concept_art",
+              "related_image",
+              "entity",
+              "cross_reference"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "duplicateCandidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["assetId", "method", "score", "verificationState"],
+            "properties": {
+              "assetId": {
+                "type": "string",
+                "pattern": "^IMG-CAEL-[0-9]{4}$"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["sha256", "perceptual_hash", "vision_similarity"]
+              },
+              "score": { "$ref": "#/$defs/confidence" },
+              "verificationState": { "$ref": "#/$defs/verificationState" }
+            }
+          }
+        }
+      }
+    },
+    "indexing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["languages", "semanticText", "embedding", "graph"],
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "semanticText": { "$ref": "#/$defs/localizedText" },
+        "embedding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "provider",
+            "model",
+            "dimensions",
+            "vectorId",
+            "contentHash"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["pending", "indexed", "failed"]
+            },
+            "provider": { "type": ["string", "null"] },
+            "model": { "type": ["string", "null"] },
+            "dimensions": { "type": ["integer", "null"], "minimum": 1 },
+            "vectorId": { "type": ["string", "null"] },
+            "contentHash": {
+              "anyOf": [
+                { "$ref": "#/$defs/sha256" },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        "graph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodeId", "edgeCandidateCount", "status"],
+          "properties": {
+            "nodeId": {
+              "type": "string",
+              "pattern": "^image:IMG-CAEL-[0-9]{4}$"
+            },
+            "edgeCandidateCount": { "type": "integer", "minimum": 0 },
+            "status": {
+              "type": "string",
+              "enum": ["pending_review", "ready", "indexed", "rejected"]
+            }
+          }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "migrationVersion",
+        "migratedAt",
+        "sourceRecordSha256",
+        "losslessRawAiCopy",
+        "rollback"
+      ],
+      "properties": {
+        "migrationVersion": {
+          "const": "vision-pilot-v1-to-v2.0.0"
+        },
+        "migratedAt": { "type": "string", "format": "date-time" },
+        "sourceRecordSha256": { "$ref": "#/$defs/sha256" },
+        "losslessRawAiCopy": { "const": true },
+        "rollback": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy", "sourcePreserved", "legacyContractUntouched"],
+          "properties": {
+            "strategy": {
+              "const": "disable_v2_consumer_and_restore_v1_read_path"
+            },
+            "sourcePreserved": { "const": true },
+            "legacyContractUntouched": { "const": true }
+          }
+        }
+      }
+    }
+  }
+}

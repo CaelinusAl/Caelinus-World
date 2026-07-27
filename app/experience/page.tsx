@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { useRef } from "react";
 import Reveal from "@/components/anime/Reveal";
 import JourneyLink from "@/components/journey/JourneyLink";
+import { codexUrl } from "@/lib/public-domains";
 
 const HeroField = dynamic(() => import("@/components/experience/HeroField"), {
   ssr: false,
@@ -54,9 +55,9 @@ const GATES: Gate[] = [
   },
   {
     no: "04",
-    title: "Library",
-    sub: "Yazarlar ve metinler — kelimelerin saklandığı kat.",
-    href: "/archive",
+    title: "Temple of Silence",
+    sub: "Living Codex, kanon, Image Vault ve yaşayan bilgi ağı.",
+    href: codexUrl("caelinus"),
     color: "#7fe3ff",
     glyph: "❖",
   },

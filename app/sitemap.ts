@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
 
 import { absoluteUrl } from "@/lib/i18n/locale";
+import { PUBLIC_HOSTS, PUBLIC_ORIGINS } from "@/lib/public-domains";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -99,6 +101,16 @@ async function fetchLookIds(): Promise<DynamicRoute[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const requestHost = (await headers()).get("host")?.split(":")[0].toLowerCase();
+  if (requestHost === PUBLIC_HOSTS.codex) {
+    return [{
+      url: `${PUBLIC_ORIGINS.codex}/`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+    }];
+  }
+
   const [atelierRoutes, lookRoutes] = await Promise.all([
     fetchAtelierSlugs(),
     fetchLookIds(),

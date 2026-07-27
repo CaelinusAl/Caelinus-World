@@ -56,3 +56,5 @@ public/hero/_raw/
 # Blender çalışma + yedek dosyaları (repoya girmez; render çıktıları ayrı)
 *.blend
 *.blend1
+.vercel
+.env*.local
