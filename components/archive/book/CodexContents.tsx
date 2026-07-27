@@ -22,19 +22,24 @@ export default function CodexContents({ book }: { book: LivingBookPublicModel })
 
         <ol>
           {book.chapters.map((chapter) => {
-            const available = chapter.availablePages > 0;
+            const available =
+              chapter.hasCanonicalProse || chapter.availablePages > 0;
             return (
               <li key={chapter.slug}>
                 <span>{String(chapter.order).padStart(2, "0")}</span>
                 {available ? (
                   <Link href={`/archive/chapter/${chapter.slug}`}>
                     <strong>{chapter.title}</strong>
-                    <small>{chapter.availablePages} pages</small>
+                    <small>
+                      {chapter.sectionCount
+                        ? `${chapter.sectionCount} sections`
+                        : `${chapter.availablePages} pages`}
+                    </small>
                   </Link>
                 ) : (
                   <div aria-disabled="true">
                     <strong>{chapter.title}</strong>
-                    <small>Volume</small>
+                    <small>Canonical volume</small>
                   </div>
                 )}
               </li>
@@ -42,8 +47,8 @@ export default function CodexContents({ book }: { book: LivingBookPublicModel })
           })}
         </ol>
 
-        <Link href="/archive/chapter/image-archive" className="codex-contents__continue">
-          Enter the Image Archive <span aria-hidden="true">→</span>
+        <Link href="/archive/chapter/genesis" className="codex-contents__continue">
+          Begin with Genesis <span aria-hidden="true">→</span>
         </Link>
       </section>
     </main>

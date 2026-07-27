@@ -12,6 +12,9 @@ export type CodexCanonicalStatus = "temporary" | "reviewed" | "canonical";
 
 /** Public-safe page model. It intentionally contains no source filename. */
 export type PublicCodexPage = {
+  assetId: string;
+  primaryCanonId: string;
+  canonIds: string[];
   publicTitle: string;
   subtitle?: string;
   chapter: string;
@@ -30,10 +33,98 @@ export type PublicCodexPage = {
 };
 
 export type CodexChapter = {
+  canonId: string | null;
   slug: string;
   title: string;
+  subtitle: string;
   order: number;
   availablePages: number;
+  sectionCount: number;
+  wordCount: number;
+  sourceStatus: string;
+  hasCanonicalProse: boolean;
+};
+
+export type CodexChapterProseBlock = {
+  heading: string | null;
+  text: string;
+};
+
+export type CodexChapterSection = {
+  id: string;
+  bibleId: string;
+  kind: string;
+  num: number | null;
+  title: string;
+  wordCount: number;
+  profession: string | null;
+  entityIds: string[];
+  blocks: CodexChapterProseBlock[];
+};
+
+export type CodexChapterEntity = {
+  id: string;
+  label: string;
+  type: string;
+  color: string;
+};
+
+export type CodexChapterAsset = {
+  assetId: string;
+  primaryCanonId: string;
+  canonIds: string[];
+  publicTitle: string;
+  subtitle: string | null;
+  chapter: string;
+  section: string;
+  description: string | null;
+  relatedSystems: string[];
+  npc: string | null;
+  profession: string | null;
+  imageSrc: string;
+};
+
+export type CodexChapterReference = {
+  id: string;
+  type: CanonicalGraphNodeType;
+  label: string;
+  assetIds: string[];
+  canonIds: string[];
+};
+
+export type CodexChapterCrossReference = {
+  canonId: string;
+  slug: string;
+  title: string;
+  sharedAssetIds: string[];
+};
+
+export type CodexChapterDocument = {
+  canonId: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  order: number;
+  glyph: string;
+  accent: string;
+  sourceStatus: string;
+  sections: CodexChapterSection[];
+  entities: CodexChapterEntity[];
+  assets: CodexChapterAsset[];
+  references: CodexChapterReference[];
+  crossReferences: CodexChapterCrossReference[];
+  previous: { slug: string; title: string } | null;
+  next: { slug: string; title: string } | null;
+  wordCount: number;
+};
+
+export type CodexSearchResult = {
+  chapterSlug: string;
+  chapterTitle: string;
+  sectionId: string;
+  sectionTitle: string;
+  heading: string | null;
+  excerpt: string;
 };
 
 export type LivingBookPublicModel = {
@@ -118,6 +209,8 @@ export type ArchiveOccurrence = {
 export type ArchiveImageSummary = {
   id: string;
   assetId: string;
+  primaryCanonId: string;
+  canonIds: string[];
   file: string;
   bytes: number;
   status: string;
@@ -146,4 +239,65 @@ export type ArchiveBootstrap = {
     occurrences: Record<string, ArchiveOccurrence[]>;
   };
   images: ArchiveImageSummary[];
+};
+
+export type CanonicalGraphNodeType =
+  | "asset"
+  | "book"
+  | "canon"
+  | "chapter"
+  | "environment"
+  | "npc"
+  | "profession"
+  | "production-step"
+  | "production-volume"
+  | "text-image-bridge";
+
+export type CanonicalGraphEdgeType =
+  | "alternate-of"
+  | "belongs-to-book"
+  | "belongs-to-chapter"
+  | "canonical-of"
+  | "image-text-bridge"
+  | "profession-volume"
+  | "production-chain"
+  | "references";
+
+export type CanonicalGraphEvidence = {
+  source: string;
+  locator: string;
+};
+
+export type CanonicalGraphNode = {
+  id: string;
+  type: CanonicalGraphNodeType;
+  label: string;
+  assetIds: string[];
+  canonIds: string[];
+  evidence: CanonicalGraphEvidence[];
+  attributes: Record<string, unknown>;
+};
+
+export type CanonicalGraphEdge = {
+  id: string;
+  type: CanonicalGraphEdgeType;
+  source: string;
+  target: string;
+  evidence: CanonicalGraphEvidence;
+  chainId?: string;
+  sequence?: number;
+  cycleAllowed?: boolean;
+};
+
+export type CanonicalKnowledgeGraph = {
+  schemaVersion: "canonical-knowledge-graph.v1";
+  graphType: "canonical-knowledge";
+  editorialVersion: "1.0";
+  frozenAt: string;
+  readOnly: true;
+  sourceHashes: Record<string, string>;
+  nodeCount: number;
+  edgeCount: number;
+  nodes: CanonicalGraphNode[];
+  edges: CanonicalGraphEdge[];
 };

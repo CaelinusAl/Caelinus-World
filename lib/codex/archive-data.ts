@@ -1,6 +1,7 @@
 import "server-only";
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import {
@@ -9,9 +10,11 @@ import {
   type ArchiveBootstrap,
   type ArchiveSectionDetail,
   type ArchiveSectionSummary,
+  type CanonicalKnowledgeGraph,
   type CodexCanonicalStatus,
   type LivingBookPublicModel,
 } from "./experience-contract";
+import { loadCodexChapterLibrary } from "./chapter-adapter";
 
 type JsonObject = Record<string, unknown>;
 type ProductionAsset = {
@@ -29,6 +32,26 @@ type ProductionAssetManifest = {
     pageNumber: number;
     aliasOf?: "cover";
   }>;
+};
+type EditorialRuntimePage = JsonObject & {
+  assetId: string;
+  pageNumber: number;
+  sourceFile: string;
+  primaryCanonId: string;
+  canonIds: string[];
+  publicTitle: string;
+  subtitle?: string;
+  Bible: string;
+  volume: string;
+  chapter: string;
+  canonicalStatus: string;
+  shortDescription?: string;
+};
+type EditorialRuntime = {
+  schemaVersion: "editorial-runtime.v1";
+  editorialVersion: "1.0";
+  editorialStatus: "FROZEN";
+  pages: EditorialRuntimePage[];
 };
 export type ResolvedArchiveAsset =
   | (ProductionAsset & { source: "remote" })
@@ -59,91 +82,73 @@ const readJson = async <T>(name: string): Promise<T> =>
 let codexPromise: Promise<JsonObject> | undefined;
 let imagesPromise: Promise<JsonObject> | undefined;
 let reportPromise: Promise<JsonObject> | undefined;
+let editorialRuntimePromise: Promise<EditorialRuntime> | undefined;
+let canonicalGraphPromise: Promise<CanonicalKnowledgeGraph> | undefined;
 let productionAssetsPromise: Promise<ProductionAssetManifest | null> | undefined;
 
 const readCodex = () => (codexPromise ??= readJson<JsonObject>("codex.json"));
 const readImages = () => (imagesPromise ??= readJson<JsonObject>("images.json"));
 const readReport = () => (reportPromise ??= readJson<JsonObject>("report.json"));
+const readEditorialRuntime = () =>
+  (editorialRuntimePromise ??= readJson<EditorialRuntime>("editorial-runtime.v1.json"));
+export const loadCanonicalKnowledgeGraph = () =>
+  (canonicalGraphPromise ??= readJson<CanonicalKnowledgeGraph>(
+    "canonical-knowledge-graph.v1.json",
+  ));
 const readProductionAssets = () =>
   (productionAssetsPromise ??= readJson<ProductionAssetManifest>(
     "image-assets.production.v1.json",
   ).catch(() => null));
 
-const PUBLIC_CHAPTERS: LivingBookPublicModel["chapters"] = [
-  { slug: "genesis", title: "Genesis", order: 1, availablePages: 0 },
-  { slug: "world-bible", title: "World Bible", order: 2, availablePages: 0 },
-  { slug: "living-civilization", title: "Living Civilization", order: 3, availablePages: 0 },
-  { slug: "production-bible", title: "Production Bible", order: 4, availablePages: 0 },
-  { slug: "npc-bible", title: "NPC Bible", order: 5, availablePages: 0 },
-  { slug: "engineering-bible", title: "Engineering Bible", order: 6, availablePages: 0 },
-  { slug: "art-direction", title: "Art Direction", order: 7, availablePages: 0 },
-  { slug: "image-archive", title: "Image Archive", order: 8, availablePages: 132 },
-  { slug: "canon-decisions", title: "Canon Decisions", order: 9, availablePages: 0 },
-];
-
 type CodexPageRecord = LivingBookPublicModel["pages"][number] & {
-  assetReference: string;
   hiddenTechnicalFilename: string;
 };
 
 let codexPageRecordsPromise: Promise<CodexPageRecord[]> | undefined;
 
-function publicStatus(image: JsonObject): CodexCanonicalStatus {
-  const status = String(image.status ?? "").toLowerCase();
+function publicStatus(value: unknown): CodexCanonicalStatus {
+  const status = String(value ?? "").toLowerCase();
   if (status === "canonical" || status === "verified") return "canonical";
   if (status === "reviewed") return "reviewed";
   return "temporary";
 }
 
-function publicPageTitle(image: JsonObject, pageNumber: number) {
-  const status = publicStatus(image);
-  if (status !== "temporary" && typeof image.title === "string" && image.title.trim()) {
-    return image.title.trim();
-  }
-  return `CAELINUS CODEX — PAGE ${String(pageNumber).padStart(3, "0")}`;
-}
-
 async function buildCodexPageRecords(): Promise<CodexPageRecord[]> {
-  const manifest = await readImages();
-  const images = manifest.images as Array<JsonObject>;
-  const cover = await resolveAssetFile("kapak.png");
-  let coverUsedAsReplacement = false;
-  const records: CodexPageRecord[] = [];
-  for (let index = 0; index < images.length; index++) {
-    const image = images[index];
-    const manifestFileName = String(image.file);
-    const manifestAsset = await resolveAssetFile(manifestFileName);
-    const useCover = !manifestAsset && !coverUsedAsReplacement && Boolean(cover);
-    if (useCover) coverUsedAsReplacement = true;
-    const fileName = useCover ? "kapak.png" : manifestFileName;
-    const pageNumber = index + 1;
-    records.push({
-      assetReference: `IMG-CAEL-${String(index + 1).padStart(4, "0")}`,
-      publicTitle: publicPageTitle(image, pageNumber),
-      chapter: "image-archive",
-      volume: "Image Archive",
-      pageNumber,
-      imageSrc: `/api/archive/page/${pageNumber}`,
-      canonicalStatus: publicStatus(image),
-      hiddenTechnicalFilename: fileName,
-    });
-  }
-  return records;
+  const runtime = await readEditorialRuntime();
+  return runtime.pages.map((page) => ({
+    assetId: page.assetId,
+    primaryCanonId: page.primaryCanonId,
+    canonIds: page.canonIds,
+    publicTitle: page.publicTitle,
+    subtitle: page.subtitle,
+    chapter: page.chapter,
+    volume: page.volume,
+    pageNumber: page.pageNumber,
+    imageSrc: `/api/archive/page/${page.pageNumber}`,
+    canonicalStatus: publicStatus(page.canonicalStatus),
+    hiddenTechnicalFilename: page.sourceFile,
+  }));
 }
 
 const loadCodexPageRecords = () =>
   (codexPageRecordsPromise ??= buildCodexPageRecords());
 
 export async function loadLivingBookPublicModel(): Promise<LivingBookPublicModel> {
-  const records = await loadCodexPageRecords();
+  const [records, chapterLibrary] = await Promise.all([
+    loadCodexPageRecords(),
+    loadCodexChapterLibrary(),
+  ]);
   return {
     version: LIVING_BOOK_VERSION,
     title: "CAELINUS CODEX",
     subtitle: "THE LIVING BOOK OF ANATOLIA",
     imprint: "Temple of Silence · The Living Archive of Caelinus",
     coverSrc: "/api/archive/cover",
-    chapters: PUBLIC_CHAPTERS,
+    chapters: chapterLibrary.chapters,
     pages: records.map((record) => ({
+      assetId: record.assetId,
+      primaryCanonId: record.primaryCanonId,
+      canonIds: record.canonIds,
       publicTitle: record.publicTitle,
       subtitle: record.subtitle,
       chapter: record.chapter,
@@ -170,15 +175,18 @@ function sectionSummary(section: RawSection, bibleId: string): ArchiveSectionSum
 }
 
 export async function loadArchiveBootstrap(): Promise<ArchiveBootstrap> {
-  const [codex, imageManifest, report] = await Promise.all([
+  const [codex, imageManifest, report, editorialRuntime, productionAssets] = await Promise.all([
     readCodex(),
     readImages(),
     readReport(),
+    readEditorialRuntime(),
+    readProductionAssets(),
   ]);
   const meta = codex.meta as JsonObject;
   const rawBibles = codex.bibles as Array<JsonObject & { sections: RawSection[] }>;
   const rawGraph = codex.graph as JsonObject;
   const rawImages = imageManifest.images as Array<JsonObject>;
+  const rawImagesByFile = new Map(rawImages.map((image) => [String(image.file), image]));
   const gaps = ((report.gaps as JsonObject)?.gaps as unknown[]) ?? [];
 
   return {
@@ -211,15 +219,20 @@ export async function loadArchiveBootstrap(): Promise<ArchiveBootstrap> {
       chains: rawGraph.chains as ArchiveBootstrap["graph"]["chains"],
       occurrences: rawGraph.occurrences as ArchiveBootstrap["graph"]["occurrences"],
     },
-    images: rawImages.map((image, index) => ({
-      id: String(image.id),
-      assetId: `IMG-CAEL-${String(index + 1).padStart(4, "0")}`,
-      file: String(image.file),
-      bytes: Number(image.bytes),
-      status: String(image.status),
-      title: typeof image.title === "string" ? image.title : null,
-      description: typeof image.description === "string" ? image.description : null,
-    })),
+    images: editorialRuntime.pages.map((page) => {
+      const image = rawImagesByFile.get(page.sourceFile);
+      return {
+        id: `editorial-${String(page.pageNumber).padStart(4, "0")}`,
+        assetId: page.assetId,
+        primaryCanonId: page.primaryCanonId,
+        canonIds: page.canonIds,
+        file: page.sourceFile,
+        bytes: image ? Number(image.bytes) : (productionAssets?.cover.bytes ?? 0),
+        status: page.canonicalStatus,
+        title: page.publicTitle,
+        description: page.shortDescription ?? null,
+      };
+    }),
   };
 }
 
@@ -275,18 +288,10 @@ async function resolveAssetFile(fileName: string) {
 
 export async function resolveArchiveAsset(assetId: string) {
   if (!/^IMG-CAEL-\d{4}$/.test(assetId)) return null;
-  const productionAsset = (await readProductionAssets())?.pages.find(
+  const page = (await readEditorialRuntime()).pages.find(
     (candidate) => candidate.assetId === assetId,
   );
-  if (productionAsset) {
-    return { source: "remote" as const, ...productionAsset };
-  }
-  const index = Number(assetId.slice(-4)) - 1;
-  const manifest = await readImages();
-  const images = manifest.images as Array<JsonObject>;
-  const image = images[index];
-  if (!image) return null;
-  return resolveAssetFile(String(image.file));
+  return page ? resolveEditorialPageAsset(page) : null;
 }
 
 export async function resolveArchiveCover() {
@@ -297,16 +302,60 @@ export async function resolveArchiveCover() {
   return resolveAssetFile("kapak.png");
 }
 
+export function resolveGenesisContentsReference() {
+  return resolveAssetFile("genesis.png");
+}
+
+export async function resolveGenesisVisualReference() {
+  const portableAsset = await resolveAssetFile("gorselanlatim-1-3.png");
+  if (portableAsset) return portableAsset;
+
+  const fileName = "gorselanlatim-1-3.png";
+  const file = path.join(os.homedir(), "Downloads", fileName);
+  try {
+    const stat = await fs.stat(file);
+    if (!stat.isFile()) return null;
+    return {
+      source: "local" as const,
+      file,
+      fileName,
+      bytes: stat.size,
+      contentType: "image/png",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function resolvePublicCodexPage(pageNumber: number) {
   if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > 132) return null;
-  const productionAsset = (await readProductionAssets())?.pages.find(
-    (candidate) => candidate.pageNumber === pageNumber,
-  );
-  if (productionAsset) {
-    return { source: "remote" as const, ...productionAsset };
-  }
   const record = (await loadCodexPageRecords()).find(
     (candidate) => candidate.pageNumber === pageNumber,
   );
-  return record ? resolveAssetFile(record.hiddenTechnicalFilename) : null;
+  if (!record) return null;
+  const page = (await readEditorialRuntime()).pages.find(
+    (candidate) => candidate.assetId === record.assetId,
+  );
+  return page ? resolveEditorialPageAsset(page) : null;
+}
+
+async function resolveEditorialPageAsset(page: EditorialRuntimePage) {
+  const productionAssets = await readProductionAssets();
+  if (page.sourceFile === "kapak.png") {
+    return productionAssets?.cover
+      ? { source: "remote" as const, ...productionAssets.cover }
+      : resolveAssetFile(page.sourceFile);
+  }
+
+  const imageManifest = await readImages();
+  const images = imageManifest.images as Array<JsonObject>;
+  const legacyPageNumber =
+    images.findIndex((image) => String(image.file) === page.sourceFile) + 1;
+  if (legacyPageNumber > 0) {
+    const productionAsset = productionAssets?.pages.find(
+      (candidate) => candidate.pageNumber === legacyPageNumber,
+    );
+    if (productionAsset) return { source: "remote" as const, ...productionAsset };
+  }
+  return resolveAssetFile(page.sourceFile);
 }

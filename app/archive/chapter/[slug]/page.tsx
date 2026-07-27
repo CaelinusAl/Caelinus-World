@@ -1,12 +1,36 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import CodexChapterCover from "@/components/archive/book/CodexChapterCover";
+import CodexChapterExperience from "@/components/archive/book/CodexChapterExperience";
+import CodexGenesisExperience from "@/components/archive/book/CodexGenesisExperience";
 import { loadLivingBookPublicModel } from "@/lib/codex/archive-data";
+import {
+  loadCodexChapter,
+  loadCodexChapterLibrary,
+} from "@/lib/codex/chapter-adapter";
 
 export const dynamic = "force-static";
 
 export async function generateStaticParams() {
-  return [{ slug: "image-archive" }];
+  const library = await loadCodexChapterLibrary();
+  return library.chapters.map((chapter) => ({ slug: chapter.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const library = await loadCodexChapterLibrary();
+  const chapter = library.chapters.find((candidate) => candidate.slug === slug);
+  if (!chapter) return {};
+  return {
+    title: `${chapter.title} — CAELINUS CODEX`,
+    description: `${chapter.subtitle}. Canonical documentation, linked assets and cross-references.`,
+    alternates: { canonical: `/archive/chapter/${chapter.slug}` },
+  };
 }
 
 export default async function CodexChapterPage({
@@ -15,10 +39,16 @@ export default async function CodexChapterPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const book = await loadLivingBookPublicModel();
-  const chapter = book.chapters.find(
-    (candidate) => candidate.slug === slug && candidate.availablePages > 0,
-  );
+  if (slug === "image-archive") {
+    const book = await loadLivingBookPublicModel();
+    const chapter = book.chapters.find((candidate) => candidate.slug === slug);
+    if (!chapter) notFound();
+    return <CodexChapterCover chapter={chapter} />;
+  }
+  const chapter = await loadCodexChapter(slug);
   if (!chapter) notFound();
-  return <CodexChapterCover chapter={chapter} />;
+  if (slug === "genesis") {
+    return <CodexGenesisExperience chapter={chapter} />;
+  }
+  return <CodexChapterExperience chapter={chapter} />;
 }
