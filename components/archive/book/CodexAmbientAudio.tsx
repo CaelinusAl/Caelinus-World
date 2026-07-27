@@ -37,7 +37,7 @@ export default function CodexAmbientAudio() {
   }, []);
 
   if (pathname.startsWith("/archive/internal")) return null;
-  if (!started && pathname === "/archive") return null;
+  if (!started && (pathname === "/archive" || pathname === "/")) return null;
 
   const toggle = () => {
     if (!ambienceRef.current) {
