@@ -5,6 +5,7 @@ import CodexChapterCover from "@/components/archive/book/CodexChapterCover";
 import CodexChapterExperience from "@/components/archive/book/CodexChapterExperience";
 import CodexGenesisExperience from "@/components/archive/book/CodexGenesisExperience";
 import { loadLivingBookPublicModel } from "@/lib/codex/archive-data";
+import { ART_DIRECTION_EXPERIENCE_SECTIONS } from "@/lib/codex/art-direction-experience-copy";
 import {
   loadCodexChapter,
   loadCodexChapterLibrary,
@@ -49,6 +50,14 @@ export default async function CodexChapterPage({
   if (!chapter) notFound();
   if (slug === "genesis") {
     return <CodexGenesisExperience chapter={chapter} />;
+  }
+  if (slug === "art-direction") {
+    return (
+      <CodexChapterExperience
+        chapter={chapter}
+        experienceSections={ART_DIRECTION_EXPERIENCE_SECTIONS}
+      />
+    );
   }
   return <CodexChapterExperience chapter={chapter} />;
 }

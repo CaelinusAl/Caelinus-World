@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
+import type { ArtDirectionExperienceSection } from "@/lib/codex/art-direction-experience-copy";
 import type { CodexChapterDocument } from "@/lib/codex/experience-contract";
 
 import BookParticles from "./BookParticles";
@@ -17,13 +18,20 @@ const REFERENCE_LABELS = {
 
 export default function CodexChapterExperience({
   chapter,
+  experienceSections,
 }: {
   chapter: CodexChapterDocument;
+  experienceSections?: ArtDirectionExperienceSection[];
 }) {
-  const sections = chapter.sections.map((section) => ({
-    id: section.id,
-    title: section.title,
-  }));
+  const sections = experienceSections
+    ? experienceSections.map((section) => ({
+        id: section.sourceSectionId,
+        title: section.title,
+      }))
+    : chapter.sections.map((section) => ({
+        id: section.id,
+        title: section.title,
+      }));
   const referencesByType = Object.entries(
     chapter.references.reduce<
       Partial<Record<(typeof chapter.references)[number]["type"], typeof chapter.references>>
@@ -93,25 +101,65 @@ export default function CodexChapterExperience({
             <h2>{chapter.subtitle}</h2>
             <dl>
               <div>
-                <dt>Canonical source</dt>
-                <dd>{chapter.sourceStatus}</dd>
+                <dt>Codex kaynağı</dt>
+                <dd>
+                  {chapter.sourceStatus === "PRESENT"
+                    ? "Doğrulandı"
+                    : "Görsel kayıt"}
+                </dd>
               </div>
               <div>
-                <dt>Sections</dt>
+                <dt>Bölümler</dt>
                 <dd>{chapter.sections.length}</dd>
               </div>
               <div>
-                <dt>Full text</dt>
-                <dd>{chapter.wordCount.toLocaleString("tr-TR")} words</dd>
+                <dt>Anlatı derinliği</dt>
+                <dd>{chapter.wordCount.toLocaleString("tr-TR")} kelime</dd>
               </div>
               <div>
-                <dt>Linked plates</dt>
+                <dt>Bağlı görseller</dt>
                 <dd>{chapter.assets.length}</dd>
               </div>
             </dl>
           </header>
 
-          {chapter.sections.length ? (
+          {experienceSections ? (
+            <div className="codex-document__prose codex-document__prose--curated">
+              {experienceSections.map((section) => (
+                  <section
+                    id={section.sourceSectionId}
+                    key={section.sourceSectionId}
+                    data-codex-section
+                  >
+                    <header>
+                      <p>{chapter.canonId} · Living Art Direction</p>
+                      <span>{section.number}</span>
+                      <h2>{section.title}</h2>
+                      <small>{section.subtitle}</small>
+                    </header>
+                    {section.passages.map((passage) => (
+                      <div
+                        className="codex-document__block codex-document__block--curated"
+                        key={`${section.sourceSectionId}-${passage.title}`}
+                      >
+                        <h3>{passage.title}</h3>
+                        {passage.paragraphs?.map((paragraph) => (
+                          <p key={paragraph}>{paragraph}</p>
+                        ))}
+                        {passage.bullets?.length ? (
+                          <ul>
+                            {passage.bullets.map((bullet) => (
+                              <li key={bullet}>{bullet}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {passage.quote ? <blockquote>{passage.quote}</blockquote> : null}
+                      </div>
+                    ))}
+                  </section>
+                ))}
+            </div>
+          ) : chapter.sections.length ? (
             <div className="codex-document__prose">
               {chapter.sections.map((section, sectionIndex) => (
                 <section id={section.id} key={section.id} data-codex-section>

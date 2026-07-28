@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 
 import { PROVINCES } from "@/data/provinces";
 import { TURKEY_SVG_PATHS, TURKEY_VIEW_BOX } from "@/data/turkey-svg-paths";
+import { GENESIS_DISCOVERY_GATES } from "@/lib/codex/discovery-experience-copy";
 import { GENESIS_EXPERIENCE_CHAPTERS } from "@/lib/codex/genesis-experience-copy";
 import type {
   CodexChapterDocument,
@@ -103,16 +104,12 @@ export default function CodexGenesisExperience({
   );
   const referencesByType = groupReferences(chapter.references);
   const placeEntities = chapter.entities.filter((entity) => entity.type === "place");
-  const entityById = new Map(chapter.entities.map((entity) => [entity.id, entity]));
   const placeIds = new Set(placeEntities.map((entity) => entity.id));
   const linkedProvinces = PROVINCES.filter((province) => placeIds.has(province.id));
   const linkedProvinceIds = new Set(linkedProvinces.map((province) => province.id));
   const peopleAssets = chapter.assets.filter(
     (asset) => asset.npc || asset.profession,
   );
-  const firstBreathEntities = ["hafiza", "isik", "ilknefes", "digitaltwin"]
-    .map((entityId) => entityById.get(entityId))
-    .filter((entity) => entity !== undefined);
 
   return (
     <main
@@ -138,7 +135,7 @@ export default function CodexGenesisExperience({
             <strong>CAELINUS<br />CODEX</strong>
             <small>THE LIVING BOOK<br />OF ANATOLIA</small>
           </Link>
-          <p>Canonical volume</p>
+          <p>Founding volume</p>
           <strong>{chapter.canonId}</strong>
         </aside>
 
@@ -198,7 +195,7 @@ export default function CodexGenesisExperience({
             </section>
 
             <small className="genesis-first-breath__status">
-              Experience Layer açılış anlatısı · Frozen canonical kaynak değiştirilmedi
+              Living Codex açılış anlatısı · Genesis’in yaşayan başlangıcı
             </small>
           </article>
 
@@ -237,15 +234,33 @@ export default function CodexGenesisExperience({
 
             <section>
               <h2><span>1.5</span> İlişkili Varlıklar</h2>
-              <ul className="genesis-first-breath__entities">
-                {firstBreathEntities.map((entity) => (
-                  <li key={entity.id}>
-                    <span aria-hidden="true">✦</span>
-                    <small>{entity.type}</small>
-                    <strong>{entity.label}</strong>
-                  </li>
+              <nav
+                className="genesis-discovery-gates"
+                aria-label="Genesis keşif kapıları"
+              >
+                {GENESIS_DISCOVERY_GATES.map((gate) => (
+                  <Link href={gate.href} key={gate.id}>
+                    <span className="genesis-discovery-gates__art">
+                      <Image
+                        src={gate.imageSrc}
+                        alt=""
+                        fill
+                        unoptimized
+                        sizes="(max-width: 700px) 42vw, 180px"
+                      />
+                    </span>
+                    <span className="genesis-discovery-gates__copy">
+                      <small>{gate.kind}</small>
+                      <strong>
+                        <i aria-hidden="true">{gate.glyph}</i>
+                        {gate.title}
+                      </strong>
+                      <span>{gate.description}</span>
+                    </span>
+                    <b aria-hidden="true">→</b>
+                  </Link>
                 ))}
-              </ul>
+              </nav>
             </section>
 
             <section>
@@ -415,7 +430,7 @@ export default function CodexGenesisExperience({
             </div>
 
             <small className="genesis-first-breath__status">
-              Experience Layer anlatısı · Frozen canonical kaynak değiştirilmedi
+              Living Codex anlatısı · Meraktan aidiyete uzanan yolculuk
             </small>
           </article>
         </div>
@@ -629,7 +644,7 @@ export default function CodexGenesisExperience({
             </div>
 
             <small className="genesis-first-breath__status">
-              Experience Layer anlatısı · Frozen canonical kaynak değiştirilmedi
+              Living Codex anlatısı · Şehirden ortak hafızaya
             </small>
           </article>
         </div>
@@ -640,7 +655,7 @@ export default function CodexGenesisExperience({
           <p>Genesis · The Living Codex Edition</p>
           <h2 id="genesis-text-title">Yaşayan Uygarlık</h2>
           <span>
-            Genesis 005’ten kurucunun yeminine uzanan tutarlı Experience Layer anlatısı.
+            Genesis 005’ten kurucunun yeminine uzanan yaşayan kuruluş anlatısı.
           </span>
         </header>
 
@@ -677,7 +692,7 @@ export default function CodexGenesisExperience({
                   </div>
                 ))}
                 <small className="genesis-first-breath__status">
-                  Experience Layer anlatısı · Frozen canonical kaynak değiştirilmedi
+                  Living Codex anlatısı · Kuruluş vizyonunun devamı
                 </small>
               </article>
             ))}
@@ -696,9 +711,9 @@ export default function CodexGenesisExperience({
 
       <section id="genesis-timeline" className="genesis-timeline" aria-labelledby="genesis-timeline-title">
         <header className="genesis-section-heading">
-          <p>Source order · 01—{String(chapter.sections.length).padStart(2, "0")}</p>
-          <h2 id="genesis-timeline-title">Canonical sequence</h2>
-          <span>Genesis bölümlerinin kaynakta tanımlı okuma izi.</span>
+          <p>Genesis reading order · 01—{String(chapter.sections.length).padStart(2, "0")}</p>
+          <h2 id="genesis-timeline-title">Genesis sequence</h2>
+          <span>Kuruluş anlatısının başlangıçtan kurucunun yeminine uzanan izi.</span>
         </header>
         <ol>
           {chapter.sections.map((section, index) => (
@@ -715,7 +730,7 @@ export default function CodexGenesisExperience({
 
       <section id="genesis-atlas" className="genesis-atlas" aria-labelledby="genesis-atlas-title">
         <header className="genesis-section-heading">
-          <p>Canonical place entities</p>
+          <p>Living place network</p>
           <h2 id="genesis-atlas-title">Anadolu atlası</h2>
           <span>Yalnız Genesis metninde açıkça indekslenen yerler vurgulanır.</span>
         </header>
@@ -738,14 +753,14 @@ export default function CodexGenesisExperience({
             })}
           </svg>
           <div>
-            <p>Indexed geography</p>
+            <p>Bağlı coğrafya</p>
             <ul>
               {placeEntities.map((entity) => (
                 <li key={entity.id}>
                   <span style={{ backgroundColor: entity.color }} aria-hidden="true" />
                   <strong>{entity.label}</strong>
                   <small>
-                    {linkedProvinceIds.has(entity.id) ? "Province" : "Place entity"}
+                    {linkedProvinceIds.has(entity.id) ? "Şehir" : "Mekân"}
                   </small>
                 </li>
               ))}
@@ -756,9 +771,9 @@ export default function CodexGenesisExperience({
 
       <section id="genesis-assets" className="genesis-assets" aria-labelledby="genesis-assets-title">
         <header className="genesis-section-heading">
-          <p>Editorial Runtime · {chapter.assets.length} linked plates</p>
-          <h2 id="genesis-assets-title">Visual archive</h2>
-          <span>Asset ve Canon ID bağları frozen editorial runtime’dan okunur.</span>
+          <p>Visual Codex · {chapter.assets.length} linked plates</p>
+          <h2 id="genesis-assets-title">Görsel arşiv</h2>
+          <span>Her görsel, ilgili dünya ve üretim sistemlerine bağlanır.</span>
         </header>
         <div className="genesis-assets__grid">
           {chapter.assets.map((asset) => (
@@ -790,9 +805,9 @@ export default function CodexGenesisExperience({
 
       <section id="genesis-people" className="genesis-people" aria-labelledby="genesis-people-title">
         <header className="genesis-section-heading">
-          <p>Editorial identity boundary</p>
-          <h2 id="genesis-people-title">People & NPC records</h2>
-          <span>Doğrulanmamış kayıtların statüsü değiştirilmeden gösterilir.</span>
+          <p>Living People System</p>
+          <h2 id="genesis-people-title">İnsanlar ve yaşayan karakterler</h2>
+          <span>Her insan, yaşadığı yerin başka türlü anlatılamayacak bir cümlesidir.</span>
         </header>
         {peopleAssets.length ? (
           <ul>
@@ -805,15 +820,18 @@ export default function CodexGenesisExperience({
             ))}
           </ul>
         ) : (
-          <p className="genesis-empty">Genesis için bağlı kişi veya NPC kaydı yok.</p>
+          <p className="genesis-empty">
+            Genesis’in ilk insan kapısı, Meydan’ın sözlü hafızasını taşıyan{" "}
+            <Link href="/archive/discover/ilk-bilge">İlk Bilge</Link> ile açılır.
+          </p>
         )}
       </section>
 
       <section id="genesis-relations" className="genesis-relations" aria-labelledby="genesis-relations-title">
         <header className="genesis-section-heading">
-          <p>Canonical Knowledge Graph</p>
-          <h2 id="genesis-relations-title">Related knowledge</h2>
-          <span>Yalnız graph içinde açıkça bulunan bağlar.</span>
+          <p>Living Knowledge Network</p>
+          <h2 id="genesis-relations-title">Bağlı sistemler</h2>
+          <span>Görselleri, insanları, mekânları ve üretim katmanlarını birleştiren ağ.</span>
         </header>
         <div className="genesis-relations__grid">
           {referencesByType.map(([type, references]) => (

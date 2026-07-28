@@ -9,6 +9,13 @@ import {
   type RawCodex,
   type RawEditorialRuntime,
 } from "./chapter-adapter-core";
+import { ART_DIRECTION_EXPERIENCE_SECTIONS } from "./art-direction-experience-copy";
+import {
+  DISCOVERY_DOSSIERS,
+  DISCOVERY_SLUGS,
+  GENESIS_DISCOVERY_GATES,
+  MEMORY_STONE_TAB_COPY,
+} from "./discovery-experience-copy";
 import type { CanonicalKnowledgeGraph } from "./experience-contract";
 import { GENESIS_EXPERIENCE_CHAPTERS } from "./genesis-experience-copy";
 
@@ -109,5 +116,48 @@ test("covers every remaining Genesis source section with experience copy", () =>
   assert.deepEqual(
     GENESIS_EXPERIENCE_CHAPTERS.map((chapter) => chapter.sourceSectionId),
     genesis.sections.slice(start).map((section) => section.id),
+  );
+});
+
+test("covers Art Direction canon with conversation-free experience copy", () => {
+  const artDirection = codex.bibles.find((bible) => bible.id === "CN-09")!;
+  assert.deepEqual(
+    ART_DIRECTION_EXPERIENCE_SECTIONS.map((section) => section.sourceSectionId),
+    artDirection.sections.map((section) => section.id),
+  );
+  const visibleCopy = ART_DIRECTION_EXPERIENCE_SECTIONS.map(
+    ({ title, subtitle, passages }) => ({ title, subtitle, passages }),
+  );
+  assert.doesNotMatch(
+    JSON.stringify(visibleCopy),
+    /AURA|Selin\.\.\.|Apple'ın/i,
+  );
+});
+
+test("defines four unique Genesis discovery gates and three dossiers", () => {
+  assert.equal(GENESIS_DISCOVERY_GATES.length, 4);
+  assert.equal(
+    new Set(GENESIS_DISCOVERY_GATES.map((gate) => gate.id)).size,
+    GENESIS_DISCOVERY_GATES.length,
+  );
+  assert.deepEqual(Object.keys(DISCOVERY_DOSSIERS), [...DISCOVERY_SLUGS]);
+  for (const gate of GENESIS_DISCOVERY_GATES) {
+    assert.match(gate.href, /^\/archive\/(asset|discover)\//);
+    assert.match(gate.imageSrc, /^\/api\/archive\/asset\/IMG-CAEL-\d{4}$/);
+  }
+  assert.match(
+    DISCOVERY_DOSSIERS["ilk-bilge"].statusLabel,
+    /Yaşayan NPC sistemi/,
+  );
+  assert.equal(
+    DISCOVERY_DOSSIERS["yasam-agaci"].canonicalEntityId,
+    "yasamagaci",
+  );
+  assert.doesNotMatch(
+    JSON.stringify({
+      dossiers: DISCOVERY_DOSSIERS,
+      memoryStone: MEMORY_STONE_TAB_COPY,
+    }),
+    /\b(?:MISSING|PENDING|TEMPORARY|UNAVAILABLE)\b|frozen canon|Experience persona/i,
   );
 });
