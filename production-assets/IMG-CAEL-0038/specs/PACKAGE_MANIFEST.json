@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "master-asset-production-package.v1",
+  "assetId": "IMG-CAEL-0038",
+  "publicTitle": "Master Asset — Hafıza Taşı",
+  "editorialDisposition": "CANONICAL",
+  "primaryCanonId": "CN-04.3",
+  "canonIds": [
+    "CN-02",
+    "CN-04.3",
+    "CN-09",
+    "CN-11",
+    "CN-13"
+  ],
+  "phase": "D",
+  "packageStatus": "SPECIFICATION_COMPLETE",
+  "productionStatus": "REGISTERED",
+  "specificationFile": "MEMORY_STONE_PRODUCTION_PACKAGE.md",
+  "decisionFile": "OWNER_APPROVED_DESIGN_DECISIONS.md",
+  "sourceLocks": {
+    "editorialRuntimeSha256": "17e939f560a4c238a5198c7f39463252c8f0a1d1d0aec45b033319f35d47eeaf",
+    "canonicalKnowledgeGraphSha256": "06931cf78e422d62f8d45f23aa74bb8ad929f69bf4c675e5b64c0cff0799d106"
+  },
+  "deliverables": [
+    { "id": 1, "name": "Master Concept Sheet", "status": "SPECIFIED" },
+    { "id": 2, "name": "Orthographic Sheet", "status": "SPECIFIED" },
+    { "id": 3, "name": "High Poly Sculpt Plan", "status": "SPECIFIED" },
+    { "id": 4, "name": "Low Poly Production Mesh Spec", "status": "SPECIFIED" },
+    { "id": 5, "name": "UV Layout Spec", "status": "SPECIFIED" },
+    { "id": 6, "name": "Material Specification", "status": "SPECIFIED" },
+    { "id": 7, "name": "4K PBR Texture List", "status": "SPECIFIED" },
+    { "id": 8, "name": "LOD Strategy", "status": "SPECIFIED" },
+    { "id": 9, "name": "Nanite Strategy", "status": "SPECIFIED" },
+    { "id": 10, "name": "Collision Strategy", "status": "SPECIFIED" },
+    { "id": 11, "name": "Blueprint Interaction Specification", "status": "SPECIFIED" },
+    { "id": 12, "name": "Audio Trigger Specification", "status": "SPECIFIED" },
+    { "id": 13, "name": "VFX Specification", "status": "SPECIFIED" },
+    { "id": 14, "name": "Gameplay Integration", "status": "SPECIFIED" },
+    { "id": 15, "name": "Quest Integration", "status": "SPECIFIED" },
+    { "id": 16, "name": "Memory Synchronization Flow", "status": "SPECIFIED" },
+    { "id": 17, "name": "Performance Budget", "status": "SPECIFIED" },
+    { "id": 18, "name": "Naming Convention", "status": "SPECIFIED" },
+    { "id": 19, "name": "Directory Layout", "status": "SPECIFIED" },
+    { "id": 20, "name": "Production Checklist", "status": "SPECIFIED" }
+  ],
+  "generatedAssetFiles": [],
+  "visualReferences": [
+    {
+      "id": "REF-IMG-CAEL-0038-MEMORY-STONE-01",
+      "file": "local://CODEX_ASSET_DIR/hafizatasi.png",
+      "assetId": "IMG-CAEL-0038",
+      "canonId": "CN-04.3",
+      "classifications": [
+        "Concept Reference",
+        "Art Direction Reference",
+        "Production Reference"
+      ],
+      "readOnly": true
+    },
+    {
+      "id": "REF-IMG-CAEL-0038-MEMORY-STONE-02",
+      "file": "local://CODEX_ASSET_DIR/hafizatasi001.png",
+      "assetId": "IMG-CAEL-0038",
+      "canonId": "CN-04.3",
+      "classifications": [
+        "Concept Reference",
+        "Art Direction Reference",
+        "Production Reference"
+      ],
+      "readOnly": true
+    }
+  ],
+  "approvedDesignDecisions": [
+    "Original handcrafted Anatolian Tree of Life and Caelinus Glyph Set v1.",
+    "No existing rune system or Viking alphabet.",
+    "No directly audible 963 Hz tone; environmental layered sound identity.",
+    "Approach-to-synchronization interaction flow.",
+    "Reusable knowledge, quest, cinematic and route unlock categories.",
+    "Knowledge-based progression instead of default gold or generic experience."
+  ],
+  "pendingProductionDefinitions": [
+    "Exact glyph count, individual forms, meaning map and reading order.",
+    "Concrete quest IDs, payload IDs, values, dialogue and memory content.",
+    "Final audio recordings, synthesis, mix values and implementation assets."
+  ]
+}

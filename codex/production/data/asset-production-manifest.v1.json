@@ -1,0 +1,625 @@
+{
+  "schemaVersion": "asset-production-manifest.v1",
+  "pipelineVersion": "1.0.0",
+  "setId": "phase-c-canonical-assets-001",
+  "generatedFromFrozenAt": "2026-07-27T19:51:28.228Z",
+  "readOnlySources": {
+    "editorialRuntime": {
+      "file": "codex/data/editorial-runtime.v1.json",
+      "sha256": "17e939f560a4c238a5198c7f39463252c8f0a1d1d0aec45b033319f35d47eeaf",
+      "frozen": true
+    },
+    "canonicalKnowledgeGraph": {
+      "file": "codex/data/canonical-knowledge-graph.v1.json",
+      "sha256": "06931cf78e422d62f8d45f23aa74bb8ad929f69bf4c675e5b64c0cff0799d106",
+      "frozen": true
+    }
+  },
+  "statusVocabulary": [
+    "CANONICAL",
+    "ALTERNATE",
+    "UNVERIFIED",
+    "DEPRECATED"
+  ],
+  "assetCount": 6,
+  "assets": [
+    {
+      "assetId": "IMG-CAEL-0038",
+      "primaryCanonId": "CN-04.3",
+      "canonIds": [
+        "CN-02",
+        "CN-04.3",
+        "CN-09",
+        "CN-11",
+        "CN-13"
+      ],
+      "publicTitle": "Master Asset — Hafıza Taşı",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0038",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0038",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0038"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0038",
+        "raw": "production-assets/IMG-CAEL-0038/raw",
+        "work": "production-assets/IMG-CAEL-0038/work",
+        "exports": "production-assets/IMG-CAEL-0038/exports",
+        "reports": "production-assets/IMG-CAEL-0038/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0038/work/IMG-CAEL-0038.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0038/exports/IMG-CAEL-0038.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0038/exports/IMG-CAEL-0038.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0038/reports/IMG-CAEL-0038.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0038/reports/IMG-CAEL-0038.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "assetId": "IMG-CAEL-0044",
+      "primaryCanonId": "CN-04.4",
+      "canonIds": [
+        "CN-02",
+        "CN-04.4",
+        "CN-06",
+        "CN-13"
+      ],
+      "publicTitle": "Master Asset — Köy Çeşmesi",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0044",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0044",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0044"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0044",
+        "raw": "production-assets/IMG-CAEL-0044/raw",
+        "work": "production-assets/IMG-CAEL-0044/work",
+        "exports": "production-assets/IMG-CAEL-0044/exports",
+        "reports": "production-assets/IMG-CAEL-0044/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0044/work/IMG-CAEL-0044.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0044/exports/IMG-CAEL-0044.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0044/exports/IMG-CAEL-0044.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0044/reports/IMG-CAEL-0044.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0044/reports/IMG-CAEL-0044.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "assetId": "IMG-CAEL-0040",
+      "primaryCanonId": "CN-06",
+      "canonIds": [
+        "CN-02",
+        "CN-04.4",
+        "CN-06",
+        "CN-13"
+      ],
+      "publicTitle": "Master Asset — Anadolu Evi (Modüler Mimari)",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0040",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0040",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0040"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0040",
+        "raw": "production-assets/IMG-CAEL-0040/raw",
+        "work": "production-assets/IMG-CAEL-0040/work",
+        "exports": "production-assets/IMG-CAEL-0040/exports",
+        "reports": "production-assets/IMG-CAEL-0040/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0040/work/IMG-CAEL-0040.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0040/exports/IMG-CAEL-0040.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0040/exports/IMG-CAEL-0040.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0040/reports/IMG-CAEL-0040.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0040/reports/IMG-CAEL-0040.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "assetId": "IMG-CAEL-0041",
+      "primaryCanonId": "CN-06",
+      "canonIds": [
+        "CN-02",
+        "CN-04.4",
+        "CN-06",
+        "CN-13",
+        "CN-14"
+      ],
+      "publicTitle": "Master Asset — Taş Köprü",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0041",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0041",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0041"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0041",
+        "raw": "production-assets/IMG-CAEL-0041/raw",
+        "work": "production-assets/IMG-CAEL-0041/work",
+        "exports": "production-assets/IMG-CAEL-0041/exports",
+        "reports": "production-assets/IMG-CAEL-0041/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0041/work/IMG-CAEL-0041.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0041/exports/IMG-CAEL-0041.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0041/exports/IMG-CAEL-0041.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0041/reports/IMG-CAEL-0041.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0041/reports/IMG-CAEL-0041.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "assetId": "IMG-CAEL-0042",
+      "primaryCanonId": "CN-04.4",
+      "canonIds": [
+        "CN-02",
+        "CN-04.4",
+        "CN-05",
+        "CN-06",
+        "CN-13"
+      ],
+      "publicTitle": "Master Asset — Köy Meydanı",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0042",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0042",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0042"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0042",
+        "raw": "production-assets/IMG-CAEL-0042/raw",
+        "work": "production-assets/IMG-CAEL-0042/work",
+        "exports": "production-assets/IMG-CAEL-0042/exports",
+        "reports": "production-assets/IMG-CAEL-0042/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0042/work/IMG-CAEL-0042.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0042/exports/IMG-CAEL-0042.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0042/exports/IMG-CAEL-0042.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0042/reports/IMG-CAEL-0042.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0042/reports/IMG-CAEL-0042.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "assetId": "IMG-CAEL-0043",
+      "primaryCanonId": "CN-04.4",
+      "canonIds": [
+        "CN-02",
+        "CN-04.4",
+        "CN-05",
+        "CN-06",
+        "CN-13"
+      ],
+      "publicTitle": "Master Asset — Çarşı Sokağı",
+      "editorialDisposition": "CANONICAL",
+      "productionStatus": "REGISTERED",
+      "sourceReferences": {
+        "editorialRecord": "codex/data/editorial-runtime.v1.json#IMG-CAEL-0043",
+        "graphNode": "codex/data/canonical-knowledge-graph.v1.json#IMG-CAEL-0043",
+        "referenceImage": "/api/archive/asset/IMG-CAEL-0043"
+      },
+      "workspace": {
+        "root": "production-assets/IMG-CAEL-0043",
+        "raw": "production-assets/IMG-CAEL-0043/raw",
+        "work": "production-assets/IMG-CAEL-0043/work",
+        "exports": "production-assets/IMG-CAEL-0043/exports",
+        "reports": "production-assets/IMG-CAEL-0043/reports"
+      },
+      "artifacts": [
+        {
+          "kind": "source-scene",
+          "format": "blend",
+          "path": "production-assets/IMG-CAEL-0043/work/IMG-CAEL-0043.blend",
+          "state": "MISSING"
+        },
+        {
+          "kind": "web-runtime",
+          "format": "glb",
+          "path": "production-assets/IMG-CAEL-0043/exports/IMG-CAEL-0043.glb",
+          "state": "MISSING"
+        },
+        {
+          "kind": "engine-interchange",
+          "format": "fbx",
+          "path": "production-assets/IMG-CAEL-0043/exports/IMG-CAEL-0043.fbx",
+          "state": "MISSING"
+        },
+        {
+          "kind": "preview",
+          "format": "png",
+          "path": "production-assets/IMG-CAEL-0043/reports/IMG-CAEL-0043.preview.png",
+          "state": "MISSING"
+        },
+        {
+          "kind": "validation-report",
+          "format": "json",
+          "path": "production-assets/IMG-CAEL-0043/reports/IMG-CAEL-0043.validation.json",
+          "state": "MISSING"
+        }
+      ],
+      "gates": [
+        {
+          "id": "identity-lock",
+          "status": "PASS"
+        },
+        {
+          "id": "reference-review",
+          "status": "PENDING"
+        },
+        {
+          "id": "geometry",
+          "status": "PENDING"
+        },
+        {
+          "id": "topology",
+          "status": "PENDING"
+        },
+        {
+          "id": "transforms",
+          "status": "PENDING"
+        },
+        {
+          "id": "materials",
+          "status": "PENDING"
+        },
+        {
+          "id": "collision",
+          "status": "PENDING"
+        },
+        {
+          "id": "lod",
+          "status": "PENDING"
+        },
+        {
+          "id": "export",
+          "status": "PENDING"
+        },
+        {
+          "id": "visual-review",
+          "status": "PENDING"
+        }
+      ]
+    }
+  ]
+}
